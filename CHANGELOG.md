@@ -1,8 +1,9 @@
-# 10.0.0 - TBD
+# 10.0.0 - 2017-11-21
 ### Changed
 * Maven group ID changed to _com.hotels_.
 * Exclude logback in parent POM.
 * First open source release.
+* Various small code cleanups.
 
 # 9.2.0 - 2017-11-20
 ### Fixed
