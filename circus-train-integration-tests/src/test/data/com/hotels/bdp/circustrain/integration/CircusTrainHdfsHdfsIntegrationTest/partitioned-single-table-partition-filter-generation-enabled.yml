@@ -1,0 +1,12 @@
+table-replications:
+  - source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_p
+      generate-partition-filter: true
+      partition-limit: 100
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_p_copy
+      table-name: ct_table_p_copy
+copier-options:
+  file-attribute: replication, blocksize, user, group, permission, checksumtype
+  preserve-raw-xattrs: false

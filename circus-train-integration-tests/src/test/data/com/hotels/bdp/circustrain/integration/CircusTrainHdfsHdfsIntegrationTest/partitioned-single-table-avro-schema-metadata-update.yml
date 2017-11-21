@@ -1,0 +1,11 @@
+table-replications:
+  - replication-mode: METADATA_UPDATE
+    source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_p_managed
+      partition-filter: (continent='Europe' AND country='UK') OR (continent='Asia' AND country='China')
+      partition-limit: 100
+    replica-table:
+      table-name: ct_table_p_managed_copy
+avro-serde-options:
+  base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/

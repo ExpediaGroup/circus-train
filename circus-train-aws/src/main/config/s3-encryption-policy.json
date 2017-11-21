@@ -1,0 +1,25 @@
+{
+  "Id": "deny-insecure-transport-to-s3-policy",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "deny-insecure-transport-to-s3-stmt",
+      "Action": "s3:*",
+      "Effect": "Deny",
+      "Resource": [
+        "arn:aws:s3:::ewest-emr-imports",
+        "arn:aws:s3:::ewest-emr-imports/*"
+      ],
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      },
+      "Principal": {
+        "AWS": [
+          "*"
+        ]
+      }
+    }
+  ]
+}

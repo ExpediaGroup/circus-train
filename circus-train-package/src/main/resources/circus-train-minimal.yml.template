@@ -1,0 +1,18 @@
+source-catalog:
+  name: on-premise-hadoop-cluster
+replica-catalog:
+  name: aws-data-warehouse
+  hive-metastore-uris: thrift://domain-name.eu-west-1.compute.amazonaws.com:9083
+  metastore-tunnel:
+    user: hadoop
+    private-key: /home/<user>/.aws/circus-train.pem
+    known-hosts: /home/<user>/.ssh/known_hosts
+security:
+  credential-provider: jceks://hdfs/home/<user>/conf/aws.jceks
+table-replications:
+  -
+    source-table:
+      database-name: <database>
+      table-name: <table>
+    replica-table:
+      table-location: s3://<company>-<team>-<database>-<table>/

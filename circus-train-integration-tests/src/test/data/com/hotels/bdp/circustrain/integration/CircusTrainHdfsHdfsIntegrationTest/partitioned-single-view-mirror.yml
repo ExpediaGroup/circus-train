@@ -1,0 +1,14 @@
+table-replications:
+  - source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_p
+      partition-filter: (continent='Europe' AND country='UK') OR (continent='Asia' AND country='China')
+      partition-limit: 100
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_p
+  - replication-mode: METADATA_MIRROR
+    source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_view_p
+    replica-table:
+      table-name: ct_view_p_copy

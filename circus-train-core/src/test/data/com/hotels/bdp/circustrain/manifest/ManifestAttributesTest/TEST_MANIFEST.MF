@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Maven-GroupId: com.hotels
+Build-Jdk: 1.7.0_40
+Built-By: developer
+Build-Version: 0.0.1-SNAPSHOT
+Maven-ArtifactId: circus-train
+Build-DateTime: 20170207-1535
+Created-By: Apache Maven
+Main-Class: com.hotels.bdp.circustrain.CircusTrain
+Archiver-Version: Plexus Archiver
+

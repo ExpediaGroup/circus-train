@@ -1,0 +1,3 @@
+graphite:
+  prefix: dummy
+  namespace: test

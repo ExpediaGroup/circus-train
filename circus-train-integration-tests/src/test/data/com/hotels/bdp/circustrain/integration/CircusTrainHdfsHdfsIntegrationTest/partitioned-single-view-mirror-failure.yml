@@ -1,0 +1,8 @@
+# We don't replicate the underlying table here
+table-replications:
+  - replication-mode: METADATA_MIRROR
+    source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_view_p
+    replica-table:
+      table-name: ct_view_p_copy

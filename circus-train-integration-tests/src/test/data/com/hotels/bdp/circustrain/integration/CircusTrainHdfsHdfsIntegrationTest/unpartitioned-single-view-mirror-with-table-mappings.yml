@@ -1,0 +1,15 @@
+table-replications:
+  - replication-mode: METADATA_MIRROR
+    source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_u_managed
+    replica-table:
+      table-name: ct_table_u_managed_copy
+  - replication-mode: METADATA_MIRROR
+    table-mappings:
+      ct_database.ct_table_u: ct_database.ct_table_u_managed_copy
+    source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_view_u
+    replica-table:
+      table-name: ct_view_u_copy

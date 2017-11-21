@@ -1,0 +1,14 @@
+table-replications:
+  - source-table:
+      database-name: unknown_db
+      table-name: unknown_table_1
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/unknown_table_1
+  - source-table:
+      database-name: unknown_db
+      table-name: unknown_table_2
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/unknown_table_2
+copier-options:
+  file-attribute: replication, blocksize, user, group, permission, checksumtype
+  preserve-raw-xattrs: false

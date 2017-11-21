@@ -1,0 +1,19 @@
+table-replications:
+  - source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_p
+      partition-filter: (continent='Europe' AND country='UK') OR (continent='Asia' AND country='China')
+      partition-limit: 100
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_p
+  - source-table:
+      database-name: unknown_db
+      table-name: unknown_table
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/unknown_table
+copier-options:
+  file-attribute: replication, blocksize, user, group, permission, checksumtype
+  preserve-raw-xattrs: false
+metrics-reporter:
+  period: 1
+  time-unit: SECONDS

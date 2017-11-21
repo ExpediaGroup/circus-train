@@ -1,0 +1,10 @@
+table-replications:
+  - source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_u
+    replica-table:
+      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_u
+      table-name: ct_table_u_copy
+copier-options:
+  file-attribute: replication, blocksize, user, group, permission, checksumtype
+  preserve-raw-xattrs: false

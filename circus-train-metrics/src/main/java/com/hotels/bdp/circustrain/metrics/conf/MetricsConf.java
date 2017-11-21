@@ -1,0 +1,57 @@
+/**
+ * Copyright (C) 2016-2017 Expedia Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.hotels.bdp.circustrain.metrics.conf;
+
+import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+
+import com.codahale.metrics.MetricRegistry;
+
+import com.hotels.bdp.circustrain.api.metrics.LoggingScheduledReporterFactory;
+import com.hotels.bdp.circustrain.api.metrics.MetricSender;
+import com.hotels.bdp.circustrain.api.metrics.ScheduledReporterFactory;
+import com.hotels.bdp.circustrain.metrics.GraphiteMetricSender;
+import com.hotels.bdp.circustrain.metrics.GraphiteScheduledReporterFactory;
+
+@org.springframework.context.annotation.Configuration
+class MetricsConf {
+
+  @Bean
+  MetricSender metricSender(ValidatedGraphite validatedGraphite) {
+    if (validatedGraphite.isEnabled()) {
+      return GraphiteMetricSender.newInstance(validatedGraphite.getHost(), validatedGraphite.getFormattedPrefix());
+    }
+    return MetricSender.DEFAULT_LOG_ONLY;
+  }
+
+  @Bean
+  ScheduledReporterFactory runningScheduledReporterFactory(
+      MetricRegistry runningMetricRegistry,
+      ValidatedGraphite validatedGraphite) {
+    if (validatedGraphite.isEnabled()) {
+      return new GraphiteScheduledReporterFactory(runningMetricRegistry, validatedGraphite.getHost(),
+          validatedGraphite.getFormattedPrefix());
+    }
+    return new LoggingScheduledReporterFactory(runningMetricRegistry);
+  }
+
+  @Bean
+  ValidatedGraphite validatedGraphite(Graphite graphite, @Qualifier("baseConf") Configuration baseConf) {
+    return new GraphiteValidator(baseConf).validate(graphite);
+  }
+
+}

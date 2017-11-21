@@ -1,0 +1,10 @@
+security:
+  credential-provider: jceks://file/${config-location}/aws.jceks
+table-replications:
+  - source-table:
+      database-name: ${circus-train-runner.database-name}
+      table-name: ct_table_u
+    replica-table:
+      table-name: ct_table_u_copy
+      table-location: s3a://replica/${circus-train-runner.database-name}/ct_table_u_copy
+      
