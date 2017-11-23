@@ -54,6 +54,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
   private final PartitionPredicate partitionPredicate;
   private final Source source;
   private final Replica replica;
+  private final String targetTableLocation;
   private final String replicaDatabaseName;
   private final String replicaTableName;
 
@@ -64,6 +65,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
       Source source,
       Replica replica,
       EventIdFactory eventIdFactory,
+      String targetTableLocation,
       String replicaDatabaseName,
       String replicaTableName) {
     this.database = database;
@@ -71,9 +73,10 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
     this.partitionPredicate = partitionPredicate;
     this.source = source;
     this.replica = replica;
+    this.targetTableLocation = targetTableLocation;
     this.replicaDatabaseName = replicaDatabaseName;
     this.replicaTableName = replicaTableName;
-    eventId = eventIdFactory.newEventId("ctt");
+    eventId = eventIdFactory.newEventId("ctp");
   }
 
   @Override
@@ -85,34 +88,47 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
       PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
           partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
-      if (sourcePartitions.isEmpty()) {
-        LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
-            partitionPredicate);
-        return;
-      }
 
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
+
       try (CloseableMetaStoreClient client = replica.getMetaStoreClientSupplier().get()) {
-        String previousLocation = getPreviousLocation(client);
-        PartitionsAndStatistics sourcePartitionsAndStatisticsThatWereReplicated = filterOnReplicatedPartitions(client,
-            sourcePartitionsAndStatistics, sourceTable.getPartitionKeys());
-        SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable,
-            sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
-            Collections.<String, Object> emptyMap());
-        ReplicaLocationManager replicaLocationManager = new MetadataUpdateReplicaLocationManager(client,
-            TableType.PARTITIONED, previousLocation, replicaDatabaseName, replicaTableName);
+        if (sourcePartitions.isEmpty()) {
+          ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
+              targetTableLocation);
+          // Replicate table metadata only
+          replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+              replicaLocationManager);
+          LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
+              partitionPredicate);
+        } else {
+          String previousLocation = getPreviousLocation(client);
+          ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
+              previousLocation);
 
-        replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
-            sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
+          PartitionsAndStatistics sourcePartitionsAndStatisticsThatWereReplicated = filterOnReplicatedPartitions(client,
+              sourcePartitionsAndStatistics, sourceTable.getPartitionKeys());
+          SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable,
+              sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
+              Collections.<String, Object> emptyMap());
+
+          replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
+              sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
+          int partitionsCopied = sourcePartitions.size();
+          LOG.info("Metadata updated for {} partitions of table {}.{}. (no data copied)", partitionsCopied, database,
+              table);
+        }
       }
-      int partitionsCopied = sourcePartitions.size();
-
-      LOG.info("Metadata updated for {} partitions of table {}.{}. (no data copied)", partitionsCopied, database,
-          table);
 
     } catch (Throwable t) {
       throw new CircusTrainException("Unable to replicate", t);
     }
+  }
+
+  private ReplicaLocationManager newMetadataUpdateReplicaLocationManager(
+      CloseableMetaStoreClient client,
+      String previousLocation) {
+    return new MetadataUpdateReplicaLocationManager(client, TableType.PARTITIONED, previousLocation,
+        replicaDatabaseName, replicaTableName);
   }
 
   private PartitionsAndStatistics filterOnReplicatedPartitions(
@@ -126,9 +142,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
         replicaClient.getPartition(replicaDatabaseName, replicaTableName, partition.getValues());
         statisticsByPartition.put(partition, sourcePartitionsAndStatistics.getStatisticsForPartition(partition));
       } catch (NoSuchObjectException e) {
-        LOG.debug(
-            "Partition {} not found on replica, skipping metadata update (Set ReplicationMode.FULL to replicate missing partitions and data)",
-            partition.getValues());
+        // partition doesn't exist, skipping it
       }
     }
     return new PartitionsAndStatistics(partitionKeys, statisticsByPartition);

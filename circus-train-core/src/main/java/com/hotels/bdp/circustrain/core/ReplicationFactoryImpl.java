@@ -121,7 +121,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       break;
     case METADATA_UPDATE:
       replication = new PartitionedTableMetadataUpdateReplication(sourceDatabaseName, sourceTableName,
-          partitionPredicate, source, replica, eventIdFactory, replicaDatabaseName, replicaTableName);
+          partitionPredicate, source, replica, eventIdFactory, replicaTableLocation, replicaDatabaseName,
+          replicaTableName);
       break;
     default:
       throw new CircusTrainException(

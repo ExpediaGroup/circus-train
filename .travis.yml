@@ -1,0 +1,13 @@
+language: java
+jdk:
+  - openjdk7
+os:
+  - linux
+cache:
+  directories:
+    - ~/.m2/repository
+install:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -P travis
+script:
+  - mvn clean test cobertura:cobertura coveralls:report -B -P travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
+
