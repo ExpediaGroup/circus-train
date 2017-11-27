@@ -11,5 +11,5 @@ install:
 before_script:
   - echo "MAVEN_OPTS=${TEST_MEM_SETTINGS}" > ~/.mavenrc
 script:
-  - travis_wait mvn clean test cobertura:cobertura coveralls:report -B -P travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
+  - mvn clean test cobertura:cobertura coveralls:report -B -P travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
 
