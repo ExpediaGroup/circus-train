@@ -25,11 +25,11 @@
 
   <logger name="com.hotels.bdp.circustrain">
     <!-- Required to be DEBUG for com.hotels.bdp.circustrain.core.metastore.HiveConfFactoryTest.secretProperties() -->
-    <level value="INFO" />
+    <level value="DEBUG" />
   </logger>
 
   <root>
-    <level value="WARN" />
+    <level value="INFO" />
     <appender-ref ref="CONSOLE" />
   </root>
 

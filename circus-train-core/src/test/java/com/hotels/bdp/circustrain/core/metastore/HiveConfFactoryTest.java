@@ -98,6 +98,7 @@ public class HiveConfFactoryTest {
 
   @Test
   public void secretProperties() {
+    // This requires to set the log level to DEBUG
     assertFalse("Test is pointless when there are no secrets and this whole test can probably be removed",
         HiveConfFactory.SECRET_KEYS.isEmpty());
 
