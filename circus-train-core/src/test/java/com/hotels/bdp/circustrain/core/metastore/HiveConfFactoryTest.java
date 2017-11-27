@@ -34,6 +34,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.log4j.Appender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.After;
@@ -98,7 +99,10 @@ public class HiveConfFactoryTest {
 
   @Test
   public void secretProperties() {
-    // This requires to set the log level to DEBUG
+    // This test requires setting the log level to DEBUG
+    Logger.getLogger("com.hotels.bdp.circustrain").setLevel(Level.DEBUG);
+    Logger.getRootLogger().setLevel(Level.INFO);
+
     assertFalse("Test is pointless when there are no secrets and this whole test can probably be removed",
         HiveConfFactory.SECRET_KEYS.isEmpty());
 
