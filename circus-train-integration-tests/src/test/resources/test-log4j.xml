@@ -31,7 +31,7 @@
     <level value="INFO" />
   </logger>
   <logger name="org.apache.hadoop.tools">
-    <level value="INFO" />
+    <level value="WARN" />
   </logger>
 
   <root>

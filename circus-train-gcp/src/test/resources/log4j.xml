@@ -24,11 +24,11 @@
   </appender>
 
   <logger name="com.hotels.bdp.circustrain">
-    <level value="DEBUG"/>
+    <level value="WARN"/>
   </logger>
 
   <root>
-    <level value="INFO"/>
+    <level value="WARN"/>
     <appender-ref ref="CONSOLE"/>
   </root>
 
