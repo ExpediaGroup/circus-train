@@ -84,11 +84,12 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
           TableType.PARTITIONED);
       sourceLocationManager.cleanUpLocations();
       if (sourcePartitions.isEmpty()) {
-        // Replicate table metadata only
+        LOG.debug("Update table {}.{} metadata only", database, table);
         replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
             replicaLocationManager);
-        LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
-            partitionPredicate);
+        LOG.info(
+            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitiones were updated.",
+            database, table, partitionPredicate);
       } else {
         replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
             replicaDatabaseName, replicaTableName, replicaLocationManager);

@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.ColumnStatistics;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
@@ -95,11 +96,12 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
         if (sourcePartitions.isEmpty()) {
           ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
               targetTableLocation);
-          // Replicate table metadata only
+          LOG.debug("Update table {}.{} metadata only", database, table);
           replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
               replicaLocationManager);
-          LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
-              partitionPredicate);
+          LOG.info(
+              "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitiones were updated.",
+              database, table, partitionPredicate);
         } else {
           String previousLocation = getPreviousLocation(client);
           ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
@@ -142,7 +144,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
         replicaClient.getPartition(replicaDatabaseName, replicaTableName, partition.getValues());
         statisticsByPartition.put(partition, sourcePartitionsAndStatistics.getStatisticsForPartition(partition));
       } catch (NoSuchObjectException e) {
-        // partition doesn't exist, skipping it
+        LOG.debug("Partition {} doesn't exist, skipping it...", Warehouse.getQualifiedName(partition));
       }
     }
     return new PartitionsAndStatistics(partitionKeys, statisticsByPartition);
