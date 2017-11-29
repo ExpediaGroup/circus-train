@@ -1,1 +1,1 @@
-CREATE SCHEMA IF NOT EXISTS circus_train;
+CREATE SCHEMA IF NOT EXISTS housekeeping_common;

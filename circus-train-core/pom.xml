@@ -109,6 +109,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Housekeeping -->
+    <dependency>
+      <groupId>com.hotels.bdp</groupId>
+      <artifactId>housekeeping-spring</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- YAML -->
     <dependency>
       <groupId>org.yaml</groupId>

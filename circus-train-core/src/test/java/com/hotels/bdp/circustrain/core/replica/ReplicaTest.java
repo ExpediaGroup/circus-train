@@ -73,7 +73,6 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
@@ -83,6 +82,7 @@ import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
+import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTest {

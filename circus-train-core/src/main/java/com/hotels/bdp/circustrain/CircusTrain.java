@@ -42,7 +42,6 @@ import com.google.common.base.Joiner;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
@@ -71,6 +70,7 @@ import com.hotels.bdp.circustrain.core.transformation.CompositePartitionTransfor
 import com.hotels.bdp.circustrain.core.transformation.CompositeTableTransformation;
 import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
+import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
 
 @SpringBootApplication
 @EnableConfigurationProperties

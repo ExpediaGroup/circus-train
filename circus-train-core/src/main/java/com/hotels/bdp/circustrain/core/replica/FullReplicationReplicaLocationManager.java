@@ -31,8 +31,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
+import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
 
 public class FullReplicationReplicaLocationManager implements ReplicaLocationManager {
 

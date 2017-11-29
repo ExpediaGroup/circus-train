@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -33,12 +34,13 @@ import com.google.common.collect.ImmutableMap;
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.bdp.circustrain.housekeeping.conf.Housekeeping;
-import com.hotels.bdp.circustrain.housekeeping.service.HousekeepingService;
+import com.hotels.bdp.housekeeping.api.service.HousekeepingService;
+import com.hotels.bdp.housekeeping.spring.housekeeping.conf.Housekeeping;
 
 @Profile({ Modules.HOUSEKEEPING })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
+@ComponentScan("com.hotels.bdp.housekeeping.spring")
 class HousekeepingRunner implements ApplicationRunner {
   private static final Logger LOG = LoggerFactory.getLogger(HousekeepingRunner.class);
 
@@ -73,5 +75,4 @@ class HousekeepingRunner implements ApplicationRunner {
       metricSender.send(metricsMap);
     }
   }
-
 }

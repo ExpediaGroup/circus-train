@@ -1,4 +1,4 @@
-SET SCHEMA circus_train;
+SET SCHEMA housekeeping_common;
 
 -- Old path from 2014-12-25 11:13:28.0
 INSERT INTO legacy_replica_path
