@@ -15,6 +15,7 @@
   limitations under the License.
 -->
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
 <log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
 <!-- **************************************************************************************** -->
@@ -28,14 +29,14 @@
   </appender>
 
   <logger name="com.hotels.bdp.circustrain">
-    <level value="INFO" />
+    <level value="DEBUG" />
   </logger>
   <logger name="org.apache.hadoop.tools">
-    <level value="WARN" />
+    <level value="DEBUG" />
   </logger>
 
   <root>
-    <level value="WARN" />
+    <level value="INFO" />
     <appender-ref ref="CONSOLE" />
   </root>
 

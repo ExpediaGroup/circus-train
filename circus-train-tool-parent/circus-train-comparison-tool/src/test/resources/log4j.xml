@@ -24,7 +24,7 @@
   </appender>
 
   <logger name="com.hotels.bdp.circustrain">
-    <level value="WARN" />
+    <level value="DEBUG" />
   </logger>
 
   <logger name="org.datanucleus">
@@ -34,13 +34,13 @@
   <logger name="DataNucleus">
     <level value="WARN" />
   </logger>
-
+  
   <logger name="org.apache.hadoop">
-    <level value="WARN" />
+    <level value="INFO" />
   </logger>
-
+  
   <root>
-    <level value="WARN" />
+    <level value="INFO" />
     <appender-ref ref="CONSOLE" />
   </root>
 
