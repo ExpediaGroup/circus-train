@@ -28,8 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.DelegatingApplicationContextInitializer;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -62,7 +62,7 @@ import com.hotels.bdp.circustrain.housekeeping.model.LegacyReplicaPath;
     "housekeeping.data-source.url=jdbc:h2:./target/data/housekeeping;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE",
     "housekeeping.data-source.username=bdp",
     "housekeeping.data-source.password=Ch4ll3ng3" })
-@SpringApplicationConfiguration(classes = { TestApplication.class }, initializers = {
+@ContextConfiguration(classes = { TestApplication.class }, initializers = {
     DelegatingApplicationContextInitializer.class })
 @TestExecutionListeners({
     DependencyInjectionTestExecutionListener.class,

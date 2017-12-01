@@ -33,7 +33,6 @@ import org.apache.hadoop.hive.ql.lib.Rule;
 import org.apache.hadoop.hive.ql.parse.ASTNode;
 import org.apache.hadoop.hive.ql.parse.ParseDriver;
 import org.apache.hadoop.hive.ql.parse.ParseException;
-import org.apache.hadoop.hive.ql.parse.ParseUtils;
 import org.apache.hadoop.hive.ql.parse.SemanticException;
 
 public class HiveLanguageParser {
@@ -76,11 +75,10 @@ public class HiveLanguageParser {
     } catch (ParseException e) {
       throw new HiveParseException(e);
     }
-    tree = ParseUtils.findRootNonNullToken(tree);
     // create a walker which walks the tree in a DFS manner while maintaining
     // the operator stack. The dispatcher
     // generates the plan from the operator tree
-    Map<Rule, NodeProcessor> rules = new LinkedHashMap<Rule, NodeProcessor>();
+    Map<Rule, NodeProcessor> rules = new LinkedHashMap<>();
     // The dispatcher fires the processor corresponding to the closest matching
     // rule and passes the context along
     Dispatcher dispatcher = new DefaultRuleDispatcher(nodeProcessor, rules, null);

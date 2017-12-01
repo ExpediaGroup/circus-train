@@ -11,7 +11,7 @@
   <name>DistCp Copier</name>
 
   <properties>
-    <hadoop.version>2.6.0</hadoop.version>
+    <protobuf.version>2.5.0</protobuf.version>
   </properties>
 
   <dependencies>
@@ -71,11 +71,15 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

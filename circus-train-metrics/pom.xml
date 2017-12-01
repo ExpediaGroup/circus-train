@@ -39,6 +39,22 @@
       <artifactId>metrics-graphite</artifactId>
     </dependency>
 
+    <!-- Java EL: needed for compatibility with new Spring and hibernate-validator -->
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>javax.el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
+    </dependency>
+
+    <!-- Hibernate for validation -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
     <!-- Hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
@@ -49,12 +65,6 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-core</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <!-- Hibernate for validation -->
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
     </dependency>
 
     <!-- Test -->
