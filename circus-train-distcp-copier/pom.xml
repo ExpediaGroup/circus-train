@@ -4,15 +4,11 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>10.0.1-SNAPSHOT</version>
+    <version>11.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-distcp-copier</artifactId>
   <name>DistCp Copier</name>
-
-  <properties>
-    <hadoop.version>2.6.0</hadoop.version>
-  </properties>
 
   <dependencies>
     <!-- Circus Train -->
@@ -68,6 +64,7 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
+    <!-- Test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -77,6 +74,10 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
     </dependency>
   </dependencies>
 </project>

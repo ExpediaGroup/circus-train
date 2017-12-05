@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>10.0.1-SNAPSHOT</version>
+    <version>11.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-housekeeping</artifactId>
@@ -24,17 +24,14 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Hadoop -->
+    <!-- Java EL: needed for compatibility with new Spring and hibernate-validator -->
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <scope>provided</scope>
+      <groupId>javax.el</groupId>
+      <artifactId>javax.el-api</artifactId>
     </dependency>
-
-    <!-- DataSource (HikariCP) -->
     <dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
     </dependency>
 
     <!-- Hibernate -->
@@ -49,6 +46,19 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
+    <!-- Hadoop -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- DataSource (HikariCP) -->
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
     </dependency>
 
     <!-- H2 -->
@@ -127,6 +137,11 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

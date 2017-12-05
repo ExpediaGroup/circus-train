@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>10.0.1-SNAPSHOT</version>
+    <version>11.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-hive-view</artifactId>
@@ -32,7 +32,7 @@
     <!-- Spring Boot -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j</artifactId>
+      <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
