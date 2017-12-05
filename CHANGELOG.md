@@ -1,6 +1,7 @@
 # Unreleased
 ### Changed
 * Replicating a partitioned table containing no partitions will now succeed instead of silently not replicating the table metadata.
+* Upgrade dependencies
 
 # 10.0.0 - 2017-11-21
 ### Changed
