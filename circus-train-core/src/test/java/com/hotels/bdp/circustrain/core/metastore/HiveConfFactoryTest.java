@@ -19,12 +19,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,16 +32,17 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.StringLayout;
+import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -100,15 +100,21 @@ public class HiveConfFactoryTest {
   @Test
   public void secretProperties() {
     // This test requires setting the log level to DEBUG
-    Logger.getLogger("com.hotels.bdp.circustrain").setLevel(Level.DEBUG);
-    Logger.getRootLogger().setLevel(Level.INFO);
+    Configurator.setLevel("com.hotels.bdp.circustrain", Level.DEBUG);
+    Configurator.setRootLevel(Level.INFO);
 
     assertFalse("Test is pointless when there are no secrets and this whole test can probably be removed",
         HiveConfFactory.SECRET_KEYS.isEmpty());
 
-    Appender mockAppender = Mockito.mock(Appender.class);
-    ArgumentCaptor<LoggingEvent> captor = ArgumentCaptor.forClass(LoggingEvent.class);
-    Logger.getRootLogger().addAppender(mockAppender);
+    StringWriter writer = new StringWriter();
+    StringLayout layout = PatternLayout.newBuilder().withPattern("%d{ISO8601} %-5p %c:%L - %m%n").build();
+    WriterAppender appender = WriterAppender
+        .newBuilder()
+        .setName("StringWriter")
+        .setTarget(writer)
+        .setLayout(layout)
+        .build();
+    ((Logger) LogManager.getRootLogger()).addAppender(appender);
 
     Map<String, String> properties = new LinkedHashMap<>();
     for (String secretKey : HiveConfFactory.SECRET_KEYS) {
@@ -117,14 +123,11 @@ public class HiveConfFactoryTest {
 
     HiveConf hiveConf = new HiveConfFactory(null, properties).newInstance();
 
-    verify(mockAppender, times(HiveConfFactory.SECRET_KEYS.size())).doAppend(captor.capture());
-    int i = 0;
     for (String secretKey : properties.keySet()) {
       // hiveConf contains non hidden value
       assertThat(hiveConf.get(secretKey), is("b"));
       // log contains hidden value
-      assertThat(captor.getAllValues().get(i++).getMessage().toString(),
-          is("Adding custom property: " + secretKey + "=****"));
+      assertThat(writer.toString().contains("Adding custom property: " + secretKey + "=****"), is(true));
     }
   }
 
