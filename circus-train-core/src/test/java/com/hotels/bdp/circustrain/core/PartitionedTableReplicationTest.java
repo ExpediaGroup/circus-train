@@ -109,6 +109,8 @@ public class PartitionedTableReplicationTest {
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
+    when(source.getLocationManager(sourceTable, Collections.<Partition> emptyList(), EVENT_ID, copierOptions))
+        .thenReturn(sourceLocationManager);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
         source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
@@ -116,7 +118,10 @@ public class PartitionedTableReplicationTest {
     replication.replicate();
 
     verifyZeroInteractions(copier);
-    verifyZeroInteractions(replica);
+    InOrder replicationOrder = inOrder(sourceLocationManager, replica, replicaLocationManager, listener);
+    replicationOrder.verify(replica).validateReplicaTable(DATABASE, TABLE);
+    replicationOrder.verify(replica).updateMetadata(EVENT_ID, sourceTableAndStatistics, DATABASE, TABLE,
+        replicaLocationManager);
   }
 
   @Test

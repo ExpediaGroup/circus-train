@@ -19,7 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -98,11 +98,15 @@ public class PartitionedTableMetadataMirrorReplicationTest {
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
+    when(source.getLocationManager(sourceTable, Collections.<Partition> emptyList(), EVENT_ID, copierOptions))
+        .thenReturn(sourceLocationManager);
 
     PartitionedTableMetadataMirrorReplication replication = new PartitionedTableMetadataMirrorReplication(DATABASE,
         TABLE, partitionPredicate, source, replica, eventIdFactory, DATABASE, TABLE);
     replication.replicate();
 
-    verifyZeroInteractions(replica);
+    verify(replica).validateReplicaTable(DATABASE, TABLE);
+    verify(replica).updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics), eq(DATABASE), eq(TABLE),
+        any(ReplicaLocationManager.class));
   }
 }

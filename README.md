@@ -3,7 +3,7 @@
 # Start using
 You can obtain Circus Train from Maven Central:
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/circus-train.svg)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) [![Build Status](https://travis-ci.org/HotelsDotCom/circus-train.svg?branch=master)](https://travis-ci.org/HotelsDotCom/circus-train) [![Coverage Status](https://coveralls.io/repos/github/HotelsDotCom/circus-train/badge.svg?branch=master)](https://coveralls.io/github/HotelsDotCom/circus-train?branch=master) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/circus-train.svg)
 
 ## Overview
 Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. However, it is not event driven and does not know how tables differ between sites; it merely responds to requests to copy (meta-)data. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. Circus Train employs snapshot isolation to minimise the impact of changing data at the source, and to allow consumers of data in the replica cluster to operate independently of ongoing replication tasks.

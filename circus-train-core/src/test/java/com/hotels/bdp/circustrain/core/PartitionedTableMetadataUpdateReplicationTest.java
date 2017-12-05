@@ -22,7 +22,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
@@ -60,14 +60,14 @@ import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.replica.InvalidReplicationModeException;
+import com.hotels.bdp.circustrain.core.replica.MetadataUpdateReplicaLocationManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartitionedTableMetadataUpdateReplicationTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  public @Rule ExpectedException expectedException = ExpectedException.none();
 
   private static final short MAX_PARTITIONS = 1;
   private static final String PARTITION_PREDICATE = "partitionPredicate";
@@ -88,6 +88,7 @@ public class PartitionedTableMetadataUpdateReplicationTest {
   private @Mock StorageDescriptor sd;
 
   private final String tableLocation = "/tmp/table/location";
+  private final String replicaLocation = "/tmp/replica/table/location";
   private final List<FieldSchema> partitionKeys = Lists.newArrayList(newFieldSchema("a"));
   private final Table sourceTable = newTable(TABLE, DATABASE, partitionKeys,
       newStorageDescriptor(new File("bla"), "col1"));
@@ -119,7 +120,7 @@ public class PartitionedTableMetadataUpdateReplicationTest {
     when(sd.getLocation()).thenReturn(tableLocation);
 
     PartitionedTableMetadataUpdateReplication replication = new PartitionedTableMetadataUpdateReplication(DATABASE,
-        TABLE, partitionPredicate, source, replica, eventIdFactory, DATABASE, TABLE);
+        TABLE, partitionPredicate, source, replica, eventIdFactory, replicaLocation, DATABASE, TABLE);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(sourceLocationManager, replica);
@@ -143,7 +144,7 @@ public class PartitionedTableMetadataUpdateReplicationTest {
         .thenThrow(new NoSuchObjectException());
 
     PartitionedTableMetadataUpdateReplication replication = new PartitionedTableMetadataUpdateReplication(DATABASE,
-        TABLE, partitionPredicate, source, replica, eventIdFactory, DATABASE, TABLE);
+        TABLE, partitionPredicate, source, replica, eventIdFactory, replicaLocation, DATABASE, TABLE);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(sourceLocationManager, replica);
@@ -163,12 +164,16 @@ public class PartitionedTableMetadataUpdateReplicationTest {
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
+    when(source.getLocationManager(sourceTable, Collections.<Partition> emptyList(), EVENT_ID, copierOptions))
+        .thenReturn(sourceLocationManager);
 
     PartitionedTableMetadataUpdateReplication replication = new PartitionedTableMetadataUpdateReplication(DATABASE,
-        TABLE, partitionPredicate, source, replica, eventIdFactory, DATABASE, TABLE);
+        TABLE, partitionPredicate, source, replica, eventIdFactory, replicaLocation, DATABASE, TABLE);
     replication.replicate();
 
-    verifyZeroInteractions(replica);
+    verify(replica).validateReplicaTable(DATABASE, TABLE);
+    verify(replica).updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics), eq(DATABASE), eq(TABLE),
+        any(MetadataUpdateReplicaLocationManager.class));
   }
 
   @Test
@@ -180,7 +185,7 @@ public class PartitionedTableMetadataUpdateReplicationTest {
     when(replica.getTable(replicaClient, DATABASE, TABLE)).thenReturn(Optional.<Table> absent());
 
     PartitionedTableMetadataUpdateReplication replication = new PartitionedTableMetadataUpdateReplication(DATABASE,
-        TABLE, partitionPredicate, source, replica, eventIdFactory, DATABASE, TABLE);
+        TABLE, partitionPredicate, source, replica, eventIdFactory, replicaLocation, DATABASE, TABLE);
     replication.replicate();
   }
 }

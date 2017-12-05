@@ -53,7 +53,6 @@ import com.hotels.bdp.circustrain.s3mapreducecp.CopyListingFileStatus;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpConstants;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.StubContext;
-import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.lib.DynamicInputFormat;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
 public class DynamicInputFormatTest {
@@ -112,11 +111,6 @@ public class DynamicInputFormatTest {
     } finally {
       IOUtils.cleanup(null, fileSystem, outputStream);
     }
-  }
-
-  @AfterClass
-  public static void tearDown() {
-    cluster.shutdown();
   }
 
   @Test
@@ -185,4 +179,5 @@ public class DynamicInputFormatTest {
     conf.setInt(S3MapReduceCpConstants.CONF_LABEL_SPLIT_RATIO, 53);
     assertEquals(53, DynamicInputFormat.getSplitRatio(3, 200, conf));
   }
+
 }

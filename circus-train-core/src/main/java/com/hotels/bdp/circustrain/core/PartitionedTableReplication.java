@@ -91,11 +91,6 @@ class PartitionedTableReplication implements Replication {
       PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
           partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
-      if (sourcePartitions.isEmpty()) {
-        LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
-            partitionPredicate);
-        return;
-      }
 
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
 
@@ -109,26 +104,34 @@ class PartitionedTableReplication implements Replication {
           targetTableLocation, eventId, sourceLocationManager);
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
-      CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceBaseLocation,
-          replicaPartitionBaseLocation);
-      Copier copier = copierFactory.newInstance(eventId, sourceBaseLocation, sourceSubLocations,
-          replicaPartitionBaseLocation, copierOptions);
-      copierListener.copierStart(copier.getClass().getName());
-      try {
-        metrics = copier.copy();
-      } finally {
-        copierListener.copierEnd(metrics);
+      if (sourcePartitions.isEmpty()) {
+        LOG.debug("Update table {}.{} metadata only", database, table);
+        replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+            replicaLocationManager);
+        LOG.info(
+            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
+            database, table, partitionPredicate);
+      } else {
+        CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceBaseLocation,
+            replicaPartitionBaseLocation);
+        Copier copier = copierFactory.newInstance(eventId, sourceBaseLocation, sourceSubLocations,
+            replicaPartitionBaseLocation, copierOptions);
+        copierListener.copierStart(copier.getClass().getName());
+        try {
+          metrics = copier.copy();
+        } finally {
+          copierListener.copierEnd(metrics);
+        }
+
+        sourceLocationManager.cleanUpLocations();
+
+        replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
+            replicaDatabaseName, replicaTableName, replicaLocationManager);
+        replicaLocationManager.cleanUpLocations();
+
+        int partitionsCopied = sourcePartitions.size();
+        LOG.info("Replicated {} partitions of table {}.{}.", partitionsCopied, database, table);
       }
-
-      sourceLocationManager.cleanUpLocations();
-
-      replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-          replicaDatabaseName, replicaTableName, replicaLocationManager);
-      replicaLocationManager.cleanUpLocations();
-
-      int partitionsCopied = sourcePartitions.size();
-
-      LOG.info("Replicated {} partitions of table {}.{}.", partitionsCopied, database, table);
     } catch (Throwable t) {
       throw new CircusTrainException("Unable to replicate", t);
     }

@@ -74,11 +74,7 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
       PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
           partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
-      if (sourcePartitions.isEmpty()) {
-        LOG.info("No matching partitions found on table {}.{} with predicate {}; Nothing to do.", database, table,
-            partitionPredicate);
-        return;
-      }
+
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
 
       // We expect all partitions to be under the table base path
@@ -87,12 +83,20 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
       ReplicaLocationManager replicaLocationManager = new MetadataMirrorReplicaLocationManager(sourceLocationManager,
           TableType.PARTITIONED);
       sourceLocationManager.cleanUpLocations();
-      replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-          replicaDatabaseName, replicaTableName, replicaLocationManager);
-      int partitionsCopied = sourcePartitions.size();
-
-      LOG.info("Metadata mirrored for {} partitions of table {}.{} (no data copied).", partitionsCopied, database,
-          table);
+      if (sourcePartitions.isEmpty()) {
+        LOG.debug("Update table {}.{} metadata only", database, table);
+        replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+            replicaLocationManager);
+        LOG.info(
+            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
+            database, table, partitionPredicate);
+      } else {
+        replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
+            replicaDatabaseName, replicaTableName, replicaLocationManager);
+        int partitionsCopied = sourcePartitions.size();
+        LOG.info("Metadata mirrored for {} partitions of table {}.{} (no data copied).", partitionsCopied, database,
+            table);
+      }
     } catch (Throwable t) {
       throw new CircusTrainException("Unable to replicate", t);
     }
