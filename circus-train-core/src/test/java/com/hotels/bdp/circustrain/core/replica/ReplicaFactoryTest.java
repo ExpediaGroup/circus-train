@@ -31,7 +31,7 @@ import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaFactoryTest {

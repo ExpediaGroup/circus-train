@@ -23,10 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
@@ -41,6 +43,8 @@ import com.hotels.bdp.housekeeping.spring.housekeeping.conf.Housekeeping;
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
 @ComponentScan("com.hotels.bdp.housekeeping.spring")
+@EntityScan(basePackages = { "com.hotels.bdp.circustrain.housekeeping.model" })
+@EnableJpaRepositories(basePackages = { "com.hotels.bdp.circustrain.housekeeping.repository" })
 class HousekeepingRunner implements ApplicationRunner {
   private static final Logger LOG = LoggerFactory.getLogger(HousekeepingRunner.class);
 

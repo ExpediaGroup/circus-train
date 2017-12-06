@@ -82,7 +82,7 @@ import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
-import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTest {

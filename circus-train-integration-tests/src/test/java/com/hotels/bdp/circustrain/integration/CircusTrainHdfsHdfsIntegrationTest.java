@@ -155,10 +155,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
-            getCleanUpPaths(conn, "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+            getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
           } catch (SQLException e) {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
@@ -232,10 +232,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
-            getCleanUpPaths(conn, "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+            getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
           } catch (SQLException e) {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
@@ -266,10 +266,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+              "SELECT * FROM circus_train.legacy_replica_path_aud");
           assertThat(cleanUpPathsAudit.size(), is(1));
           assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
           assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
@@ -300,10 +300,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+              "SELECT * FROM circus_train.legacy_replica_path_aud");
           assertThat(cleanUpPathsAudit.size(), is(1));
           assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
           assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
@@ -334,10 +334,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
-            getCleanUpPaths(conn, "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+            getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
           } catch (SQLException e) {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
@@ -655,10 +655,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
           List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM housekeeping_common.legacy_replica_path");
+              "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
-            getCleanUpPaths(conn, "SELECT * FROM housekeeping_common.legacy_replica_path_aud");
+            getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
           } catch (SQLException e) {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }

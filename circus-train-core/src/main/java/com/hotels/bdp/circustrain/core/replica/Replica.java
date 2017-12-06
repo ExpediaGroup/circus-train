@@ -60,7 +60,7 @@ import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
-import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 public class Replica extends HiveEndpoint {
 

@@ -29,7 +29,7 @@ import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @Profile({ Modules.REPLICATION })
 @Component

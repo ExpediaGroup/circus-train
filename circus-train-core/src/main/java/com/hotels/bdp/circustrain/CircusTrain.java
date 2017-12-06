@@ -70,7 +70,7 @@ import com.hotels.bdp.circustrain.core.transformation.CompositePartitionTransfor
 import com.hotels.bdp.circustrain.core.transformation.CompositeTableTransformation;
 import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
-import com.hotels.bdp.housekeeping.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @SpringBootApplication
 @EnableConfigurationProperties
