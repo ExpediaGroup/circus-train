@@ -46,6 +46,7 @@ import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
@@ -70,7 +71,6 @@ import com.hotels.bdp.circustrain.core.transformation.CompositePartitionTransfor
 import com.hotels.bdp.circustrain.core.transformation.CompositeTableTransformation;
 import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
-import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @SpringBootApplication
 @EnableConfigurationProperties
