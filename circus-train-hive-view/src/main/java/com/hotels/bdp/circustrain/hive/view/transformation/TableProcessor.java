@@ -36,10 +36,12 @@ public class TableProcessor implements NodeProcessor {
   public Object process(Node node, Stack<Node> stack, NodeProcessorCtx procCtx, Object... nodeOutputs)
     throws SemanticException {
     ASTNode astNode = (ASTNode) node;
-    switch (astNode.getToken().getText()) {
-    case "TOK_TABNAME":
-      tables.add(extractTableName(astNode));
-      break;
+    if (astNode.getToken() != null && astNode.getToken().getText() != null) {
+      switch (astNode.getToken().getText()) {
+      case "TOK_TABNAME":
+        tables.add(extractTableName(astNode));
+        break;
+      }
     }
     return null;
   }

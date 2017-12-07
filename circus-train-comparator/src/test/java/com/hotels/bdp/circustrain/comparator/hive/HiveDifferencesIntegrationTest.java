@@ -37,6 +37,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
+import org.apache.hadoop.hive.metastore.api.EnvironmentContext;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.SerDeInfo;
@@ -94,6 +95,7 @@ public class HiveDifferencesIntegrationTest {
   private File replicaTableUri;
   private final ComparatorRegistry comparatorRegistry = new ComparatorRegistry(SHORT_CIRCUIT);
   private final Configuration configuration = new Configuration();
+  private final EnvironmentContext environmentContext = new EnvironmentContext();
 
   @Before
   public void init() throws Exception {
@@ -303,7 +305,7 @@ public class HiveDifferencesIntegrationTest {
   public void sourcePartitionHasChanged() throws Exception {
     Partition sourcePartition1 = catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1");
     sourcePartition1.getSd().getCols().add(BAZ_COL);
-    catalog.client().alter_partition(DATABASE, SOURCE_TABLE, sourcePartition1);
+    catalog.client().alter_partition(DATABASE, SOURCE_TABLE, sourcePartition1, environmentContext);
 
     Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
     Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
@@ -331,7 +333,7 @@ public class HiveDifferencesIntegrationTest {
   public void replicaPartitionHasChanged() throws Exception {
     Partition replicaPartition1 = catalog.client().getPartition(DATABASE, REPLICA_TABLE, "part=1");
     replicaPartition1.getSd().getCols().add(BAZ_COL);
-    catalog.client().alter_partition(DATABASE, REPLICA_TABLE, replicaPartition1);
+    catalog.client().alter_partition(DATABASE, REPLICA_TABLE, replicaPartition1, environmentContext);
 
     Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
     Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
@@ -360,11 +362,13 @@ public class HiveDifferencesIntegrationTest {
     Partition replicaPartition1 = catalog.client().getPartition(DATABASE, REPLICA_TABLE, "part=1");
     replicaPartition1.putToParameters("DO_NOT_UPDATE_STATS", "true");
     replicaPartition1.putToParameters("STATS_GENERATED_VIA_STATS_TASK", "true");
-    catalog.client().alter_partition(DATABASE, REPLICA_TABLE, replicaPartition1);
+    replicaPartition1.putToParameters("STATS_GENERATED", "true");
+    catalog.client().alter_partition(DATABASE, REPLICA_TABLE, replicaPartition1, environmentContext);
     Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
     Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
     replicaPartition1.putToParameters("DO_NOT_UPDATE_STATS", "true");
     replicaPartition1.putToParameters("STATS_GENERATED_VIA_STATS_TASK", "true");
+    replicaPartition1.putToParameters("STATS_GENERATED", "true");
     catalog.client().alter_table(DATABASE, REPLICA_TABLE, replicaTable);
 
     HiveDifferences

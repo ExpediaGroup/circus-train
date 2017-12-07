@@ -19,7 +19,8 @@ public enum ExcludedHiveParameter {
   TRANSIENT_LAST_DDL_TIME("transient_lastDdlTime"),
   COMMENT("comment"),
   DO_NOT_UPDATE_STATS("DO_NOT_UPDATE_STATS"),
-  STATS_GENERATED_VIA_STATS_TASK(org.apache.hadoop.hive.common.StatsSetupConst.STATS_GENERATED_VIA_STATS_TASK),
+  STATS_GENERATED_VIA_STATS_TASK("STATS_GENERATED_VIA_STATS_TASK"),
+  STATS_GENERATEDK(org.apache.hadoop.hive.common.StatsSetupConst.STATS_GENERATED),
   COLUMN_STATS_ACCURATE(org.apache.hadoop.hive.common.StatsSetupConst.COLUMN_STATS_ACCURATE),
   // Seen cases where this is in the replica but not in the source most likely they are added by hive when doing the
   // replication, so ignoring them.

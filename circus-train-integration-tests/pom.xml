@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>10.0.1-SNAPSHOT</version>
+    <version>11.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-integration-tests</artifactId>
@@ -12,9 +12,17 @@
 
   <properties>
     <hadoop.version>2.8.1</hadoop.version>
+    <log4j2.version>2.6.2</log4j2.version>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>datanucleus-core</artifactId>
+      <version>4.1.17</version>
+    </dependency>
+
     <!-- Circus Train -->
     <dependency>
       <groupId>com.hotels</groupId>
@@ -131,6 +139,18 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j2.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j2.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
