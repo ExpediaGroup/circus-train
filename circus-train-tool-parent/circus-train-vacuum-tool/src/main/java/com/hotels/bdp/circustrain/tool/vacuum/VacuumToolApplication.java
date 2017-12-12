@@ -50,10 +50,10 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.TableReplications;
-import com.hotels.housekeeping.spring.model.LegacyReplicaPath;
-import com.hotels.housekeeping.spring.repository.LegacyReplicaPathRepository;
-import com.hotels.housekeeping.spring.service.HousekeepingService;
-import com.hotels.housekeeping.spring.service.impl.EventIdExtractor;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.service.impl.EventIdExtractor;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)

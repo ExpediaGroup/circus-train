@@ -19,8 +19,8 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
-import com.hotels.housekeeping.spring.model.LegacyReplicaPath;
-import com.hotels.housekeeping.spring.service.HousekeepingService;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.housekeeping.service.HousekeepingService;
 
 public class JdbcHousekeepingListener implements HousekeepingListener {
 

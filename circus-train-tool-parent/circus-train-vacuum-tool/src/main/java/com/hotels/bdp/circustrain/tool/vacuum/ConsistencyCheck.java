@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.hotels.housekeeping.spring.service.impl.EventIdExtractor;
+import com.hotels.housekeeping.service.impl.EventIdExtractor;
 
 final class ConsistencyCheck {
 
