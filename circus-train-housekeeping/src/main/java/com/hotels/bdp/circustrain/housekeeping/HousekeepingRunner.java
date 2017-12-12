@@ -33,8 +33,8 @@ import com.google.common.collect.ImmutableMap;
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.housekeeping.conf.Housekeeping;
-import com.hotels.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.spring.conf.Housekeeping;
+import com.hotels.housekeeping.spring.service.HousekeepingService;
 
 @Profile({ Modules.HOUSEKEEPING })
 @Component

@@ -21,9 +21,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
-import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
-import com.hotels.housekeeping.service.HousekeepingService;
-import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
+import com.hotels.housekeeping.spring.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.spring.service.HousekeepingService;
+import com.hotels.housekeeping.spring.service.impl.FileSystemHousekeepingService;
 
 @Configuration
 @ComponentScan("com.hotels.housekeeping")
