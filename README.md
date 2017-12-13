@@ -433,7 +433,7 @@ A YAML file is made up of multiple *documents*, separated by three hyphens (`---
           hive-metastore-uris: thrift://<prod-host>.com:9083
 
 ### Configuring housekeeping
-Housekeeping is the process that removes expired and orphaned data on the replica. Below is a YAML configuration fragment and description of the available configuration properties.
+Housekeeping is the process that removes expired and orphaned data on the replica. Below is a YAML configuration fragment and description of the available configuration properties. Implementation of Housekeeping can be found [here](https://github.com/HotelsDotCom/housekeeping)
 
         housekeeping:
           expired-path-duration: P3D

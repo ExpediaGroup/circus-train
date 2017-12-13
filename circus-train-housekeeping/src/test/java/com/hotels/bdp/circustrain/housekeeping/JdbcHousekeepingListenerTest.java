@@ -29,8 +29,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.housekeeping.model.LegacyReplicaPath;
-import com.hotels.bdp.circustrain.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.housekeeping.service.HousekeepingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JdbcHousekeepingListenerTest {

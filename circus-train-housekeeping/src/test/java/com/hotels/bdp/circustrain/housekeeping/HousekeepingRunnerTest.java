@@ -33,8 +33,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.bdp.circustrain.housekeeping.conf.Housekeeping;
-import com.hotels.bdp.circustrain.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.conf.Housekeeping;
+import com.hotels.housekeeping.service.HousekeepingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HousekeepingRunnerTest {

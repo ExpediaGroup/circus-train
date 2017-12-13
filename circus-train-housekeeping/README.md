@@ -1,7 +1,7 @@
 # Circus Train Housekeeping
 
 ## Overview
-A database-backed module that stores orphaned replica paths in a table for later clean up.
+A database-backed module that stores orphaned replica paths in a table for later clean up. Implementation of Housekeeping can be found [here](https://github.com/HotelsDotCom/housekeeping)
 
 ## Configuration
 The circus train housekeeping module defaults to using the H2 Database Engine, however this module can be configured 
