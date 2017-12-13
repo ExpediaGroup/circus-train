@@ -109,7 +109,7 @@ class PartitionedTableReplication implements Replication {
         replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
             replicaLocationManager);
         LOG.info(
-            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitiones were updated.",
+            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
             database, table, partitionPredicate);
       } else {
         CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceBaseLocation,

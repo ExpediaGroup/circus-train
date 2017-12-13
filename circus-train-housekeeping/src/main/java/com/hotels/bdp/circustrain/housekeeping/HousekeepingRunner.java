@@ -33,8 +33,8 @@ import com.google.common.collect.ImmutableMap;
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.bdp.circustrain.housekeeping.conf.Housekeeping;
-import com.hotels.bdp.circustrain.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.conf.Housekeeping;
+import com.hotels.housekeeping.service.HousekeepingService;
 
 @Profile({ Modules.HOUSEKEEPING })
 @Component
@@ -73,5 +73,4 @@ class HousekeepingRunner implements ApplicationRunner {
       metricSender.send(metricsMap);
     }
   }
-
 }

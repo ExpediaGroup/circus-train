@@ -24,7 +24,7 @@
   </appender>
 
   <logger name="com.hotels.bdp.circustrain">
-    <level value="DEBUG" />
+    <level value="INFO" />
   </logger>
 
   <root>
