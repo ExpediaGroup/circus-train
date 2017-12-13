@@ -54,7 +54,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
-import com.hotels.bdp.housekeeping.api.model.LegacyReplicaPath;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public final class TestUtils {
 

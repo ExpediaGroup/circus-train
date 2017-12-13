@@ -15,10 +15,10 @@
  */
 package com.hotels.bdp.circustrain.housekeeping.repository;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
-import com.hotels.bdp.housekeeping.spring.housekeeping.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 
 @Transactional
 public interface CircusTrainLegacyReplicaPathRepository

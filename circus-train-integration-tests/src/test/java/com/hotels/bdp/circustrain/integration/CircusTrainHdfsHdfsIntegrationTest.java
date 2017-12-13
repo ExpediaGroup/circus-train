@@ -79,8 +79,8 @@ import com.google.common.collect.FluentIterable;
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
-import com.hotels.bdp.housekeeping.api.model.LegacyReplicaPath;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public class CircusTrainHdfsHdfsIntegrationTest {
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHdfsHdfsIntegrationTest.class);

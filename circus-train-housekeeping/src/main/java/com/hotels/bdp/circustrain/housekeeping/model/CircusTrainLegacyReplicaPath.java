@@ -21,7 +21,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.envers.Audited;
 
-import com.hotels.bdp.housekeeping.spring.housekeeping.model.EntityLegacyReplicaPath;
+import com.hotels.housekeeping.model.EntityLegacyReplicaPath;
 
 @Entity
 // @Converter doesn't work with @Audited until https://hibernate.atlassian.net/browse/HHH-9042 is released
@@ -31,10 +31,6 @@ import com.hotels.bdp.housekeeping.spring.housekeeping.model.EntityLegacyReplica
 public class CircusTrainLegacyReplicaPath extends EntityLegacyReplicaPath {
 
   protected CircusTrainLegacyReplicaPath() {}
-
-  public CircusTrainLegacyReplicaPath(String path) {
-    super(path);
-  }
 
   public CircusTrainLegacyReplicaPath(String eventId, String pathEventId, String path) {
     super(eventId, pathEventId, path);

@@ -51,10 +51,10 @@ import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.TableReplications;
 import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
-import com.hotels.bdp.housekeeping.api.model.LegacyReplicaPath;
-import com.hotels.bdp.housekeeping.api.service.HousekeepingService;
-import com.hotels.bdp.housekeeping.spring.housekeeping.repository.LegacyReplicaPathRepository;
-import com.hotels.bdp.housekeeping.spring.housekeeping.service.impl.EventIdExtractor;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.service.HousekeepingService;
+import com.hotels.housekeeping.service.impl.EventIdExtractor;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)

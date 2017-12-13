@@ -53,9 +53,9 @@ import com.hotels.bdp.circustrain.core.conf.ReplicaTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.TableReplications;
 import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
-import com.hotels.bdp.housekeeping.api.model.LegacyReplicaPath;
-import com.hotels.bdp.housekeeping.api.service.HousekeepingService;
-import com.hotels.bdp.housekeeping.spring.housekeeping.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
+import com.hotels.housekeeping.service.HousekeepingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VacuumToolApplicationTest {

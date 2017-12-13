@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.hotels.bdp.housekeeping.spring.housekeeping.service.impl.EventIdExtractor;
+import com.hotels.housekeeping.service.impl.EventIdExtractor;
 
 final class ConsistencyCheck {
 
@@ -59,5 +59,4 @@ final class ConsistencyCheck {
           "ABORTING: All " + ownerMessage + " paths should contain an event id, this one does not: '" + path + "'.");
     }
   }
-
 }
