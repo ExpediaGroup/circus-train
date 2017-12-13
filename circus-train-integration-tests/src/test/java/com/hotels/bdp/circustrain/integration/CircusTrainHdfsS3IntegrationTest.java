@@ -18,17 +18,13 @@ package com.hotels.bdp.circustrain.integration;
 import static org.apache.hadoop.fs.s3a.Constants.ACCESS_KEY;
 import static org.apache.hadoop.fs.s3a.Constants.ENDPOINT;
 import static org.apache.hadoop.fs.s3a.Constants.SECRET_KEY;
-import static org.apache.hadoop.hive.metastore.MetaStoreUtils.isExternalTable;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_TABLE;
-import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
 
@@ -37,7 +33,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,6 +40,8 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fm.last.commons.test.file.ClassDataFolder;
 import fm.last.commons.test.file.DataFolder;
@@ -65,19 +62,17 @@ import com.hotels.bdp.circustrain.s3s3copier.aws.JceksAmazonS3ClientFactory;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 
 public class CircusTrainHdfsS3IntegrationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHdfsS3IntegrationTest.class);
 
   private static final String S3_ACCESS_KEY = "access";
   private static final String S3_SECRET_KEY = "secret";
 
   private static final String TARGET_UNPARTITIONED_TABLE = "ct_table_u_copy";
-  private static final String TARGET_PARTITIONED_TABLE = "ct_table_p_copy";
-
-  private static final String DUMMY_EVENT_ID = "dummyEventID";
 
   public @Rule ExpectedSystemExit exit = ExpectedSystemExit.none();
   public @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
   public @Rule DataFolder dataFolder = new ClassDataFolder();
-  private final int s3ProxyPort = TestUtils.getAvailablePort();
+  private int s3ProxyPort = TestUtils.getAvailablePort();
   public @Rule S3ProxyRule s3Proxy = S3ProxyRule
       .builder()
       .withPort(s3ProxyPort)
@@ -103,7 +98,6 @@ public class CircusTrainHdfsS3IntegrationTest {
 
   private String jceksLocation;
   private AmazonS3ClientFactory s3ClientFactory;
-  private AmazonS3 s3Client;
 
   @Before
   public void init() throws Exception {
@@ -118,9 +112,6 @@ public class CircusTrainHdfsS3IntegrationTest {
     Security security = new Security();
     security.setCredentialProvider(jceksLocation);
     s3ClientFactory = new JceksAmazonS3ClientFactory(security);
-
-    s3Client = newS3Client("s3a://replica/");
-    s3Client.createBucket("replica");
   }
 
   private AmazonS3 newS3Client(String tableUri) {
@@ -136,6 +127,10 @@ public class CircusTrainHdfsS3IntegrationTest {
   public void unpartitionedTable() throws Exception {
     final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE);
     helper.createUnpartitionedTable(sourceTableUri);
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+
+    final AmazonS3 client = newS3Client("s3a://replica/");
+    client.createBucket("replica");
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("unpartitioned-single-table-hdfs-s3-replication.yml");
@@ -161,102 +156,12 @@ public class CircusTrainHdfsS3IntegrationTest {
         File dataFile = new File(sourceTableUri.getPath(), PART_00000);
         String fileKeyRegex = String.format("%s/%s/ctt-\\d{8}t\\d{6}.\\d{3}z-\\w{8}/%s", DATABASE,
             TARGET_UNPARTITIONED_TABLE, PART_00000);
-        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
+        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(client, "replica");
         assertThat(replicaFiles.size(), is(1));
         for (S3ObjectSummary objectSummary : replicaFiles) {
           assertThat(objectSummary.getSize(), is(dataFile.length()));
           assertThat(objectSummary.getKey().matches(fileKeyRegex), is(true));
         }
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
-
-  @Test
-  public void partitionedTableWithNoPartitions() throws Exception {
-    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_PARTITIONED_TABLE, sourceTableUri);
-
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("partitioned-single-table-with-no-partitions.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
-        .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
-        .build();
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        // Assert location
-        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_TABLE);
-        String eventId = hiveTable.getParameters().get(REPLICATION_EVENT.parameterName());
-        URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_PARTITIONED_TABLE);
-        assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
-        assertThat(eventId, startsWith("ctp-"));
-        // Assert partitions
-        List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, TARGET_PARTITIONED_TABLE,
-            (short) -1);
-        assertThat(partitions.size(), is(0));
-        // Assert table directory
-        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
-        assertThat(replicaFiles.size(), is(0));
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
-
-  @Test
-  public void partitionedTableWithNoPartitionsMetadataUpdate() throws Exception {
-    URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE);
-    Table sourceTable = TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_PARTITIONED_TABLE,
-        sourceTableUri);
-
-    // creating replicaTable
-    final URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_TABLE, replicaLocation);
-    Table table = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_TABLE);
-    table.putToParameters(REPLICATION_EVENT.parameterName(), DUMMY_EVENT_ID);
-    replicaCatalog.client().alter_table(table.getDbName(), table.getTableName(), table);
-
-    // adjusting the sourceTable, mimicking the change we want to update
-    sourceTable.putToParameters("paramToUpdate", "updated");
-    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("partitioned-single-table-with-no-partitions-metadata-update.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
-        .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
-        .build();
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        // Assert location
-        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_TABLE);
-        assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
-        // EventID should be overridden
-        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctp-"));
-        assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
-        assertThat(isExternalTable(hiveTable), is(true));
-        assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
-        // Assert partitions
-        List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, TARGET_PARTITIONED_TABLE,
-            (short) -1);
-        assertThat(partitions.size(), is(0));
-        // Assert table directory
-        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
-        assertThat(replicaFiles.size(), is(0));
       }
     });
     runner.run(config.getAbsolutePath());

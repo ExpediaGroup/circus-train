@@ -32,8 +32,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FullReplicationReplicaLocationManagerTest {

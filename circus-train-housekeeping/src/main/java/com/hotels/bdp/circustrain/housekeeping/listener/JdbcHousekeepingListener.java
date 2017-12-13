@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.housekeeping;
+package com.hotels.bdp.circustrain.housekeeping.listener;
 
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 import com.hotels.housekeeping.service.HousekeepingService;
 
@@ -30,7 +30,6 @@ public class JdbcHousekeepingListener implements HousekeepingListener {
   @Override
   public void cleanUpLocation(String eventId, String pathEventId, Path location) {
     cleanUpPathService
-        .scheduleForHousekeeping(new LegacyReplicaPath(eventId, pathEventId, location.toUri().toString()));
+        .scheduleForHousekeeping(LegacyReplicaPath.DEFAULT.instance(eventId, pathEventId, location.toUri().toString()));
   }
-
 }

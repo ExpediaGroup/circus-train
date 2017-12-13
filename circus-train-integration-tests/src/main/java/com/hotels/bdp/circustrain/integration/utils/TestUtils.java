@@ -53,6 +53,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 
+import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public final class TestUtils {
@@ -75,7 +76,7 @@ public final class TestUtils {
     try (PreparedStatement preparedStatement = connection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery()) {
       while (resultSet.next()) {
-        result.add(new LegacyReplicaPath(resultSet.getString("event_id"), resultSet.getString("path_event_id"),
+        result.add(new CircusTrainLegacyReplicaPath(resultSet.getString("event_id"), resultSet.getString("path_event_id"),
             resultSet.getString("path")));
       }
     }
