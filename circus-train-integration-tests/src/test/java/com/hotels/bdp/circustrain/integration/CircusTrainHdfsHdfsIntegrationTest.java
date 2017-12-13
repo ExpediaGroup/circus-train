@@ -518,7 +518,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(hiveTable.getDbName(), is(DATABASE));
         assertThat(hiveTable.getTableName(), is(TARGET_PARTITIONED_MANAGED_TABLE));
         // dummyEventID should be overridden
-        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctt-"));
+        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctp-"));
         assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
         assertThat(isExternalTable(hiveTable), is(true));
         assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
@@ -1035,4 +1035,5 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     });
     runner.run(config.getAbsolutePath());
   }
+
 }
