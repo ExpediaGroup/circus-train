@@ -84,7 +84,6 @@ import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
-@Ignore // TODO
 public class CircusTrainHdfsHdfsIntegrationTest {
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHdfsHdfsIntegrationTest.class);
 

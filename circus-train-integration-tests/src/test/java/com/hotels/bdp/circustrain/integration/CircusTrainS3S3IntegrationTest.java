@@ -64,7 +64,6 @@ import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.JceksAmazonS3ClientFactory;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 
-@Ignore // TODO
 public class CircusTrainS3S3IntegrationTest {
 
   private static final String S3_ACCESS_KEY = "access";
