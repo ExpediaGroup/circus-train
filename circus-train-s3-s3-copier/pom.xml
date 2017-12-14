@@ -10,6 +10,10 @@
   <artifactId>circus-train-s3-s3-copier</artifactId>
   <name>S3 To S3 Copier</name>
 
+  <properties>
+    <gson.version>2.5</gson.version>
+  </properties>
+
   <dependencies>
     <!-- Circus Train -->
     <dependency>
@@ -31,6 +35,12 @@
       <groupId>com.hotels</groupId>
       <artifactId>circus-train-aws</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Hive -->
@@ -39,6 +49,12 @@
       <artifactId>hive-common</artifactId>
       <version>${hive.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty.aggregate</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- AWS -->
@@ -52,12 +68,18 @@
       <artifactId>lastcommons-lang</artifactId>
       <version>3.1.1</version>
     </dependency>
-    
+
     <!-- Test -->
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>circus-train-common-test</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

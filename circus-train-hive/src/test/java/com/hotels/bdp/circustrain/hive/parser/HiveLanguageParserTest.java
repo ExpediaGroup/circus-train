@@ -66,7 +66,7 @@ public class HiveLanguageParserTest {
   @Test
   public void typical() throws Exception {
     parser.parse(CREATE_TABLE_STATEMENT, nodeProcessor);
-    verify(nodeProcessor, times(47)).process(any(Node.class), any(Stack.class), any(NodeProcessorCtx.class),
+    verify(nodeProcessor, times(49)).process(any(Node.class), any(Stack.class), any(NodeProcessorCtx.class),
         anyVararg());
   }
 

@@ -12,6 +12,11 @@
   <name>Housekeeping</name>
   <description>Maintenance process</description>
 
+  <properties>
+    <powermock.version>1.6.4</powermock.version>
+    <jasypt-spring-boot.version>1.5-java7</jasypt-spring-boot.version>
+  </properties>
+
   <dependencies>
     <!-- Circus Train -->
     <dependency>
@@ -25,6 +30,22 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.servlet.jsp</groupId>
+          <artifactId>jsp-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    <!-- Java EL: needed for compatibility with new Spring and hibernate-validator -->
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>javax.el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
     </dependency>
 
     <dependency>

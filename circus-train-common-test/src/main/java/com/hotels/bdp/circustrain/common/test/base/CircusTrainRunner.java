@@ -58,9 +58,9 @@ public class CircusTrainRunner {
     private String sourceConnectionURL;
     private String sourceDriverClassName;
     private String graphiteUri;
-    private Map<String, String> sourceConfigurationProperties = new HashMap<>();
-    private Map<String, String> replicaConfigurationProperties = new HashMap<>();
-    private Map<String, String> copierOptions = new HashMap<>();
+    private final Map<String, String> sourceConfigurationProperties = new HashMap<>();
+    private final Map<String, String> replicaConfigurationProperties = new HashMap<>();
+    private final Map<String, String> copierOptions = new HashMap<>();
 
     private Builder(
         String databaseName,
@@ -182,7 +182,7 @@ public class CircusTrainRunner {
         .put("config", configFile.getAbsolutePath())
         .put("config-location", configFile.getParent())
         // Logging
-        .put("logging.config", "classpath:test-log4j.xml")
+        .put("logging.config", "classpath:test-log4j2.xml")
         // Spring
         .put("spring.jpa.show-sql", "true")
         // Replica Catalog

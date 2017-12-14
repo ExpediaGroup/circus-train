@@ -17,6 +17,8 @@ package com.hotels.bdp.circustrain.core.metastore;
 
 import static com.hotels.bdp.circustrain.core.metastore.TunnelConnectionManagerFactory.FIRST_AVAILABLE_PORT;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -33,10 +35,12 @@ import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
 
 public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMetaStoreClient> {
-
   private static final Logger LOG = LoggerFactory.getLogger(TunnellingMetaStoreClientSupplier.class);
+
   public static final String TUNNEL_SSH_LOCAL_HOST = "com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientFactory.local_host";
   public static final String TUNNEL_SSH_ROUTE = "com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientFactory.ssh_hops";
+
+  private static final Class<?>[] INTERFACES = new Class<?>[] { CloseableMetaStoreClient.class };
 
   private final String localHost;
   private final String remoteHost;
@@ -85,8 +89,9 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
       String proxyMetaStoreUris = "thrift://" + localHost + ":" + localPort;
       localHiveConf.setVar(ConfVars.METASTOREURIS, proxyMetaStoreUris);
       LOG.info("Metastore URI {} is being proxied to {}", hiveConf.getVar(ConfVars.METASTOREURIS), proxyMetaStoreUris);
-      return new TunnellingMetaStoreClient(metaStoreClientFactory.newInstance(localHiveConf, name),
-          tunnelConnectionManager);
+      InvocationHandler handler = new TunnellingMetaStoreClientInvocationHandler(
+          metaStoreClientFactory.newInstance(localHiveConf, name), tunnelConnectionManager);
+      return (CloseableMetaStoreClient) Proxy.newProxyInstance(getClass().getClassLoader(), INTERFACES, handler);
     } catch (Exception e) {
       String message = String.format("Unable to establish SSH tunnel: '%s:?' -> '%s' -> '%s:%s'", localHost, sshRoute,
           remoteHost, remotePort);
