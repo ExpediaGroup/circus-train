@@ -23,16 +23,6 @@
       <groupId>com.hotels</groupId>
       <artifactId>circus-train-api</artifactId>
       <version>${project.version}</version>
-<!--       <exclusions>
-        <exclusion>
-          <groupId>javax.el</groupId>
-          <artifactId>javax.el-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.glassfish</groupId>
-          <artifactId>javax.el</artifactId>
-        </exclusion>
-      </exclusions> -->
     </dependency>
 
     <!-- Hadoop -->
