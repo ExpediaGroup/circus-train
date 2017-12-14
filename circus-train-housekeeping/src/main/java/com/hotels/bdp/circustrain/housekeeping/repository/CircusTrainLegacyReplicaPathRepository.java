@@ -15,11 +15,13 @@
  */
 package com.hotels.bdp.circustrain.housekeeping.repository;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
 import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 
+@Lazy
 @Transactional
 public interface CircusTrainLegacyReplicaPathRepository
     extends LegacyReplicaPathRepository<CircusTrainLegacyReplicaPath> {

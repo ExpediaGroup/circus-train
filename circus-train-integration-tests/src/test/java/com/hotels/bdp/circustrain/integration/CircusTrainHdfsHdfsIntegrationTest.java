@@ -1035,5 +1035,4 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     });
     runner.run(config.getAbsolutePath());
   }
-
 }

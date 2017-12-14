@@ -27,7 +27,7 @@ import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
 
 @Configuration
 @ComponentScan("com.hotels.housekeeping")
-@EntityScan(basePackages = { "com.hotels.bdp.circustrain.housekeeping.model" })
+@EntityScan(basePackages = { "com.hotels.bdp.circustrain.housekeeping" })
 @EnableJpaRepositories(basePackages = { "com.hotels.bdp.circustrain.housekeeping.repository" })
 public class CircusTrainHousekeepingConfiguration {
 

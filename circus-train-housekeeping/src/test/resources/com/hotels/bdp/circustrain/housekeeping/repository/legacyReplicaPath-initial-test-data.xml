@@ -1,0 +1,20 @@
+<dataset>
+  <circus_train.legacy_replica_path
+              id="1"
+              event_id="eventId_1"
+              path_event_id="eventId_0"
+              path="file:/foo/bar/0"
+              creation_timestamp="1460027608000"/>
+  <circus_train.legacy_replica_path
+              id="2"
+              event_id="eventId_2"
+              path_event_id="eventId_1"
+              path="file:/foo/bar/1"
+              creation_timestamp="1460028315000"/>
+  <circus_train.legacy_replica_path
+              id="3"
+              event_id="eventId_3"
+              path_event_id="eventId_2"
+              path="file:/foo/bar/2"
+              creation_timestamp="1460029449000"/>
+</dataset>
