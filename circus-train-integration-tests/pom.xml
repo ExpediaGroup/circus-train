@@ -54,17 +54,17 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- AWS -->
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-s3</artifactId>
-    </dependency>
-
     <!-- Housekeeping -->
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>housekeeping</artifactId>
       <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+
+    <!-- AWS -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
     </dependency>
 
     <!-- Hive -->
@@ -142,4 +142,17 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
