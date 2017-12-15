@@ -22,7 +22,6 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,8 +44,6 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.thrift.TException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -74,23 +71,13 @@ public final class TestUtils {
   public static final List<FieldSchema> PARTITION_COLUMNS = Arrays.asList(new FieldSchema("continent", "string", ""),
       new FieldSchema("country", "string", ""));
 
-  private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
   public static List<LegacyReplicaPath> getCleanUpPaths(Connection connection, String query) throws Exception {
     List<LegacyReplicaPath> result = new ArrayList<>();
     try (PreparedStatement preparedStatement = connection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery()) {
-
-      ResultSetMetaData rsmd = resultSet.getMetaData();
-      int columnsNumber = rsmd.getColumnCount();
       while (resultSet.next()) {
-        result.add(
-            new CircusTrainLegacyReplicaPath(resultSet.getString("event_id"), resultSet.getString("path_event_id"),
-                resultSet.getString("path")));
-        for (int i = 1; i <= columnsNumber; i++) {
-          if (i > 1) { System.out.print(",  "); }
-          String columnValue = resultSet.getString(i);
-          LOG.info(columnsNumber + ": \nColumn Name: " + rsmd.getColumnName(i) + " \nColumn Value: " + columnValue);
-        }
+        result.add(new CircusTrainLegacyReplicaPath(resultSet.getString("event_id"), resultSet.getString("path_event_id"),
+            resultSet.getString("path")));
       }
     }
     return result;
@@ -101,7 +88,7 @@ public final class TestUtils {
       String database,
       String table,
       URI location)
-      throws TException {
+    throws TException {
     Table hiveTable = new Table();
     hiveTable.setDbName(database);
     hiveTable.setTableName(table);
@@ -135,7 +122,7 @@ public final class TestUtils {
       String database,
       String table,
       URI location)
-      throws Exception {
+    throws Exception {
 
     Table hiveTable = new Table();
     hiveTable.setDbName(database);
@@ -183,7 +170,7 @@ public final class TestUtils {
       String view,
       String table,
       List<FieldSchema> partitionCols)
-      throws TException {
+    throws TException {
     Table hiveView = new Table();
     hiveView.setDbName(database);
     hiveView.setTableName(view);
@@ -239,7 +226,7 @@ public final class TestUtils {
       String database,
       String view,
       String table)
-      throws TException {
+    throws TException {
     return createView(metaStoreClient, database, view, table, null);
   }
 
@@ -248,7 +235,7 @@ public final class TestUtils {
       String database,
       String view,
       String table)
-      throws Exception {
+    throws Exception {
     return createView(metaStoreClient, database, view, table, PARTITION_COLUMNS);
   }
 
@@ -291,4 +278,5 @@ public final class TestUtils {
     }
     return result;
   }
+
 }
