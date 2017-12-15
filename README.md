@@ -9,7 +9,7 @@ You can obtain Circus Train from Maven Central:
 Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. However, it is not event driven and does not know how tables differ between sites; it merely responds to requests to copy (meta-)data. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. Circus Train employs snapshot isolation to minimise the impact of changing data at the source, and to allow consumers of data in the replica cluster to operate independently of ongoing replication tasks.
 
 ## Install
-Download the version to use from [Maven Central](http://mvnrepository.com/artifact/com.hotels/circus-train/circus-train-package) and uncompress it in a directory of your choosing.
+Download the version to use from [Maven Central](http://mvnrepository.com/artifact/com.hotels/circus-train/) and uncompress it in a directory of your choosing.
 
 ## General operation
 Below is a high level summary of the steps that Circus Train performs during the course of a typical run (different configuration might change this).
