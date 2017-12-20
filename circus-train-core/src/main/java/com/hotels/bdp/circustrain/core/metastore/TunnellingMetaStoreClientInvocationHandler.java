@@ -62,7 +62,12 @@ class TunnellingMetaStoreClientInvocationHandler implements InvocationHandler {
     try {
       return method.invoke(delegate, args);
     } catch (InvocationTargetException e) {
-      throw e.getTargetException();
+      Throwable cause = e.getCause();
+      if (cause != null) {
+        throw cause;
+      } else {
+        throw e;
+      }
     }
   }
 
