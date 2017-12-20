@@ -19,10 +19,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,6 +88,14 @@ public class TunnellingMetaStoreClientInvocationHandlerTest {
       decoratorMethod.invoke(handler, arguments);
       delegateMethod.invoke(verify(delegate), arguments);
     }
+  }
+
+  @Test(expected = MetaException.class)
+  public void methodThrowsUnderlyingTargetException() throws Throwable {
+    Throwable targetException = new MetaException();
+    when(delegate.getAllDatabases()).thenThrow(targetException);
+    Method method = CloseableMetaStoreClient.class.getMethod("getAllDatabases");
+    handler.invoke(null, method, null);
   }
 
 }

@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.core.metastore;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.jcraft.jsch.JSchException;
@@ -37,10 +38,11 @@ class TunnellingMetaStoreClientInvocationHandler implements InvocationHandler {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
     switch (method.getName()) {
     case "close":
       try {
-        return method.invoke(delegate, args);
+        return invoke(method, args);
       } finally {
         tunnelConnectionManager.close();
       }
@@ -51,7 +53,16 @@ class TunnellingMetaStoreClientInvocationHandler implements InvocationHandler {
         throw new RuntimeException("Unable to reopen tunnel connections", e);
       }
     default:
+      return invoke(method, args);
+    }
+
+  }
+
+  private Object invoke(Method method, Object[] args) throws Throwable {
+    try {
       return method.invoke(delegate, args);
+    } catch (InvocationTargetException e) {
+      throw e.getTargetException();
     }
   }
 
