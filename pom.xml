@@ -56,7 +56,7 @@
     <jackson.version>2.6.6</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
     <hadoop.version>2.7.1</hadoop.version>
-    <hive.version>2.3.0</hive.version>
+    <hive.version>2.3.2</hive.version>
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.12</junit.version>
     <powermock.version>1.6.4</powermock.version>

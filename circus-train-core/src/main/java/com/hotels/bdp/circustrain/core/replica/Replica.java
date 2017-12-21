@@ -35,7 +35,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.metastore.api.ColumnStatistics;
-import org.apache.hadoop.hive.metastore.api.EnvironmentContext;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.SetPartitionsStatsRequest;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -71,7 +70,6 @@ public class Replica extends HiveEndpoint {
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
-  private final EnvironmentContext environmentContext;
 
   /**
    * Use {@link ReplicaFactory}
@@ -89,7 +87,6 @@ public class Replica extends HiveEndpoint {
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
     this.replicationMode = replicationMode;
-    environmentContext = new EnvironmentContext(); // TODO if we have to pass properties, which ones should we pass?
   }
 
   public void updateMetadata(
@@ -180,7 +177,7 @@ public class Replica extends HiveEndpoint {
       if (!partitionsToAlter.isEmpty()) {
         LOG.info("Altering {} existing partitions.", partitionsToAlter.size());
         try {
-          client.alter_partitions(replicaDatabaseName, replicaTableName, partitionsToAlter, environmentContext);
+          client.alter_partitions(replicaDatabaseName, replicaTableName, partitionsToAlter);
         } catch (TException e) {
           throw new MetaStoreClientException("Unable to alter partitions '"
               + partitionsToAlter

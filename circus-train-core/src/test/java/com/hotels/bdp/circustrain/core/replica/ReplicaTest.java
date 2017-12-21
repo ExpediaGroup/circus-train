@@ -49,7 +49,6 @@ import org.apache.hadoop.hive.metastore.api.ColumnStatisticsData;
 import org.apache.hadoop.hive.metastore.api.ColumnStatisticsData._Fields;
 import org.apache.hadoop.hive.metastore.api.ColumnStatisticsDesc;
 import org.apache.hadoop.hive.metastore.api.ColumnStatisticsObj;
-import org.apache.hadoop.hive.metastore.api.EnvironmentContext;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.LongColumnStatsData;
 import org.apache.hadoop.hive.metastore.api.MetaException;
@@ -115,7 +114,6 @@ public class ReplicaTest {
   private @Captor ArgumentCaptor<List<Partition>> alterPartitionCaptor;
   private @Captor ArgumentCaptor<List<Partition>> addPartitionCaptor;
   private @Captor ArgumentCaptor<SetPartitionsStatsRequest> setStatsRequestCaptor;
-  private @Captor ArgumentCaptor<EnvironmentContext> environmentContextCaptor;
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
 
@@ -416,8 +414,7 @@ public class ReplicaTest {
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
-    verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture(),
-        environmentContextCaptor.capture());
+    verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
 
     assertThat(alterPartitionCaptor.getValue().size(), is(1));
@@ -481,8 +478,7 @@ public class ReplicaTest {
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
-    verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture(),
-        environmentContextCaptor.capture());
+    verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
 

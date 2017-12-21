@@ -56,11 +56,9 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.metastore.api.EnvironmentContext;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.Assertion;
@@ -106,7 +104,6 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   private File housekeepingDbLocation;
 
   private IntegrationTestHelper helper;
-  private final EnvironmentContext environmentContext = new EnvironmentContext();
 
   @Before
   public void init() throws Exception {
@@ -398,7 +395,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE,
         "continent=Asia/country=China");
     partition.putToParameters("partition_paramToUpdate", "updated");
-    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition, environmentContext);
+    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-mirror.yml");
@@ -504,7 +501,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE,
         "continent=Asia/country=China");
     partition.putToParameters("partition_paramToUpdate", "updated");
-    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition, environmentContext);
+    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-metadata-update.yml");
@@ -813,7 +810,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         "continent=Asia/country=China");
     partition.putToParameters("avro.schema.url", avroSchemaBaseUrl);
 
-    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition, environmentContext);
+    sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-avro-schema-metadata-update.yml");
