@@ -54,13 +54,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Housekeeping -->
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>housekeeping</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-    </dependency>
-
     <!-- AWS -->
     <dependency>
       <groupId>com.amazonaws</groupId>
