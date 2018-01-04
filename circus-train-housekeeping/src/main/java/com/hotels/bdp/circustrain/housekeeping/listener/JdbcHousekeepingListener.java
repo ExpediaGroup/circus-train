@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.housekeeping.model.LegacyReplicaPath;
+import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
 import com.hotels.housekeeping.service.HousekeepingService;
 
 public class JdbcHousekeepingListener implements HousekeepingListener {
@@ -30,6 +30,6 @@ public class JdbcHousekeepingListener implements HousekeepingListener {
   @Override
   public void cleanUpLocation(String eventId, String pathEventId, Path location) {
     cleanUpPathService
-        .scheduleForHousekeeping(LegacyReplicaPath.DEFAULT.instance(eventId, pathEventId, location.toUri().toString()));
+        .scheduleForHousekeeping(new CircusTrainLegacyReplicaPath(eventId, pathEventId, location.toUri().toString()));
   }
 }
