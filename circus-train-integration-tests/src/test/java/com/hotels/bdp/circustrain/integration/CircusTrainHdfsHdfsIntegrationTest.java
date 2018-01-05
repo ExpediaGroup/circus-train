@@ -83,6 +83,7 @@ import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public class CircusTrainHdfsHdfsIntegrationTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHdfsHdfsIntegrationTest.class);
 
   private static final String TARGET_UNPARTITIONED_TABLE = "ct_table_u_copy";
@@ -1035,4 +1036,5 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     });
     runner.run(config.getAbsolutePath());
   }
+
 }

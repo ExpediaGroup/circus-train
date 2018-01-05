@@ -56,4 +56,5 @@ public class JdbcHousekeepingListenerTest {
     assertThat(argumentCaptor.getValue().getPath(), is("/foo/bar"));
   }
 
+
 }
