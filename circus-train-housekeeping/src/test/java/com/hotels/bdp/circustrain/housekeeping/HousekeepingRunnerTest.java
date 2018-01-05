@@ -38,6 +38,7 @@ import com.hotels.housekeeping.service.HousekeepingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HousekeepingRunnerTest {
+
   private static final Duration TWO_DAYS_DURATION = Duration.standardDays(2);
 
   private @Mock Housekeeping housekeeping;
@@ -66,5 +67,4 @@ public class HousekeepingRunnerTest {
     doThrow(new IllegalStateException()).when(cleanUpPathService).cleanUp(any(Instant.class));
     runner.run(null);
   }
-
 }

@@ -55,6 +55,4 @@ public class JdbcHousekeepingListenerTest {
     assertThat(argumentCaptor.getValue().getPathEventId(), is(PATH_EVENT_ID));
     assertThat(argumentCaptor.getValue().getPath(), is("/foo/bar"));
   }
-
-
 }
