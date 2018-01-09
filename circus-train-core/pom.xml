@@ -11,6 +11,8 @@
   <name>Core</name>
 
   <properties>
+    <!-- must match Spring Boot dependencies -->
+    <!--log4j.version>1.2.17</log4j.version-->
     <!-- must be compatible with Spring Boot Jsch dependencies -->
     <jsch-extension.version>0.1.6</jsch-extension.version>
   </properties>
@@ -34,10 +36,10 @@
     </dependency>
 
     <!-- Spring Boot -->
-    <dependency>
+    <!--dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j2</artifactId>
-    </dependency>
+      <artifactId>spring-boot-starter-log4j</artifactId>
+    </dependency-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
