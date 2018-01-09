@@ -182,7 +182,7 @@ public class CircusTrainRunner {
         .put("config", configFile.getAbsolutePath())
         .put("config-location", configFile.getParent())
         // Logging
-        .put("logging.config", "classpath:test-log4j2.xml")
+        .put("logging.config", "classpath:logback-test.xml")
         // Spring
         .put("spring.jpa.show-sql", "true")
         // Replica Catalog
