@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS circus_train;
+
 SET SCHEMA circus_train;
 
 -- Old path from 2014-12-25 11:13:28.0
