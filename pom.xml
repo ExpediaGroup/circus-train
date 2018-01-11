@@ -47,9 +47,7 @@
     <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
-    <spring-platform.version>Brussels-SR5</spring-platform.version>
-    <spring.version>4.3.11.RELEASE</spring.version>
-    <javax-el.version>3.0.0</javax-el.version>
+    <spring-platform.version>2.0.8.RELEASE</spring-platform.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
     <aws-jdk.version>1.11.126</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.2</httpcomponents.httpclient.version>

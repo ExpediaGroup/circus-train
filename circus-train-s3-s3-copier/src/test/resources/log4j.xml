@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  Copyright (C) 2016-2017 Expedia Inc.
+  Copyright (C) 2016-2018 Expedia Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,20 +14,22 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<Configuration>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
-   <Appenders>
-    <Console name="CONSOLE" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} %-5p %c:%L - %m%n"/>
-    </Console>
-  </Appenders>
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ISO8601} %-5p %c:%L - %m%n" />
+    </layout>
+  </appender>
 
-  <Loggers>
-    <Logger name="com.hotels.bdp.circustrain" level="DEBUG"/>
-    <Logger name="org.apache.hadoop.tools" level="DEBUG"/>
-    <Root level="INFO">
-      <AppenderRef ref="CONSOLE"/>
-    </Root>
-  </Loggers>
+  <logger name="com.hotels.bdp.circustrain">
+    <level value="DEBUG" />
+  </logger>
 
-</Configuration>
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="CONSOLE" />
+  </root>
+
+</log4j:configuration>

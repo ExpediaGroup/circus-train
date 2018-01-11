@@ -11,6 +11,8 @@
   <name>Core</name>
 
   <properties>
+    <!-- must match Spring Boot dependencies -->
+    <log4j.version>1.2.17</log4j.version>
     <!-- must be compatible with Spring Boot Jsch dependencies -->
     <jsch-extension.version>0.1.6</jsch-extension.version>
   </properties>
@@ -36,7 +38,7 @@
     <!-- Spring Boot -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j2</artifactId>
+      <artifactId>spring-boot-starter-log4j</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -66,6 +68,13 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
+    <!-- Log4j for RollingFileAppender -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>apache-log4j-extras</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
 
     <!-- Hive -->

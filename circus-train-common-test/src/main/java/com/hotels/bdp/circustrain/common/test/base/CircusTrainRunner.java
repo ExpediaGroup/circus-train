@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ public class CircusTrainRunner {
         .put("config", configFile.getAbsolutePath())
         .put("config-location", configFile.getParent())
         // Logging
-        .put("logging.config", "classpath:test-log4j2.xml")
+        .put("logging.config", "classpath:test-log4j.xml")
         // Spring
         .put("spring.jpa.show-sql", "true")
         // Replica Catalog
