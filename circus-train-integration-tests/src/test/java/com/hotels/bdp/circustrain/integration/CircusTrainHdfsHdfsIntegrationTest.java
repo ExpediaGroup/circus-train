@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public class CircusTrainHdfsHdfsIntegrationTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHdfsHdfsIntegrationTest.class);
 
   private static final String TARGET_UNPARTITIONED_TABLE = "ct_table_u_copy";
@@ -1037,3 +1038,4 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
 }
+

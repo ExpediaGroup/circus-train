@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.event;
+package com.hotels.bdp.circustrain.api.listener;
 
 import org.apache.hadoop.fs.Path;
 

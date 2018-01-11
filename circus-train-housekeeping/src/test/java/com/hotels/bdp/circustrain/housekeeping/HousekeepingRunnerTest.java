@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import com.hotels.housekeeping.service.HousekeepingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HousekeepingRunnerTest {
+
   private static final Duration TWO_DAYS_DURATION = Duration.standardDays(2);
 
   private @Mock Housekeeping housekeeping;
@@ -66,5 +67,4 @@ public class HousekeepingRunnerTest {
     doThrow(new IllegalStateException()).when(cleanUpPathService).cleanUp(any(Instant.class));
     runner.run(null);
   }
-
 }

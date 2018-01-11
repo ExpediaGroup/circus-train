@@ -49,7 +49,6 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
@@ -61,6 +60,7 @@ import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 public class Replica extends HiveEndpoint {
 

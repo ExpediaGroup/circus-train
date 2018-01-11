@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>circus-train-housekeeping</artifactId>
-  <name>Housekeeping</name>
+  <name>Circus Train Housekeeping</name>
   <description>Maintenance process</description>
 
   <dependencies>
@@ -20,20 +20,19 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Hadoop -->
+    <!-- Housekeeping -->
+    <dependency>
+      <groupId>com.hotels</groupId>
+      <artifactId>housekeeping</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>housekeeping</artifactId>
-      <version>0.0.2</version>
-    </dependency>
-
-    <!-- Test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -46,7 +45,8 @@
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-library</artifactId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
