@@ -221,4 +221,5 @@ public class VacuumToolApplicationTest {
     assertThat(legacyReplicaPath.getPathEventId(), is(PARTITION_EVENT_3));
     assertThat(legacyReplicaPath.getEventId().startsWith("vacuum-"), is(true));
   }
+
 }

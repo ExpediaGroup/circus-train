@@ -67,4 +67,5 @@ public class HousekeepingRunnerTest {
     doThrow(new IllegalStateException()).when(cleanUpPathService).cleanUp(any(Instant.class));
     runner.run(null);
   }
+
 }
