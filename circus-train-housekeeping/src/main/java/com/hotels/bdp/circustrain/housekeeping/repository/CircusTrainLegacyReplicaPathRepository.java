@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.event;
+package com.hotels.bdp.circustrain.housekeeping.repository;
 
-import org.apache.hadoop.fs.Path;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface HousekeepingListener {
-  public static final HousekeepingListener NULL = new HousekeepingListener() {
+import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
+import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 
-    @Override
-    public void cleanUpLocation(String eventId, String pathEventId, Path location) {}
-
-  };
-
-  void cleanUpLocation(String eventId, String pathEventId, Path location);
+@Lazy
+@Transactional
+public interface CircusTrainLegacyReplicaPathRepository
+    extends LegacyReplicaPathRepository<CircusTrainLegacyReplicaPath> {
 }

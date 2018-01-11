@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.housekeeping.listener.JdbcHousekeepingListener;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 import com.hotels.housekeeping.service.HousekeepingService;
 
@@ -54,5 +55,4 @@ public class JdbcHousekeepingListenerTest {
     assertThat(argumentCaptor.getValue().getPathEventId(), is(PATH_EVENT_ID));
     assertThat(argumentCaptor.getValue().getPath(), is("/foo/bar"));
   }
-
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,32 @@
  */
 package com.hotels.bdp.circustrain.housekeeping;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.hotels.bdp.circustrain.api.event.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.housekeeping.listener.JdbcHousekeepingListener;
 import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 import com.hotels.housekeeping.service.HousekeepingService;
 import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
 
 @Configuration
 @ComponentScan("com.hotels.housekeeping")
+@EntityScan(basePackages = { "com.hotels.bdp.circustrain.housekeeping" })
+@EnableJpaRepositories(basePackages = { "com.hotels.bdp.circustrain.housekeeping.repository" })
 public class CircusTrainHousekeepingConfiguration {
+
+  @Bean
+  HousekeepingService housekeepingService(
+      LegacyReplicaPathRepository legacyReplicaPathRepository) {
+    return new FileSystemHousekeepingService(legacyReplicaPathRepository, new org.apache.hadoop.conf.Configuration());
+  }
 
   @Bean
   HousekeepingListener housekeepingListener() {
     return new JdbcHousekeepingListener();
-  }
-
-  @Bean
-  HousekeepingService housekeepingService(
-      LegacyReplicaPathRepository legacyReplicaPathRepository,
-      @Qualifier("replicaHiveConf") org.apache.hadoop.conf.Configuration conf) {
-    return new FileSystemHousekeepingService(legacyReplicaPathRepository, conf);
   }
 }
