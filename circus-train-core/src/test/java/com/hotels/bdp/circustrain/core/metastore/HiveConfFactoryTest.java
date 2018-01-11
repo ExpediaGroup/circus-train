@@ -39,7 +39,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -98,7 +97,6 @@ public class HiveConfFactoryTest {
     assertThat(hiveConf.get("a"), is("b"));
   }
 
-  @Ignore("TODO: fix this, possibly move to log4j2 for just the test?")
   @Test
   public void secretProperties() {
     // This test requires setting the log level to DEBUG
