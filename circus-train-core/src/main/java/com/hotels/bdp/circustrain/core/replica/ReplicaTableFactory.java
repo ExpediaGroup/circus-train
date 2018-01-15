@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class ReplicaTableFactory {
   /**
    * Parameter to indicate we wish to retain table statistics >= Hive 2.1.0.
    */
-  private static final String STATS_GENERATED = "STATS_GENERATED";
+  private static final String STATS_GENERATED = StatsSetupConst.STATS_GENERATED;
 
   /**
    * Parameter to indicate the "EXTERNAL" table type. Values "TRUE" or "FALSE".
