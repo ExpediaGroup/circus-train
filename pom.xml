@@ -70,7 +70,7 @@
       <dependency>
         <groupId>com.hotels</groupId>
         <artifactId>housekeeping</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
       </dependency>
       
       <dependency>
