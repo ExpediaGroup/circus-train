@@ -25,11 +25,9 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Housekeeping -->
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>housekeeping</artifactId>
-      <version>1.0.0</version>
     </dependency>
 
     <dependency>
