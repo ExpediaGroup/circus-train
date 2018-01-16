@@ -1,4 +1,6 @@
 # Unreleased
+
+# 11.0.0 - 2018-01-16
 ### Changed
 * Upgraded Hive version from 1.2.1 to 2.3.2 (changes are backwards compatible).
 * Upgraded Spring Platform version from 2.0.3.RELEASE to 2.0.8.RELEASE.
