@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_TA
 import java.util.Objects;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.common.StatsSetupConst;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.metastore.TableType;
@@ -46,18 +47,19 @@ import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 public class ReplicaTableFactory {
 
   /**
-   * Parameter to indicate we wish to retain table statistics >= Hive 2.0.0. See <a href=
-   * "https://github.com/apache/hive/blob/release-2.0.0/common/src/java/org/apache/hadoop/hive/common/StatsSetupConst.java#L120">
-   * hive-exec:2.0.0#StatsSetupConst:120</a>.
+   * Parameter to indicate we wish to retain table statistics >= Hive 2.0.0.
    */
-  private static final String DO_NOT_UPDATE_STATS = "DO_NOT_UPDATE_STATS";
+  private static final String DO_NOT_UPDATE_STATS = StatsSetupConst.DO_NOT_UPDATE_STATS;
 
   /**
-   * Parameter to indicate we wish to retain table statistics < Hive 2.0.0. See <a href=
-   * "https://github.com/apache/hive/blob/release-1.0.0/common/src/java/org/apache/hadoop/hive/common/StatsSetupConst.java#L134">
-   * hive-exec:1.0.0#StatsSetupConst:134</a>.
+   * Parameter to indicate we wish to retain table statistics <= Hive 2.0.1.
    */
   private static final String STATS_GENERATED_VIA_STATS_TASK = "STATS_GENERATED_VIA_STATS_TASK";
+
+  /**
+   * Parameter to indicate we wish to retain table statistics >= Hive 2.1.0.
+   */
+  private static final String STATS_GENERATED = StatsSetupConst.STATS_GENERATED;
 
   /**
    * Parameter to indicate the "EXTERNAL" table type. Values "TRUE" or "FALSE".
@@ -106,6 +108,7 @@ public class ReplicaTableFactory {
 
     // Statistic specific parameters
     replica.putToParameters(STATS_GENERATED_VIA_STATS_TASK, Boolean.TRUE.toString());
+    replica.putToParameters(STATS_GENERATED, Boolean.TRUE.toString());
     replica.putToParameters(DO_NOT_UPDATE_STATS, Boolean.TRUE.toString());
 
     // Replication specific parameters
@@ -167,6 +170,7 @@ public class ReplicaTableFactory {
 
     // Statistic specific parameters
     replica.putToParameters(STATS_GENERATED_VIA_STATS_TASK, Boolean.TRUE.toString());
+    replica.putToParameters(STATS_GENERATED, Boolean.TRUE.toString());
     replica.putToParameters(DO_NOT_UPDATE_STATS, Boolean.TRUE.toString());
     // Replication specific parameters
     replica.putToParameters(LAST_REPLICATED.parameterName(), DateTime.now(DateTimeZone.UTC).toString());

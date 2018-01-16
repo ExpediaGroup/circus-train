@@ -195,4 +195,5 @@ class VacuumToolApplication implements ApplicationRunner {
       LOG.warn("DRY RUN ENABLED: path '{}' left as is.", toRemove);
     }
   }
+
 }

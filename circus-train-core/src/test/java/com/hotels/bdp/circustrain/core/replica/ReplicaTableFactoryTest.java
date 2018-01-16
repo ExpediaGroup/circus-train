@@ -144,6 +144,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.replication.mode"), is(FULL.name()));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
     assertThat(replica.getTableType(), is(TableType.EXTERNAL_TABLE.name()));
     assertThat(replica.getParameters().get("EXTERNAL"), is("TRUE"));
@@ -174,6 +175,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.last.replicated"), is(not(nullValue())));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
 
     assertThat(replicaAndStats.getStatistics(), is(nullValue()));
@@ -208,6 +210,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.replication.mode"), is(FULL.name()));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
   }
 
@@ -233,6 +236,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.last.replicated"), is(not(nullValue())));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
   }
 
@@ -265,6 +269,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.last.replicated"), is(not(nullValue())));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
   }
 
   @Test
@@ -287,6 +292,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.last.replicated"), is(not(nullValue())));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
   }
 
   @Test
@@ -316,6 +322,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.last.replicated"), is(not(nullValue())));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
 
     assertThat(replicaStatistics.getStatsDesc().getDbName(), is(MAPPED_DB_NAME));
     assertThat(replicaStatistics.getStatsDesc().getTableName(), is(MAPPED_TABLE_NAME));
@@ -414,6 +421,7 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("com.hotels.bdp.circustrain.replication.mode"), is(FULL.name()));
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
+    assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
     assertThat(replica.getTableType(), is(TableType.VIRTUAL_VIEW.name()));
     assertTrue(MetaStoreUtils.isView(replica));

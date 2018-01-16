@@ -1038,4 +1038,3 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
 }
-

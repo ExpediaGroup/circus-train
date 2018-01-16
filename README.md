@@ -32,12 +32,12 @@ To run Circus Train you just need to execute the `bin/circus-train.sh` script in
         $CIRCUS_TRAIN_HOME/bin/circus-train.sh --config=/path/to/config/file.yml
 
 ### EMR
-If you are planning to run Circus Train on EMR you may need to set the EMR classpaths with the following two commands:
+If you are planning to run Circus Train on EMR you will need to set up the EMR classpath by exporting the following environment variables before calling the `bin/circus-train.sh` script:
 
         export HCAT_LIB=/usr/lib/hive-hcatalog/share/hcatalog/
         export HIVE_LIB=/usr/lib/hive/lib/
 
-Note that Circus Train is built against Hive 1.x and the above will only work on EMR up to version 4.7.0 - see the [EMR release guide](http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-release-components.html) for more details on versions. Also note that the paths may differ across EMR versions.
+Note that the paths above are correct as of when this document was last updated but may differ across EMR versions, refer to the [EMR release guide](http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-release-components.html) for more up to date information if necessary.
 
 ### Exit codes
 Circus Train returns the following exit codes:

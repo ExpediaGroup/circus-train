@@ -48,19 +48,20 @@
     <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
-    <spring-platform.version>2.0.3.RELEASE</spring-platform.version>
+    <spring-platform.version>2.0.8.RELEASE</spring-platform.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
     <aws-jdk.version>1.11.126</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.2</httpcomponents.httpclient.version>
     <jackson.version>2.6.6</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
     <hadoop.version>2.7.1</hadoop.version>
-    <hive.version>1.2.1</hive.version>
+    <hive.version>2.3.2</hive.version>
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.12</junit.version>
     <powermock.version>1.6.4</powermock.version>
     <derby.version>10.10.2.0</derby.version>
     <beeju.version>1.2.1</beeju.version>
+    <hamcrest-library.version>1.3</hamcrest-library.version>
   </properties>
 
   <dependencyManagement>
@@ -69,7 +70,7 @@
       <dependency>
         <groupId>com.hotels</groupId>
         <artifactId>housekeeping</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
       </dependency>
       
       <dependency>
@@ -150,6 +151,7 @@
         <artifactId>jackson-dataformat-cbor</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -172,7 +174,7 @@
         <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest-library</artifactId>
         <scope>test</scope>
-        <version>1.3</version>
+        <version>${hamcrest-library.version}</version>
       </dependency>
       <dependency>
         <groupId>org.dbunit</groupId>

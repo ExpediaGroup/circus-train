@@ -360,11 +360,13 @@ public class HiveDifferencesIntegrationTest {
     Partition replicaPartition1 = catalog.client().getPartition(DATABASE, REPLICA_TABLE, "part=1");
     replicaPartition1.putToParameters("DO_NOT_UPDATE_STATS", "true");
     replicaPartition1.putToParameters("STATS_GENERATED_VIA_STATS_TASK", "true");
+    replicaPartition1.putToParameters("STATS_GENERATED", "true");
     catalog.client().alter_partition(DATABASE, REPLICA_TABLE, replicaPartition1);
     Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
     Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
     replicaPartition1.putToParameters("DO_NOT_UPDATE_STATS", "true");
     replicaPartition1.putToParameters("STATS_GENERATED_VIA_STATS_TASK", "true");
+    replicaPartition1.putToParameters("STATS_GENERATED", "true");
     catalog.client().alter_table(DATABASE, REPLICA_TABLE, replicaTable);
 
     HiveDifferences

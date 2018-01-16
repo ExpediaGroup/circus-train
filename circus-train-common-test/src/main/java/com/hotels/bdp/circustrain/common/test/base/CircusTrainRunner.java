@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ public class CircusTrainRunner {
     private String sourceConnectionURL;
     private String sourceDriverClassName;
     private String graphiteUri;
-    private Map<String, String> sourceConfigurationProperties = new HashMap<>();
-    private Map<String, String> replicaConfigurationProperties = new HashMap<>();
-    private Map<String, String> copierOptions = new HashMap<>();
+    private final Map<String, String> sourceConfigurationProperties = new HashMap<>();
+    private final Map<String, String> replicaConfigurationProperties = new HashMap<>();
+    private final Map<String, String> copierOptions = new HashMap<>();
 
     private Builder(
         String databaseName,
