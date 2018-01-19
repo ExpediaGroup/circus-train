@@ -33,7 +33,7 @@ public class CircusTrainHelpTest {
         + "\tError message 1\n"
         + "\tError message 2\n"
         + "Configuration file help:\n"
-        + "\tFor more information and help please refer to https://stash/projects/HDW/repos/circus-train/browse/README.md";
+        + "\tFor more information and help please refer to https://github.com/HotelsDotCom/circus-train/blob/master/README.md";
     List<ObjectError> errors = Arrays.asList(new ObjectError("object.1", "Error message 1"),
         new ObjectError("object.2", "Error message 2"));
     String help = new CircusTrainHelp(errors).toString();
