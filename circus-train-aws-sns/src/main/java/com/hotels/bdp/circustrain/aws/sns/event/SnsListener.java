@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.aws.sns.event;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +104,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     startTime = clock.getTime();
-    SnsMessage message = new SnsMessage("START", config.getHeaders(), startTime, null, eventId, sourceCatalog.getName(),
+    SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId, sourceCatalog.getName(),
         replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
         tableReplication.getQualifiedReplicaName(), null, null, null);
     publish(config.getStartTopic(), message);
@@ -112,7 +113,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String endTime = clock.getTime();
-    SnsMessage message = new SnsMessage("SUCCESS", config.getHeaders(), startTime, endTime, eventId,
+    SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
         sourceCatalog.getName(), replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
         tableReplication.getQualifiedReplicaName(), getModifiedPartitions(partitionsToAlter, partitionsToCreate),
         getBytesReplicated(), null);
@@ -125,7 +126,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
       startTime = clock.getTime();
     }
     String endTime = clock.getTime();
-    SnsMessage message = new SnsMessage("FAILURE", config.getHeaders(), startTime, endTime, eventId,
+    SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
         sourceCatalog.getName(), replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
         tableReplication.getQualifiedReplicaName(), getModifiedPartitions(partitionsToAlter, partitionsToCreate),
         getBytesReplicated(), t.getMessage());
@@ -159,6 +160,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     List<List<String>> partitionValues = new ArrayList<>();
     for (List<EventPartition> partitions : Arrays.asList(partitionsToAlter, partitionsToCreate)) {
       if (partitions != null) {
+        //TODO: if we wanted to have partition key name here we'd probably need to change 
+        //the EventPartition class, not sure it's worth the effort as Hive doesn't seem to make
+        //this info easy to fetch, need to investigate a bit more
         for (EventPartition partition : partitions) {
           partitionValues.add(partition.getValues());
         }
@@ -171,8 +175,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     if (topic != null) {
       try {
         final String jsonMessage = startWriter.writeValueAsString(message);
-        if (jsonMessage.getBytes("UTF-8").length > SNS_MESSAGE_SIZE_LIMIT) {
-          LOG.warn("Message length execeeds SNS limit ({} bytes).", SNS_MESSAGE_SIZE_LIMIT);
+        int messageLength = jsonMessage.getBytes(StandardCharsets.UTF_8).length;
+        if (messageLength > SNS_MESSAGE_SIZE_LIMIT) {
+          LOG.warn("Message length of {} exceeds SNS limit ({} bytes).", messageLength, SNS_MESSAGE_SIZE_LIMIT);
         }
         LOG.debug("Attempting to send message to topic '{}': {}", topic, jsonMessage);
         PublishRequest request = new PublishRequest(topic, jsonMessage);
@@ -186,8 +191,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
         }
       } catch (JsonProcessingException e) {
         LOG.error("Could not serialize message '{}'.", message, e);
-      } catch (UnsupportedEncodingException e) {
-        LOG.error("Could not UTF-8 encode message '{}'.", message, e);
       }
     }
   }

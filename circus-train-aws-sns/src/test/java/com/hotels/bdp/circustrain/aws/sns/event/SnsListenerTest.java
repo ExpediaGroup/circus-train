@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class SnsListenerTest {
   private static List<EventPartition> PARTITIONS_1;
   private static final String STARTTIME = "starttime";
   private static final String EVENT_ID = "EVENT_ID";
+  private static final String PROTOCOL_VERSION = "\"protocolVersion\":\"2.0.0\"";
 
   static {
     try {
@@ -116,7 +117,7 @@ public class SnsListenerTest {
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("startArn"));
     assertThat(request.getMessage(),
-        is("{\"protocolVersion\":\"1.0\",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+        is("{" + PROTOCOL_VERSION + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
             + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
             + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
             + "\"replicaDb.replicaTable\"}"));
@@ -137,7 +138,7 @@ public class SnsListenerTest {
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
     assertThat(request.getMessage(),
-        is("{\"protocolVersion\":\"1.0\",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+        is("{" +PROTOCOL_VERSION + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
             + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
             + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
             + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"modifiedPartitions\":"
@@ -158,7 +159,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
-    assertThat(request.getMessage(), is("{\"protocolVersion\":\"1.0\",\"type\":\"FAILURE\",\"headers\":"
+    assertThat(request.getMessage(), is("{" +PROTOCOL_VERSION + ",\"type\":\"FAILURE\",\"headers\":"
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
         + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"modifiedPartitions\":"
@@ -175,7 +176,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
-    assertThat(request.getMessage(), is("{\"protocolVersion\":\"1.0\",\"type\":\"FAILURE\",\"headers\":"
+    assertThat(request.getMessage(), is("{" +PROTOCOL_VERSION + ",\"type\":\"FAILURE\",\"headers\":"
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
         + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"bytesReplicated\":0,\"errorMessage\":\"error message\"}"));

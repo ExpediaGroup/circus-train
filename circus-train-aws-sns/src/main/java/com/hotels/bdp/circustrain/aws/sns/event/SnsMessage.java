@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.util.Map;
 
 public class SnsMessage {
 
-  private final static String PROTOCOL_VERSION_1_0 = "1.0";
+  private final static String PROTOCOL_VERSION = "2.0.0";
 
-  private final String protocolVersion;
-  private final String type;
+  private final String protocolVersion = PROTOCOL_VERSION;
+  private final SnsMessageType type;
   private final Map<String, String> headers;
   private final String startTime;
   private final String endTime;
@@ -37,7 +37,7 @@ public class SnsMessage {
   private final String errorMessage;
 
   SnsMessage(
-      String type,
+      SnsMessageType type,
       Map<String, String> headers,
       String startTime,
       String endTime,
@@ -49,7 +49,6 @@ public class SnsMessage {
       List<List<String>> modifiedPartitions,
       Long bytesReplicated,
       String errorMessage) {
-    protocolVersion = PROTOCOL_VERSION_1_0;
     this.type = type;
     this.headers = headers;
     this.startTime = startTime;
@@ -68,7 +67,7 @@ public class SnsMessage {
     return protocolVersion;
   }
 
-  public String getType() {
+  public SnsMessageType getType() {
     return type;
   }
 
