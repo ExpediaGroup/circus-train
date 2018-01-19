@@ -1,4 +1,6 @@
 # Unreleased
+### Changed
+* Fixed references to README.md in command line runner help messages to point to correct GitHub locations.
 
 # 11.0.0 - 2018-01-16
 ### Changed
