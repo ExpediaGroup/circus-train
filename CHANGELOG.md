@@ -4,7 +4,7 @@
 ### Changed
 * Upgraded Hive version from 1.2.1 to 2.3.2 (changes are backwards compatible).
 * Upgraded Spring Platform version from 2.0.3.RELEASE to 2.0.8.RELEASE.
-* Replaced TunnellingMetaStoreClient "concrete" implementation with a Java reflection TunnellingMetaStoreClientInvocationHandler. 
+* Replaced `TunnellingMetaStoreClient` "concrete" implementation with a Java reflection `TunnellingMetaStoreClientInvocationHandler`. 
 * Replicating a partitioned table containing no partitions will now succeed instead of silently not replicating the table metadata.
 * Most functionality from Housekeeping module moved to https://github.com/HotelsDotCom/housekeeping.
 
