@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 
 public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
@@ -47,7 +47,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
   }
 
   @Override
-  public void existingReplicaPartitions(List<EventPartition> partitions) {
+  public void existingReplicaPartitions(EventPartitions partitions) {
     for (final ReplicaCatalogListener listener : listeners) {
       try {
         listener.existingReplicaPartitions(partitions);
@@ -58,7 +58,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
   }
 
   @Override
-  public void partitionsToCreate(List<EventPartition> partitions) {
+  public void partitionsToCreate(EventPartitions partitions) {
     for (final ReplicaCatalogListener listener : listeners) {
       try {
         listener.partitionsToCreate(partitions);
@@ -69,7 +69,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
   }
 
   @Override
-  public void partitionsToAlter(List<EventPartition> partitions) {
+  public void partitionsToAlter(EventPartitions partitions) {
     for (final ReplicaCatalogListener listener : listeners) {
       try {
         listener.partitionsToAlter(partitions);

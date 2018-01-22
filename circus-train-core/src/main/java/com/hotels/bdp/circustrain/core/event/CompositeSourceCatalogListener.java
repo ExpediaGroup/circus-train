@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
 
@@ -47,7 +47,7 @@ public class CompositeSourceCatalogListener implements SourceCatalogListener {
   }
 
   @Override
-  public void resolvedSourcePartitions(List<EventPartition> partitions) {
+  public void resolvedSourcePartitions(EventPartitions partitions) {
     for (final SourceCatalogListener listener : listeners) {
       try {
         listener.resolvedSourcePartitions(partitions);

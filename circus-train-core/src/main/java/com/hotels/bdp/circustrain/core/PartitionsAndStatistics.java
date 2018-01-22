@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class PartitionsAndStatistics {
 
   private final Map<Partition, ColumnStatistics> statisticsByPartition;
   private final List<String> partitionNames = new ArrayList<>();
+  private List<FieldSchema> partitionKeys;
 
   public PartitionsAndStatistics(
       List<FieldSchema> partitionKeys,
@@ -48,6 +49,7 @@ public class PartitionsAndStatistics {
   public PartitionsAndStatistics(
       List<FieldSchema> partitionKeys,
       Map<Partition, ColumnStatistics> statisticsByPartition) {
+    this.partitionKeys = partitionKeys;
     this.statisticsByPartition = statisticsByPartition;
     for (Partition partition : statisticsByPartition.keySet()) {
       String partitionName = getPartitionName(partitionKeys, partition);
@@ -92,6 +94,10 @@ public class PartitionsAndStatistics {
 
   public List<Partition> getPartitions() {
     return Collections.unmodifiableList(new ArrayList<>(statisticsByPartition.keySet()));
+  }
+  
+  public List<FieldSchema> getPartitionKeys() {
+    return Collections.unmodifiableList(partitionKeys);
   }
 
   public ColumnStatistics getStatisticsForPartition(Partition partition) {

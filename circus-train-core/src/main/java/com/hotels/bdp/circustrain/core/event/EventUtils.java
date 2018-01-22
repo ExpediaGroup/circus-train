@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@ package com.hotels.bdp.circustrain.core.event;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.hotels.bdp.circustrain.api.event.EventMetastoreTunnel;
 import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaCatalog;
 import com.hotels.bdp.circustrain.api.event.EventReplicaTable;
 import com.hotels.bdp.circustrain.api.event.EventS3;
@@ -35,6 +38,7 @@ import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.metastore.FieldSchemaUtils;
 import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
@@ -54,16 +58,26 @@ public class EventUtils {
     return uris;
   }
 
-  public static List<EventPartition> toEventPartitions(List<Partition> partitions) {
-    if (partitions == null) {
-      return null;
+  //TODO: is this ever called with an unpartitioned table? if so what should this do?
+  public static EventPartitions toEventPartitions(Table table, List<Partition> partitions) {
+    // if (partitions == null) { //TODO: or should the returned object's list be null? need to see how null is used
+    // return null;
+    // }
+    LinkedHashMap<String, String> partitionKeyTypes = new LinkedHashMap<>();
+    List<FieldSchema> partitionKeys = table.getPartitionKeys();
+    for (FieldSchema partitionKey : partitionKeys) {
+      partitionKeyTypes.put(partitionKey.getName(), partitionKey.getType());
     }
-    List<EventPartition> result = new ArrayList<>(partitions.size());
-    for (Partition partition : partitions) {
-      result.add(new EventPartition(partition.getValues(),
-          LocationUtils.hasLocation(partition) ? LocationUtils.locationAsUri(partition) : null));
+    EventPartitions eventPartitions = new EventPartitions(partitionKeyTypes);
+    // TODO: we have changed behaviour to return empty list here instead of null
+    // need to check all usages of this method and see if this is ok
+    if (partitions != null) {
+      for (Partition partition : partitions) {
+        eventPartitions.add(new EventPartition(partition.getValues(),
+            LocationUtils.hasLocation(partition) ? LocationUtils.locationAsUri(partition) : null));
+      }
     }
-    return result;
+    return eventPartitions;
   }
 
   public static EventTable toEventTable(Table sourceTable) {
@@ -92,13 +106,13 @@ public class EventUtils {
   }
 
   public static EventTableReplication toEventTableReplication(TableReplication tableReplication) {
-    return new EventTableReplication(new EventSourceTable(tableReplication.getSourceTable().getDatabaseName(),
-        tableReplication.getSourceTable().getTableName(), tableReplication.getSourceTable().getTableLocation(),
-        tableReplication.getSourceTable().getPartitionFilter(), tableReplication.getSourceTable().getPartitionLimit(),
-        tableReplication.getSourceTable().getQualifiedName()),
-        new EventReplicaTable(tableReplication.getReplicaTable().getDatabaseName(),
-            tableReplication.getReplicaTable().getTableName(), tableReplication.getReplicaTable().getTableLocation()),
-        tableReplication.getCopierOptions(), tableReplication.getQualifiedReplicaName(),
+    SourceTable sourceTable = tableReplication.getSourceTable();
+    EventReplicaTable eventReplicaTable = new EventReplicaTable(tableReplication.getReplicaTable().getDatabaseName(),
+        tableReplication.getReplicaTable().getTableName(), tableReplication.getReplicaTable().getTableLocation());
+    return new EventTableReplication(
+        new EventSourceTable(sourceTable.getDatabaseName(), sourceTable.getTableName(), sourceTable.getTableLocation(),
+            sourceTable.getPartitionFilter(), sourceTable.getPartitionLimit(), sourceTable.getQualifiedName()),
+        eventReplicaTable, tableReplication.getCopierOptions(), tableReplication.getQualifiedReplicaName(),
         tableReplication.getTransformOptions());
   }
 

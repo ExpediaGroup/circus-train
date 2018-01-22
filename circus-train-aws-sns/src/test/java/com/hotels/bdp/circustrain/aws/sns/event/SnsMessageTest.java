@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.aws.sns.event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,8 +50,8 @@ public class SnsMessageTest {
     String replicaCatalog = "replicaCatalogName";
     String sourceTable = "srcDb.srcTable";
     String replicaTable = "replicaDb.replicaTable";
-    //TODO: need to decide if we want to keep this format for partitions
-    //or instead to move to name, value pairs for each partition key
+    String replicaTableLocation = "s3://bucket/path";
+    String replicaMetastoreUris = "thrift://host:9083";
     List<String> partition1 = Lists.newArrayList("2014-01-01", "0");
     List<String> partition2 = Lists.newArrayList("2014-01-01", "1");
     List<List<String>> modifiedPartitions = new ArrayList<>();
@@ -58,10 +59,17 @@ public class SnsMessageTest {
     modifiedPartitions.add(partition2);
     long bytesReplicated = 84837488L;
     String errorMessage = "error message";
+    LinkedHashMap<String, String> partitionKeys = new LinkedHashMap<>();
+    partitionKeys.put("local_date", "string");
+    partitionKeys.put("local_hour", "int");
     SnsMessage message = new SnsMessage(type, headers, startTime, endTime, eventId, sourceCatalog, replicaCatalog,
-        sourceTable, replicaTable, modifiedPartitions, bytesReplicated, errorMessage);
+        replicaMetastoreUris, sourceTable, replicaTable, replicaTableLocation, partitionKeys, modifiedPartitions, bytesReplicated, errorMessage);
+    
     String jsonMessage = objectWriter.writeValueAsString(message);
     System.out.println(jsonMessage);
   }
+  
+  //TODO: output for each type in enum (and add to docs)
+  //also output what we'd get for an unpartitioned table
 
 }

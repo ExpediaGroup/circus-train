@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ public interface ReplicaCatalogListener {
 
   void resolvedReplicaLocation(URI location);
 
-  void existingReplicaPartitions(List<EventPartition> partitions);
+  void existingReplicaPartitions(EventPartitions partitions);
 
-  void partitionsToCreate(List<EventPartition> partitions);
+  void partitionsToCreate(EventPartitions partitions);
 
-  void partitionsToAlter(List<EventPartition> partitions);
+  void partitionsToAlter(EventPartitions partitions);
 
   void deprecatedReplicaLocations(List<URI> locations);
 }

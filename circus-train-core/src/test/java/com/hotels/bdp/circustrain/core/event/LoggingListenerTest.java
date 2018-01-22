@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.junit.Before;
@@ -31,6 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceTable;
@@ -67,11 +69,13 @@ public class LoggingListenerTest {
 
   @Test
   public void resetAlteredPartitionsCount() {
-    List<EventPartition> partitions = Lists.newArrayList(eventPartition);
+    //TODO: having to pass this map in every time is a bit painful, create an empty constructor?
+    EventPartitions eventPartitions = new EventPartitions(new LinkedHashMap<String,String>());
+    eventPartitions.add(eventPartition);
 
     listener.tableReplicationStart(tableReplication, "event-id");
-    listener.partitionsToAlter(partitions);
-    listener.partitionsToCreate(partitions);
+    listener.partitionsToAlter(eventPartitions);
+    listener.partitionsToCreate(eventPartitions);
     assertThat(listener.getReplicationState().partitionsAltered, is(2));
 
     // state should be reset

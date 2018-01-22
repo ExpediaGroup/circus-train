@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.aws.sns.event;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,13 @@ public class SnsMessage {
   private final String replicaCatalog;
   private final String sourceTable;
   private final String replicaTable;
+  private final String replicaTableLocation;
+  private final String replicaMetastoreUris;
+  private final LinkedHashMap<String,String> partitionKeys;
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
+  
 
   SnsMessage(
       SnsMessageType type,
@@ -44,8 +49,11 @@ public class SnsMessage {
       String eventId,
       String sourceCatalog,
       String replicaCatalog,
+      String replicaMetastoreUris,
       String sourceTable,
       String replicaTable,
+      String replicaTableLocation,
+      LinkedHashMap<String, String> partitionKeys,
       List<List<String>> modifiedPartitions,
       Long bytesReplicated,
       String errorMessage) {
@@ -58,6 +66,9 @@ public class SnsMessage {
     this.replicaCatalog = replicaCatalog;
     this.sourceTable = sourceTable;
     this.replicaTable = replicaTable;
+    this.replicaTableLocation = replicaTableLocation;
+    this.replicaMetastoreUris = replicaMetastoreUris;
+    this.partitionKeys = partitionKeys;
     this.modifiedPartitions = modifiedPartitions;
     this.bytesReplicated = bytesReplicated;
     this.errorMessage = errorMessage;
@@ -101,6 +112,18 @@ public class SnsMessage {
 
   public String getReplicaTable() {
     return replicaTable;
+  }
+  
+  public String getReplicaTableLocation() {
+    return replicaTableLocation;
+  }
+  
+  public String getReplicaMetastoreUris() {
+    return replicaMetastoreUris;
+  }
+  
+  public LinkedHashMap<String,String> getPartitionKeys() {
+    return partitionKeys;
   }
 
   public List<List<String>> getModifiedPartitions() {

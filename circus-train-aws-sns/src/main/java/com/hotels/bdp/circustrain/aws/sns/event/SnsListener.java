@@ -15,11 +15,11 @@
  */
 package com.hotels.bdp.circustrain.aws.sns.event;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +43,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaCatalog;
+import com.hotels.bdp.circustrain.api.event.EventReplicaTable;
 import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
@@ -73,6 +75,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   private String startTime;
   private EventSourceCatalog sourceCatalog;
   private EventReplicaCatalog replicaCatalog;
+  private LinkedHashMap<String, String> partitionKeyTypes;
 
   @Autowired
   public SnsListener(AmazonSNSAsyncClient sns, ListenerConfig config) {
@@ -104,18 +107,20 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     startTime = clock.getTime();
+    EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId, sourceCatalog.getName(),
-        replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(), null, null, null);
+        replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, null, null, null);
     publish(config.getStartTopic(), message);
   }
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String endTime = clock.getTime();
+    EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(), getModifiedPartitions(partitionsToAlter, partitionsToCreate),
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
         getBytesReplicated(), null);
     publish(config.getSuccessTopic(), message);
   }
@@ -126,9 +131,10 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
       startTime = clock.getTime();
     }
     String endTime = clock.getTime();
+    EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(), getModifiedPartitions(partitionsToAlter, partitionsToCreate),
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(),replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
         getBytesReplicated(), t.getMessage());
     publish(config.getFailTopic(), message);
   }
@@ -141,13 +147,21 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   }
 
   @Override
-  public void partitionsToCreate(List<EventPartition> partitions) {
-    partitionsToCreate = partitions;
+  public void partitionsToCreate(EventPartitions eventPartitions) {
+    partitionsToCreate = eventPartitions.getEventPartitions();
+    setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
+  }
+  
+  private void setPartitionKeyTypes(LinkedHashMap<String, String> partitionKeyTypes) {
+    if (partitionKeyTypes != null) {
+      this.partitionKeyTypes = partitionKeyTypes;
+    }
   }
 
   @Override
-  public void partitionsToAlter(List<EventPartition> partitions) {
-    partitionsToAlter = partitions;
+  public void partitionsToAlter(EventPartitions eventPartitions) {
+    partitionsToAlter = eventPartitions.getEventPartitions();
+    setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
 
   @VisibleForTesting
@@ -160,9 +174,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     List<List<String>> partitionValues = new ArrayList<>();
     for (List<EventPartition> partitions : Arrays.asList(partitionsToAlter, partitionsToCreate)) {
       if (partitions != null) {
-        //TODO: if we wanted to have partition key name here we'd probably need to change 
-        //the EventPartition class, not sure it's worth the effort as Hive doesn't seem to make
-        //this info easy to fetch, need to investigate a bit more
         for (EventPartition partition : partitions) {
           partitionValues.add(partition.getValues());
         }
@@ -211,7 +222,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void resolvedReplicaLocation(URI location) {}
 
   @Override
-  public void existingReplicaPartitions(List<EventPartition> partitions) {}
+  public void existingReplicaPartitions(EventPartitions partitions) {}
 
   @Override
   public void deprecatedReplicaLocations(List<URI> locations) {}
@@ -220,7 +231,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void resolvedMetaStoreSourceTable(EventTable table) {}
 
   @Override
-  public void resolvedSourcePartitions(List<EventPartition> partitions) {}
+  public void resolvedSourcePartitions(EventPartitions partitions) {}
 
   @Override
   public void resolvedSourceLocation(URI location) {}
