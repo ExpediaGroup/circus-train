@@ -57,8 +57,7 @@ class VacuumToolHelp {
         .append(System.lineSeparator())
         .append(TAB)
         .append("For more information and help please refer to ")
-        .append(
-            "https://stash/projects/HDW/repos/circus-train/circus-train-tool/circus-train-vacuum-tool/browse/README.md");
+        .append("https://github.com/HotelsDotCom/circus-train/tree/master/circus-train-tool-parent");
     return help.toString();
   }
 }

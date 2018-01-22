@@ -57,7 +57,7 @@ class CircusTrainHelp {
         .append(System.lineSeparator())
         .append(TAB)
         .append("For more information and help please refer to ")
-        .append("https://stash/projects/HDW/repos/circus-train/browse/README.md");
+        .append("https://github.com/HotelsDotCom/circus-train/blob/master/README.md");
     return help.toString();
   }
 
