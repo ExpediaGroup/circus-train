@@ -39,7 +39,6 @@ public class SnsMessage {
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
-  
 
   SnsMessage(
       SnsMessageType type,
