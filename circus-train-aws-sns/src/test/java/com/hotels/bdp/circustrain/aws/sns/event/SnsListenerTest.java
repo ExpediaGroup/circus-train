@@ -132,13 +132,12 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("startArn"));
-    assertThat(request.getMessage(),
-        is("{"
-            + PROTOCOL_VERSION
-            + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
-            + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
-            + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
-            + "\"replicaDb.replicaTable\"}"));
+    assertThat(request.getMessage(), is("{"
+        + PROTOCOL_VERSION
+        + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+        + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
+        + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
+        + "\"replicaDb.replicaTable\",\"replicaTableLocation\":\"s3://bucket/path\",\"replicaMetastoreUris\":\"thrift://host:9083\"}"));
   }
 
   // TODO: need tests for unpartitioned tables to see what gets output for partition stuff
@@ -176,10 +175,12 @@ public class SnsListenerTest {
             + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
             + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
             + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
-            
-        +"\"replicaTableLocation\":\""+ REPLICA_TABLE_LOCATION + "\",\"replicaMetastoreUris\":\""  
-        + REPLICA_METASTORE_URIS 
-            
+
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+
             + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
             + "\"modifiedPartitions\":"
             + "[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40}"));
@@ -212,8 +213,11 @@ public class SnsListenerTest {
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
         + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
-        +"\"replicaTableLocation\":\""+ REPLICA_TABLE_LOCATION + "\",\"replicaMetastoreUris\":\""  
-        + REPLICA_METASTORE_URIS +"\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+        + "\"replicaTableLocation\":\""
+        + REPLICA_TABLE_LOCATION
+        + "\",\"replicaMetastoreUris\":\""
+        + REPLICA_METASTORE_URIS
+        + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
         + "\"modifiedPartitions\":[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40,\"errorMessage\":\"error message\"}"));
   }
 
@@ -232,7 +236,7 @@ public class SnsListenerTest {
         + ",\"type\":\"FAILURE\",\"headers\":"
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
-        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"bytesReplicated\":0,\"errorMessage\":\"error message\"}"));
+        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"replicaTableLocation\":\"s3://bucket/path\",\"replicaMetastoreUris\":\"thrift://host:9083\",\"bytesReplicated\":0,\"errorMessage\":\"error message\"}"));
   }
 
   @Test
