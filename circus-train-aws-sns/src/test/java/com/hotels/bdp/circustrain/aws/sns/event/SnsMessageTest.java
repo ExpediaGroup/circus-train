@@ -35,7 +35,7 @@ import com.google.common.collect.Lists;
 public class SnsMessageTest {
 
   // set below to true if you want to print messages
-  private final static boolean PRINT_MESSAGE = true;
+  private final static boolean PRINT_MESSAGE = false;
 
   private void printMessage(SnsMessage message) throws JsonProcessingException {
     if (PRINT_MESSAGE) {
