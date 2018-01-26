@@ -21,15 +21,12 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.event.EventPartition;
 import com.hotels.bdp.circustrain.api.event.EventPartitions;
@@ -69,7 +66,6 @@ public class LoggingListenerTest {
 
   @Test
   public void resetAlteredPartitionsCount() {
-    //TODO: having to pass this map in every time is a bit painful, create an empty constructor?
     EventPartitions eventPartitions = new EventPartitions(new LinkedHashMap<String,String>());
     eventPartitions.add(eventPartition);
 

@@ -66,6 +66,7 @@ public class PartitionsAndStatisticsTest {
 
     assertThat(partitionsAndStatistics.getPartitionNames(), is(expectedName));
     assertThat(partitionsAndStatistics.getPartitions(), is(partitions));
+    assertThat(partitionsAndStatistics.getPartitionKeys(), is(partitionKeys));
     ColumnStatisticsDesc statsDesc = new ColumnStatisticsDesc(false, "db1", "t1");
     statsDesc.setPartName("a=b/c=d");
     ColumnStatistics expectedStats = new ColumnStatistics(statsDesc, columnStats);
@@ -82,6 +83,7 @@ public class PartitionsAndStatisticsTest {
 
     assertThat(partitionsAndStatistics.getPartitionNames(), is(empty()));
     assertThat(partitionsAndStatistics.getPartitions(), is(empty()));
+    assertThat(partitionsAndStatistics.getPartitionKeys(), is(partitionKeys));
   }
 
   @Test(expected = IllegalArgumentException.class)

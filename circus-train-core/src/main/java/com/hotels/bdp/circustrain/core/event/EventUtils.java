@@ -58,19 +58,13 @@ public class EventUtils {
     return uris;
   }
 
-  //TODO: is this ever called with an unpartitioned table? if so what should this do?
   public static EventPartitions toEventPartitions(Table table, List<Partition> partitions) {
-    // if (partitions == null) { //TODO: or should the returned object's list be null? need to see how null is used
-    // return null;
-    // }
     LinkedHashMap<String, String> partitionKeyTypes = new LinkedHashMap<>();
     List<FieldSchema> partitionKeys = table.getPartitionKeys();
     for (FieldSchema partitionKey : partitionKeys) {
       partitionKeyTypes.put(partitionKey.getName(), partitionKey.getType());
     }
     EventPartitions eventPartitions = new EventPartitions(partitionKeyTypes);
-    // TODO: we have changed behaviour to return empty list here instead of null
-    // need to check all usages of this method and see if this is ok
     if (partitions != null) {
       for (Partition partition : partitions) {
         eventPartitions.add(new EventPartition(partition.getValues(),

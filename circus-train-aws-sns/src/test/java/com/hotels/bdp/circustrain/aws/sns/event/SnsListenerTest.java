@@ -142,13 +142,8 @@ public class SnsListenerTest {
 
   // TODO: need tests for unpartitioned tables to see what gets output for partition stuff
 
-  // TODO: need to test the following changes to the JSON
-  // (haven't coded these up yet)
-  // "replicaTableLocation" : "s3://bucket/path",
-  // "remoteMetastoreUris : thrift://bla"
-
   @Test
-  public void success() {
+  public void successPartitionedTable() {
     SnsListener listener = new SnsListener(client, config, clock);
     listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
     listener.tableReplicationStart(tableReplication, EVENT_ID);
@@ -175,15 +170,40 @@ public class SnsListenerTest {
             + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
             + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
             + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
-
             + "\"replicaTableLocation\":\""
             + REPLICA_TABLE_LOCATION
             + "\",\"replicaMetastoreUris\":\""
             + REPLICA_METASTORE_URIS
-
             + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
             + "\"modifiedPartitions\":"
             + "[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40}"));
+  }
+
+  @Test
+  public void successUnpartitionedTable() {
+    SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
+
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
+
+    verify(client, times(2)).publish(requestCaptor.capture());
+    PublishRequest request = requestCaptor.getAllValues().get(1);
+    assertThat(request.getSubject(), is(SUBJECT));
+    assertThat(request.getTopicArn(), is("successArn"));
+    assertThat(request.getMessage(),
+        is("{"
+            + PROTOCOL_VERSION
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"bytesReplicated\":40}"));
   }
 
   @Test
