@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class EventPartitions {
+  
   private List<EventPartition> eventPartitions = new ArrayList<>();
   private final LinkedHashMap<String, String> partitionKeyTypes;
 

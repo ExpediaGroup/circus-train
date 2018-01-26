@@ -22,11 +22,11 @@ public interface ReplicaCatalogListener {
 
   void resolvedReplicaLocation(URI location);
 
-  void existingReplicaPartitions(EventPartitions partitions);
+  void existingReplicaPartitions(EventPartitions eventPartitions);
 
-  void partitionsToCreate(EventPartitions partitions);
+  void partitionsToCreate(EventPartitions eventPartitions);
 
-  void partitionsToAlter(EventPartitions partitions);
+  void partitionsToAlter(EventPartitions eventPartitions);
 
   void deprecatedReplicaLocations(List<URI> locations);
 }

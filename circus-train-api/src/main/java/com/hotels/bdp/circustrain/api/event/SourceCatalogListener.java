@@ -21,7 +21,7 @@ public interface SourceCatalogListener {
 
   void resolvedMetaStoreSourceTable(EventTable table);
 
-  void resolvedSourcePartitions(EventPartitions partitions);
+  void resolvedSourcePartitions(EventPartitions eventPartitions);
 
   void resolvedSourceLocation(URI location);
 

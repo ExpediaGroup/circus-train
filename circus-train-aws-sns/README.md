@@ -1,11 +1,12 @@
 # SNS event listener
 
 ##  Overview
-The SNS event listener is an optional Circus Train component which, if found on the classpath while running 
-Circus Train, will push replication events as JSON onto Amazon Web Services SNS topics.
+The SNS event listener is an optional Circus Train component which, if found on the classpath, will push 
+replication events as JSON onto Amazon Web Services SNS topics.
 
 ## Installation
 The listener can be activated in a number of ways which are described below.
+
 ### Classpath
 The jar file produced by this project can be retrieved from Maven Central and stored in a location available 
 when running Circus Train. The code snippet below shows how you could add this to the Circus Train classpath 
@@ -14,7 +15,8 @@ in a script before calling out to the main Circus Train script:
     export CIRCUS_TRAIN_CLASSPATH=$CIRCUS_TRAIN_CLASSPATH:/your-circus-train-sns-lib-path/*
 
 ### Dependency
-If you have a project that is using Circus Train as a Maven dependency you could add the XML fragment below to your POM file in order to depend on the Circus Train SNS artifact and bundle this onto your application's 
+If you have a project that is using Circus Train as a Maven dependency you could add the XML fragment below 
+to your POM file in order to depend on the Circus Train SNS artifact and bundle this onto your application's 
 classpath at runtime:
 
     <dependency>

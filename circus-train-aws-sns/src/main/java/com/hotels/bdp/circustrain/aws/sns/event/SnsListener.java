@@ -152,18 +152,18 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
   
-  private void setPartitionKeyTypes(LinkedHashMap<String, String> partitionKeyTypes) {
-    if (partitionKeyTypes != null) {
-      this.partitionKeyTypes = partitionKeyTypes;
-    }
-  }
-
   @Override
   public void partitionsToAlter(EventPartitions eventPartitions) {
     partitionsToAlter = eventPartitions.getEventPartitions();
     setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
-
+  
+  private void setPartitionKeyTypes(LinkedHashMap<String, String> partitionKeyTypes) {
+    if (partitionKeyTypes != null) {
+      this.partitionKeyTypes = partitionKeyTypes;
+    }
+  }
+  
   @VisibleForTesting
   static List<List<String>> getModifiedPartitions(
       List<EventPartition> partitionsToAlter,
@@ -222,7 +222,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void resolvedReplicaLocation(URI location) {}
 
   @Override
-  public void existingReplicaPartitions(EventPartitions partitions) {}
+  public void existingReplicaPartitions(EventPartitions eventPartitions) {}
 
   @Override
   public void deprecatedReplicaLocations(List<URI> locations) {}
@@ -231,7 +231,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void resolvedMetaStoreSourceTable(EventTable table) {}
 
   @Override
-  public void resolvedSourcePartitions(EventPartitions partitions) {}
+  public void resolvedSourcePartitions(EventPartitions eventPartitions) {}
 
   @Override
   public void resolvedSourceLocation(URI location) {}
