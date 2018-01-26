@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class CircusTrainHelp {
         .append(System.lineSeparator())
         .append(TAB)
         .append("For more information and help please refer to ")
-        .append("https://stash/projects/HDW/repos/circus-train/browse/README.md");
+        .append("https://github.com/HotelsDotCom/circus-train/blob/master/README.md");
     return help.toString();
   }
 
