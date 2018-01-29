@@ -122,7 +122,8 @@ public class Replica extends HiveEndpoint {
           replicaDatabaseName, replicaTableName, client);
       LOG.debug("Found {} existing partitions that may match.", oldPartitions.size());
 
-      replicaCatalogListener.existingReplicaPartitions(EventUtils.toEventPartitions(oldPartitions));
+      replicaCatalogListener
+          .existingReplicaPartitions(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), oldPartitions));
 
       Map<List<String>, Partition> oldPartitionsByKey = mapPartitionsByKey(oldPartitions);
 
@@ -136,7 +137,6 @@ public class Replica extends HiveEndpoint {
 
         Partition replicaPartition = tableFactory.newReplicaPartition(eventId, sourceTableAndStatistics.getTable(),
             sourcePartition, replicaDatabaseName, replicaTableName, replicaPartitionLocation, replicationMode);
-
         Partition oldPartition = oldPartitionsByKey.get(sourcePartition.getValues());
         if (oldPartition == null) {
           partitionsToCreate.add(replicaPartition);
@@ -156,9 +156,11 @@ public class Replica extends HiveEndpoint {
               replicaPartition, sourcePartitionStatistics));
         }
       }
-
-      replicaCatalogListener.partitionsToAlter(EventUtils.toEventPartitions(partitionsToAlter));
-      replicaCatalogListener.partitionsToCreate(EventUtils.toEventPartitions(partitionsToCreate));
+      sourcePartitionsAndStatistics.getPartitionNames();
+      replicaCatalogListener
+          .partitionsToAlter(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), partitionsToAlter));
+      replicaCatalogListener
+          .partitionsToCreate(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), partitionsToCreate));
 
       if (!partitionsToCreate.isEmpty()) {
         LOG.info("Creating {} new partitions.", partitionsToCreate.size());

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  */
 package com.hotels.bdp.circustrain.aws.sns.event;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SnsMessage {
 
-  private final static String PROTOCOL_VERSION_1_0 = "1.0";
+  private final static String PROTOCOL_VERSION = "1.1";
 
-  private final String protocolVersion;
-  private final String type;
+  private final String protocolVersion = PROTOCOL_VERSION;
+  private final SnsMessageType type;
   private final Map<String, String> headers;
   private final String startTime;
   private final String endTime;
@@ -32,24 +33,29 @@ public class SnsMessage {
   private final String replicaCatalog;
   private final String sourceTable;
   private final String replicaTable;
+  private final String replicaTableLocation;
+  private final String replicaMetastoreUris;
+  private final LinkedHashMap<String,String> partitionKeys;
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
 
   SnsMessage(
-      String type,
+      SnsMessageType type,
       Map<String, String> headers,
       String startTime,
       String endTime,
       String eventId,
       String sourceCatalog,
       String replicaCatalog,
+      String replicaMetastoreUris,
       String sourceTable,
       String replicaTable,
+      String replicaTableLocation,
+      LinkedHashMap<String, String> partitionKeys,
       List<List<String>> modifiedPartitions,
       Long bytesReplicated,
       String errorMessage) {
-    protocolVersion = PROTOCOL_VERSION_1_0;
     this.type = type;
     this.headers = headers;
     this.startTime = startTime;
@@ -59,6 +65,9 @@ public class SnsMessage {
     this.replicaCatalog = replicaCatalog;
     this.sourceTable = sourceTable;
     this.replicaTable = replicaTable;
+    this.replicaTableLocation = replicaTableLocation;
+    this.replicaMetastoreUris = replicaMetastoreUris;
+    this.partitionKeys = partitionKeys;
     this.modifiedPartitions = modifiedPartitions;
     this.bytesReplicated = bytesReplicated;
     this.errorMessage = errorMessage;
@@ -68,7 +77,7 @@ public class SnsMessage {
     return protocolVersion;
   }
 
-  public String getType() {
+  public SnsMessageType getType() {
     return type;
   }
 
@@ -102,6 +111,18 @@ public class SnsMessage {
 
   public String getReplicaTable() {
     return replicaTable;
+  }
+  
+  public String getReplicaTableLocation() {
+    return replicaTableLocation;
+  }
+  
+  public String getReplicaMetastoreUris() {
+    return replicaMetastoreUris;
+  }
+  
+  public LinkedHashMap<String,String> getPartitionKeys() {
+    return partitionKeys;
   }
 
   public List<List<String>> getModifiedPartitions() {

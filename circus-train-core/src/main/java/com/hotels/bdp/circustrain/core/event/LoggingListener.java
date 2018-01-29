@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
-import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventTable;
@@ -97,13 +97,13 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   }
 
   @Override
-  public void partitionsToCreate(List<EventPartition> partitions) {
-    replicationState.partitionsAltered += partitions.size();
+  public void partitionsToCreate(EventPartitions partitions) {
+    replicationState.partitionsAltered += partitions.getEventPartitions().size();
   }
 
   @Override
-  public void partitionsToAlter(List<EventPartition> partitions) {
-    replicationState.partitionsAltered += partitions.size();
+  public void partitionsToAlter(EventPartitions partitions) {
+    replicationState.partitionsAltered += partitions.getEventPartitions().size();
   }
 
   @Override
@@ -115,7 +115,7 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   public void circusTrainShutDown(CompletionCode completionCode, Map<String, Long> metrics) {}
 
   @Override
-  public void resolvedSourcePartitions(List<EventPartition> partitions) {}
+  public void resolvedSourcePartitions(EventPartitions partitions) {}
 
   @Override
   public void resolvedSourceLocation(URI location) {}
@@ -124,7 +124,7 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   public void resolvedReplicaLocation(URI location) {}
 
   @Override
-  public void existingReplicaPartitions(List<EventPartition> partitions) {}
+  public void existingReplicaPartitions(EventPartitions partitions) {}
 
   @Override
   public void deprecatedReplicaLocations(List<URI> locations) {}

@@ -13,20 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.event;
+package com.hotels.bdp.circustrain.aws.sns.event;
 
-import java.net.URI;
-import java.util.List;
-
-public interface ReplicaCatalogListener {
-
-  void resolvedReplicaLocation(URI location);
-
-  void existingReplicaPartitions(EventPartitions eventPartitions);
-
-  void partitionsToCreate(EventPartitions eventPartitions);
-
-  void partitionsToAlter(EventPartitions eventPartitions);
-
-  void deprecatedReplicaLocations(List<URI> locations);
+public enum SnsMessageType {
+  START, SUCCESS, FAILURE
 }

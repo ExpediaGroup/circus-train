@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class Source extends HiveEndpoint {
   public PartitionsAndStatistics getPartitions(Table sourceTable, String partitionPredicate, int maxPartitions)
     throws TException {
     PartitionsAndStatistics sourcePartitions = super.getPartitions(sourceTable, partitionPredicate, maxPartitions);
-    sourceCatalogListener.resolvedSourcePartitions(EventUtils.toEventPartitions(sourcePartitions.getPartitions()));
+    sourceCatalogListener.resolvedSourcePartitions(EventUtils.toEventPartitions(sourceTable, sourcePartitions.getPartitions()));
     return sourcePartitions;
   }
 

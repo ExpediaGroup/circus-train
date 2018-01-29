@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
@@ -38,14 +41,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.event.EventPartition;
+import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventUtilsTest {
 
-  private static final List<String> PARTITION_VALUES = ImmutableList.of("P1", "P2");
-  private static final List<FieldSchema> PARTITION_COLS = ImmutableList.of(new FieldSchema("P1", "string", null),
-      new FieldSchema("P2", "string", null));
+  private static final List<String> PARTITION_VALUES = ImmutableList.of("2017-01-23", "2");
+  private static final List<String> PARTITION_KEY_NAMES = ImmutableList.of("local_date", "local_hour");
+  private static final List<FieldSchema> PARTITION_COLS = ImmutableList
+      .of(new FieldSchema(PARTITION_KEY_NAMES.get(0), "string", null), new FieldSchema(PARTITION_KEY_NAMES.get(1), "int", null));
 
   private @Mock Table table;
   private @Mock StorageDescriptor tableStorageDescriptor;
@@ -62,33 +67,50 @@ public class EventUtilsTest {
 
   @Test
   public void toNullEventPartitions() {
-    assertThat(EventUtils.toEventPartitions(null), is(nullValue()));
+    EventPartitions eventPartitions = EventUtils.toEventPartitions(table, null);
+    assertThat(eventPartitions.getEventPartitions().size(), is(0));
   }
 
   @Test
   public void toEmptyEventPartitions() {
-    List<EventPartition> eventPartitions = EventUtils.toEventPartitions(Collections.<Partition> emptyList());
-    assertThat(eventPartitions, is(not(nullValue())));
-    assertThat(eventPartitions.size(), is(0));
+    EventPartitions eventPartitions = EventUtils.toEventPartitions(table, Collections.<Partition> emptyList());
+    List<EventPartition> partitions = eventPartitions.getEventPartitions();
+    assertThat(partitions, is(not(nullValue())));
+    assertThat(partitions.size(), is(0));
+    assertPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
+  }
+
+  private void assertPartitionKeyTypes(LinkedHashMap<String, String> partitionKeyTypes) {
+    Iterator<Entry<String, String>> iterator = partitionKeyTypes.entrySet().iterator();
+    Entry<String, String> entry = iterator.next();
+    assertThat(entry.getKey(), is("local_date"));
+    assertThat(entry.getValue(), is("string"));
+    entry = iterator.next();
+    assertThat(entry.getKey(), is("local_hour"));
+    assertThat(entry.getValue(), is("int"));
+    assertThat(iterator.hasNext(), is(false));
   }
 
   @Test
   public void toEventPartitions() {
     when(partitionStorageDescriptor.getLocation()).thenReturn("location");
-    List<EventPartition> eventPartitions = EventUtils.toEventPartitions(ImmutableList.of(partition));
-    assertThat(eventPartitions, is(not(nullValue())));
-    assertThat(eventPartitions.size(), is(1));
-    assertThat(eventPartitions.get(0).getValues(), is(PARTITION_VALUES));
-    assertThat(eventPartitions.get(0).getLocation(), is(URI.create("location")));
+    EventPartitions eventPartitions = EventUtils.toEventPartitions(table, ImmutableList.of(partition));
+    List<EventPartition> partitions = eventPartitions.getEventPartitions();
+    assertThat(partitions, is(not(nullValue())));
+    assertThat(partitions.size(), is(1));
+    assertThat(partitions.get(0).getValues(), is(PARTITION_VALUES));
+    assertThat(partitions.get(0).getLocation(), is(URI.create("location")));
+    assertPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
 
   @Test
   public void toEventPartitionsWithNullLocation() {
-    List<EventPartition> eventPartitions = EventUtils.toEventPartitions(ImmutableList.of(partition));
-    assertThat(eventPartitions, is(not(nullValue())));
-    assertThat(eventPartitions.size(), is(1));
-    assertThat(eventPartitions.get(0).getValues(), is(PARTITION_VALUES));
-    assertThat(eventPartitions.get(0).getLocation(), is(nullValue()));
+    EventPartitions eventPartitions = EventUtils.toEventPartitions(table, ImmutableList.of(partition));
+    List<EventPartition> partitions = eventPartitions.getEventPartitions();
+    assertThat(partitions, is(not(nullValue())));
+    assertThat(partitions.size(), is(1));
+    assertThat(partitions.get(0).getValues(), is(PARTITION_VALUES));
+    assertThat(partitions.get(0).getLocation(), is(nullValue()));
   }
 
   @Test
@@ -101,7 +123,7 @@ public class EventUtilsTest {
     when(tableStorageDescriptor.getLocation()).thenReturn("location");
     EventTable eventTable = EventUtils.toEventTable(table);
     assertThat(eventTable, is(not(nullValue())));
-    assertThat(eventTable.getPartitionKeys(), is(PARTITION_VALUES));
+    assertThat(eventTable.getPartitionKeys(), is(PARTITION_KEY_NAMES));
     assertThat(eventTable.getLocation(), is(URI.create("location")));
   }
 
@@ -109,7 +131,7 @@ public class EventUtilsTest {
   public void toEventTableWithNullLocation() {
     EventTable eventTable = EventUtils.toEventTable(table);
     assertThat(eventTable, is(not(nullValue())));
-    assertThat(eventTable.getPartitionKeys(), is(PARTITION_VALUES));
+    assertThat(eventTable.getPartitionKeys(), is(PARTITION_KEY_NAMES));
     assertThat(eventTable.getLocation(), is(nullValue()));
   }
 
