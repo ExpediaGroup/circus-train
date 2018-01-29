@@ -130,7 +130,7 @@ The following shows an example JSON message representing a successful replicatio
 	}
 
 #### Replication success for a partitioned table
-The following shows an example JSON message representing a successful replication of a non-partitioned table 
+The following shows an example JSON message representing a successful replication of a partitioned table 
 and also the usage of custom "pipeline-id" header that was set using the `sns-event-listener.headers` 
 configuration value described above:
 
