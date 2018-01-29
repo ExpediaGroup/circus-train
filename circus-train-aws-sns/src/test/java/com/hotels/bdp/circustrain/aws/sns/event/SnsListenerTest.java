@@ -61,7 +61,7 @@ public class SnsListenerTest {
 
   private static final String STARTTIME = "starttime";
   private static final String EVENT_ID = "EVENT_ID";
-  private static final String PROTOCOL_VERSION = "2.0.0";
+  private static final String PROTOCOL_VERSION = "1.1";
   private static final String REPLICA_TABLE_LOCATION = "s3://bucket/path";
   private static final String REPLICA_METASTORE_URIS = "thrift://host:9083";
 

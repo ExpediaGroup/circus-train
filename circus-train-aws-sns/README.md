@@ -76,7 +76,7 @@ topic.
 
 |Field Name|Type|When present|Description|
 |----|----|----|----|
-|`protocolVersion`|String|Always|The [semantic version number](https://semver.org/) of the message|
+|`protocolVersion`|String|Always|The [semantic version number](https://semver.org/) of the message in MAJOR.MINOR format (i.e. omitting the PATCH version).
 |`type`|String Enum Value|Always|One of: START, SUCCESS or FAILURE| 
 |`headers`|Map|When configured|Any headers that were set via the `sns-event-listener.headers` configuration property|
 |`startTime`|String |Always|Time when the Circus Train job started. Formatted as a date time in ISO8601 format (yyyy-MM-ddTHH:mm:ss.SSSZZ)|
@@ -99,7 +99,7 @@ topic.
 The following shows an example JSON message representing the start of a table replication:
 
 	{
-	  "protocolVersion" : "2.0.0",
+	  "protocolVersion" : "1.1",
 	  "type" : "START",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "eventId" : "ctp-20160601T152738.363Z-CzbZaYfj",
@@ -115,7 +115,7 @@ The following shows an example JSON message representing the start of a table re
 The following shows an example JSON message representing a successful replication of a non-partitioned table:
 
 	{
-	  "protocolVersion" : "2.0.0",
+	  "protocolVersion" : "1.1",
 	  "type" : "SUCCESS",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "endTime" : "2016-06-01T15:27:39.000Z",
@@ -135,7 +135,7 @@ and also the usage of custom "pipeline-id" header that was set using the `sns-ev
 configuration value described above:
 
 	{
-	  "protocolVersion" : "2.0.0",
+	  "protocolVersion" : "1.1",
 	  "type" : "SUCCESS",
 	  "headers" : {
 	    "pipeline-id" : "0943879438"
@@ -161,7 +161,7 @@ configuration value described above:
 The following shows an example JSON message representing the failure of a table replication:
 
 	{
-	  "protocolVersion" : "2.0.0",
+	  "protocolVersion" : "1.1",
 	  "type" : "FAILURE",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "endTime" : "2016-06-01T15:27:39.000Z",

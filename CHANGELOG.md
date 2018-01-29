@@ -2,7 +2,7 @@
 ### Added
 * Added `replicaTableLocation`, `replicaMetastoreUris` and  `partitionKeys` to SNS message.
 ### Changed
-* SNS Message `protocolVersion` changed from "1.0" to "2.0.0".
+* SNS Message `protocolVersion` changed from "1.0" to "1.1".
 * Updated documentation for circus-train-aws-sns module (full reference of SNS message format, more examples).
 * Fixed references to README.md in command line runner help messages to point to correct GitHub locations.
 

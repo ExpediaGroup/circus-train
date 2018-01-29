@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class SnsMessage {
 
-  private final static String PROTOCOL_VERSION = "2.0.0";
+  private final static String PROTOCOL_VERSION = "1.1";
 
   private final String protocolVersion = PROTOCOL_VERSION;
   private final SnsMessageType type;
