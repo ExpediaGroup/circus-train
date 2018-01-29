@@ -61,7 +61,7 @@ public class SnsListenerTest {
 
   private static final String STARTTIME = "starttime";
   private static final String EVENT_ID = "EVENT_ID";
-  private static final String PROTOCOL_VERSION = "\"protocolVersion\":\"2.0.0\"";
+  private static final String PROTOCOL_VERSION = "2.0.0";
   private static final String REPLICA_TABLE_LOCATION = "s3://bucket/path";
   private static final String REPLICA_METASTORE_URIS = "thrift://host:9083";
 
@@ -132,15 +132,12 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("startArn"));
-    assertThat(request.getMessage(), is("{"
-        + PROTOCOL_VERSION
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\"" 
         + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
         + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
         + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
         + "\"replicaDb.replicaTable\",\"replicaTableLocation\":\"s3://bucket/path\",\"replicaMetastoreUris\":\"thrift://host:9083\"}"));
   }
-
-  // TODO: need tests for unpartitioned tables to see what gets output for partition stuff
 
   @Test
   public void successPartitionedTable() {
@@ -163,9 +160,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getAllValues().get(1);
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
-    assertThat(request.getMessage(),
-        is("{"
-            + PROTOCOL_VERSION
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
             + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
             + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
             + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
@@ -192,9 +187,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getAllValues().get(1);
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
-    assertThat(request.getMessage(),
-        is("{"
-            + PROTOCOL_VERSION
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
             + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
             + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
             + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
@@ -227,8 +220,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
-    assertThat(request.getMessage(), is("{"
-        + PROTOCOL_VERSION
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
         + ",\"type\":\"FAILURE\",\"headers\":"
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
@@ -251,8 +243,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
-    assertThat(request.getMessage(), is("{"
-        + PROTOCOL_VERSION
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
         + ",\"type\":\"FAILURE\",\"headers\":"
         + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
         + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
