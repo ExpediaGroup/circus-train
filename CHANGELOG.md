@@ -1,4 +1,6 @@
 # Unreleased
+### Fixed
+# https://github.com/HotelsDotCom/circus-train/issues/23 - Housekeeping failing due to missing credentials.
 ### Added
 * Added `replicaTableLocation`, `replicaMetastoreUris` and  `partitionKeys` to SNS message.
 ### Changed
