@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -59,7 +60,9 @@ import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSuppli
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @org.springframework.context.annotation.Configuration
+@ComponentScan("com.hotels.circustrain")
 public class CommonBeans {
+
   private static final Logger LOG = LoggerFactory.getLogger(CommonBeans.class);
   public static final String BEAN_BASE_CONF = "baseConf";
 
