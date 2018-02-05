@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.housekeeping;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,8 +36,9 @@ public class CircusTrainHousekeepingConfiguration {
 
   @Bean
   HousekeepingService housekeepingService(
-      LegacyReplicaPathRepository legacyReplicaPathRepository) {
-    return new FileSystemHousekeepingService(legacyReplicaPathRepository, new org.apache.hadoop.conf.Configuration());
+      LegacyReplicaPathRepository legacyReplicaPathRepository,
+      @Qualifier("baseConf") org.apache.hadoop.conf.Configuration baseConf) {
+    return new FileSystemHousekeepingService(legacyReplicaPathRepository, baseConf);
   }
 
   @Bean
