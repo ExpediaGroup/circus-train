@@ -307,9 +307,9 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
+            <!-- configuration>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            </configuration>
+            </configuration-->
           </plugin>
         </plugins>
       </build>

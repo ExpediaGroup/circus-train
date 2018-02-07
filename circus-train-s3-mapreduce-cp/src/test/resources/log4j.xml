@@ -22,7 +22,7 @@
       <param name="ConversionPattern" value="%d{ISO8601} %-5p %c:%L - %m%n" />
     </layout>
   </appender>
-xxxx
+
   <logger name="com.hotels.bdp.circustrain">
     <level value="INFO" />
   </logger>
