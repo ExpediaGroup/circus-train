@@ -75,6 +75,8 @@ public class DynamicInputFormatTest {
   @BeforeClass
   public static void setup() throws Exception {
     LOG.warn("JAVA IO TMPDIR: " + System.getProperty("java.io.tmpdir"));
+    System.out.println("JAVA IO TMPDIR: " + System.getProperty("java.io.tmpdir"));
+    System.err.println("JAVA IO TMPDIR: " + System.getProperty("java.io.tmpdir"));
     cluster = S3MapReduceCpTestUtils
         .newMiniClusterBuilder(getConfigurationForCluster())
         .numDataNodes(1)
