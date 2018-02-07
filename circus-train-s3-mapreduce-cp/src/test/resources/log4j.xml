@@ -23,8 +23,16 @@
     </layout>
   </appender>
 
-  <logger name="com.hotels.bdp.circustrain">
-    <level value="INFO" />
+  <logger name="BlockStateChange">
+    <level value="WARN" />
+  </logger>
+
+  <logger name="org.apache.hadoop">
+    <level value="WARN" />
+  </logger>
+
+  <logger name="org.mortbay">
+    <level value="WARN" />
   </logger>
 
   <root>
