@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.DataOutputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,8 +47,9 @@ import org.apache.hadoop.security.Credentials;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListingFileStatus;
@@ -56,7 +58,6 @@ import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.StubContext;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
-@Ignore("Ignoring to see if removal of this test progresses the Travis build, TODO: remove this and fix issue in the test if so")
 public class DynamicInputFormatTest {
   private static final Log LOG = LogFactory.getLog(DynamicInputFormatTest.class);
 
@@ -67,9 +68,13 @@ public class DynamicInputFormatTest {
   private static final Credentials CREDENTIALS = new Credentials();
 
   private static List<String> expectedFilePaths = new ArrayList<>(N_FILES);
+  
+  @Rule
+  public  TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @BeforeClass
   public static void setup() throws Exception {
+    LOG.warn("JAVA IO TMPDIR: " + System.getProperty("java.io.tmpdir"));
     cluster = S3MapReduceCpTestUtils
         .newMiniClusterBuilder(getConfigurationForCluster())
         .numDataNodes(1)
@@ -117,6 +122,7 @@ public class DynamicInputFormatTest {
 
   @Test
   public void getSplits() throws Exception {
+    LOG.warn("JUNIT TMP FOLDER: " + temporaryFolder.newFile());
     S3MapReduceCpOptions options = getOptions();
     Configuration configuration = new Configuration();
     configuration.set("mapred.map.tasks", String.valueOf(options.getMaxMaps()));
