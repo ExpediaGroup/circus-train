@@ -46,10 +46,9 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.security.Credentials;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.DuplicateFileException;
@@ -60,28 +59,24 @@ import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 public class SimpleCopyListingTest {
 
   private static final Credentials CREDENTIALS = new Credentials();
-  private static final Configuration CONFIG = new Configuration();
+  private Configuration config = new Configuration();
 
-  private static MiniDFSCluster cluster;
+  private MiniDFSCluster cluster;
 
   private SimpleCopyListing listing;
 
-  @BeforeClass
-  public static void setup() throws Exception {
-    cluster = S3MapReduceCpTestUtils.newMiniClusterBuilder(CONFIG).build();
+  @Before
+  public void init() throws Exception {
+    cluster = S3MapReduceCpTestUtils.newMiniClusterBuilder(config).build();
+    listing = new SimpleCopyListing(config, CREDENTIALS);
+    delete(cluster.getFileSystem(), "/tmp");
   }
-
-  @AfterClass
-  public static void tearDown() {
+  
+  @After
+  public void tearDown() {
     if (cluster != null) {
       cluster.shutdown();
     }
-  }
-
-  @Before
-  public void init() throws Exception {
-    listing = new SimpleCopyListing(CONFIG, CREDENTIALS);
-    delete(cluster.getFileSystem(), "/tmp");
   }
 
   @Test
@@ -116,7 +111,7 @@ public class SimpleCopyListingTest {
     URI target = URI.create("s3://bucket/tmp/target/");
     Path listingPath = new Path(fileSystemPath.toString() + "/tmp/META/fileList.seq");
     listing.buildListing(listingPath, options(source, target));
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listingPath))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       Text key = new Text();
       CopyListingFileStatus value = new CopyListingFileStatus();
       Map<String, String> actualValues = new HashMap<>();
@@ -148,13 +143,12 @@ public class SimpleCopyListingTest {
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
     Path listingPath = new Path(fileSystemPath.toString() + "/tmp/META/fileList.seq");
-
-    Configuration config = new Configuration(CONFIG);
+    
     config.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
     listing = new SimpleCopyListing(config, CREDENTIALS);
     listing.buildListing(listingPath, options(p1, target));
 
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listingPath))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       Text key = new Text();
       CopyListingFileStatus value = new CopyListingFileStatus();
       Map<String, String> actualValues = new HashMap<>();
@@ -177,7 +171,7 @@ public class SimpleCopyListingTest {
     Path listingFile = new Path("/tmp/list4");
     listing.buildListing(listingFile, options(source, target));
     assertThat(listing.getNumberOfPaths(), is(2L));
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listingFile))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
       assertThat(reader.next(relativePath, fileStatus), is(true));
@@ -265,7 +259,7 @@ public class SimpleCopyListingTest {
 
     listing.buildListing(listFile, options(sourceFile, targetFile));
 
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listFile))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
       assertThat(reader.next(relativePath, fileStatus), is(true));
@@ -298,7 +292,7 @@ public class SimpleCopyListingTest {
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
 
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listFile))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
       assertThat(reader.next(relativePath, fileStatus), is(true));
@@ -315,7 +309,7 @@ public class SimpleCopyListingTest {
   @Test // (timeout = 10000)
   public void buildListingForMultipleSourcesWithRootPath() throws Exception {
     String testRootString = "/tmp/source";
-    Configuration conf = new Configuration(CONFIG);
+    Configuration conf = new Configuration(config);
     conf.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, testRootString);
     listing = new SimpleCopyListing(conf, CREDENTIALS);
 
@@ -341,7 +335,7 @@ public class SimpleCopyListingTest {
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
 
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(CONFIG, SequenceFile.Reader.file(listFile))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
       assertThat(reader.next(relativePath, fileStatus), is(true));
@@ -390,7 +384,7 @@ public class SimpleCopyListingTest {
     SequenceFile.Writer writer = mock(SequenceFile.Writer.class);
     doThrow(expectedEx).when(writer).close();
 
-    SimpleCopyListing listing = new SimpleCopyListing(CONFIG, CREDENTIALS);
+    SimpleCopyListing listing = new SimpleCopyListing(config, CREDENTIALS);
     Exception actualEx = null;
     try {
       listing.doBuildListing(writer, options(source, outFile.toURI()));
@@ -401,11 +395,11 @@ public class SimpleCopyListingTest {
     Assert.assertEquals(expectedEx, actualEx);
   }
 
-  private static S3MapReduceCpOptions options(Path source, URI target) {
+  private S3MapReduceCpOptions options(Path source, URI target) {
     return options(Arrays.asList(source), target);
   }
 
-  private static S3MapReduceCpOptions options(List<Path> sources, URI target) {
+  private S3MapReduceCpOptions options(List<Path> sources, URI target) {
     return S3MapReduceCpOptions.builder(sources, target).build();
   }
 
