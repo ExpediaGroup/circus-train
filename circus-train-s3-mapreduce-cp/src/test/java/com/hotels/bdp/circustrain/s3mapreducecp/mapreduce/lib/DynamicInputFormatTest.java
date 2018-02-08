@@ -34,6 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.hdfs.MiniDFSCluster.NameNodeInfo;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -77,7 +78,7 @@ public class DynamicInputFormatTest {
         .numDataNodes(1)
         .format(true)
         .build();
-
+    LOG.info("Cluster created, is cluster up: " + cluster.isClusterUp());
     for (int i = 0; i < N_FILES; ++i) {
       createFile(temporaryFolder.getRoot() + "/source/" + String.valueOf(i));
     }

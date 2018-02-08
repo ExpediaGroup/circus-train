@@ -30,6 +30,14 @@
   <logger name="org.apache.hadoop">
     <level value="WARN" />
   </logger>
+  
+  <logger name="org.apache.hadoop.hdfs.MiniDFSCluster">
+    <level value="DEBUG" />
+  </logger>
+  
+  <logger name="org.apache.hadoop.http.HttpServer2">
+    <level value="DEBUG" />
+  </logger>
 
   <logger name="org.mortbay">
     <level value="WARN" />
