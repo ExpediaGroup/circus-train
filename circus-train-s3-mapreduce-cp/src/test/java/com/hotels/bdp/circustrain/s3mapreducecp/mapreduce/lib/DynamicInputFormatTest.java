@@ -89,35 +89,35 @@ public class DynamicInputFormatTest {
     }
   }
 
-  @After
-  public void destroy() throws InterruptedException, ExecutionException {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    Future<Void> submit = executorService.submit(new ClusterShutdownTask());
-    try {
-      submit.get(10, TimeUnit.SECONDS);
-    } catch (TimeoutException e) {
-      log.warn("Didn't manage to cleanly shut down cluster", e);
-    }
-    log.info("Shutting down service");
-    executorService.shutdownNow();
-    log.info("Shut down service");
-  }
-
-  private final class ClusterShutdownTask implements Callable<Void> {
-
-    @Override
-    public Void call() throws Exception {
-      log.info("Shutting down cluster");
-      if (cluster != null) {
-        //below sometimes blocks so we put it in a thread so we can at least try do a shutdown but 
-        //can also continue test even if this doesn't complete
-        cluster.shutdown();
-      }
-      log.info("Cluster shut down");
-      return null;
-    }
-
-  }
+//  @After
+//  public void destroy() throws InterruptedException, ExecutionException {
+//    ExecutorService executorService = Executors.newSingleThreadExecutor();
+//    Future<Void> submit = executorService.submit(new ClusterShutdownTask());
+//    try {
+//      submit.get(10, TimeUnit.SECONDS);
+//    } catch (TimeoutException e) {
+//      log.warn("Didn't manage to cleanly shut down cluster", e);
+//    }
+//    log.info("Shutting down service");
+//    executorService.shutdownNow();
+//    log.info("Shut down service");
+//  }
+//
+//  private final class ClusterShutdownTask implements Callable<Void> {
+//
+//    @Override
+//    public Void call() throws Exception {
+//      log.info("Shutting down cluster");
+//      if (cluster != null) {
+//        //below sometimes blocks so we put it in a thread so we can at least try do a shutdown but 
+//        //can also continue test even if this doesn't complete
+//        cluster.shutdown();
+//      }
+//      log.info("Cluster shut down");
+//      return null;
+//    }
+//
+//  }
 
   private Configuration getConfigurationForCluster() {
     Configuration configuration = new Configuration();
