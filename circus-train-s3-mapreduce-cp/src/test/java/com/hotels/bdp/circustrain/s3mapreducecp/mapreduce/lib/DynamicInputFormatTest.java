@@ -85,11 +85,11 @@ public class DynamicInputFormatTest {
 
   @After
   public void destroy() {
-    log.info("Shutting down cluster");
-    if (cluster != null) {
-      cluster.shutdown();
-    }
-    log.info("Cluster shut down");
+//    log.info("Shutting down cluster");
+//    if (cluster != null) {
+//      cluster.shutdown();
+//    }
+//    log.info("Cluster shut down");
   }
 
   private Configuration getConfigurationForCluster() {

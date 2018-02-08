@@ -78,11 +78,11 @@ public class SimpleCopyListingTest {
 
   @After
   public void tearDown() {
-    log.info("Shutting down cluster");
-    if (cluster != null) {
-      cluster.shutdown();
-    }
-    log.info("Cluster shut down");
+//    log.info("Shutting down cluster");
+//    if (cluster != null) {
+//      cluster.shutdown();
+//    }
+//    log.info("Cluster shut down");
   }
 
   @Test
