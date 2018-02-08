@@ -50,7 +50,7 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.TableReplications;
-import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
+import com.hotels.housekeeping.model.HousekeepingLegacyReplicaPath;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 import com.hotels.housekeeping.service.HousekeepingService;
@@ -137,7 +137,7 @@ class VacuumToolApplication implements ApplicationRunner {
 
   @VisibleForTesting
   void vacuumTable(String databaseName, String tableName)
-      throws MetaException, TException, NoSuchObjectException, URISyntaxException, IOException {
+    throws MetaException, TException, NoSuchObjectException, URISyntaxException, IOException {
     Table table = metastore.getTable(databaseName, tableName);
 
     TablePathResolver pathResolver = TablePathResolver.Factory.newTablePathResolver(metastore, table);
@@ -187,9 +187,8 @@ class VacuumToolApplication implements ApplicationRunner {
     LOG.info("REMOVE path '{}', dereferenced and can be deleted.", toRemove);
     if (!isDryRun) {
       String previousEventId = EventIdExtractor.extractFrom(toRemove);
-      housekeepingService
-          .scheduleForHousekeeping(
-              new CircusTrainLegacyReplicaPath(vacuumEventId, previousEventId, toRemove.toUri().toString()));
+      housekeepingService.scheduleForHousekeeping(
+          new HousekeepingLegacyReplicaPath(vacuumEventId, previousEventId, toRemove.toUri().toString()));
       LOG.info("Scheduled path '{}' for deletion.", toRemove);
     } else {
       LOG.warn("DRY RUN ENABLED: path '{}' left as is.", toRemove);

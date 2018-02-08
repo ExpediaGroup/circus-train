@@ -52,7 +52,7 @@ import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.conf.ReplicaTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.TableReplications;
-import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
+import com.hotels.housekeeping.model.HousekeepingLegacyReplicaPath;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 import com.hotels.housekeeping.service.HousekeepingService;
@@ -145,7 +145,7 @@ public class VacuumToolApplicationTest {
 
     when(clientSupplier.get()).thenReturn(client);
 
-    LegacyReplicaPath legacyReplicaPath = new CircusTrainLegacyReplicaPath("eventId", PARTITION_EVENT_1,
+    LegacyReplicaPath legacyReplicaPath = new HousekeepingLegacyReplicaPath("eventId", PARTITION_EVENT_1,
         partitionLocation1);
     when(legacyReplicaPathRepository.findAll()).thenReturn(Arrays.<LegacyReplicaPath> asList(legacyReplicaPath));
 
@@ -206,9 +206,8 @@ public class VacuumToolApplicationTest {
         .thenReturn(Collections.singletonList(partition));
 
     // The HK references path 2
-    when(legacyReplicaPathRepository.findAll())
-        .thenReturn(Collections.singletonList(
-            new CircusTrainLegacyReplicaPath("eventId", PARTITION_EVENT_2, partitionLocation2)));
+    when(legacyReplicaPathRepository.findAll()).thenReturn(
+        Collections.singletonList(new HousekeepingLegacyReplicaPath("eventId", PARTITION_EVENT_2, partitionLocation2)));
 
     // So we expect path 3 to be scheduled for removal
     VacuumToolApplication tool = new VacuumToolApplication(conf, clientSupplier, legacyReplicaPathRepository,

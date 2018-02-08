@@ -19,7 +19,7 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.housekeeping.model.CircusTrainLegacyReplicaPath;
+import com.hotels.housekeeping.model.HousekeepingLegacyReplicaPath;
 import com.hotels.housekeeping.service.HousekeepingService;
 
 public class JdbcHousekeepingListener implements HousekeepingListener {
@@ -30,6 +30,6 @@ public class JdbcHousekeepingListener implements HousekeepingListener {
   @Override
   public void cleanUpLocation(String eventId, String pathEventId, Path location) {
     cleanUpPathService
-        .scheduleForHousekeeping(new CircusTrainLegacyReplicaPath(eventId, pathEventId, location.toUri().toString()));
+        .scheduleForHousekeeping(new HousekeepingLegacyReplicaPath(eventId, pathEventId, location.toUri().toString()));
   }
 }

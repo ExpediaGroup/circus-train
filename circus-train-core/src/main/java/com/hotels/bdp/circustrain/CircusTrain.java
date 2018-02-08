@@ -90,6 +90,7 @@ public class CircusTrain {
           .properties("instance.home:${user.home}")
           .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
           .properties("jasypt.encryptor.password:${password:null}")
+          .properties("housekeeping.schema-name:circus_train")
           .registerShutdownHook(true)
           .initializers(new ExtensionInitializer())
           .listeners(new ConfigFileValidationApplicationListener())

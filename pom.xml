@@ -61,6 +61,7 @@
     <derby.version>10.10.2.0</derby.version>
     <beeju.version>1.2.1</beeju.version>
     <hamcrest-library.version>1.3</hamcrest-library.version>
+    <housekeeping.version>1.0.2-SNAPSHOT</housekeeping.version>
   </properties>
 
   <dependencyManagement>
@@ -69,9 +70,9 @@
       <dependency>
         <groupId>com.hotels</groupId>
         <artifactId>housekeeping</artifactId>
-        <version>1.0.1</version>
+        <version>${housekeeping.version}</version>
       </dependency>
-      
+
       <dependency>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
