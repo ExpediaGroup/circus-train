@@ -98,7 +98,9 @@ public class DynamicInputFormatTest {
     } catch (TimeoutException e) {
       log.warn("Didn't manage to cleanly shut down cluster", e);
     }
+    log.info("Shutting down service");
     executorService.shutdownNow();
+    log.info("Shut down service");
   }
 
   private final class ClusterShutdownTask implements Callable<Void> {
