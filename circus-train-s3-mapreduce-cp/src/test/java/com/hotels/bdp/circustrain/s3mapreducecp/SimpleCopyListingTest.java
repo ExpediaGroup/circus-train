@@ -39,57 +39,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.security.Credentials;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.DuplicateFileException;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.InvalidInputException;
-import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.lib.DynamicInputFormatTest;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;
-import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
 public class SimpleCopyListingTest {
 
-  private static final Log log = LogFactory.getLog(SimpleCopyListingTest.class);
   private static final Credentials CREDENTIALS = new Credentials();
   private Configuration config = new Configuration();
 
-  private MiniDFSCluster cluster;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private SimpleCopyListing listing;
+  private SimpleCopyListing listing = new SimpleCopyListing(config, CREDENTIALS);
+  private String temporaryRoot;
 
   @Before
   public void init() throws Exception {
-    cluster = S3MapReduceCpTestUtils.newMiniClusterBuilder(config).build();
-    listing = new SimpleCopyListing(config, CREDENTIALS);
-    delete(cluster.getFileSystem(), "/tmp");
-  }
-
-  @After
-  public void tearDown() {
-//    log.info("Shutting down cluster");
-//    if (cluster != null) {
-//      cluster.shutdown();
-//    }
-//    log.info("Cluster shut down");
+    temporaryRoot = temporaryFolder.getRoot().getAbsolutePath();
   }
 
   @Test
   public void typical() throws Exception {
     Map<String, String> expectedValues = new HashMap<>();
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/source");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/source");
     Path p1 = new Path(source, "1");
     Path p2 = new Path(source, "2");
     Path p3 = new Path(source, "2/3");
@@ -115,7 +101,7 @@ public class SimpleCopyListingTest {
     Path fileSystemPath = new Path(uri.toString());
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
-    Path listingPath = new Path(fileSystemPath.toString() + "/tmp/META/fileList.seq");
+    Path listingPath = new Path(fileSystemPath.toString() + "///" + temporaryRoot + "/META/fileList.seq");
     listing.buildListing(listingPath, options(source, target));
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       Text key = new Text();
@@ -139,8 +125,8 @@ public class SimpleCopyListingTest {
 
   @Test
   public void emptyDirectoriesAreIgnored() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/source");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/source");
     Path p1 = new Path(source, "1");
     fs.mkdirs(p1);
 
@@ -148,10 +134,12 @@ public class SimpleCopyListingTest {
     Path fileSystemPath = new Path(uri.toString());
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
-    Path listingPath = new Path(fileSystemPath.toString() + "/tmp/META/fileList.seq");
 
-    config.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
-    listing = new SimpleCopyListing(config, CREDENTIALS);
+    Path listingPath = new Path(fileSystemPath.toString() + "//" + temporaryRoot + "/META/fileList.seq");
+    
+    Configuration conf = new Configuration(config);
+    conf.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
+    listing = new SimpleCopyListing(conf, CREDENTIALS);
     listing.buildListing(listingPath, options(p1, target));
 
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
@@ -168,16 +156,16 @@ public class SimpleCopyListingTest {
 
   @Test(timeout = 10000)
   public void skipFlagFiles() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/in4");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/in4");
     URI target = URI.create("s3://bucket/tmp/out4/");
     createFile(fs, new Path(source, "1/_SUCCESS"));
     createFile(fs, new Path(source, "1/file"));
     createFile(fs, new Path(source, "2"));
-    Path listingFile = new Path("/tmp/list4");
-    listing.buildListing(listingFile, options(source, target));
+    Path listingPath = new Path(temporaryRoot + "/list4");
+    listing.buildListing(listingPath, options(source, target));
     assertThat(listing.getNumberOfPaths(), is(2L));
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingFile))) {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
       assertThat(reader.next(relativePath, fileStatus), is(true));
@@ -190,30 +178,30 @@ public class SimpleCopyListingTest {
 
   @Test(expected = InvalidInputException.class)
   public void glob() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/in/*/*");
-    createFile(fs, "/tmp/in/src1/1.txt");
-    createFile(fs, "/tmp/in/src2/1.txt");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/in/*/*");
+    createFile(fs, temporaryRoot + "/in/src1/1.txt");
+    createFile(fs, temporaryRoot + "/in/src2/1.txt");
     URI target = URI.create("s3://bucket/tmp/out");
-    Path listingFile = new Path("/tmp/list");
+    Path listingFile = new Path(temporaryRoot + "/list");
     listing.buildListing(listingFile, options(source, target));
   }
 
   @Test(expected = InvalidInputException.class)
   public void copyDirToFile() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/in/");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/in/");
     createFile(fs, new Path(source, "1.txt"));
     createFile(fs, new Path(source, "2.txt"));
     URI target = URI.create("s3://bucket/tmp/out");
-    Path listingFile = new Path("/tmp/list");
+    Path listingFile = new Path(temporaryRoot + "/list");
     listing.buildListing(listingFile, options(source, target));
   }
 
   @Test(timeout = 10000)
   public void numberOfPathsAndNumberOfBytes() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    Path source = new Path("/tmp/in");
+    FileSystem fs = FileSystem.get(config);
+    Path source = new Path(temporaryRoot + "/in");
     Path p1 = new Path(source, "1");
     Path p2 = new Path(source, "2");
     URI target = URI.create("s3://bucket/tmp/out/");
@@ -227,7 +215,7 @@ public class SimpleCopyListingTest {
     out.write("DEF".getBytes());
     out.close();
 
-    Path listingFile = new Path("/tmp/file");
+    Path listingFile = new Path(temporaryRoot + "/file");
 
     listing.buildListing(listingFile, options(source, target));
     assertThat(listing.getBytesToCopy(), is(6L));
@@ -236,9 +224,9 @@ public class SimpleCopyListingTest {
 
   @Test(timeout = 10000)
   public void invalidInput() throws Exception {
-    Path source = new Path("/tmp/path/does/not/exist");
+    Path source = new Path(temporaryRoot + "/path/does/not/exist");
     URI target = URI.create("s3://bucket/tmp/out");
-    Path listingFile = new Path("/tmp/file");
+    Path listingFile = new Path(temporaryRoot + "/file");
     try {
       listing.buildListing(listingFile, options(source, target));
       fail("Invalid input not detected");
@@ -247,8 +235,8 @@ public class SimpleCopyListingTest {
 
   @Test(timeout = 10000)
   public void buildListingForSingleFile() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    String testRootString = "/tmp/source";
+    FileSystem fs = FileSystem.get(config);
+    String testRootString = temporaryRoot + "/source";
     Path testRoot = new Path(testRootString);
     if (fs.exists(testRoot)) {
       delete(fs, testRootString);
@@ -261,7 +249,7 @@ public class SimpleCopyListingTest {
     createFile(fs, sourceFile.toString());
     createFile(fs, decoyFile.toString());
 
-    final Path listFile = new Path(testRoot, "/tmp/fileList.seq");
+    final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(sourceFile, targetFile));
 
@@ -275,8 +263,8 @@ public class SimpleCopyListingTest {
 
   @Test(timeout = 10000)
   public void buildListingForMultipleSources() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    String testRootString = "/tmp/source";
+    FileSystem fs = FileSystem.get(config);
+    String testRootString = temporaryRoot + "/source";
     Path testRoot = new Path(testRootString);
     if (fs.exists(testRoot)) {
       delete(fs, testRootString);
@@ -294,7 +282,7 @@ public class SimpleCopyListingTest {
     createFile(fs, new Path(sourceDir2, "bang_0.dat"));
     createFile(fs, sourceFile1.toString());
 
-    final Path listFile = new Path(testRoot, "/tmp/fileList.seq");
+    final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
 
@@ -312,14 +300,14 @@ public class SimpleCopyListingTest {
     }
   }
 
-  @Test // (timeout = 10000)
+  @Test (timeout = 10000)
   public void buildListingForMultipleSourcesWithRootPath() throws Exception {
-    String testRootString = "/tmp/source";
+    String testRootString = temporaryRoot + "/source";
     Configuration conf = new Configuration(config);
     conf.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, testRootString);
     listing = new SimpleCopyListing(conf, CREDENTIALS);
 
-    FileSystem fs = cluster.getFileSystem();
+    FileSystem fs = FileSystem.get(config);
     Path testRoot = new Path(testRootString);
     if (fs.exists(testRoot)) {
       delete(fs, testRootString);
@@ -337,7 +325,7 @@ public class SimpleCopyListingTest {
     createFile(fs, new Path(sourceDir2, "0.dat"));
     createFile(fs, sourceFile1.toString());
 
-    final Path listFile = new Path(testRoot, "/tmp/fileList.seq");
+    final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
 
@@ -357,8 +345,8 @@ public class SimpleCopyListingTest {
 
   @Test(expected = DuplicateFileException.class)
   public void failOnDuplicateFile() throws Exception {
-    FileSystem fs = cluster.getFileSystem();
-    String testRootString = "/tmp/source";
+    FileSystem fs = FileSystem.get(config);
+    String testRootString = temporaryRoot + "/source";
     Path testRoot = new Path(testRootString);
     if (fs.exists(testRoot)) {
       delete(fs, testRootString);
@@ -373,7 +361,7 @@ public class SimpleCopyListingTest {
     createFile(fs, new Path(sourceDir1, "1.dat"));
     createFile(fs, new Path(sourceDir2, "1.dat"));
 
-    final Path listFile = new Path(testRoot, "/tmp/fileList.seq");
+    final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(Arrays.asList(sourceDir1, sourceDir2), target));
   }
@@ -390,7 +378,6 @@ public class SimpleCopyListingTest {
     SequenceFile.Writer writer = mock(SequenceFile.Writer.class);
     doThrow(expectedEx).when(writer).close();
 
-    SimpleCopyListing listing = new SimpleCopyListing(config, CREDENTIALS);
     Exception actualEx = null;
     try {
       listing.doBuildListing(writer, options(source, outFile.toURI()));
