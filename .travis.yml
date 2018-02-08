@@ -7,9 +7,8 @@ cache:
   directories:
     - ~/.m2/repository
 install:
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true --quiet --batch-mode --show-version --activate-profiles travis
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true --quiet --batch-mode --show-version
 before_script:
   - echo "MAVEN_OPTS=${TEST_MEM_SETTINGS}" > ~/.mavenrc
 script:
-#  - mvn -DfailIfNoTests=false -Dtest=DynamicInputFormatTest test --batch-mode --activate-profiles travis -Dtest.arguments="${TEST_MEM_SETTINGS}"
-  - mvn cobertura:cobertura coveralls:report --batch-mode --activate-profiles travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
+  - mvn cobertura:cobertura coveralls:report --batch-mode -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
