@@ -27,6 +27,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,12 +91,29 @@ public class DynamicInputFormatTest {
   }
 
   @After
-  public void destroy() {
-    log.info("Shutting down cluster");
-    if (cluster != null) {
-      cluster.shutdown();
+  public void destroy() throws InterruptedException, ExecutionException {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    Future<Void> submit = executorService.submit(new ClusterShutdownTask());
+    try {
+      submit.get(10, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
+      log.warn("Didn't manage to cleanly shut down cluster", e);
     }
-    log.info("Cluster shut down");
+    executorService.shutdownNow();
+  }
+
+  private final class ClusterShutdownTask implements Callable<Void> {
+
+    @Override
+    public Void call() throws Exception {
+      log.info("Shutting down cluster");
+      if (cluster != null) {
+        cluster.shutdown();
+      }
+      log.info("Cluster shut down");
+      return null;
+    }
+
   }
 
   private Configuration getConfigurationForCluster() {
