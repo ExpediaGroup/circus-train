@@ -58,7 +58,7 @@ import com.hotels.bdp.circustrain.s3mapreducecp.StubContext;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
 public class DynamicInputFormatTest {
-  private static final Log LOG = LogFactory.getLog(DynamicInputFormatTest.class);
+  private static final Log log = LogFactory.getLog(DynamicInputFormatTest.class);
 
   private static final int N_FILES = 1000;
   private static final int NUM_SPLITS = 7;
@@ -77,7 +77,7 @@ public class DynamicInputFormatTest {
         .numDataNodes(1)
         .format(true)
         .build();
-    LOG.info("Cluster created, is cluster up: " + cluster.isClusterUp());
+    log.info("Cluster created, is cluster up: " + cluster.isClusterUp());
     for (int i = 0; i < N_FILES; ++i) {
       createFile(temporaryFolder.getRoot() + "/source/" + String.valueOf(i));
     }
@@ -85,17 +85,19 @@ public class DynamicInputFormatTest {
 
   @After
   public void destroy() {
+    log.info("Shutting down cluster");
     if (cluster != null) {
       cluster.shutdown();
     }
+    log.info("Cluster shut down");
   }
 
   private Configuration getConfigurationForCluster() {
     Configuration configuration = new Configuration();
     System.setProperty("test.build.data", "target/tmp/build/TEST_DYNAMIC_INPUT_FORMAT/data");
     configuration.set("hadoop.log.dir", "target/tmp");
-    LOG.debug("fs.default.name  == " + configuration.get("fs.default.name"));
-    LOG.debug("dfs.http.address == " + configuration.get("dfs.http.address"));
+    log.debug("fs.default.name  == " + configuration.get("fs.default.name"));
+    log.debug("dfs.http.address == " + configuration.get("dfs.http.address"));
     return configuration;
   }
 

@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -53,11 +55,13 @@ import org.junit.Test;
 
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.DuplicateFileException;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.InvalidInputException;
+import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.lib.DynamicInputFormatTest;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
 public class SimpleCopyListingTest {
 
+  private static final Log log = LogFactory.getLog(SimpleCopyListingTest.class);
   private static final Credentials CREDENTIALS = new Credentials();
   private Configuration config = new Configuration();
 
@@ -71,12 +75,14 @@ public class SimpleCopyListingTest {
     listing = new SimpleCopyListing(config, CREDENTIALS);
     delete(cluster.getFileSystem(), "/tmp");
   }
-  
+
   @After
   public void tearDown() {
+    log.info("Shutting down cluster");
     if (cluster != null) {
       cluster.shutdown();
     }
+    log.info("Cluster shut down");
   }
 
   @Test
@@ -143,7 +149,7 @@ public class SimpleCopyListingTest {
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
     Path listingPath = new Path(fileSystemPath.toString() + "/tmp/META/fileList.seq");
-    
+
     config.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
     listing = new SimpleCopyListing(config, CREDENTIALS);
     listing.buildListing(listingPath, options(p1, target));
