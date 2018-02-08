@@ -59,7 +59,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.Assertion;
@@ -883,12 +882,12 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     exit.expectSystemExitWithStatus(-1);
     File config = dataFolder.getFile("full-replication-failure.yml");
     CircusTrainRunner
-    .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-    .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-        sourceCatalog.driverClassName())
-    .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-    .build()
-    .run(config.getAbsolutePath());
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build()
+        .run(config.getAbsolutePath());
   }
 
   @Test
