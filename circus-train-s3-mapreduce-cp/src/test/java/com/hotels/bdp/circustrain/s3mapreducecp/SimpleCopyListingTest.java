@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
+ * Copyright (C) 2016-2018 Expedia Inc and Apache Hadoop contributors.
  *
  * Based on {@code org.apache.hadoop.tools.TestCopyListing}, {@code org.apache.hadoop.tools.TestFileBasedCopyListing} and {@code org.apache.hadoop.tools.TestGlobbedCopyListing} from Hadoop DistCp 2.7.1:
  *
@@ -101,7 +101,7 @@ public class SimpleCopyListingTest {
     Path fileSystemPath = new Path(uri.toString());
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
-    Path listingPath = new Path(fileSystemPath.toString() + "///" + temporaryRoot + "/META/fileList.seq");
+    Path listingPath = new Path(fileSystemPath.toString() + "/" + temporaryRoot + "/META/fileList.seq");
     listing.buildListing(listingPath, options(source, target));
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       Text key = new Text();
@@ -135,7 +135,7 @@ public class SimpleCopyListingTest {
     source = new Path(fileSystemPath.toString(), source);
     URI target = URI.create("s3://bucket/tmp/target/");
 
-    Path listingPath = new Path(fileSystemPath.toString() + "//" + temporaryRoot + "/META/fileList.seq");
+    Path listingPath = new Path(fileSystemPath.toString() + "/" + temporaryRoot + "/META/fileList.seq");
     
     Configuration conf = new Configuration(config);
     conf.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
