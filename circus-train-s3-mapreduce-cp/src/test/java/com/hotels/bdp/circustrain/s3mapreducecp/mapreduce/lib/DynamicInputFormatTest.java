@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
+ * Copyright (C) 2016-2018 Expedia Inc and Apache Hadoop contributors.
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.TestDynamicInputFormat} from Hadoop DistCp 2.7.1:
  *
