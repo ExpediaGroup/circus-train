@@ -108,6 +108,8 @@ public class DynamicInputFormatTest {
     public Void call() throws Exception {
       log.info("Shutting down cluster");
       if (cluster != null) {
+        //below sometimes blocks so we put it in a thread so we can at least try do a shutdown but 
+        //can also continue test even if this doesn't complete
         cluster.shutdown();
       }
       log.info("Cluster shut down");
