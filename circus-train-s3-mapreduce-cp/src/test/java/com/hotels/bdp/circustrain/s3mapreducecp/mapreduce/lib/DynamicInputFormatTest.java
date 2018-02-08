@@ -84,7 +84,6 @@ public class DynamicInputFormatTest {
         .numDataNodes(1)
         .format(true)
         .build();
-    log.info("Cluster created, is cluster up: " + cluster.isClusterUp());
     for (int i = 0; i < N_FILES; ++i) {
       createFile(temporaryFolder.getRoot() + "/source/" + String.valueOf(i));
     }
