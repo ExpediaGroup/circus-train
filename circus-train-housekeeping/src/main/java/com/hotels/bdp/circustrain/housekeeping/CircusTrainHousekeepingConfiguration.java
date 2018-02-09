@@ -29,10 +29,12 @@ import com.hotels.housekeeping.service.HousekeepingService;
 import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
 
 @Configuration
-@ComponentScan("com.hotels.housekeeping")
-@EntityScan(basePackages = { "com.hotels.housekeeping" })
-@EnableJpaRepositories(basePackages = { "com.hotels.bdp.circustrain.housekeeping.repository" })
+@ComponentScan(CircusTrainHousekeepingConfiguration.HOUSEKEEPING_PACKAGE)
+@EntityScan(basePackages = { CircusTrainHousekeepingConfiguration.HOUSEKEEPING_PACKAGE })
+@EnableJpaRepositories(basePackages = { CircusTrainHousekeepingConfiguration.HOUSEKEEPING_PACKAGE })
 public class CircusTrainHousekeepingConfiguration {
+
+  final static String HOUSEKEEPING_PACKAGE = "com.hotels.housekeeping";
 
   @Bean
   HousekeepingService housekeepingService(
