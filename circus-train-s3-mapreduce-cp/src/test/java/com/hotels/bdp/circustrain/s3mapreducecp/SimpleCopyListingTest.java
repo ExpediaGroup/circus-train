@@ -21,14 +21,13 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecp;
 
+import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.createFile;
+import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.delete;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-
-import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.createFile;
-import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.delete;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +37,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -51,6 +51,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.google.common.collect.Sets;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.DuplicateFileException;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.InvalidInputException;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;
@@ -58,7 +59,7 @@ import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;
 public class SimpleCopyListingTest {
 
   private static final Credentials CREDENTIALS = new Credentials();
-  private Configuration config = new Configuration();
+  private final Configuration config = new Configuration();
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -136,7 +137,7 @@ public class SimpleCopyListingTest {
     URI target = URI.create("s3://bucket/tmp/target/");
 
     Path listingPath = new Path(fileSystemPath.toString() + "/" + temporaryRoot + "/META/fileList.seq");
-    
+
     Configuration conf = new Configuration(config);
     conf.set(SimpleCopyListing.CONF_LABEL_ROOT_PATH, source.toString());
     listing = new SimpleCopyListing(conf, CREDENTIALS);
@@ -165,15 +166,20 @@ public class SimpleCopyListingTest {
     Path listingPath = new Path(temporaryRoot + "/list4");
     listing.buildListing(listingPath, options(source, target));
     assertThat(listing.getNumberOfPaths(), is(2L));
+
+    Set<String> expectedRelativePaths = Sets.newHashSet("/1/file", "/2");
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listingPath))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/1/file"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/2"));
-      assertThat(reader.next(relativePath, fileStatus), is(false));
+      int relativePathCount = expectedRelativePaths.size();
+      for (int i = 0; i < relativePathCount; i++) {
+        assertThat(reader.next(relativePath, fileStatus), is(true));
+        assertThat("Expected path not found " + relativePath.toString(),
+            expectedRelativePaths.remove(relativePath.toString()), is(true));
+      }
     }
+    assertThat("Expected relativePaths to be empty but was: " + expectedRelativePaths, expectedRelativePaths.isEmpty(),
+        is(true));
   }
 
   @Test(expected = InvalidInputException.class)
@@ -230,7 +236,8 @@ public class SimpleCopyListingTest {
     try {
       listing.buildListing(listingFile, options(source, target));
       fail("Invalid input not detected");
-    } catch (InvalidInputException ignore) {}
+    } catch (InvalidInputException ignore) {
+    }
   }
 
   @Test(timeout = 10000)
@@ -285,22 +292,22 @@ public class SimpleCopyListingTest {
     final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
-
+    Set<String> expectedRelativePaths = Sets.newHashSet("/source.txt", "/baz_1.dat", "/baz_2.dat", "/bang_0.dat");
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/source.txt"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/baz_1.dat"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/baz_2.dat"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/bang_0.dat"));
+      int relativePathCount = expectedRelativePaths.size();
+      for (int i = 0; i < relativePathCount; i++) {
+        assertThat(reader.next(relativePath, fileStatus), is(true));
+        assertThat("Expected path not found " + relativePath.toString(),
+            expectedRelativePaths.remove(relativePath.toString()), is(true));
+      }
     }
+    assertThat("Expected relativePaths to be empty but was: " + expectedRelativePaths, expectedRelativePaths.isEmpty(),
+        is(true));
   }
 
-  @Test (timeout = 10000)
+  @Test(timeout = 10000)
   public void buildListingForMultipleSourcesWithRootPath() throws Exception {
     String testRootString = temporaryRoot + "/source";
     Configuration conf = new Configuration(config);
@@ -328,19 +335,20 @@ public class SimpleCopyListingTest {
     final Path listFile = new Path(testRoot, temporaryRoot + "/fileList.seq");
 
     listing.buildListing(listFile, options(Arrays.asList(sourceFile1, sourceDir1, sourceDir2), target));
-
+    Set<String> expectedRelativePaths = Sets.newHashSet("/foo/bar/source.txt", "/foo/baz/0.dat", "/foo/baz/1.dat",
+        "/foo/bang/0.dat");
     try (SequenceFile.Reader reader = new SequenceFile.Reader(config, SequenceFile.Reader.file(listFile))) {
       CopyListingFileStatus fileStatus = new CopyListingFileStatus();
       Text relativePath = new Text();
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/foo/bar/source.txt"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/foo/baz/0.dat"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/foo/baz/1.dat"));
-      assertThat(reader.next(relativePath, fileStatus), is(true));
-      assertThat(relativePath.toString(), is("/foo/bang/0.dat"));
+      int relativePathCount = expectedRelativePaths.size();
+      for (int i = 0; i < relativePathCount; i++) {
+        assertThat(reader.next(relativePath, fileStatus), is(true));
+        assertThat("Expected path not found " + relativePath.toString(),
+            expectedRelativePaths.remove(relativePath.toString()), is(true));
+      }
     }
+    assertThat("Expected relativePaths to be empty but was: " + expectedRelativePaths, expectedRelativePaths.isEmpty(),
+        is(true));
   }
 
   @Test(expected = DuplicateFileException.class)
