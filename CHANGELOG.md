@@ -1,3 +1,7 @@
+# 11.1.1 - TBD
+### Changed
+* Upgrade housekeeping to version 1.0.2
+
 # 11.1.0 - 2018-02-05
 ### Fixed
 * https://github.com/HotelsDotCom/circus-train/issues/23 - Housekeeping failing due to missing credentials.
