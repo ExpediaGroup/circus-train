@@ -34,7 +34,7 @@
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
-    
+
     <!-- Test -->
     <dependency>
       <groupId>org.hamcrest</groupId>
