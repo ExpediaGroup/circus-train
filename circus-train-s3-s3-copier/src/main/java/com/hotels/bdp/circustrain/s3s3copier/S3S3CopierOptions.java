@@ -23,6 +23,7 @@ import org.apache.commons.collections.MapUtils;
 
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
 
+//TODO: maybe I haven't looked in the right place but I can't seem to find where we document these
 public class S3S3CopierOptions {
 
   public static enum Keys {
@@ -40,7 +41,12 @@ public class S3S3CopierOptions {
      * S3 endpoint to use when creating S3 clients. To configure a specific region,
      * {@code S3_ENDPOINT_URI + "." + REGION} can be used as a copier option.
      */
-    S3_ENDPOINT_URI("s3-endpoint-uri");
+    S3_ENDPOINT_URI("s3-endpoint-uri"),
+    // TODO: review naming of below and how this gets wired in and at what level we want this (s3 or s3s3) with DDC
+    /**
+     * Server-side encryption algorithm used when encrypting uploaded objects using AWS-managed keys.
+     */
+    SSE_ALGORITHM("s3-sse-algorithm");
 
     private final String keyName;
 
@@ -89,6 +95,10 @@ public class S3S3CopierOptions {
       return null;
     }
     return URI.create(endpoint);
+  }
+
+  public String getSSEAlgorithm() {
+    return MapUtils.getString(copierOptions, Keys.SSE_ALGORITHM.keyName(), null);
   }
 
 }
