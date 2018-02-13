@@ -15,13 +15,12 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
-import com.hotels.bdp.circustrain.metrics.JobMetrics;
+import static java.util.Collections.singletonList;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,35 +31,24 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 
-import static java.util.Collections.singletonList;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
+import com.hotels.bdp.circustrain.metrics.JobMetrics;
 
 public class DistCpCopier implements Copier {
 
-  interface DistCpExecutor {
-
-    static final DistCpExecutor DEFAULT = new DistCpExecutor() {
-      @Override
-      public Job exec(Configuration conf, DistCpOptions options) throws Exception {
-        return new DistCp(conf, options).execute();
-      }
-    };
-
-    Job exec(Configuration conf, DistCpOptions options) throws Exception;
-  }
-
   private static final Logger LOG = LoggerFactory.getLogger(DistCpCopier.class);
-
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
   private final List<Path> sourceDataLocations;
   private final Path replicaDataLocation;
   private final Map<String, Object> copierOptions;
   private final DistCpExecutor executor;
-
   private final MetricRegistry registry;
 
   public DistCpCopier(
@@ -148,8 +136,7 @@ public class DistCpCopier implements Copier {
   }
 
   private void loadDistributedFileSystems() throws IOException {
-    new LibJarDeployer().libjars(conf,
-        org.apache.hadoop.fs.s3a.S3AFileSystem.class,
+    new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class,
         com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class,
         com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
         com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
@@ -162,5 +149,17 @@ public class DistCpCopier implements Copier {
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
+  }
+
+  interface DistCpExecutor {
+
+    static final DistCpExecutor DEFAULT = new DistCpExecutor() {
+      @Override
+      public Job exec(Configuration conf, DistCpOptions options) throws Exception {
+        return new DistCp(conf, options).execute();
+      }
+    };
+
+    Job exec(Configuration conf, DistCpOptions options) throws Exception;
   }
 }

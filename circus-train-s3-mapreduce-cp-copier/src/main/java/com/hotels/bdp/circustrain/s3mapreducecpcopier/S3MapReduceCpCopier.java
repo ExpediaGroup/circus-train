@@ -15,8 +15,23 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecpcopier;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.security.alias.CredentialProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
@@ -26,43 +41,16 @@ import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
 import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.security.alias.CredentialProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 public class S3MapReduceCpCopier implements Copier {
 
-  interface S3MapReduceCpExecutor {
-
-    static final S3MapReduceCpExecutor DEFAULT = new S3MapReduceCpExecutor() {
-      @Override
-      public Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception {
-        return new S3MapReduceCp(conf, options).execute();
-      }
-    };
-
-    Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception;
-  }
-
   private static final Logger LOG = LoggerFactory.getLogger(S3MapReduceCpCopier.class);
-
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
   private final List<Path> sourceDataLocations;
   private final Path replicaDataLocation;
   private final Map<String, Object> copierOptions;
   private final S3MapReduceCpExecutor executor;
-
   private final MetricRegistry registry;
 
   public S3MapReduceCpCopier(
@@ -165,8 +153,7 @@ public class S3MapReduceCpCopier implements Copier {
   }
 
   private void loadDistributedFileSystems() throws IOException {
-    new LibJarDeployer().libjars(conf,
-        org.apache.hadoop.fs.s3a.S3AFileSystem.class,
+    new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class,
         com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class,
         com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
         com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
@@ -179,6 +166,18 @@ public class S3MapReduceCpCopier implements Copier {
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
+  }
+
+  interface S3MapReduceCpExecutor {
+
+    static final S3MapReduceCpExecutor DEFAULT = new S3MapReduceCpExecutor() {
+      @Override
+      public Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception {
+        return new S3MapReduceCp(conf, options).execute();
+      }
+    };
+
+    Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception;
   }
 
 }
