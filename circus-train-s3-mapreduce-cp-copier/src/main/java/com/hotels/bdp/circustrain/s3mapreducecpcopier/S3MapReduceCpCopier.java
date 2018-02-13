@@ -15,8 +15,23 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecpcopier;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.security.alias.CredentialProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
@@ -26,19 +41,6 @@ import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
 import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.security.alias.CredentialProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 public class S3MapReduceCpCopier implements Copier {
 

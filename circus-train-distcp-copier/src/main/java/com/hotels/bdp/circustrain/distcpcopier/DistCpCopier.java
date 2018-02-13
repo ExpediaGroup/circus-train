@@ -15,13 +15,12 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
-import com.hotels.bdp.circustrain.metrics.JobMetrics;
+import static java.util.Collections.singletonList;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,11 +31,14 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 
-import static java.util.Collections.singletonList;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
+import com.hotels.bdp.circustrain.metrics.JobMetrics;
 
 public class DistCpCopier implements Copier {
 
