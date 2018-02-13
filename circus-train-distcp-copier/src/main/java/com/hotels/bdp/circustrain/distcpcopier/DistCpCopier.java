@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import static java.util.Collections.singletonList;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
+import com.hotels.bdp.circustrain.metrics.JobMetrics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,13 +32,11 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.metrics.JobMetrics;
+import static java.util.Collections.singletonList;
 
 public class DistCpCopier implements Copier {
 
@@ -116,7 +115,7 @@ public class DistCpCopier implements Copier {
     CircusTrainCopyListing.setRootPath(conf, sourceDataBaseLocation);
 
     try {
-      loadHComS3AFileSystem();
+      loadDistributedFileSystems();
       distCpOptions.setBlocking(false);
       Job job = executor.exec(conf, distCpOptions);
       String counter = String.format("%s_BYTES_WRITTEN", replicaDataLocation.toUri().getScheme().toUpperCase());
@@ -148,9 +147,12 @@ public class DistCpCopier implements Copier {
     });
   }
 
-  private void loadHComS3AFileSystem() throws IOException {
-    new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class,
-        com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class);
+  private void loadDistributedFileSystems() throws IOException {
+    new LibJarDeployer().libjars(conf,
+        org.apache.hadoop.fs.s3a.S3AFileSystem.class,
+        com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class,
+        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
+        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
   }
 
   private void cleanUpReplicaDataLocation() {

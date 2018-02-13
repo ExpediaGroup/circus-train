@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,17 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecpcopier;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
+import com.hotels.bdp.circustrain.metrics.JobMetrics;
+import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
+import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
+import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
+import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,17 +34,11 @@ import org.apache.hadoop.security.alias.CredentialProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
-
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.metrics.JobMetrics;
-import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
-import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
-import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
-import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class S3MapReduceCpCopier implements Copier {
 
@@ -133,6 +132,7 @@ public class S3MapReduceCpCopier implements Copier {
     LOG.debug("Invoking S3MapReduceCp with options: {}", s3MapReduceCpOptions);
 
     try {
+      loadDistributedFileSystems();
       Enum<?> counter = Counter.BYTESCOPIED;
       Job job = executor.exec(conf, s3MapReduceCpOptions);
       registerRunningJobMetrics(job, counter);
@@ -162,6 +162,14 @@ public class S3MapReduceCpCopier implements Copier {
       }
     });
 
+  }
+
+  private void loadDistributedFileSystems() throws IOException {
+    new LibJarDeployer().libjars(conf,
+        org.apache.hadoop.fs.s3a.S3AFileSystem.class,
+        com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class,
+        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
+        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
   }
 
   private void cleanUpReplicaDataLocation() {

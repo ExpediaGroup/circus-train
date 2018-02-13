@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.distcpcopier;
+package com.hotels.bdp.circustrain.core.util;
+
+import com.google.common.base.Joiner;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,25 +33,15 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.hadoop.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-
 /**
  * Pretty much a copy of the {@code -libjars} implementation in {@link GenericOptionsParser}. I'm sure we can take out
  * some of the marshalling steps, but I'm not entirely sure what is needed in the {@link Configuration} at this time.
  */
-class LibJarDeployer {
+public class LibJarDeployer {
 
   private static final Logger LOG = LoggerFactory.getLogger(LibJarDeployer.class);
 
-  void libjars(Configuration conf, Class<?>... targetClasses) throws IOException {
+  public void libjars(Configuration conf, Class<?>... targetClasses) throws IOException {
     String libjarsList = createLibJarList(targetClasses);
     conf.set("tmpjars", validateFiles(libjarsList, conf), "from -libjars command line option");
     // setting libjars in client classpath

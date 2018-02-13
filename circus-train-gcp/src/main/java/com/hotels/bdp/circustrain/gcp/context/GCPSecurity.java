@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 public class GCPSecurity {
 
   private String credentialProvider;
+  private String projectId;
 
   public String getCredentialProvider() {
     return credentialProvider;
@@ -32,4 +33,11 @@ public class GCPSecurity {
     this.credentialProvider = credentialProvider;
   }
 
+  public String getProjectId() {
+    return projectId;
+  }
+
+  public void setProjectId(String projectId) {
+    this.projectId = projectId;
+  }
 }
