@@ -31,16 +31,6 @@
       <artifactId>circus-train-metrics</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>circus-train-aws</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>circus-train-gcp</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 
     <!-- Hadoop -->
     <dependency>

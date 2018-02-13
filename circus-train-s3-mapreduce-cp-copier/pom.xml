@@ -34,16 +34,6 @@
     </dependency>
     <dependency>
       <groupId>com.hotels</groupId>
-      <artifactId>circus-train-aws</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>circus-train-gcp</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.hotels</groupId>
       <artifactId>circus-train-s3-mapreduce-cp</artifactId>
       <version>${project.version}</version>
     </dependency>

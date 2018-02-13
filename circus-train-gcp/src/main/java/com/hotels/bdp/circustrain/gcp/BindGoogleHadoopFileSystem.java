@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_PROJECT_ID;
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_SERVICE_ACCOUNT_ENABLE;
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_ABSTRACT_FS;
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_FS_IMPLEMENTATION;
+import static com.hotels.bdp.circustrain.gcp.GCPConstants.*;
+
+import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -26,6 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS;
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem;
+
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
 
 public class BindGoogleHadoopFileSystem {
 
@@ -43,5 +45,15 @@ public class BindGoogleHadoopFileSystem {
     configuration.set(GS_ABSTRACT_FS, GoogleHadoopFS.class.getName());
     configuration.set(GCP_SERVICE_ACCOUNT_ENABLE, "true");
     configuration.set(GCP_PROJECT_ID, "_THIS_VALUE_DOESNT_MATTER");
+    loadGSFileSystem();
+  }
+
+  private void loadGSFileSystem() {
+    try {
+      new LibJarDeployer().libjars(configuration, com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
+          com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
+    } catch (IOException e) {
+      throw new CircusTrainException(e);
+    }
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
  */
 package com.hotels.bdp.circustrain.aws;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.stereotype.Component;
+
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
 
 @Component
 public class BindS3AFileSystem {
@@ -30,6 +35,15 @@ public class BindS3AFileSystem {
       configuration.setBoolean(String.format("fs.%s.impl.disable.cache", scheme), true);
       configuration.setClass(String.format("fs.%s.impl", scheme), org.apache.hadoop.fs.s3a.S3AFileSystem.class,
           FileSystem.class);
+    }
+    loadS3FileSystem(configuration);
+  }
+
+  private void loadS3FileSystem(Configuration conf) {
+    try {
+      new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class, BindS3AFileSystem.class);
+    } catch (IOException e) {
+      throw new CircusTrainException(e);
     }
   }
 }

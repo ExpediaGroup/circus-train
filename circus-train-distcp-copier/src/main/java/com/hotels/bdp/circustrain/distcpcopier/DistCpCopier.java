@@ -117,7 +117,6 @@ public class DistCpCopier implements Copier {
     CircusTrainCopyListing.setRootPath(conf, sourceDataBaseLocation);
 
     try {
-      loadDistributedFileSystems();
       distCpOptions.setBlocking(false);
       Job job = executor.exec(conf, distCpOptions);
       String counter = String.format("%s_BYTES_WRITTEN", replicaDataLocation.toUri().getScheme().toUpperCase());
@@ -147,13 +146,6 @@ public class DistCpCopier implements Copier {
         return 0L;
       }
     });
-  }
-
-  private void loadDistributedFileSystems() throws IOException {
-    new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class,
-        com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class,
-        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
-        com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
   }
 
   private void cleanUpReplicaDataLocation() {
