@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 
 public class DistCpCopier implements Copier {
@@ -116,7 +117,6 @@ public class DistCpCopier implements Copier {
     CircusTrainCopyListing.setRootPath(conf, sourceDataBaseLocation);
 
     try {
-      loadHComS3AFileSystem();
       distCpOptions.setBlocking(false);
       Job job = executor.exec(conf, distCpOptions);
       String counter = String.format("%s_BYTES_WRITTEN", replicaDataLocation.toUri().getScheme().toUpperCase());
@@ -146,11 +146,6 @@ public class DistCpCopier implements Copier {
         return 0L;
       }
     });
-  }
-
-  private void loadHComS3AFileSystem() throws IOException {
-    new LibJarDeployer().libjars(conf, org.apache.hadoop.fs.s3a.S3AFileSystem.class,
-        com.hotels.bdp.circustrain.aws.BindS3AFileSystem.class);
   }
 
   private void cleanUpReplicaDataLocation() {

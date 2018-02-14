@@ -1,3 +1,10 @@
+# 11.1.1 - Unreleased
+### Fixed
+* Google FileSystem classes not being placed onto the mapreduce.application.classpath in S3MapReduceCp and DistCp mapreduce jobs
+### Changed
+* Google FileSystem and S3 FileSystems added to mapreduce.application.classpath in circus-train-gcp and circus-train-aws respectively
+
+
 # 11.1.0 - 2018-02-05
 ### Fixed
 * https://github.com/HotelsDotCom/circus-train/issues/23 - Housekeeping failing due to missing credentials.
