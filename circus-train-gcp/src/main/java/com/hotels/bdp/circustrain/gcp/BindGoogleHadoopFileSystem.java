@@ -15,7 +15,10 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.*;
+import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_PROJECT_ID;
+import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_SERVICE_ACCOUNT_ENABLE;
+import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_ABSTRACT_FS;
+import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_FS_IMPLEMENTATION;
 
 import java.io.IOException;
 
