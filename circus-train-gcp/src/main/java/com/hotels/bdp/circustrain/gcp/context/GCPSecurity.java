@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 public class GCPSecurity {
 
   private String credentialProvider;
-  private String projectId;
 
   public String getCredentialProvider() {
     return credentialProvider;
@@ -31,13 +30,5 @@ public class GCPSecurity {
 
   public void setCredentialProvider(String credentialProvider) {
     this.credentialProvider = credentialProvider;
-  }
-
-  public String getProjectId() {
-    return projectId;
-  }
-
-  public void setProjectId(String projectId) {
-    this.projectId = projectId;
   }
 }
