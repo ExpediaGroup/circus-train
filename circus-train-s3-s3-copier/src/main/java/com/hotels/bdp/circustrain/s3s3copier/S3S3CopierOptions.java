@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
 
 public class S3S3CopierOptions {
@@ -42,6 +43,7 @@ public class S3S3CopierOptions {
      */
     S3_ENDPOINT_URI("s3-endpoint-uri"),
     /**
+     * {@link ObjectMetadata#setSSEAlgorithm(String)}
      * Server-side encryption algorithm used when encrypting uploaded objects using AWS-managed keys.
      */
     SSE_ALGORITHM("s3-sse-algorithm");

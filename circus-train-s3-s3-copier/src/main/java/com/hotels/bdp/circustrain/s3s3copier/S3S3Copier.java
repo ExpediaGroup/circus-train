@@ -155,12 +155,7 @@ public class S3S3Copier implements Copier {
 
       CopyObjectRequest copyObjectRequest = new CopyObjectRequest(s3ObjectSummary.getBucketName(),
           s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey);
-      String sseAlgorithm = s3s3CopierOptions.getSSEAlgorithm();
-      if (sseAlgorithm != null) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setSSEAlgorithm(sseAlgorithm);
-        copyObjectRequest.setNewObjectMetadata(objectMetadata);
-      }
+      applyObjectMetadata(copyObjectRequest);
 
       TransferStateChangeListener stateChangeListener = new TransferStateChangeListener() {
 
@@ -179,6 +174,15 @@ public class S3S3Copier implements Copier {
       Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
       totalBytesToReplicate += copy.getProgress().getTotalBytesToTransfer();
       copyJobs.add(copy);
+    }
+  }
+
+  private void applyObjectMetadata(CopyObjectRequest copyObjectRequest) {
+    String sseAlgorithm = s3s3CopierOptions.getSSEAlgorithm();
+    if (sseAlgorithm != null) {
+      ObjectMetadata objectMetadata = new ObjectMetadata();
+      objectMetadata.setSSEAlgorithm(sseAlgorithm);
+      copyObjectRequest.setNewObjectMetadata(objectMetadata);
     }
   }
 

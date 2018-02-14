@@ -29,12 +29,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -52,7 +50,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -122,33 +119,6 @@ public class S3S3CopierTest {
     Path replicaLocation = new Path("s3://target/");
     List<Path> sourceSubLocations = new ArrayList<>();
     S3S3Copier s3s3Copier = newS3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation);
-    Metrics metrics = s3s3Copier.copy();
-    assertThat(metrics.getBytesReplicated(), is(7L));
-    assertThat(metrics.getMetrics().get(S3S3CopierMetrics.Metrics.TOTAL_BYTES_TO_REPLICATE.name()), is(7L));
-    S3Object object = client.getObject("target", "data");
-    String data = IOUtils.toString(object.getObjectContent());
-    assertThat(data, is("bar foo"));
-    assertThat(registry.getGauges().containsKey(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name()), is(true));
-  }
-
-
-  // TODO: figure out best way of testing if below isn't possible
-  @Ignore("Test below throws error as S3Proxy doesn't currrenlty support this: com.amazonaws.services.s3.model.AmazonS3Exception: A header you provided implies functionality that is not implemented. (Service: Amazon S3; Status Code: 501; Error Code: NotImplemented; Request ID: 4442587FB7D0A2F9), S3 Extended Request ID: null")
-  @Test
-  public void copyOneObjectSSE() throws Exception {
-    client.putObject("source", "data", inputData);
-
-    Path sourceBaseLocation = new Path("s3://source/");
-    Path replicaLocation = new Path("s3://target/");
-    List<Path> sourceSubLocations = new ArrayList<>();
-
-    Map<String, Object> copierOptions = new HashMap<>();
-    copierOptions.put(S3S3CopierOptions.Keys.SSE_ALGORITHM.keyName(), ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
-    S3S3CopierOptions customOptions = new S3S3CopierOptions(copierOptions);
-
-    S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
-        transferManagerFactory, listObjectsRequestFactory, registry, customOptions);
-
     Metrics metrics = s3s3Copier.copy();
     assertThat(metrics.getBytesReplicated(), is(7L));
     assertThat(metrics.getMetrics().get(S3S3CopierMetrics.Metrics.TOTAL_BYTES_TO_REPLICATE.name()), is(7L));
@@ -255,7 +225,7 @@ public class S3S3CopierTest {
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-    .thenReturn(mockedTransferManager);
+        .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
@@ -274,7 +244,7 @@ public class S3S3CopierTest {
     List<Path> sourceSubLocations = new ArrayList<>();
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-    .thenThrow(new RuntimeException("error in instance"));
+        .thenThrow(new RuntimeException("error in instance"));
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
     try {
@@ -294,7 +264,7 @@ public class S3S3CopierTest {
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-    .thenReturn(mockedTransferManager);
+        .thenReturn(mockedTransferManager);
     when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenThrow(new AmazonServiceException("MyCause"));
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
@@ -318,7 +288,7 @@ public class S3S3CopierTest {
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-    .thenReturn(mockedTransferManager);
+        .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(copy.getProgress()).thenReturn(new TransferProgress());
     when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
