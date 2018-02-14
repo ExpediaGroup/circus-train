@@ -158,10 +158,6 @@ public class S3S3Copier implements Copier {
       String sseAlgorithm = s3s3CopierOptions.getSSEAlgorithm();
       if (sseAlgorithm != null) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        // TODO: should we only support AES256 (ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION) or allow any string to be
-        // passed in?
-        // TODO: not sure if we can unit test the below, passing in valid and invalid values, probably not since s3proxy
-        // doesn't seem to support?
         objectMetadata.setSSEAlgorithm(sseAlgorithm);
         copyObjectRequest.setNewObjectMetadata(objectMetadata);
       }
