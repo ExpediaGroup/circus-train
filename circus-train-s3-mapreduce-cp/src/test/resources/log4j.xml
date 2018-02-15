@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  Copyright (C) 2016-2017 Expedia Inc.
+  Copyright (C) 2016-2018 Expedia Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,8 +23,24 @@
     </layout>
   </appender>
 
-  <logger name="com.hotels.bdp.circustrain">
-    <level value="INFO" />
+  <logger name="BlockStateChange">
+    <level value="WARN" />
+  </logger>
+
+  <logger name="org.apache.hadoop">
+    <level value="WARN" />
+  </logger>
+  
+  <logger name="org.apache.hadoop.hdfs.MiniDFSCluster">
+    <level value="DEBUG" />
+  </logger>
+  
+  <logger name="org.apache.hadoop.http.HttpServer2">
+    <level value="DEBUG" />
+  </logger>
+
+  <logger name="org.mortbay">
+    <level value="WARN" />
   </logger>
 
   <root>

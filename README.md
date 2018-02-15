@@ -304,7 +304,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
 
 ##### S3 to S3 copier options
-If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManage.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
+If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
 
 |Property|Required|Description|
 |----|----|----|
@@ -794,4 +794,4 @@ The Circus Train logo uses the [Ewert font](http://www.1001fonts.com/ewert-font.
 # Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-Copyright 2016-2017 Expedia Inc.
+Copyright 2016-2018 Expedia Inc.
