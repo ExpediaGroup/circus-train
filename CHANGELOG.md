@@ -1,6 +1,8 @@
-# 11.1.1 - Unreleased
+# TBD
 ### Added
 * Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
+
+# 11.1.1 - 2018-02-15
 ### Fixed
 * Google FileSystem classes not being placed onto the mapreduce.application.classpath in S3MapReduceCp and DistCp mapreduce jobs
 ### Changed
