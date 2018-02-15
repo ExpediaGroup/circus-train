@@ -178,10 +178,9 @@ public class S3S3Copier implements Copier {
   }
 
   private void applyObjectMetadata(CopyObjectRequest copyObjectRequest) {
-    String sseAlgorithm = s3s3CopierOptions.getSSEAlgorithm();
-    if (sseAlgorithm != null) {
+    if (s3s3CopierOptions.isS3ServerSideEncryption()) {
       ObjectMetadata objectMetadata = new ObjectMetadata();
-      objectMetadata.setSSEAlgorithm(sseAlgorithm);
+      objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
       copyObjectRequest.setNewObjectMetadata(objectMetadata);
     }
   }

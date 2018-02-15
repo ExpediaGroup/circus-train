@@ -44,9 +44,9 @@ public class S3S3CopierOptions {
     S3_ENDPOINT_URI("s3-endpoint-uri"),
     /**
      * {@link ObjectMetadata#setSSEAlgorithm(String)}
-     * Server-side encryption algorithm used when encrypting uploaded objects using AWS-managed keys.
+     * Whether to enable server side encryption.
      */
-    SSE_ALGORITHM("s3-sse-algorithm");
+    S3_SERVER_SIDE_ENCRYPTION("s3-server-side-encryption");
 
     private final String keyName;
 
@@ -97,8 +97,8 @@ public class S3S3CopierOptions {
     return URI.create(endpoint);
   }
 
-  public String getSSEAlgorithm() {
-    return MapUtils.getString(copierOptions, Keys.SSE_ALGORITHM.keyName(), null);
+  public Boolean isS3ServerSideEncryption() {
+    return MapUtils.getBoolean(copierOptions, Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), false);
   }
 
 }

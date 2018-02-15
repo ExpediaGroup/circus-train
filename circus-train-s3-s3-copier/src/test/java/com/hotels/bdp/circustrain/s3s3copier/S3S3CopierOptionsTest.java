@@ -69,16 +69,16 @@ public class S3S3CopierOptionsTest {
   }
 
   @Test
-  public void getSSEAlgorithm() throws Exception {
-    copierOptions.put(S3S3CopierOptions.Keys.SSE_ALGORITHM.keyName(), "AES256");
+  public void setS3ServerSideEncryption() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), "true");
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
-    assertThat(options.getSSEAlgorithm(), is("AES256"));
+    assertThat(options.isS3ServerSideEncryption(), is(true));
   }
 
   @Test
-  public void getSSEAlgorithmDefaultIsNull() throws Exception {
+  public void defaultS3ServerSideEncryption() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
-    assertNull(options.getSSEAlgorithm());
+    assertThat(options.isS3ServerSideEncryption(), is(false));
   }
 
 }
