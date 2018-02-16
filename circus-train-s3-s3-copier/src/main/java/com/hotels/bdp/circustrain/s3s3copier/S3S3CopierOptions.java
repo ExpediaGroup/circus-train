@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
 
 public class S3S3CopierOptions {
@@ -40,7 +41,12 @@ public class S3S3CopierOptions {
      * S3 endpoint to use when creating S3 clients. To configure a specific region,
      * {@code S3_ENDPOINT_URI + "." + REGION} can be used as a copier option.
      */
-    S3_ENDPOINT_URI("s3-endpoint-uri");
+    S3_ENDPOINT_URI("s3-endpoint-uri"),
+    /**
+     * {@link ObjectMetadata#setSSEAlgorithm(String)}
+     * Whether to enable server side encryption.
+     */
+    S3_SERVER_SIDE_ENCRYPTION("s3-server-side-encryption");
 
     private final String keyName;
 
@@ -89,6 +95,10 @@ public class S3S3CopierOptions {
       return null;
     }
     return URI.create(endpoint);
+  }
+
+  public Boolean isS3ServerSideEncryption() {
+    return MapUtils.getBoolean(copierOptions, Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), false);
   }
 
 }

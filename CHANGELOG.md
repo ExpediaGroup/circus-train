@@ -1,4 +1,6 @@
 # TBD
+### Added
+* Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
 ### Changed
 * Upgrade housekeeping to version 1.0.2
 
