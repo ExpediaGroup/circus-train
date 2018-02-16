@@ -1,4 +1,4 @@
-# TBD
+# 11.2.0 - 2018-02-16
 ### Added
 * Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
 ### Changed
