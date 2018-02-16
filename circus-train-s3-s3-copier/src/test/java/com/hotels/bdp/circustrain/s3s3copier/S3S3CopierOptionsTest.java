@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,19 @@ public class S3S3CopierOptionsTest {
   public void getS3EndpointDefaultIsNull() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertNull(options.getS3Endpoint());
+  }
+
+  @Test
+  public void setS3ServerSideEncryption() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), "true");
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.isS3ServerSideEncryption(), is(true));
+  }
+
+  @Test
+  public void defaultS3ServerSideEncryption() throws Exception {
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.isS3ServerSideEncryption(), is(false));
   }
 
 }

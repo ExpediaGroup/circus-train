@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.Transfer;
@@ -154,6 +155,7 @@ public class S3S3Copier implements Copier {
 
       CopyObjectRequest copyObjectRequest = new CopyObjectRequest(s3ObjectSummary.getBucketName(),
           s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey);
+      applyObjectMetadata(copyObjectRequest);
 
       TransferStateChangeListener stateChangeListener = new TransferStateChangeListener() {
 
@@ -172,6 +174,14 @@ public class S3S3Copier implements Copier {
       Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
       totalBytesToReplicate += copy.getProgress().getTotalBytesToTransfer();
       copyJobs.add(copy);
+    }
+  }
+
+  private void applyObjectMetadata(CopyObjectRequest copyObjectRequest) {
+    if (s3s3CopierOptions.isS3ServerSideEncryption()) {
+      ObjectMetadata objectMetadata = new ObjectMetadata();
+      objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+      copyObjectRequest.setNewObjectMetadata(objectMetadata);
     }
   }
 

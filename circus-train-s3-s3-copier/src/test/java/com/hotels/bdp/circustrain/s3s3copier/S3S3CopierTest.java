@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.s3s3copier;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
@@ -37,6 +39,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -50,6 +53,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -304,4 +308,60 @@ public class S3S3CopierTest {
       assertThat(e.getCause().getMessage(), is("cause"));
     }
   }
+  
+  @Test
+  public void copyDefaultCopierOptions() throws Exception {
+    client.putObject("source", "data", inputData);
+    Path sourceBaseLocation = new Path("s3://source/");
+    Path replicaLocation = new Path("s3://target/");
+    List<Path> sourceSubLocations = new ArrayList<>();
+
+    TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
+    TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
+    when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
+        .thenReturn(mockedTransferManager);
+    Copy copy = Mockito.mock(Copy.class);
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+        any(TransferStateChangeListener.class))).thenReturn(copy);
+    TransferProgress transferProgress = new TransferProgress();
+    when(copy.getProgress()).thenReturn(transferProgress);
+
+    S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
+        mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
+    s3s3Copier.copy();
+    ArgumentCaptor<CopyObjectRequest> argument = ArgumentCaptor.forClass(CopyObjectRequest.class);
+    verify(mockedTransferManager).copy(argument.capture(), any(AmazonS3.class),any(TransferStateChangeListener.class));
+    CopyObjectRequest copyObjectRequest = argument.getValue();
+    assertNull(copyObjectRequest.getNewObjectMetadata());
+  }
+
+  @Test
+  public void copyServerSideEncryption() throws Exception {
+    client.putObject("source", "data", inputData);
+    Path sourceBaseLocation = new Path("s3://source/");
+    Path replicaLocation = new Path("s3://target/");
+    List<Path> sourceSubLocations = new ArrayList<>();
+    Map<String, Object> copierOptions = new HashMap<>();
+    copierOptions.put(S3S3CopierOptions.Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), "true");
+    S3S3CopierOptions customOptions = new S3S3CopierOptions(copierOptions);
+
+    TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
+    TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
+    when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(customOptions)))
+        .thenReturn(mockedTransferManager);
+    Copy copy = Mockito.mock(Copy.class);
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+        any(TransferStateChangeListener.class))).thenReturn(copy);
+    TransferProgress transferProgress = new TransferProgress();
+    when(copy.getProgress()).thenReturn(transferProgress);
+
+    S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
+        mockedTransferManagerFactory, listObjectsRequestFactory, registry, customOptions);
+    s3s3Copier.copy();
+    ArgumentCaptor<CopyObjectRequest> argument = ArgumentCaptor.forClass(CopyObjectRequest.class);
+    verify(mockedTransferManager).copy(argument.capture(), any(AmazonS3.class),any(TransferStateChangeListener.class));
+    CopyObjectRequest copyObjectRequest = argument.getValue();
+    assertThat(copyObjectRequest.getNewObjectMetadata().getSSEAlgorithm(), is(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION));
+  }
+
 }
