@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
+ * Copyright (C) 2016-2018 Expedia Inc and Apache Hadoop contributors.
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.TestDynamicInputFormat} from Hadoop DistCp 2.7.1:
  *
@@ -43,10 +43,11 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.task.JobContextImpl;
 import org.apache.hadoop.security.Credentials;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListingFileStatus;
@@ -56,52 +57,46 @@ import com.hotels.bdp.circustrain.s3mapreducecp.StubContext;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils;
 
 public class DynamicInputFormatTest {
-  private static final Log LOG = LogFactory.getLog(DynamicInputFormatTest.class);
+  private static final Log log = LogFactory.getLog(DynamicInputFormatTest.class);
 
-  private static MiniDFSCluster cluster;
   private static final int N_FILES = 1000;
   private static final int NUM_SPLITS = 7;
-
   private static final Credentials CREDENTIALS = new Credentials();
 
-  private static List<String> expectedFilePaths = new ArrayList<>(N_FILES);
+  private MiniDFSCluster cluster;
+  private List<String> expectedFilePaths = new ArrayList<>(N_FILES);
 
-  @BeforeClass
-  public static void setup() throws Exception {
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+  @Before
+  public void setup() throws Exception {
     cluster = S3MapReduceCpTestUtils
         .newMiniClusterBuilder(getConfigurationForCluster())
         .numDataNodes(1)
         .format(true)
         .build();
-
     for (int i = 0; i < N_FILES; ++i) {
-      createFile("/tmp/source/" + String.valueOf(i));
+      createFile(temporaryFolder.getRoot() + "/source/" + String.valueOf(i));
     }
   }
 
-  @AfterClass
-  public static void destroy() {
-    if (cluster != null) {
-      cluster.shutdown();
-    }
-  }
-
-  private static Configuration getConfigurationForCluster() {
+  private Configuration getConfigurationForCluster() {
     Configuration configuration = new Configuration();
     System.setProperty("test.build.data", "target/tmp/build/TEST_DYNAMIC_INPUT_FORMAT/data");
     configuration.set("hadoop.log.dir", "target/tmp");
-    LOG.debug("fs.default.name  == " + configuration.get("fs.default.name"));
-    LOG.debug("dfs.http.address == " + configuration.get("dfs.http.address"));
+    log.debug("fs.default.name  == " + configuration.get("fs.default.name"));
+    log.debug("dfs.http.address == " + configuration.get("dfs.http.address"));
     return configuration;
   }
 
-  private static S3MapReduceCpOptions getOptions() throws Exception {
-    Path source = new Path(cluster.getFileSystem().getUri().toString() + "/tmp/source");
-    URI target = URI.create(cluster.getFileSystem().getUri().toString() + "/tmp/target/");
+  private S3MapReduceCpOptions getOptions() throws Exception {
+    Path source = new Path(cluster.getFileSystem().getUri().toString() + temporaryFolder.getRoot() + "/source");
+    URI target = URI.create(cluster.getFileSystem().getUri().toString() + temporaryFolder.getRoot() + "/target/");
     return S3MapReduceCpOptions.builder(Arrays.asList(source), target).maxMaps(NUM_SPLITS).build();
   }
 
-  private static void createFile(String path) throws Exception {
+  private void createFile(String path) throws Exception {
     FileSystem fileSystem = null;
     DataOutputStream outputStream = null;
     try {
@@ -118,8 +113,9 @@ public class DynamicInputFormatTest {
     S3MapReduceCpOptions options = getOptions();
     Configuration configuration = new Configuration();
     configuration.set("mapred.map.tasks", String.valueOf(options.getMaxMaps()));
-    CopyListing.getCopyListing(configuration, CREDENTIALS, options).buildListing(
-        new Path(cluster.getFileSystem().getUri().toString() + "/tmp/testDynInputFormat/fileList.seq"), options);
+    CopyListing.getCopyListing(configuration, CREDENTIALS, options).buildListing(new Path(
+        cluster.getFileSystem().getUri().toString() + temporaryFolder.getRoot() + "/testDynInputFormat/fileList.seq"),
+        options);
 
     JobContext jobContext = new JobContextImpl(configuration, new JobID());
     DynamicInputFormat<Text, CopyListingFileStatus> inputFormat = new DynamicInputFormat<>();
