@@ -41,7 +41,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
       try {
         listener.resolvedReplicaLocation(location);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on resolvedReplicaLocation.", listener, e);
       }
     }
   }
@@ -52,7 +52,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
       try {
         listener.existingReplicaPartitions(partitions);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on existingReplicaPartitions.", listener, e);
       }
     }
   }
@@ -63,7 +63,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
       try {
         listener.partitionsToCreate(partitions);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on partitionsToCreate.", listener, e);
       }
     }
   }
@@ -74,7 +74,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
       try {
         listener.partitionsToAlter(partitions);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on partitionsToAlter.", listener, e);
       }
     }
   }
@@ -85,7 +85,7 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
       try {
         listener.deprecatedReplicaLocations(locations);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on deprecatedReplicaLocations.", listener, e);
       }
     }
   }
