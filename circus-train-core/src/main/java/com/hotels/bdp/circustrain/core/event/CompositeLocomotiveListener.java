@@ -43,7 +43,7 @@ public class CompositeLocomotiveListener implements LocomotiveListener {
       try {
         listener.circusTrainStartUp(args, sourceCatalog, replicaCatalog);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on circusTrainStartUp.", listener, e);
       }
     }
   }
@@ -54,7 +54,7 @@ public class CompositeLocomotiveListener implements LocomotiveListener {
       try {
         listener.circusTrainShutDown(completionCode, metrics);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on circusTrainShutDown.", listener, e);
       }
     }
   }

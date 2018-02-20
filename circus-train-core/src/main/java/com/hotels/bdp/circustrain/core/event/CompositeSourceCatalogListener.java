@@ -41,7 +41,7 @@ public class CompositeSourceCatalogListener implements SourceCatalogListener {
       try {
         listener.resolvedMetaStoreSourceTable(table);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on resolvedMetaStoreSourceTable.", listener, e);
       }
     }
   }
@@ -52,7 +52,7 @@ public class CompositeSourceCatalogListener implements SourceCatalogListener {
       try {
         listener.resolvedSourcePartitions(partitions);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on resolvedSourcePartitions.", listener, e);
       }
     }
   }
@@ -63,7 +63,7 @@ public class CompositeSourceCatalogListener implements SourceCatalogListener {
       try {
         listener.resolvedSourceLocation(location);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on resolvedSourceLocation.", listener, e);
       }
     }
   }

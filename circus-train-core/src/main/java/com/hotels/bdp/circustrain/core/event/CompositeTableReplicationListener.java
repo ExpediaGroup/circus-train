@@ -40,7 +40,7 @@ public class CompositeTableReplicationListener implements TableReplicationListen
       try {
         listener.tableReplicationStart(tableReplication, eventId);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on tableReplicationStart.", listener, e);
       }
     }
   }
@@ -51,7 +51,7 @@ public class CompositeTableReplicationListener implements TableReplicationListen
       try {
         listener.tableReplicationSuccess(tableReplication, eventId);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on tableReplicationSuccess.", listener, e);
       }
     }
   }
@@ -62,7 +62,7 @@ public class CompositeTableReplicationListener implements TableReplicationListen
       try {
         listener.tableReplicationFailure(tableReplication, eventId, t);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on tableReplicationFailure.", listener, e);
       }
     }
   }

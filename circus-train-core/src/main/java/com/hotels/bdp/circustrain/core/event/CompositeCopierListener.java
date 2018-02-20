@@ -40,7 +40,7 @@ public class CompositeCopierListener implements CopierListener {
       try {
         listener.copierStart(copierImplementation);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on copierStart.", listener, e);
       }
     }
   }
@@ -51,7 +51,7 @@ public class CompositeCopierListener implements CopierListener {
       try {
         listener.copierEnd(metrics);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception onFailure.", listener, e);
+        LOG.error("Listener '{}' threw exception on copierEnd.", listener, e);
       }
     }
   }
