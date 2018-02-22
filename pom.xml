@@ -63,6 +63,9 @@
     <beeju.version>1.2.1</beeju.version>
     <hamcrest-library.version>1.3</hamcrest-library.version>
     <housekeeping.version>1.0.2</housekeeping.version>
+    <guava.version>20.0</guava.version>
+    <google-cloud.version>0.34.0-alpha</google-cloud.version>
+    <google-cloud-bigdataoss.version>1.6.3</google-cloud-bigdataoss.version>
   </properties>
 
   <dependencyManagement>
@@ -73,11 +76,9 @@
         <version>${housekeeping.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud-bom</artifactId>
-        <version>0.34.0-alpha</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
       </dependency>
       <dependency>
         <groupId>io.spring.platform</groupId>
@@ -269,22 +270,31 @@
             <excludes>
               <exclude>src/main/java/com/hotels/bdp/circustrain/comparator/comparator/PropertyComparator.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/validation/constraints/TunnelRoute.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/validation/constraintvalidators/TunnelRouteValidator.java</exclude>
+              <exclude>
+                src/main/java/com/hotels/bdp/circustrain/validation/constraintvalidators/TunnelRouteValidator.java
+              </exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/command/RetriableCommand.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/io/BytesFormatter.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/io/ThrottledInputStream.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/jcommander/PositiveLong.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/jcommander/PositiveNonZeroInteger.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/jcommander/PositiveNonZeroLong.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputChunk.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputFormat.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicRecordReader.java</exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/jcommander/PositiveNonZeroInteger.java
+              </exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/jcommander/PositiveNonZeroLong.java
+              </exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputChunk.java
+              </exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputFormat.java
+              </exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicRecordReader.java
+              </exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/CopyCommitter.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/CopyMapper.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/CopyOutputFormat.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/Counter.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/RetriableFileCopyCommand.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/UniformSizeInputFormat.java</exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/RetriableFileCopyCommand.java
+              </exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/UniformSizeInputFormat.java
+              </exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/util/ConfigurationUtil.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/util/IoUtil.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/util/PathUtil.java</exclude>
@@ -294,9 +304,12 @@
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/S3MapReduceCpConstants.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/SimpleCopyListing.java</exclude>
               <exclude>src/main/resources/s3mapreducecp-default.xml</exclude>
-              <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/command/RetriableCommandTest.java</exclude>
+              <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/command/RetriableCommandTest.java
+              </exclude>
               <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/io/ThrottledInputStreamTest.java</exclude>
-              <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputFormatTest.java</exclude>
+              <exclude>
+                src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/mapreduce/lib/DynamicInputFormatTest.java
+              </exclude>
               <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/util/ConfigurationUtilTest.java</exclude>
               <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/util/IoUtilTest.java</exclude>
               <exclude>src/test/java/com/hotels/bdp/circustrain/s3mapreducecp/util/PathUtilTest.java</exclude>
