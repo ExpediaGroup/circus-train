@@ -99,10 +99,6 @@
                   <shadedPattern>${shade.prefix}.com.google.common</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>com.google.api</pattern>
-                  <shadedPattern>${shade.prefix}.com.google.api</shadedPattern>
-                </relocation>
-                <relocation>
                   <pattern>com.jcraft</pattern>
                   <shadedPattern>${shade.prefix}.com.jcraft</shadedPattern>
                 </relocation>
