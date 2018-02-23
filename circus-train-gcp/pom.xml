@@ -11,6 +11,11 @@
   <artifactId>circus-train-gcp</artifactId>
   <name>Google Cloud Platform Utils</name>
 
+  <properties>
+    <google-cloud.version>0.34.0-alpha</google-cloud.version>
+    <google-cloud-bigdataoss.version>1.6.3</google-cloud-bigdataoss.version>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
