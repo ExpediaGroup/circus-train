@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc and the original Apache hive-metastore contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.apache.thrift.TBase;
 import org.apache.thrift.TException;
 import org.apache.thrift.TServiceClient;
 
-public class HiveMetaStoreClientCompatibility12x {
+public class HiveMetaStoreClientCompatibility12x implements HiveMetaStoreClientCompatibility {
 
   private final TServiceClient tServiceClient;
 
@@ -43,7 +43,7 @@ public class HiveMetaStoreClientCompatibility12x {
         client = getField(handler, "base");
         continue;
       }
-      // TODO add CloseableMetaStoreClientInvocationHandler ?
+      // Others handlers can be added here
       throw new RuntimeException("Unknown InvocationHandler " + handler.getClass());
     }
     tServiceClient = getField(client, "client");
@@ -94,15 +94,30 @@ public class HiveMetaStoreClientCompatibility12x {
     }
   }
 
+  /*
+   * Based on https://github.com/apache/hive/blob/release-1.2.1/metastore/src/java/org/apache/hadoop/hive/metastore/
+   * HiveMetaStoreClient.java#L1206
+   */
+  @Override
   public Table getTable(String dbname, String name) throws MetaException, TException, NoSuchObjectException {
     return deepCopy(get_table(dbname, name));
   }
 
+  /*
+   * Copied from Hive 1.2.1 ThriftHiveMetastore.Client#get_table(String,String) - see
+   * https://raw.githubusercontent.com/apache/hive/release-1.2.1/metastore/src/gen/thrift/gen-javabean/org/apache/hadoop
+   * /hive/metastore/api/ThriftHiveMetastore.java
+   */
   private Table get_table(String dbname, String tbl_name) throws MetaException, NoSuchObjectException, TException {
     send_get_table(dbname, tbl_name);
     return recv_get_table();
   }
 
+  /*
+   * Copied from Hive 1.2.1 ThriftHiveMetastore.Client#send_get_table(String,String) - see
+   * https://raw.githubusercontent.com/apache/hive/release-1.2.1/metastore/src/gen/thrift/gen-javabean/org/apache/hadoop
+   * /hive/metastore/api/ThriftHiveMetastore.java
+   */
   private void send_get_table(String dbname, String tbl_name) throws TException {
     ThriftHiveMetastore.get_table_args args = new ThriftHiveMetastore.get_table_args();
     args.setDbname(dbname);
@@ -110,6 +125,11 @@ public class HiveMetaStoreClientCompatibility12x {
     sendBase("get_table", args);
   }
 
+  /*
+   * Based on Hive 1.2.1 ThriftHiveMetastore.Client#recv_get_table() - see
+   * https://raw.githubusercontent.com/apache/hive/release-1.2.1/metastore/src/gen/thrift/gen-javabean/org/apache/hadoop
+   * /hive/metastore/api/ThriftHiveMetastore.java
+   */
   private Table recv_get_table() throws MetaException, NoSuchObjectException, TException {
     ThriftHiveMetastore.get_table_result result = new ThriftHiveMetastore.get_table_result();
     receiveBase(result, "get_table");

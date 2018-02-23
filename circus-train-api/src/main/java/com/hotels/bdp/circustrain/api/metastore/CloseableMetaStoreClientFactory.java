@@ -25,6 +25,9 @@ import org.apache.thrift.TApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
+import com.hotels.bdp.circustrain.api.metastore.compatibility.HiveMetaStoreClientCompatibility;
 import com.hotels.bdp.circustrain.api.metastore.compatibility.HiveMetaStoreClientCompatibility12x;
 
 public final class CloseableMetaStoreClientFactory {
@@ -33,24 +36,36 @@ public final class CloseableMetaStoreClientFactory {
   private CloseableMetaStoreClientFactory() {}
 
   public static CloseableMetaStoreClient newInstance(IMetaStoreClient delegate) {
+    HiveMetaStoreClientCompatibility compatibility = null;
+    try {
+      compatibility = new HiveMetaStoreClientCompatibility12x(delegate);
+    } catch (Throwable t) {
+      log.warn("Unable to initialize compatibility", t);
+    }
+    return newInstance(delegate, compatibility);
+  }
+
+  @VisibleForTesting
+  static CloseableMetaStoreClient newInstance(
+      IMetaStoreClient delegate,
+      HiveMetaStoreClientCompatibility compatibility) {
     ClassLoader classLoader = CloseableMetaStoreClient.class.getClassLoader();
     Class<?>[] interfaces = new Class<?>[] { CloseableMetaStoreClient.class };
-    CloseableMetaStoreClientInvocationHandler handler = new CloseableMetaStoreClientInvocationHandler(delegate);
+    CloseableMetaStoreClientInvocationHandler handler = new CloseableMetaStoreClientInvocationHandler(delegate,
+        compatibility);
     return (CloseableMetaStoreClient) Proxy.newProxyInstance(classLoader, interfaces, handler);
   }
 
   static class CloseableMetaStoreClientInvocationHandler implements InvocationHandler {
 
     private final IMetaStoreClient delegate;
-    private HiveMetaStoreClientCompatibility12x compatibility;
+    private final HiveMetaStoreClientCompatibility compatibility;
 
-    CloseableMetaStoreClientInvocationHandler(IMetaStoreClient delegate) {
+    CloseableMetaStoreClientInvocationHandler(
+        IMetaStoreClient delegate,
+        HiveMetaStoreClientCompatibility compatibility) {
       this.delegate = delegate;
-      try {
-        compatibility = new HiveMetaStoreClientCompatibility12x(delegate);
-      } catch (Throwable t) {
-        log.warn("Unable to initialize compatibility", t);
-      }
+      this.compatibility = compatibility;
     }
 
     @Override
