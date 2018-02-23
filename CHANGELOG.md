@@ -1,3 +1,8 @@
+# 11.2.1 - TBD
+### Changed
+* Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility
+* Add dependency management bom for Google Cloud dependencies
+
 # 11.2.0 - 2018-02-16
 ### Added
 * Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
