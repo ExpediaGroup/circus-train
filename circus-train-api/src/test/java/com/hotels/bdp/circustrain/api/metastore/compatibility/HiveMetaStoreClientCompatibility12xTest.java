@@ -69,7 +69,7 @@ public class HiveMetaStoreClientCompatibility12xTest {
 
     @Override
     public GetTableResult get_table_req(GetTableRequest req) throws MetaException, NoSuchObjectException, TException {
-      // Safeguard: this method should not be invoked since we are testing directrly calling the compatibility class
+      // Safeguard: this method should not be invoked since we are testing directly calling the compatibility class
       throw new TApplicationException();
     }
 
