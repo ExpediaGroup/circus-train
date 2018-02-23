@@ -43,7 +43,7 @@ public class HiveMetaStoreClientCompatibility12x implements HiveMetaStoreClientC
         client = getField(handler, "base");
         continue;
       }
-      // Others handlers can be added here
+      // Other handlers can be added here
       throw new RuntimeException("Unknown InvocationHandler " + handler.getClass());
     }
     tServiceClient = getField(client, "client");
