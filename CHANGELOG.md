@@ -1,5 +1,4 @@
-
-# 11.3.0 - TBD
+# 11.3.0 - 2018-02-27
 ### Changed
 * SNS message now indicates if message was truncated. See [#41](https://github.com/HotelsDotCom/circus-train/issues/41).
 * Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility.
