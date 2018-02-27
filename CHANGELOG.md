@@ -1,21 +1,22 @@
-# 11.2.1 - 2018-02-27
+# 11.3.0 - 2018-02-27
 ### Changed
-* Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility
-* Add dependency management bom for Google Cloud dependencies
+* SNS message now indicates if message was truncated. See [#41](https://github.com/HotelsDotCom/circus-train/issues/41).
+* Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility.
+* Add dependency management bom for Google Cloud dependencies.
 ### Fixed
-* Backwards compatibility with Hive 1.2.x
+* Backwards compatibility with Hive 1.2.x.
 
 # 11.2.0 - 2018-02-16
 ### Added
 * Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
 ### Changed
-* Upgrade housekeeping to version 1.0.2
+* Upgrade housekeeping to version 1.0.2.
 
 # 11.1.1 - 2018-02-15
 ### Fixed
-* Google FileSystem classes not being placed onto the mapreduce.application.classpath in S3MapReduceCp and DistCp mapreduce jobs
+* Google FileSystem classes not being placed onto the mapreduce.application.classpath in S3MapReduceCp and DistCp mapreduce jobs.
 ### Changed
-* Google FileSystem and S3 FileSystems added to mapreduce.application.classpath in circus-train-gcp and circus-train-aws respectively
+* Google FileSystem and S3 FileSystems added to mapreduce.application.classpath in circus-train-gcp and circus-train-aws respectively.
 
 # 11.1.0 - 2018-02-05
 ### Fixed

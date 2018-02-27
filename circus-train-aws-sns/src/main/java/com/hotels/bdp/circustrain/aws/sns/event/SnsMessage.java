@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class SnsMessage {
 
-  private final static String PROTOCOL_VERSION = "1.1";
+  final static String PROTOCOL_VERSION = "1.2";
 
   private final String protocolVersion = PROTOCOL_VERSION;
   private final SnsMessageType type;
@@ -35,10 +35,11 @@ public class SnsMessage {
   private final String replicaTable;
   private final String replicaTableLocation;
   private final String replicaMetastoreUris;
-  private final LinkedHashMap<String,String> partitionKeys;
+  private final LinkedHashMap<String, String> partitionKeys;
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
+  private Boolean messageTruncated = null;
 
   SnsMessage(
       SnsMessageType type,
@@ -112,15 +113,15 @@ public class SnsMessage {
   public String getReplicaTable() {
     return replicaTable;
   }
-  
+
   public String getReplicaTableLocation() {
     return replicaTableLocation;
   }
-  
+
   public String getReplicaMetastoreUris() {
     return replicaMetastoreUris;
   }
-  
+
   public LinkedHashMap<String,String> getPartitionKeys() {
     return partitionKeys;
   }
@@ -129,12 +130,26 @@ public class SnsMessage {
     return modifiedPartitions;
   }
 
+  public void clearModifiedPartitions() {
+    if (modifiedPartitions != null) {
+      modifiedPartitions.clear();
+    }
+  }
+
   public Long getBytesReplicated() {
     return bytesReplicated;
   }
 
   public String getErrorMessage() {
     return errorMessage;
+  }
+
+  public Boolean isMessageTruncated() {
+    return messageTruncated;
+  }
+
+  public void setMessageTruncated(Boolean truncated) {
+    messageTruncated = truncated;
   }
 
 }

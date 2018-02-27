@@ -91,6 +91,7 @@ topic.
 |`partitionKeys`|Ordered Map of String->String|Only on successful replication of a partitioned table|A map where the keys are the partition key names and the values are the partition key types, the order output in the JSON matches the order of the values in the `modifiedPartitions` field below|
 |`modifiedPartitions`|List of List of Strings|Only on successful replication of a partitioned table|A list containing Lists of string representing the partition key values|
 |`bytesReplicated`|Long|Only on replication of `type` SUCCESS of a table containing data|The number of bytes of data replicated|
+|`messageTruncated`|Boolean|Only if SNS message exceeded maximum supported length|Will be set to `true` if the generated message exceeded the [maximum supported SNS message length](https://docs.aws.amazon.com/sns/latest/dg/large-payload-raw-message.html). In this case the `modifiedPartitions` will be _empty_ in order to reduce the message size so that this truncated version could be sent|
 |`errorMessage`|String|Only on replication of `type` FAILURE|A message describing the cause of the failure|
 
 ### Example Messages
@@ -99,7 +100,7 @@ topic.
 The following shows an example JSON message representing the start of a table replication:
 
 	{
-	  "protocolVersion" : "1.1",
+	  "protocolVersion" : "1.2",
 	  "type" : "START",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "eventId" : "ctp-20160601T152738.363Z-CzbZaYfj",
@@ -115,7 +116,7 @@ The following shows an example JSON message representing the start of a table re
 The following shows an example JSON message representing a successful replication of a non-partitioned table:
 
 	{
-	  "protocolVersion" : "1.1",
+	  "protocolVersion" : "1.2",
 	  "type" : "SUCCESS",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "endTime" : "2016-06-01T15:27:39.000Z",
@@ -135,7 +136,7 @@ and also the usage of custom "pipeline-id" header that was set using the `sns-ev
 configuration value described above:
 
 	{
-	  "protocolVersion" : "1.1",
+	  "protocolVersion" : "1.2",
 	  "type" : "SUCCESS",
 	  "headers" : {
 	    "pipeline-id" : "0943879438"
@@ -161,7 +162,7 @@ configuration value described above:
 The following shows an example JSON message representing the failure of a table replication:
 
 	{
-	  "protocolVersion" : "1.1",
+	  "protocolVersion" : "1.2",
 	  "type" : "FAILURE",
 	  "startTime" : "2016-06-01T15:27:38.365Z",
 	  "endTime" : "2016-06-01T15:27:39.000Z",
@@ -176,4 +177,4 @@ The following shows an example JSON message representing the failure of a table 
 	}
 
 ## Limitations
-SNS messages have a size limit of 256KB. It is possible that you could exceed this bound if your replication touches a very large number of partitions. In this case your message will not be sent and instead logged with a warning.
+SNS messages have a [size limit of 256KB](https://docs.aws.amazon.com/sns/latest/dg/large-payload-raw-message.html). It is possible that you could exceed this bound if your replication touches a very large number of partitions. In this case your message will be sent with the `modifiedPartitions` set to be empty and the `messageTruncated` field set to `true`. If this occurs you will need to take additional steps to identify which partitions were altered.

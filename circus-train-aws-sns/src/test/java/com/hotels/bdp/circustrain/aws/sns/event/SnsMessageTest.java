@@ -15,6 +15,9 @@
  */
 package com.hotels.bdp.circustrain.aws.sns.event;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -145,6 +148,26 @@ public class SnsMessageTest {
         bytesReplicated, errorMessage);
 
     printMessage(message);
+  }
+
+  @Test
+  public void clearPartitions() throws JsonProcessingException {
+    List<String> partition1 = Lists.newArrayList("2014-01-01", "1");
+    List<List<String>> modifiedPartitions = Lists.newArrayList();
+    modifiedPartitions.add(partition1);
+    SnsMessage message = new SnsMessage(null, null, null, null, null, null, null,
+        null, null, null, null, null, modifiedPartitions,
+        0L, null);
+    assertThat(message.getModifiedPartitions().size(), is(1));
+    message.clearModifiedPartitions();
+    assertThat(message.getModifiedPartitions().size(), is(0));
+  }
+
+  @Test
+  public void clearNullPartitions() throws JsonProcessingException {
+    SnsMessage message = new SnsMessage(null, null, null, null, null, null, null, null, null, null, null, null, null,
+        0L, null);
+    message.clearModifiedPartitions();
   }
 
 }

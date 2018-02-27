@@ -151,19 +151,19 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     partitionsToCreate = eventPartitions.getEventPartitions();
     setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
-  
+
   @Override
   public void partitionsToAlter(EventPartitions eventPartitions) {
     partitionsToAlter = eventPartitions.getEventPartitions();
     setPartitionKeyTypes(eventPartitions.getPartitionKeyTypes());
   }
-  
+
   private void setPartitionKeyTypes(LinkedHashMap<String, String> partitionKeyTypes) {
     if (partitionKeyTypes != null) {
       this.partitionKeyTypes = partitionKeyTypes;
     }
   }
-  
+
   @VisibleForTesting
   static List<List<String>> getModifiedPartitions(
       List<EventPartition> partitionsToAlter,
@@ -185,10 +185,14 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   private void publish(final String topic, SnsMessage message) {
     if (topic != null) {
       try {
-        final String jsonMessage = startWriter.writeValueAsString(message);
+        String jsonMessage = startWriter.writeValueAsString(message);
         int messageLength = jsonMessage.getBytes(StandardCharsets.UTF_8).length;
         if (messageLength > SNS_MESSAGE_SIZE_LIMIT) {
-          LOG.warn("Message length of {} exceeds SNS limit ({} bytes).", messageLength, SNS_MESSAGE_SIZE_LIMIT);
+          LOG.warn("Message length of {} exceeds SNS limit ({} bytes), clearing partition info", messageLength,
+              SNS_MESSAGE_SIZE_LIMIT);
+          message.clearModifiedPartitions();
+          message.setMessageTruncated(true);
+          jsonMessage = startWriter.writeValueAsString(message);
         }
         LOG.debug("Attempting to send message to topic '{}': {}", topic, jsonMessage);
         PublishRequest request = new PublishRequest(topic, jsonMessage);

@@ -22,6 +22,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static com.hotels.bdp.circustrain.aws.sns.event.SnsMessage.PROTOCOL_VERSION;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -30,6 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +65,6 @@ public class SnsListenerTest {
 
   private static final String STARTTIME = "starttime";
   private static final String EVENT_ID = "EVENT_ID";
-  private static final String PROTOCOL_VERSION = "1.1";
   private static final String REPLICA_TABLE_LOCATION = "s3://bucket/path";
   private static final String REPLICA_METASTORE_URIS = "thrift://host:9083";
 
@@ -71,6 +74,7 @@ public class SnsListenerTest {
       PARTITION_1 = new EventPartition(Arrays.asList("2014-01-01", "1"), new URI("location_1"));
     } catch (URISyntaxException e) {}
   }
+
   @Mock
   private ListenerConfig config;
   @Mock
@@ -132,7 +136,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("startArn"));
-    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\"" 
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
         + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
         + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
         + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
@@ -274,6 +278,48 @@ public class SnsListenerTest {
   public void getModifiedPartitionsBothNull() throws URISyntaxException {
     List<List<String>> partitions = SnsListener.getModifiedPartitions(null, null);
     assertThat(partitions, is(nullValue()));
+  }
+
+  @Test
+  public void messageSizeExceeded() throws Exception {
+    SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
+
+    EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
+    LocalDate date = LocalDate.now();
+    // send a large number of partitions to trigger message size exceeded
+    for (int i = 0; i < 20000; i++) {
+      EventPartition partition = new EventPartition(
+          Arrays.asList(date.toString(DateTimeFormat.forPattern("yyyy-dd-MM")), "0"),
+          new URI("location_" + i));
+      createdPartitions.add(partition);
+      date = date.plusDays(1);
+    }
+    listener.partitionsToCreate(createdPartitions);
+
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
+
+    verify(client, times(2)).publish(requestCaptor.capture());
+    PublishRequest request = requestCaptor.getAllValues().get(1);
+    assertThat(request.getSubject(), is(SUBJECT));
+    assertThat(request.getTopicArn(), is("successArn"));
+    assertThat(request.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+            + "\"modifiedPartitions\":[],\"bytesReplicated\":40,"
+            + "\"messageTruncated\":true}"));
   }
 
 }
