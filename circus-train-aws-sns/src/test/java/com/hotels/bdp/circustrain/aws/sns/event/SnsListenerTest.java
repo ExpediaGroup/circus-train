@@ -26,14 +26,14 @@ import static com.hotels.bdp.circustrain.aws.sns.event.SnsMessage.PROTOCOL_VERSI
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -302,7 +302,8 @@ public class SnsListenerTest {
     LocalDate date = LocalDate.now();
     // send a large number of partitions to trigger message size exceeded
     for (int i = 0; i < 20000; i++) {
-      EventPartition partition = new EventPartition(Arrays.asList(date.format(DateTimeFormatter.ISO_DATE), "0"),
+      EventPartition partition = new EventPartition(
+          Arrays.asList(date.toString(DateTimeFormat.forPattern("yyyy-dd-MM")), "0"),
           new URI("location_" + i));
       createdPartitions.add(partition);
       date = date.plusDays(1);
