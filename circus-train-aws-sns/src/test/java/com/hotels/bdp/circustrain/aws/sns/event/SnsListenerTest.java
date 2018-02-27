@@ -136,7 +136,7 @@ public class SnsListenerTest {
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("startArn"));
-    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\"" 
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\"" + PROTOCOL_VERSION + "\""
         + ",\"type\":\"START\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
         + "\"startTime\":\"starttime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\","
         + "\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":"
@@ -319,7 +319,7 @@ public class SnsListenerTest {
             + REPLICA_METASTORE_URIS
             + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
             + "\"modifiedPartitions\":[],\"bytesReplicated\":40,"
-            + "\"truncated\":true}"));
+            + "\"messageTruncated\":true}"));
   }
 
 }

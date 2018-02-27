@@ -39,7 +39,7 @@ public class SnsMessage {
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
-  private Boolean truncated = null;
+  private Boolean messageTruncated = null;
 
   SnsMessage(
       SnsMessageType type,
@@ -144,12 +144,12 @@ public class SnsMessage {
     return errorMessage;
   }
 
-  public Boolean isTruncated() {
-    return truncated;
+  public Boolean isMessageTruncated() {
+    return messageTruncated;
   }
 
-  public void setTruncated(Boolean truncated) {
-    this.truncated = truncated;
+  public void setMessageTruncated(Boolean truncated) {
+    messageTruncated = truncated;
   }
 
 }

@@ -191,7 +191,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
           LOG.warn("Message length of {} exceeds SNS limit ({} bytes), clearing partition info", messageLength,
               SNS_MESSAGE_SIZE_LIMIT);
           message.clearModifiedPartitions();
-          message.setTruncated(true);
+          message.setMessageTruncated(true);
           jsonMessage = startWriter.writeValueAsString(message);
         }
         LOG.debug("Attempting to send message to topic '{}': {}", topic, jsonMessage);
