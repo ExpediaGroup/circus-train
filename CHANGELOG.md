@@ -1,7 +1,9 @@
-# 11.2.1 - TBD
+# 11.2.1 - 2018-02-27
 ### Changed
 * Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility
 * Add dependency management bom for Google Cloud dependencies
+### Fixed
+* Backwards compatibility with Hive 1.2.x
 
 # 11.2.0 - 2018-02-16
 ### Added
