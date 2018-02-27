@@ -108,10 +108,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     startTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
-    SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
-        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
-        replicaTable.getTableLocation(), partitionKeyTypes, null, null, null);
+    SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId, sourceCatalog.getName(),
+        replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, null, null, null);
     publish(config.getStartTopic(), message);
   }
 
@@ -120,10 +119,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     String endTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
-        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
-        replicaTable.getTableLocation(), partitionKeyTypes,
-        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), null);
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
+        getBytesReplicated(), null);
     publish(config.getSuccessTopic(), message);
   }
 
@@ -135,10 +133,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     String endTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
-        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
-        replicaTable.getTableLocation(), partitionKeyTypes,
-        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), t.getMessage());
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
+        tableReplication.getQualifiedReplicaName(),replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
+        getBytesReplicated(), t.getMessage());
     publish(config.getFailTopic(), message);
   }
 

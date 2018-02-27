@@ -1,8 +1,11 @@
+
 # 11.3.0 - TBD
 ### Changed
 * SNS message now indicates if message was truncated. See [#41](https://github.com/HotelsDotCom/circus-train/issues/41).
 * Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility.
 * Add dependency management bom for Google Cloud dependencies.
+### Fixed
+* Backwards compatibility with Hive 1.2.x.
 
 # 11.2.0 - 2018-02-16
 ### Added
