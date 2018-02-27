@@ -35,7 +35,7 @@ public class SnsMessage {
   private final String replicaTable;
   private final String replicaTableLocation;
   private final String replicaMetastoreUris;
-  private final LinkedHashMap<String,String> partitionKeys;
+  private final LinkedHashMap<String, String> partitionKeys;
   private final List<List<String>> modifiedPartitions;
   private final Long bytesReplicated;
   private final String errorMessage;
@@ -131,7 +131,9 @@ public class SnsMessage {
   }
 
   public void clearModifiedPartitions() {
-    modifiedPartitions.clear();
+    if (modifiedPartitions != null) {
+      modifiedPartitions.clear();
+    }
   }
 
   public Long getBytesReplicated() {
