@@ -91,7 +91,7 @@ topic.
 |`partitionKeys`|Ordered Map of String->String|Only on successful replication of a partitioned table|A map where the keys are the partition key names and the values are the partition key types, the order output in the JSON matches the order of the values in the `modifiedPartitions` field below|
 |`modifiedPartitions`|List of List of Strings|Only on successful replication of a partitioned table|A list containing Lists of string representing the partition key values|
 |`bytesReplicated`|Long|Only on replication of `type` SUCCESS of a table containing data|The number of bytes of data replicated|
-|`messageTruncated`|Boolean|Only if SNS message exceeded maximum supported length|Will be set to `true` if the generated message exceeded the [maximum supported SNS message length](https://docs.aws.amazon.com/sns/latest/dg/large-payload-raw-message.html). In this case the `modifiedPartitions` will be _empty_ in order to reduce the size so that this truncated version of the message was able to be transmitted instead|
+|`messageTruncated`|Boolean|Only if SNS message exceeded maximum supported length|Will be set to `true` if the generated message exceeded the [maximum supported SNS message length](https://docs.aws.amazon.com/sns/latest/dg/large-payload-raw-message.html). In this case the `modifiedPartitions` will be _empty_ in order to reduce the message size so that this truncated version could be sent|
 |`errorMessage`|String|Only on replication of `type` FAILURE|A message describing the cause of the failure|
 
 ### Example Messages
