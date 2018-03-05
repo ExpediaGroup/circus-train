@@ -23,7 +23,7 @@
     <dependency>
       <groupId>org.gaul</groupId>
       <artifactId>s3proxy</artifactId>
-      <version>1.5.3</version>
+      <version>1.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>ch.qos.logback</groupId>

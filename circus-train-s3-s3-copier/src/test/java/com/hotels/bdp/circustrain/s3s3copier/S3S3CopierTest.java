@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
+import org.gaul.s3proxy.junit.S3ProxyRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,7 +68,6 @@ import com.google.common.io.Files;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.common.test.junit.rules.S3ProxyRule;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
@@ -105,7 +105,7 @@ public class S3S3CopierTest {
   }
 
   private AmazonS3 newClient() {
-    EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Proxy.getProxyUrl(),
+    EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Proxy.getUri().toString(),
         Regions.DEFAULT_REGION.getName());
     AmazonS3 newClient = AmazonS3ClientBuilder
         .standard()
@@ -229,7 +229,7 @@ public class S3S3CopierTest {
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-        .thenReturn(mockedTransferManager);
+    .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
@@ -308,7 +308,7 @@ public class S3S3CopierTest {
       assertThat(e.getCause().getMessage(), is("cause"));
     }
   }
-  
+
   @Test
   public void copyDefaultCopierOptions() throws Exception {
     client.putObject("source", "data", inputData);
