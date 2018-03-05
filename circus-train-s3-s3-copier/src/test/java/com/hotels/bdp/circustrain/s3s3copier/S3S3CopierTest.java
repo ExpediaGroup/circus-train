@@ -229,7 +229,7 @@ public class S3S3CopierTest {
     TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
-    .thenReturn(mockedTransferManager);
+        .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
