@@ -39,6 +39,7 @@ import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.gaul.s3proxy.junit.S3ProxyRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,7 +56,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
-import com.hotels.bdp.circustrain.common.test.junit.rules.S3ProxyRule;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 import com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser;
@@ -127,7 +127,7 @@ public class CircusTrainHdfsS3IntegrationTest {
     AmazonS3URI base = toAmazonS3URI(URI.create(tableUri));
     S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(ImmutableMap
         .<String, Object> builder()
-        .put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getProxyUrl())
+        .put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getUri().toString())
         .build());
     return s3ClientFactory.newInstance(base, s3s3CopierOptions);
   }
@@ -144,8 +144,8 @@ public class CircusTrainHdfsS3IntegrationTest {
         .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
             sourceCatalog.driverClassName())
         .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getProxyUrl())
+        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
         .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
         .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
         .build();
@@ -184,8 +184,8 @@ public class CircusTrainHdfsS3IntegrationTest {
         .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
             sourceCatalog.driverClassName())
         .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getProxyUrl())
+        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
         .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
         .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
         .build();
@@ -234,8 +234,8 @@ public class CircusTrainHdfsS3IntegrationTest {
         .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
             sourceCatalog.driverClassName())
         .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getProxyUrl())
-        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getProxyUrl())
+        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
         .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
         .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
         .build();
