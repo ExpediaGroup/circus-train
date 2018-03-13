@@ -1,3 +1,7 @@
+# TBD
+### Changed
+* Clearer replica-check exception message. See [#47](https://github.com/HotelsDotCom/circus-train/issues/47).
+
 # 11.3.0 - 2018-02-27
 ### Changed
 * SNS message now indicates if message was truncated. See [#41](https://github.com/HotelsDotCom/circus-train/issues/41).

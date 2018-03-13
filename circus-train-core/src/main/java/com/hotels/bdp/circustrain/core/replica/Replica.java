@@ -50,6 +50,7 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
@@ -60,7 +61,6 @@ import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
-import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 public class Replica extends HiveEndpoint {
 
@@ -297,7 +297,8 @@ public class Replica extends HiveEndpoint {
     // REPLICATION_EVENT to determine if a table was created via CT.
     String previousEvent = oldReplicaTable.getParameters().get(REPLICATION_EVENT.parameterName());
     if (StringUtils.isBlank(previousEvent)) {
-      throw new DestinationNotReplicaException(oldReplicaTable, getHiveConf().getVar(ConfVars.METASTOREURIS));
+      throw new DestinationNotReplicaException(oldReplicaTable, getHiveConf().getVar(ConfVars.METASTOREURIS),
+          REPLICATION_EVENT);
     }
     LOG.debug("Checking that replication modes are compatible.");
     Optional<ReplicationMode> replicaReplicationMode = Enums.getIfPresent(ReplicationMode.class,
