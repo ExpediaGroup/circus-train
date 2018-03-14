@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,23 @@ import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.CircusTrainTableParameter;
 
 public class DestinationNotReplicaException extends CircusTrainException {
 
   private static final long serialVersionUID = 1L;
 
-  DestinationNotReplicaException(Table oldReplicaTable, String replicaMetastoreUris) {
+  DestinationNotReplicaException(
+      Table oldReplicaTable,
+      String replicaMetastoreUris,
+      CircusTrainTableParameter tableParameter) {
     super("Found an existing table '"
         + Warehouse.getQualifiedName(oldReplicaTable)
         + "' in '"
         + replicaMetastoreUris
-        + "', but it does not appear to be a replica!");
+        + "', but it does not appear to be a replica! Missing table property '"
+        + tableParameter.parameterName()
+        + "'");
   }
 
 }
