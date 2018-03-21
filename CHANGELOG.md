@@ -1,3 +1,7 @@
+# TBD
+### Fixed
+* Log job failure if Circus Train fails on tableReplicationStart.
+
 # 11.3.1 - 2018-03-21
 ### Changed
 * Clearer replica-check exception message. See [#47](https://github.com/HotelsDotCom/circus-train/issues/47).

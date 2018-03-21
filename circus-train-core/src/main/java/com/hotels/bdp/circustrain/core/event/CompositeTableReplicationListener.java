@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core.event;
 import java.util.Collections;
 import java.util.List;
 
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class CompositeTableReplicationListener implements TableReplicationListen
       try {
         listener.tableReplicationStart(tableReplication, eventId);
       } catch (Exception e) {
-        LOG.error("Listener '{}' threw exception on tableReplicationStart.", listener, e);
+        throw new CircusTrainException("Listener '" + listener + "' threw exception on tableReplicationStart.", e);
       }
     }
   }
