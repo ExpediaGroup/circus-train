@@ -1,6 +1,6 @@
 # TBD
 ### Fixed
-* Log job failure if Circus Train fails on tableReplicationStart.
+* Fail circus train if copy fails on tableReplicationStart
 
 # 11.3.1 - 2018-03-21
 ### Changed
