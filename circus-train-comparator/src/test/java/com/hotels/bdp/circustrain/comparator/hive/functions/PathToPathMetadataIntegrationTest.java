@@ -15,7 +15,6 @@
  */
 package com.hotels.bdp.circustrain.comparator.hive.functions;
 
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -66,7 +65,7 @@ public class PathToPathMetadataIntegrationTest {
     Path path = new Path(baseDir.toURI());
     PathMetadata metadata = function.apply(path);
 
-    assertThat(metadata.getLastModifiedTimestamp(), not(baseDir.lastModified()));
+    assertThat(metadata.getLastModifiedTimestamp(), is(0L));
     assertThat(metadata.getLocation(), is(baseDir.toURI().toString()));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
