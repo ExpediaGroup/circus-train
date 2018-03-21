@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ public class PathToPathMetadataIntegrationTest {
     Path path = new Path(baseDir.toURI());
     PathMetadata metadata = function.apply(path);
 
+    assertThat(metadata.getLastModifiedTimestamp(), is(0L));
     assertThat(metadata.getLocation(), is(baseDir.toURI().toString()));
-    assertThat(metadata.getLastModifiedTimestamp(), is(baseDir.lastModified()));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
     assertThat(metadata.getChecksum(), is(nullValue()));

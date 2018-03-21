@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.comparator.hive.functions.PathToPathMetadata;
 import com.hotels.bdp.circustrain.comparator.hive.wrappers.PathMetadata;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,8 +45,8 @@ public class PathToPathMetadataTest {
 
   private static final String DIR_PATH = "file:/abc";
   private static final String FILE_PATH = DIR_PATH + "/child.dat";
-  private static final long LAST_MODIFIED_DIR = 123456789L;
-  private static final long LAST_MODIFIED_FILE = 999999999999L;
+  private static final long LAST_MODIFIED = 123456789L;
+  private static final long LAST_MODIFIED_CHILD = 999999999999L;
   private static final String CHECKSUM_ALGORITHM = "CHECKSUM_ALGORITHM";
   private static final int CHECKSUM_LENGTH = 64;
   private static final byte[] CHECKSUM_BYTES = new byte[] { 1, 2, 3 };
@@ -65,7 +64,7 @@ public class PathToPathMetadataTest {
     when(path.getFileSystem(any(Configuration.class))).thenReturn(fs);
 
     when(fileStatus.getPath()).thenReturn(path);
-    when(fileStatus.getModificationTime()).thenReturn(LAST_MODIFIED_DIR);
+    when(fileStatus.getModificationTime()).thenReturn(LAST_MODIFIED);
     when(fs.getFileStatus(path)).thenReturn(fileStatus);
 
     when(fileChecksum.getAlgorithmName()).thenReturn(CHECKSUM_ALGORITHM);
@@ -84,7 +83,7 @@ public class PathToPathMetadataTest {
     PathMetadata metadata = function.apply(path);
 
     assertThat(metadata.getLocation(), is(DIR_PATH));
-    assertThat(metadata.getLastModifiedTimestamp(), is(LAST_MODIFIED_DIR));
+    assertThat(metadata.getLastModifiedTimestamp(), is(LAST_MODIFIED));
     assertThat(metadata.getChecksumAlgorithmName(), is(CHECKSUM_ALGORITHM));
     assertThat(metadata.getChecksumLength(), is(CHECKSUM_LENGTH));
     assertThat(metadata.getChecksum(), is(CHECKSUM_BYTES));
@@ -103,7 +102,7 @@ public class PathToPathMetadataTest {
 
     FileStatus childStatus = mock(FileStatus.class);
     when(childStatus.getPath()).thenReturn(childPath);
-    when(childStatus.getModificationTime()).thenReturn(LAST_MODIFIED_FILE);
+    when(childStatus.getModificationTime()).thenReturn(LAST_MODIFIED_CHILD);
     when(childStatus.isFile()).thenReturn(true);
     when(childStatus.isDirectory()).thenReturn(false);
     when(fs.getFileStatus(childPath)).thenReturn(childStatus);
@@ -115,7 +114,7 @@ public class PathToPathMetadataTest {
     PathMetadata metadata = function.apply(path);
 
     assertThat(metadata.getLocation(), is(DIR_PATH));
-    assertThat(metadata.getLastModifiedTimestamp(), is(LAST_MODIFIED_DIR));
+    assertThat(metadata.getLastModifiedTimestamp(), is(0L));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
     assertThat(metadata.getChecksum(), is(nullValue()));
@@ -125,7 +124,7 @@ public class PathToPathMetadataTest {
 
     PathMetadata childMetadata = metadata.getChildrenMetadata().get(0);
     assertThat(childMetadata.getLocation(), is(FILE_PATH));
-    assertThat(childMetadata.getLastModifiedTimestamp(), is(LAST_MODIFIED_FILE));
+    assertThat(childMetadata.getLastModifiedTimestamp(), is(LAST_MODIFIED_CHILD));
     assertThat(childMetadata.getChecksumAlgorithmName(), is(CHECKSUM_ALGORITHM));
     assertThat(childMetadata.getChecksumLength(), is(CHECKSUM_LENGTH));
     assertThat(childMetadata.getChecksum(), is(CHECKSUM_BYTES));

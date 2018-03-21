@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,16 +50,19 @@ public class PathToPathMetadata implements Function<Path, PathMetadata> {
         checksum = fs.getFileChecksum(location);
       }
 
+      long modificationTime = 0;
       List<PathMetadata> childPathDescriptors = new ArrayList<>();
+
       if (fileStatus.isDirectory()) {
         FileStatus[] childStatuses = fs.listStatus(location);
         for (FileStatus childStatus : childStatuses) {
           childPathDescriptors.add(apply(childStatus.getPath()));
         }
+      } else {
+        modificationTime = fileStatus.getModificationTime();
       }
 
-      return new PathMetadata(location, fileStatus.getModificationTime(), checksum, childPathDescriptors);
-
+      return new PathMetadata(location, modificationTime, checksum, childPathDescriptors);
     } catch (IOException e) {
       throw new CircusTrainException("Unable to compute digest for location " + location.toString(), e);
     }
