@@ -38,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.comparator.hive.functions.PathToPathMetadata;
 import com.hotels.bdp.circustrain.comparator.hive.wrappers.PathMetadata;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,7 +45,7 @@ public class PathToPathMetadataTest {
 
   private static final String DIR_PATH = "file:/abc";
   private static final String FILE_PATH = DIR_PATH + "/child.dat";
-  private static final long LAST_MODIFIED_DIR = 123456789L;
+  private static final long LAST_MODIFIED_DIR = 0;
   private static final long LAST_MODIFIED_FILE = 999999999999L;
   private static final String CHECKSUM_ALGORITHM = "CHECKSUM_ALGORITHM";
   private static final int CHECKSUM_LENGTH = 64;
