@@ -1,6 +1,8 @@
 # TBD
 ### Changed
 * Clearer replica-check exception message. See [#47](https://github.com/HotelsDotCom/circus-train/issues/47).
+### Fixed
+* S3-S3 Hive Diff calculating incorrect checksum on folders
 
 # 11.3.0 - 2018-02-27
 ### Changed
