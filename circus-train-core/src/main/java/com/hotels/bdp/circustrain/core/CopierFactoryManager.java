@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import java.util.Map;
 
 @Profile({ Modules.REPLICATION })
 @Component
@@ -55,13 +56,21 @@ public class CopierFactoryManager {
     }
   }
 
-  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation) {
+  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions) {
     String sourceScheme = sourceLocation.toUri().getScheme();
     String replicaScheme = replicaLocation.toUri().getScheme();
     for (CopierFactory copierFactory : copierFactories) {
-      if (copierFactory.supportsSchemes(sourceScheme, replicaScheme)) {
+      final String copierFactoryName = copierFactory.getClass().getName();
+      if (copierOptions.containsKey("copier-name")) {
+        if (copierFactoryName.equalsIgnoreCase(copierOptions.get("copier-name").toString())) {
+          LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
+                  copierFactoryName, sourceScheme, replicaScheme);
+          return copierFactory;
+        }
+      }
+      else if (copierFactory.supportsSchemes(sourceScheme, replicaScheme)) {
         LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
-            copierFactory.getClass().getName(), sourceScheme, replicaScheme);
+                copierFactoryName, sourceScheme, replicaScheme);
         return copierFactory;
       }
     }

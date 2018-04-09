@@ -113,7 +113,7 @@ class PartitionedTableReplication implements Replication {
             database, table, partitionPredicate);
       } else {
         CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceBaseLocation,
-            replicaPartitionBaseLocation);
+            replicaPartitionBaseLocation, copierOptions);
         Copier copier = copierFactory.newInstance(eventId, sourceBaseLocation, sourceSubLocations,
             replicaPartitionBaseLocation, copierOptions);
         copierListener.copierStart(copier.getClass().getName());

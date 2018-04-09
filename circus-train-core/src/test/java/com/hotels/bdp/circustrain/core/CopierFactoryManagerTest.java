@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class CopierFactoryManagerTest {
   public void supportsScheme() {
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(true);
 
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path);
+    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of());
 
     assertTrue(copierFactoryResult == copierFactory);
   }
@@ -60,6 +61,6 @@ public class CopierFactoryManagerTest {
   public void doesNotSupportScheme() {
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(false);
 
-    copierFactoryManager.getCopierFactory(path, path);
+    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of());
   }
 }

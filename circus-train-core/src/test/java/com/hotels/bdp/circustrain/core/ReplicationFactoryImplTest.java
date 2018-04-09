@@ -52,6 +52,7 @@ import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
 import com.hotels.bdp.circustrain.core.source.Source;
 import com.hotels.bdp.circustrain.core.source.SourceFactory;
+import static org.mockito.Matchers.anyMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicationFactoryImplTest {
@@ -101,7 +102,7 @@ public class ReplicationFactoryImplTest {
     when(replicaTable.getDatabaseName()).thenReturn(DATABASE);
     when(replicaTable.getTableName()).thenReturn(TABLE);
 
-    when(copierFactoryManager.getCopierFactory(any(Path.class), any(Path.class))).thenReturn(copierFactory);
+    when(copierFactoryManager.getCopierFactory(any(Path.class), any(Path.class), anyMap())).thenReturn(copierFactory);
     when(partitionPredicateFactory.newInstance(tableReplication)).thenReturn(partitionPredicate);
     when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
     when(sourceTable.getPartitionLimit()).thenReturn((short) MAX_PARTITIONS);
