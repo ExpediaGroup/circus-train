@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package com.hotels.bdp.circustrain.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,10 +32,6 @@ import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CopierFactoryManagerTest {
@@ -47,35 +45,31 @@ public class CopierFactoryManagerTest {
 
   private CopierFactoryManager copierFactoryManager;
 
-  @Before
-  public void before() {
-    copierFactoryManager = new CopierFactoryManager(Arrays.asList(copierFactory));
-    copierFactoryManager.postConstruct();
-  }
-
   @Test
   public void supportsScheme() {
+    copierFactoryManager = new CopierFactoryManager(Arrays.asList(copierFactory));
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(true);
 
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of());
+    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path,
+        ImmutableMap.<String, Object> of());
 
-    assertTrue(copierFactoryResult == copierFactory);
+    assertEquals(copierFactory, copierFactoryResult);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void doesNotSupportScheme() {
+    copierFactoryManager = new CopierFactoryManager(Arrays.asList(copierFactory));
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(false);
 
-    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of());
+    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of());
   }
 
   @Test
   public void supportsSchemeWithCopierFactoryClass() {
     CopierFactory testCopierFactory = new TestCopierFactory();
     copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
-    copierFactoryManager.postConstruct();
-
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "com.hotels.bdp.circustrain.core.CopierFactoryManagerTest$TestCopierFactory"));
+    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path,
+        ImmutableMap.<String, Object> of("copier-factory-class", testCopierFactory.getClass().getName()));
 
     assertEquals(copierFactoryResult, testCopierFactory);
   }
@@ -84,9 +78,8 @@ public class CopierFactoryManagerTest {
   public void supportsSchemeWithCopierFactoryClassNotFound() {
     CopierFactory testCopierFactory = new TestCopierFactory();
     copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
-    copierFactoryManager.postConstruct();
 
-    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "test"));
+    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of("copier-factory-class", "test"));
   }
 
   class TestCopierFactory implements CopierFactory {
@@ -97,12 +90,14 @@ public class CopierFactoryManagerTest {
     }
 
     @Override
-    public Copier newInstance(String eventId, Path sourceBaseLocation, List<Path> sourceSubLocations, Path replicaLocation, Map<String, Object> copierOptions) {
+    public Copier newInstance(String eventId, Path sourceBaseLocation, List<Path> sourceSubLocations,
+        Path replicaLocation, Map<String, Object> copierOptions) {
       return null;
     }
 
     @Override
-    public Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions) {
+    public Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation,
+        Map<String, Object> copierOptions) {
       return null;
     }
   }
