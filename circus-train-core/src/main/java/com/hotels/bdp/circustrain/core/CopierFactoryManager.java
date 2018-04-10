@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import java.util.Map;
 
 @Profile({ Modules.REPLICATION })
 @Component
@@ -39,6 +40,7 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 public class CopierFactoryManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopierFactoryManager.class);
+  private static final String COPIER_FACTORY_CLASS = "copier-factory-class";
 
   private final List<CopierFactory> copierFactories;
 
@@ -55,14 +57,25 @@ public class CopierFactoryManager {
     }
   }
 
-  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation) {
+  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions) {
     String sourceScheme = sourceLocation.toUri().getScheme();
     String replicaScheme = replicaLocation.toUri().getScheme();
-    for (CopierFactory copierFactory : copierFactories) {
-      if (copierFactory.supportsSchemes(sourceScheme, replicaScheme)) {
-        LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
-            copierFactory.getClass().getName(), sourceScheme, replicaScheme);
-        return copierFactory;
+    if (copierOptions.containsKey(COPIER_FACTORY_CLASS)) {
+      for (CopierFactory copierFactory : copierFactories) {
+        final String copierFactoryClassName = copierFactory.getClass().getName();
+        if (copierFactoryClassName.equals(copierOptions.get(COPIER_FACTORY_CLASS).toString())) {
+          LOG.debug("Found CopierFactory '{}' using config", copierFactoryClassName);
+          return copierFactory;
+        }
+      }
+    } else {
+      for (CopierFactory copierFactory : copierFactories) {
+        final String copierFactoryClassName = copierFactory.getClass().getName();
+        if (copierFactory.supportsSchemes(sourceScheme, replicaScheme)) {
+          LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
+                  copierFactoryClassName, sourceScheme, replicaScheme);
+          return copierFactory;
+        }
       }
     }
     throw new UnsupportedOperationException("No CopierFactory that suppports sourceScheme '"

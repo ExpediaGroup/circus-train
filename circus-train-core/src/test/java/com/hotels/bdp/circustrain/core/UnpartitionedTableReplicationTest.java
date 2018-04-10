@@ -88,7 +88,7 @@ public class UnpartitionedTableReplicationTest {
     when(sourceTableAndStatistics.getTable()).thenReturn(sourceTable);
     when(source.getLocationManager(sourceTable, EVENT_ID)).thenReturn(sourceLocationManager);
     when(sourceLocationManager.getTableLocation()).thenReturn(sourceTableLocation);
-    when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation)).thenReturn(copierFactory);
+    when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions)).thenReturn(copierFactory);
     when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copier);
     when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
@@ -105,7 +105,7 @@ public class UnpartitionedTableReplicationTest {
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
         replicaLocationManager, listener);
     replicationOrder.verify(replica).validateReplicaTable(DATABASE, TABLE);
-    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation);
+    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
     replicationOrder.verify(copierFactory).newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation,
         copierOptions);
     replicationOrder.verify(listener).copierStart(anyString());
@@ -130,7 +130,7 @@ public class UnpartitionedTableReplicationTest {
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
         replicaLocationManager);
     replicationOrder.verify(replica).validateReplicaTable(MAPPED_DATABASE, MAPPED_TABLE);
-    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation);
+    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
     replicationOrder.verify(copierFactory).newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation,
         copierOptions);
     replicationOrder.verify(copier).copy();
