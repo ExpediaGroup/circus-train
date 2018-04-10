@@ -251,6 +251,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
             max-maps: 50
             skip-crc: false
             ssl-configuration-file: /foo/bar/ssl-config
+            copier-factory-class: com.hotels.bdp.circustrain.distcpcopier.DistCpCopier
 
 |Property|Required|Description|
 |----|----|----|
@@ -266,6 +267,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
 |`copier-options.skip-crc`|No|Controls whether CRC computation is skipped. Defaults to `false`.|
 |`copier-options.ssl-configuration-file`|No|Path to the SSL configuration file to use for `hftps://`. Defaults to `null`.|
 |`copier-options.ignore-missing-partition-folder-errors`|No|Boolean flag, if set to `true` will ignore errors from DistCp that normally fail the replication. DistCp normally fails when a partition is found in the metadata that is missing on HDFS (Default DistCp behavior). Defaults to `false` (so replication will fail).|
+|`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 
 ##### S3MapReduceCp copier options
 If data is being replicated from HDFS to S3 then Circus Train will use a customized, improved version of DistCp to copy the data. The options are summarised below.
@@ -283,6 +285,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
             copy-strategy: uniformsize
             ignore-failures: false
             log-path:
+            copier-factory-class: com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpCopier
 
 | Property|Required|Description|
 |----|----|----|
@@ -302,6 +305,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-retry-count`|No|Maximum number of upload retries. Defaults to `3`|
 | `copier-options.upload-retry-delay-ms`|No|Milliseconds between upload retries. The actual delay will be computed as `delay = attempt * copier-options.upload-retry-delay-ms` where `attempt` is the current retry number. Defaults to `300` ms.|
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
+|`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 
 ##### S3 to S3 copier options
 If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
@@ -312,6 +316,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3s3-multipart-copy-part-size-in-bytes`|No|Default value should be OK for most replications. See [TransferManagerConfiguration](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManagerConfiguration.html)|
 |`copier-options.s3-endpoint-uri`|No|URI of the S3 end-point used by the S3 client. Defaults to `null` which means the client will select the end-point.|
 |`copier-options.s3-server-side-encryption`|No|Whether to enable server side encryption. Defaults to `false`.|
+|`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 
 ### S3 Secret Configuration
 When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. To protect these from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.
