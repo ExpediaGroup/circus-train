@@ -15,12 +15,9 @@
  */
 package com.hotels.bdp.circustrain.core;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-
 import com.google.common.collect.ImmutableMap;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CopierFactoryManagerTest {
@@ -62,5 +64,43 @@ public class CopierFactoryManagerTest {
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(false);
 
     copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of());
+  }
+
+  @Test
+  public void supportsSchemeWithCopierFactoryClass() {
+    CopierFactory testCopierFactory = new TestCopierFactory();
+    copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
+    copierFactoryManager.postConstruct();
+
+    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "com.hotels.bdp.circustrain.core.CopierFactoryManagerTest$TestCopierFactory"));
+
+    assertTrue(copierFactoryResult == testCopierFactory);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void supportsSchemeWithCopierFactoryClassNotFound() {
+    CopierFactory testCopierFactory = new TestCopierFactory();
+    copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
+    copierFactoryManager.postConstruct();
+
+    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "test"));
+  }
+
+  class TestCopierFactory implements CopierFactory {
+
+    @Override
+    public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
+      return false;
+    }
+
+    @Override
+    public Copier newInstance(String eventId, Path sourceBaseLocation, List<Path> sourceSubLocations, Path replicaLocation, Map<String, Object> copierOptions) {
+      return null;
+    }
+
+    @Override
+    public Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions) {
+      return null;
+    }
   }
 }
