@@ -15,9 +15,10 @@
  */
 package com.hotels.bdp.circustrain.core;
 
-import com.google.common.collect.ImmutableMap;
-import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +26,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -74,7 +77,7 @@ public class CopierFactoryManagerTest {
 
     CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "com.hotels.bdp.circustrain.core.CopierFactoryManagerTest$TestCopierFactory"));
 
-    assertTrue(copierFactoryResult == testCopierFactory);
+    assertEquals(copierFactoryResult, testCopierFactory);
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -83,7 +86,7 @@ public class CopierFactoryManagerTest {
     copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
     copierFactoryManager.postConstruct();
 
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "test"));
+    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object>of("copier-factory-class", "test"));
   }
 
   class TestCopierFactory implements CopierFactory {

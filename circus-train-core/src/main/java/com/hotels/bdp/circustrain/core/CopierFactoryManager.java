@@ -63,9 +63,8 @@ public class CopierFactoryManager {
     if (copierOptions.containsKey(COPIER_FACTORY_CLASS)) {
       for (CopierFactory copierFactory : copierFactories) {
         final String copierFactoryClassName = copierFactory.getClass().getName();
-        if (copierFactoryClassName.equalsIgnoreCase(copierOptions.get(COPIER_FACTORY_CLASS).toString())) {
-          LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
-                  copierFactoryClassName, sourceScheme, replicaScheme);
+        if (copierFactoryClassName.equals(copierOptions.get(COPIER_FACTORY_CLASS).toString())) {
+          LOG.debug("Found CopierFactory '{}' using yaml config", copierFactoryClassName);
           return copierFactory;
         }
       }
