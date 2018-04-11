@@ -1,6 +1,6 @@
-# 11.3.2 - 2018-04-10
-### Changed
-* Select Copier using yaml file. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).
+# 11.3.2 - 2018-04-11
+### Added
+* Ability to select Copier via configuration. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).
 
 # 11.3.1 - 2018-03-21
 ### Changed
