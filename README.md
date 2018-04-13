@@ -1,6 +1,6 @@
 ![Circus Train.](circus-train.png "Moving Hive data between sites.")
 
-**We’ll be speaking about Circus Train and [Waggle Dance](https://github.com/HotelsDotCom/waggle-dance) at the DataWorks Summit Berlin 2018 at 14:50 on Wednesday the 18th of April. Please drop by for a free sticker!**
+**We’ll be speaking about Circus Train and [Waggle Dance](https://github.com/HotelsDotCom/waggle-dance) at the [DataWorks Summit Berlin 2018](https://dataworkssummit.com/berlin-2018/) at 14:50 on Wednesday the 18th of April. Please drop by for a free sticker!**
 
 # Start using
 You can obtain Circus Train from Maven Central:
