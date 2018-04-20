@@ -787,9 +787,9 @@ Note that the Circus Train configuration only supports one set of AWS credential
           table-name: aws-a_table
           table-location: s3://<aws-a-data-bucket>/<pata-to-aws-a_db>/aws-a_table
 
-## Contact
+# Contact
 
-### Mailing List
+## Mailing List
 If you would like to ask any questions about or discuss Circus Train please join our mailing list at 
 
   [https://groups.google.com/forum/#!forum/circus-train-user](https://groups.google.com/forum/#!forum/circus-train-user)
