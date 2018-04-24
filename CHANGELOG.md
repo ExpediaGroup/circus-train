@@ -1,3 +1,7 @@
+# TBD
+### Changed
+* Replace SSH support with _hcommon-ssh_ library. [#46](https://github.com/HotelsDotCom/waggle-dance/issues/46).
+
 # 11.4.0 - 2018-04-11
 ### Added
 * Ability to select Copier via configuration. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).

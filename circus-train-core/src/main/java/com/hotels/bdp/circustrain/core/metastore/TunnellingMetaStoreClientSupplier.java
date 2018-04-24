@@ -15,51 +15,99 @@
  */
 package com.hotels.bdp.circustrain.core.metastore;
 
-import static com.hotels.bdp.circustrain.core.metastore.TunnelConnectionManagerFactory.FIRST_AVAILABLE_PORT;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_LOCALHOST;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_PORT;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_PRIVATE_KEYS;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_ROUTE;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.pastdev.jsch.tunnel.TunnelConnectionManager;
 
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
+import com.hotels.hcommon.ssh.MethodChecker;
+import com.hotels.hcommon.ssh.SshException;
+import com.hotels.hcommon.ssh.SshSettings;
+import com.hotels.hcommon.ssh.TunnelableFactory;
+import com.hotels.hcommon.ssh.TunnelableSupplier;
 
 public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMetaStoreClient> {
-  private static final Logger LOG = LoggerFactory.getLogger(TunnellingMetaStoreClientSupplier.class);
 
-  public static final String TUNNEL_SSH_LOCAL_HOST = "com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientFactory.local_host";
-  public static final String TUNNEL_SSH_ROUTE = "com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientFactory.ssh_hops";
+  private static String stringValue(HiveConf hiveConf, CircusTrainHiveConfVars var) {
+    return hiveConf.get(var.varname);
+  }
 
-  private static final Class<?>[] INTERFACES = new Class<?>[] { CloseableMetaStoreClient.class };
+  private static int intValue(HiveConf hiveConf, CircusTrainHiveConfVars var) {
+    return hiveConf.getInt(var.varname, -1);
+  }
+
+  private static int getLocalPort() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      return socket.getLocalPort();
+    } catch (IOException | RuntimeException e) {
+      throw new SshException("Unable to bind to a free localhost port", e);
+    }
+  }
+
+  private static class HiveMetaStoreClientSupplier implements TunnelableSupplier<CloseableMetaStoreClient> {
+    private final MetaStoreClientFactory metaStoreClientFactory;
+    private final HiveConf hiveConf;
+    private final String name;
+
+    private HiveMetaStoreClientSupplier(MetaStoreClientFactory metaStoreClientFactory, HiveConf hiveConf, String name) {
+      this.metaStoreClientFactory = metaStoreClientFactory;
+      this.hiveConf = hiveConf;
+      this.name = name;
+    }
+
+    @Override
+    public CloseableMetaStoreClient get() {
+      return metaStoreClientFactory.newInstance(hiveConf, name);
+    }
+
+  }
 
   private final String localHost;
   private final String remoteHost;
   private final int remotePort;
-  private final String sshRoute;
   private final HiveConf hiveConf;
   private final String name;
-  private final TunnelConnectionManagerFactory tunnelConnectionManagerFactory;
+  private final TunnelableFactory<CloseableMetaStoreClient> tunnelableFactory;
   private final MetaStoreClientFactory metaStoreClientFactory;
 
   /** This does not allow handle multiple URIs in {@link ConfVars.METASTOREURIS}. */
   public TunnellingMetaStoreClientSupplier(
       HiveConf hiveConf,
       String name,
+      MetaStoreClientFactory metaStoreClientFactory) {
+    this(hiveConf, name, metaStoreClientFactory,
+        new TunnelableFactory<CloseableMetaStoreClient>(SshSettings
+            .builder()
+            .withRoute(stringValue(hiveConf, SSH_ROUTE))
+            .withSshPort(intValue(hiveConf, SSH_PORT))
+            .withPrivateKeys(stringValue(hiveConf, SSH_PRIVATE_KEYS))
+            .withKnownHosts(stringValue(hiveConf, CircusTrainHiveConfVars.SSH_KNOWN_HOSTS))
+            .build()));
+  }
+
+  @VisibleForTesting
+  TunnellingMetaStoreClientSupplier(
+      HiveConf hiveConf,
+      String name,
       MetaStoreClientFactory metaStoreClientFactory,
-      TunnelConnectionManagerFactory tunnelConnectionManagerFactory) {
+      TunnelableFactory<CloseableMetaStoreClient> tunnelableFactory) {
     this.hiveConf = hiveConf;
     this.name = name;
-    this.tunnelConnectionManagerFactory = tunnelConnectionManagerFactory;
+    this.tunnelableFactory = tunnelableFactory;
 
     URI metaStoreUri;
     try {
@@ -69,34 +117,29 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
     }
     remoteHost = metaStoreUri.getHost();
     remotePort = metaStoreUri.getPort();
-    sshRoute = hiveConf.get(TUNNEL_SSH_ROUTE);
-    localHost = hiveConf.get(TUNNEL_SSH_LOCAL_HOST, "localhost");
+    localHost = hiveConf.get(SSH_LOCALHOST.varname, "localhost");
     this.metaStoreClientFactory = metaStoreClientFactory;
   }
 
   @Override
   public CloseableMetaStoreClient get() {
-    LOG.debug("Creating tunnel: {}:? -> {} -> {}:{}", localHost, sshRoute, remoteHost, remotePort);
     try {
-      TunnelConnectionManager tunnelConnectionManager = tunnelConnectionManagerFactory.create(sshRoute, localHost,
-          FIRST_AVAILABLE_PORT, remoteHost, remotePort);
-      int localPort = tunnelConnectionManager.getTunnel(remoteHost, remotePort).getAssignedLocalPort();
-      tunnelConnectionManager.open();
-      LOG.debug("Tunnel created: {}:{} -> {} -> {}:{}", localHost, localPort, sshRoute, remoteHost, remotePort);
-
-      localPort = tunnelConnectionManager.getTunnel(remoteHost, remotePort).getAssignedLocalPort();
-      HiveConf localHiveConf = new HiveConf(hiveConf);
-      String proxyMetaStoreUris = "thrift://" + localHost + ":" + localPort;
-      localHiveConf.setVar(ConfVars.METASTOREURIS, proxyMetaStoreUris);
-      LOG.info("Metastore URI {} is being proxied to {}", hiveConf.getVar(ConfVars.METASTOREURIS), proxyMetaStoreUris);
-      InvocationHandler handler = new TunnellingMetaStoreClientInvocationHandler(
-          metaStoreClientFactory.newInstance(localHiveConf, name), tunnelConnectionManager);
-      return (CloseableMetaStoreClient) Proxy.newProxyInstance(getClass().getClassLoader(), INTERFACES, handler);
-    } catch (Exception e) {
-      String message = String.format("Unable to establish SSH tunnel: '%s:?' -> '%s' -> '%s:%s'", localHost, sshRoute,
+      int localPort = getLocalPort();
+      HiveConf localHiveConf = localHiveConf(hiveConf, localHost, localPort);
+      HiveMetaStoreClientSupplier supplier = new HiveMetaStoreClientSupplier(metaStoreClientFactory, localHiveConf,
+          name);
+      return (CloseableMetaStoreClient) tunnelableFactory.wrap(supplier, MethodChecker.DEFAULT, localHost, localPort,
           remoteHost, remotePort);
-      throw new MetaStoreClientException(message, e);
+    } catch (Exception e) {
+      throw new MetaStoreClientException("Unable to create tunnelled HiveMetaStoreClient", e);
     }
+  }
+
+  private static HiveConf localHiveConf(HiveConf hiveConf, String localHost, int localPort) {
+    HiveConf localHiveConf = new HiveConf(hiveConf);
+    String proxyMetaStoreUris = "thrift://" + localHost + ":" + localPort;
+    localHiveConf.setVar(ConfVars.METASTOREURIS, proxyMetaStoreUris);
+    return localHiveConf;
   }
 
 }
