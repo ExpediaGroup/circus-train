@@ -1,3 +1,7 @@
+# TBD
+### Fixed
+* Housekeeping was failing when attempting to delete a path which no longer existed on the filesystem. Upgraded Circus Train's Housekeeping dependency to a version which fixed this bug. See [#61](https://github.com/HotelsDotCom/circus-train/issues/55).
+
 # 11.4.0 - 2018-04-11
 ### Added
 * Ability to select Copier via configuration. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).
