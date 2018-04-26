@@ -105,6 +105,9 @@ public class CommonBeans {
       properties.put(CircusTrainHiveConfVars.SSH_LOCALHOST.varname, metastoreTunnel.getLocalhost());
       properties.put(CircusTrainHiveConfVars.SSH_PRIVATE_KEYS.varname, metastoreTunnel.getPrivateKeys());
       properties.put(CircusTrainHiveConfVars.SSH_KNOWN_HOSTS.varname, metastoreTunnel.getKnownHosts());
+      properties.put(CircusTrainHiveConfVars.SSH_SESSION_TIMEOUT.varname, String.valueOf(metastoreTunnel.getTimeout()));
+      properties.put(CircusTrainHiveConfVars.SSH_STRICT_HOST_KEY_CHECKING.varname,
+          metastoreTunnel.getStrictHostKeyChecking());
     }
   }
 

@@ -15,10 +15,13 @@
  */
 package com.hotels.bdp.circustrain.core.metastore;
 
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_KNOWN_HOSTS;
 import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_LOCALHOST;
 import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_PORT;
 import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_PRIVATE_KEYS;
 import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_ROUTE;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_SESSION_TIMEOUT;
+import static com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars.SSH_STRICT_HOST_KEY_CHECKING;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -47,7 +50,12 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
   }
 
   private static int intValue(HiveConf hiveConf, CircusTrainHiveConfVars var) {
-    return hiveConf.getInt(var.varname, -1);
+    return hiveConf.getInt(var.varname, Integer.valueOf(var.defaultValue));
+  }
+
+  private static boolean booleanValue(HiveConf hiveConf, CircusTrainHiveConfVars var) {
+    String value = stringValue(hiveConf, var).trim().toLowerCase();
+    return "true".equals(value) || "yes".equals(value) ? true : false;
   }
 
   private static int getLocalPort() {
@@ -95,7 +103,9 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
             .withRoute(stringValue(hiveConf, SSH_ROUTE))
             .withSshPort(intValue(hiveConf, SSH_PORT))
             .withPrivateKeys(stringValue(hiveConf, SSH_PRIVATE_KEYS))
-            .withKnownHosts(stringValue(hiveConf, CircusTrainHiveConfVars.SSH_KNOWN_HOSTS))
+            .withKnownHosts(stringValue(hiveConf, SSH_KNOWN_HOSTS))
+            .withSessionTimeout(intValue(hiveConf, SSH_SESSION_TIMEOUT))
+            .withStrictHostKeyChecking(booleanValue(hiveConf, SSH_STRICT_HOST_KEY_CHECKING))
             .build()));
   }
 
