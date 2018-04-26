@@ -35,6 +35,12 @@
       <artifactId>metrics-core</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.hotels</groupId>
+      <artifactId>hcommon-ssh</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>com.hotels</groupId>
