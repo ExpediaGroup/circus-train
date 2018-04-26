@@ -1,6 +1,8 @@
 # TBD
+### Added
+* Add SSH timeout and SSH strict host key checking capabilities. [#64](https://github.com/HotelsDotCom/circus-train/issues/64).
 ### Changed
-* Replace SSH support with _hcommon-ssh_ library. [#46](https://github.com/HotelsDotCom/waggle-dance/issues/46).
+* Replace SSH support with [hcommon-ssh](https://github.com/HotelsDotCom/hcommon-ssh) library. [#46](https://github.com/HotelsDotCom/circus-train/issues/46).
 ### Fixed
 * Housekeeping was failing when attempting to delete a path which no longer exists on the replica filesystem. Upgraded Circus Train's Housekeeping dependency to a version which fixes this bug. See [#61](https://github.com/HotelsDotCom/circus-train/issues/61).
 
