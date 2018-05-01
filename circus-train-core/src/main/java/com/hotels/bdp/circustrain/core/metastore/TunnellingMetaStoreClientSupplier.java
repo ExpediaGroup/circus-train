@@ -74,8 +74,8 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
 
     private HiveMetaStoreClientSupplier(MetaStoreClientFactory metaStoreClientFactory, HiveConf hiveConf, String name) {
       this.metaStoreClientFactory = metaStoreClientFactory;
-      this.name = name;
       this.hiveConf = hiveConf;
+      this.name = name;
     }
 
     @Override
