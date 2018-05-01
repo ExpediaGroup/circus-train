@@ -96,7 +96,7 @@ public class MetastoreTunnel {
   }
 
   public void setStrictHostKeyChecking(String strictHostKeyChecking) {
-    this.strictHostKeyChecking = strictHostKeyChecking == null ? null : strictHostKeyChecking.toLowerCase();
+    this.strictHostKeyChecking = strictHostKeyChecking;
   }
 
 }
