@@ -66,10 +66,11 @@ public class TunnellingMetaStoreClientSupplier implements Supplier<CloseableMeta
     }
   }
 
-  private static class HiveMetaStoreClientSupplier implements TunnelableSupplier<CloseableMetaStoreClient> {
+  @VisibleForTesting
+  static class HiveMetaStoreClientSupplier implements TunnelableSupplier<CloseableMetaStoreClient> {
     private final MetaStoreClientFactory metaStoreClientFactory;
-    private final HiveConf hiveConf;
     private final String name;
+    final @VisibleForTesting HiveConf hiveConf;
 
     private HiveMetaStoreClientSupplier(MetaStoreClientFactory metaStoreClientFactory, HiveConf hiveConf, String name) {
       this.metaStoreClientFactory = metaStoreClientFactory;

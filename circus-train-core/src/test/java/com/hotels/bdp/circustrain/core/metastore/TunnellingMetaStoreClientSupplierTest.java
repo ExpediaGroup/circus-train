@@ -15,12 +15,12 @@
  */
 package com.hotels.bdp.circustrain.core.metastore;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +44,7 @@ import com.jcraft.jsch.JSchException;
 
 import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
+import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.ssh.MethodChecker;
 import com.hotels.hcommon.ssh.TunnelableFactory;
 import com.hotels.hcommon.ssh.TunnelableSupplier;
@@ -52,7 +53,6 @@ import com.hotels.hcommon.ssh.TunnelableSupplier;
 public class TunnellingMetaStoreClientSupplierTest {
 
   private static final String LOCAL_HOST = "127.0.0.2";
-  private static final int LOCAL_PORT = 12345;
   private static final int REMOTE_PORT = 9083;
   private static final String REMOTE_HOST = "emrmaster";
   private static final String ROUTE = "hadoop@ec2";
@@ -61,7 +61,7 @@ public class TunnellingMetaStoreClientSupplierTest {
   private @Mock TunnelableFactory<CloseableMetaStoreClient> tunnelableFactory;
   private @Mock ThriftMetaStoreClientFactory metaStoreClientFactory;
   private @Mock CloseableMetaStoreClient metaStoreClient;
-  private @Captor ArgumentCaptor<HiveConf> localHiveConfCaptor;
+  private @Captor ArgumentCaptor<HiveMetaStoreClientSupplier> supplierCaptor;
 
   private final HiveConf hiveConf = new HiveConf();
   private TunnellingMetaStoreClientSupplier factory;
@@ -75,9 +75,9 @@ public class TunnellingMetaStoreClientSupplierTest {
 
   @Before
   public void injectMocks() throws Exception {
-    when(tunnelableFactory.wrap(any(TunnelableSupplier.class), any(MethodChecker.class), eq(LOCAL_HOST), eq(LOCAL_PORT),
+    when(tunnelableFactory.wrap(supplierCaptor.capture(), any(MethodChecker.class), eq(LOCAL_HOST), anyInt(),
         eq(REMOTE_HOST), eq(REMOTE_PORT))).thenReturn(tunnelable);
-    when(metaStoreClientFactory.newInstance(localHiveConfCaptor.capture(), anyString())).thenReturn(metaStoreClient);
+    when(metaStoreClientFactory.newInstance(any(HiveConf.class), anyString())).thenReturn(metaStoreClient);
   }
 
   @Test
@@ -87,8 +87,8 @@ public class TunnellingMetaStoreClientSupplierTest {
 
     factory.get();
 
-    HiveConf localHiveConf = localHiveConfCaptor.getValue();
-    assertThat(localHiveConf.getVar(ConfVars.METASTOREURIS), is("thrift://" + LOCAL_HOST + ":" + LOCAL_PORT));
+    HiveMetaStoreClientSupplier supplier = supplierCaptor.getValue();
+    assertThat(supplier.hiveConf.getVar(ConfVars.METASTOREURIS), startsWith("thrift://" + LOCAL_HOST + ":"));
   }
 
   @Test(expected = RuntimeException.class)
@@ -100,7 +100,8 @@ public class TunnellingMetaStoreClientSupplierTest {
 
   @Test(expected = MetaStoreClientException.class)
   public void metaException() throws MetaException, IOException {
-    doThrow(MetaStoreClientException.class).when(metaStoreClientFactory).newInstance(any(HiveConf.class), anyString());
+    when(tunnelableFactory.wrap(any(TunnelableSupplier.class), any(MethodChecker.class), eq(LOCAL_HOST), anyInt(),
+        eq(REMOTE_HOST), eq(REMOTE_PORT))).thenThrow(MetaStoreClientException.class);
 
     factory = new TunnellingMetaStoreClientSupplier(hiveConf, "emr-metastore", metaStoreClientFactory,
         tunnelableFactory);
@@ -111,8 +112,8 @@ public class TunnellingMetaStoreClientSupplierTest {
   @Test(expected = MetaStoreClientException.class)
   public void jschException() throws JSchException {
     reset(tunnelableFactory, metaStoreClientFactory);
-    doThrow(JSchException.class).when(tunnelableFactory).wrap(any(TunnelableSupplier.class), any(MethodChecker.class),
-        eq(LOCAL_HOST), eq(LOCAL_PORT), eq(REMOTE_HOST), eq(REMOTE_PORT));
+    when(tunnelableFactory.wrap(any(TunnelableSupplier.class), any(MethodChecker.class), eq(LOCAL_HOST), anyInt(),
+        eq(REMOTE_HOST), eq(REMOTE_PORT))).thenThrow(JSchException.class);
 
     factory = new TunnellingMetaStoreClientSupplier(hiveConf, "emr-metastore", metaStoreClientFactory,
         tunnelableFactory);
