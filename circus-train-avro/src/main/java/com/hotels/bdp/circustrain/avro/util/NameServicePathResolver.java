@@ -42,15 +42,13 @@ public class NameServicePathResolver {
       URI uri = URI.create(url);
       String scheme = uri.getScheme();
       String path = uri.getPath();
-      LOG.info("Scheme: {}", scheme);
-      LOG.info("Path: {}", path);
       if (isBlank(scheme)) {
         path = "/" + nameService + path;
         location = new Path(path);
       } else {
         location = new Path(scheme, nameService, path);
       }
-      LOG.info("Added nameservice to avro.schema.url. {} became {}", url, location.toString());
+      LOG.info("Added nameservice to path. {} became {}", url, location.toString());
     }
     return location;
   }
