@@ -20,8 +20,6 @@ public final class AWSConstants {
   public static final String ACCESS_KEY = "access.key";
   public static final String SECRET_KEY = "secret.key";
 
-  public static final String S3_SCHEME = "s3";
-
   public static final String FS_PROTOCOL_S3 = "s3";
   public static final String FS_PROTOCOL_S3N = "s3n";
   public static final String FS_PROTOCOL_S3A = "s3a";

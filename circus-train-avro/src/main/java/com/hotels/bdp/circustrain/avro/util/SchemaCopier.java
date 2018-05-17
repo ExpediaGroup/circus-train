@@ -15,17 +15,13 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,8 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 
@@ -46,13 +40,11 @@ public class SchemaCopier {
 
   private final Configuration sourceHiveConf;
   private final Configuration replicaHiveConf;
-  private final Iterable<String> supportedSchemes;
 
   @Autowired
-  public SchemaCopier(Configuration sourceHiveConf, Configuration replicaHiveConf, Iterable<String> supportedSchemes) {
+  public SchemaCopier(Configuration sourceHiveConf, Configuration replicaHiveConf) {
     this.sourceHiveConf = sourceHiveConf;
     this.replicaHiveConf = replicaHiveConf;
-    this.supportedSchemes = supportedSchemes;
   }
 
   public Path copy(String source, String destination) {
@@ -62,73 +54,15 @@ public class SchemaCopier {
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
-    tryCopyToLocal(source, localLocation);
+    copyToLocal(source, localLocation);
 
     String destinationNameService = replicaHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path destinationLocation = locationWithNameService(new Path(destination, fileName(source)).toString(),
-        destinationNameService);
+    Path destinationLocation = new NameServicePathResolver(new Path(destination, fileName(source)).toString(),
+        destinationNameService).resolve();
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);
     return destinationLocation;
-  }
-
-  private void tryCopyToLocal(String source, Path localLocation) {
-    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path sourceLocation = locationWithNameService(source, sourceNameService);
-    try {
-      LOG.info("Attempting to copy from {} to {}", sourceLocation, localLocation);
-      copyToLocal(sourceLocation, localLocation);
-      LOG.info("Copy from {} to {} succeeded", sourceLocation, localLocation);
-    } catch (Exception e) {
-      LOG.warn("Couldn't copy from {} to {}, attempting copy from different filesystems", sourceLocation,
-          localLocation);
-      tryCopyToLocalFromSupportedFileSystems(sourceNameService, URI.create(source).getPath(), localLocation);
-    }
-  }
-
-  private void tryCopyToLocalFromSupportedFileSystems(String authority, String path, Path localLocation) {
-    for (String scheme : supportedSchemes) {
-      boolean succeeded = executeCopyToLocal(scheme, authority, path, localLocation)
-          || executeCopyToLocal(scheme, authority, StringUtils.removeStart(path, "/"), localLocation);
-      if (succeeded) {
-        return;
-      }
-    }
-    throw new UnsupportedOperationException("Cannot copy from avro.schema.url " + path + ", unsupported filesystem ");
-  }
-
-  private boolean executeCopyToLocal(String scheme, String authority, String path, Path destination) {
-    try {
-      Path source = new Path(scheme, authority, path);
-      LOG.info("Attempting to copy from {} to {}", source, destination);
-      copyToLocal(source, destination);
-      LOG.info("Copy from {} to {} succeeded", source, destination);
-      return true;
-    } catch (Exception e) {
-      LOG.warn("Could not locate avro schema at {}", scheme);
-    }
-    return false;
-  }
-
-  @VisibleForTesting
-  Path locationWithNameService(String url, String nameService) {
-    Path location;
-    if (isBlank(nameService)) {
-      location = new Path(url);
-    } else {
-      URI uri = URI.create(url);
-      String scheme = uri.getScheme();
-      String path = uri.getPath();
-      if (isBlank(scheme)) {
-        path = "/" + nameService + path;
-        location = new Path(path);
-      } else {
-        location = new Path(scheme, nameService, path);
-      }
-      LOG.info("Added nameservice to avro.schema.url. {} became {}", url, location.toString());
-    }
-    return location;
   }
 
   private java.nio.file.Path createTempDirectory() {
@@ -142,12 +76,16 @@ public class SchemaCopier {
     return temporaryDirectory;
   }
 
-  private void copyToLocal(Path sourceLocation, Path localLocation) {
-    FileSystem sourceFileSystem;
+  private void copyToLocal(String source, Path localLocation) {
+    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
+    Path sourceLocation = new NameServicePathResolver(source, sourceNameService).resolve();
     try {
+      LOG.info("Attempting to copy from {} to {}", sourceLocation, localLocation);
+      FileSystem sourceFileSystem;
       sourceFileSystem = sourceLocation.getFileSystem(sourceHiveConf);
       sourceFileSystem.copyToLocalFile(false, sourceLocation, localLocation);
-    } catch (IOException e) {
+      LOG.info("Copy from {} to {} succeeded", sourceLocation, localLocation);
+    } catch (Exception e) {
       throw new CircusTrainException("Couldn't copy file from " + sourceLocation + " to " + localLocation, e);
     }
   }

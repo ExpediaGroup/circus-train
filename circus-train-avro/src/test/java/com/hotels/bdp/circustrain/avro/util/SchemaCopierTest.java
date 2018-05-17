@@ -15,13 +15,11 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -37,7 +35,7 @@ public class SchemaCopierTest {
   @Rule
   public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf(), Collections.<String> emptyList());
+  private SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
 
   @Test
   public void copiedToCorrectDestination() throws IOException {
@@ -46,22 +44,6 @@ public class SchemaCopierTest {
     copier.copy(source.toString(), destination.toString());
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(destination.toString() + "/test.txt")));
-  }
-
-  @Test
-  public void locationWithNameServiceTest() {
-    assertEquals("hdfs://etl/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs://etl/test/avsc0/tlog.avsc", null).toString());
-    assertEquals("hdfs://hdp-ha/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs://etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
-    assertEquals("hdfs:/etl/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs:///etl/test/avsc0/tlog.avsc", null).toString());
-    assertEquals("hdfs://hdp-ha/etl/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs:///etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
-    assertEquals("/etl/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("/etl/test/avsc0/tlog.avsc", null).toString());
-    assertEquals("/hdp-ha/etl/test/avsc0/tlog.avsc",
-        copier.locationWithNameService("/etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
   }
 
   @Test

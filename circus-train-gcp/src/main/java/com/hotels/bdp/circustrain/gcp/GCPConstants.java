@@ -15,8 +15,7 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
-public class GCPConstants {
-  public static final String GS_SCHEME = "gs";
+class GCPConstants {
   static final String GCP_PROJECT_ID = "fs.gs.project.id";
   static final String GCP_SERVICE_ACCOUNT_ENABLE = "google.cloud.auth.service.account.enable";
   static final String GCP_KEYFILE_CACHED_LOCATION = "google.cloud.auth.service.account.json.keyfile";

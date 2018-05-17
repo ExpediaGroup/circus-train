@@ -17,10 +17,6 @@ package com.hotels.bdp.circustrain.aws.context;
 
 import static org.apache.hadoop.security.alias.CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH;
 
-import static com.hotels.bdp.circustrain.aws.AWSConstants.S3_SCHEME;
-
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +54,6 @@ public class AWSBeanPostProcessor implements BeanPostProcessor {
       }
       return baseConf;
     }
-
-    if (CommonBeans.BEAN_SUPPORTED_SCHEMES.equals(beanName)) {
-      List<String> supportedSchemes = (List<String>) bean;
-      supportedSchemes.add(S3_SCHEME);
-    }
-
     return bean;
   }
 

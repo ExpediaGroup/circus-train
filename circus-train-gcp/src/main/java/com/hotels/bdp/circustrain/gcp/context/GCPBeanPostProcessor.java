@@ -15,7 +15,6 @@
  */
 package com.hotels.bdp.circustrain.gcp.context;
 
-import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_SCHEME;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import org.apache.hadoop.conf.Configuration;
@@ -29,8 +28,6 @@ import org.springframework.stereotype.Component;
 import com.hotels.bdp.circustrain.context.CommonBeans;
 import com.hotels.bdp.circustrain.gcp.BindGoogleHadoopFileSystem;
 import com.hotels.bdp.circustrain.gcp.GCPCredentialConfigurer;
-
-import java.util.List;
 
 @Component
 public class GCPBeanPostProcessor implements BeanPostProcessor {
@@ -55,11 +52,6 @@ public class GCPBeanPostProcessor implements BeanPostProcessor {
       Configuration baseConf = (Configuration) bean;
       setHadoopConfiguration(baseConf);
       return baseConf;
-    }
-
-    if (CommonBeans.BEAN_SUPPORTED_SCHEMES.equals(beanName)) {
-      List<String> supportedSchemes = (List<String>) bean;
-      supportedSchemes.add(GS_SCHEME);
     }
     return bean;
   }
