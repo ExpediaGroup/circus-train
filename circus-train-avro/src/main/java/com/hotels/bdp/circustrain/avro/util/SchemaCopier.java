@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.avro.util;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -25,6 +24,7 @@ import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 
@@ -44,11 +45,10 @@ public class SchemaCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(SchemaCopier.class);
   private static final String NAMESERVICES_PARAMETER = "dfs.nameservices";
-  private static final String S3_FS_PARAMETER = "fs.s3.impl";
-  private static final String GS_FS_PARAMETER = "fs.gs.impl";
   private static final String HDFS_SCHEME = "hdfs";
   private static final String S3_SCHEME = "s3";
   private static final String GS_SCHEME = "gs";
+  private static final List<String> SCHEMES = ImmutableList.of(HDFS_SCHEME, S3_SCHEME, GS_SCHEME);
 
   private final Configuration sourceHiveConf;
   private final Configuration replicaHiveConf;
@@ -80,64 +80,38 @@ public class SchemaCopier {
   private void tryCopyToLocal(String source, Path localLocation) {
     String sourceNameService = sourceHiveConf.get(NAMESERVICES_PARAMETER);
     Path sourceLocation = locationWithNameService(source, sourceNameService);
-
     LOG.info("Attempting to copy from supported filesystems");
     try {
       copyToLocal(sourceLocation, localLocation);
-      return;
     } catch (Exception e) {
       LOG.info("Couldn't copy from {} to {}, attempting copy from different filesystems", sourceLocation,
           localLocation);
+      tryCopyToLocalFromSupportedFileSystems(sourceNameService, URI.create(source).getPath(), localLocation);
     }
+  }
 
-    URI uri = URI.create(source);
-    String scheme = uri.getScheme();
-    String authority = sourceNameService;
-    String path = uri.getPath();
-
-    if (isBlank(scheme)) {
-      if (tryCopyToLocalFromSupportedFileSystems(authority, path, localLocation)
-          || tryCopyToLocalFromSupportedFileSystems(authority, StringUtils.removeStart(path, "/"), localLocation)) {
+  private void tryCopyToLocalFromSupportedFileSystems(String authority, String path, Path localLocation) {
+    for (String scheme : SCHEMES) {
+      boolean succeeded = executeCopyToLocal(scheme, authority, path, localLocation)
+          || executeCopyToLocal(scheme, authority, StringUtils.removeStart(path, "/"), localLocation);
+      if (succeeded) {
         return;
       }
     }
-    throw new UnsupportedOperationException(
-        "Cannot copy from avro.schema.url " + sourceLocation + ", unsupported filesystem " + uri.getScheme());
+    throw new UnsupportedOperationException("Cannot copy from avro.schema.url " + path + ", unsupported filesystem ");
   }
 
-  private boolean tryCopyToLocalFromSupportedFileSystems(String authority, String path, Path localLocation) {
+  private boolean executeCopyToLocal(String scheme, String authority, String path, Path destination) {
     try {
-      executeCopyToLocal(HDFS_SCHEME, authority, path, localLocation);
+      Path source = new Path(scheme, authority, path);
+      LOG.info("Attempting copy from {} to {}", source, destination);
+      copyToLocal(source, destination);
+      LOG.info("Copy from {} to {} succeeded", source, destination);
       return true;
     } catch (Exception e) {
-      LOG.info("Could not locate avro schema in HDFS");
+      LOG.info("Could not locate avro schema in {}", scheme);
+      return false;
     }
-
-    try {
-      if (isNotBlank(sourceHiveConf.get(S3_FS_PARAMETER))) {
-        executeCopyToLocal(S3_SCHEME, authority, path, localLocation);
-        return true;
-      }
-    } catch (Exception e) {
-      LOG.info("Could not locate avro schema in S3");
-    }
-
-    try {
-      if (isNotBlank(sourceHiveConf.get(GS_FS_PARAMETER))) {
-        executeCopyToLocal(GS_SCHEME, authority, path, localLocation);
-        return true;
-      }
-    } catch (Exception e) {
-      LOG.info("Could not locate avro schema in Google Storage");
-    }
-    return false;
-  }
-
-  private void executeCopyToLocal(String scheme, String authority, String path, Path destination) {
-    Path source = new Path(scheme, authority, path);
-    LOG.info("Attempting copy from {} to {}", source, destination);
-    copyToLocal(source, destination);
-    LOG.info("Copy from {} to {} succeeded", source, destination);
   }
 
   @VisibleForTesting
