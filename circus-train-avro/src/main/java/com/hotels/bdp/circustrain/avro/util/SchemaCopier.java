@@ -53,8 +53,10 @@ public class SchemaCopier {
 
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
+    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
+    Path sourceLocation = new NameServicePathResolver(source, sourceNameService).resolve();
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
-    copyToLocal(source, localLocation);
+    copyToLocal(sourceLocation, localLocation);
 
     String destinationNameService = replicaHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
     Path destinationLocation = new NameServicePathResolver(new Path(destination, fileName(source)).toString(),
@@ -76,9 +78,7 @@ public class SchemaCopier {
     return temporaryDirectory;
   }
 
-  private void copyToLocal(String source, Path localLocation) {
-    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path sourceLocation = new NameServicePathResolver(source, sourceNameService).resolve();
+  private void copyToLocal(Path sourceLocation, Path localLocation) {
     try {
       LOG.info("Attempting to copy from {} to {}", sourceLocation, localLocation);
       FileSystem sourceFileSystem;
