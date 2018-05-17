@@ -46,6 +46,7 @@ public class SchemaCopier {
   private static final String NAMESERVICES_PARAMETER = "dfs.nameservices";
   private static final String S3_FS_PARAMETER = "fs.s3.impl";
   private static final String GS_FS_PARAMETER = "fs.gs.impl";
+  private static final String HDFS_SCHEME = "hdfs";
   private static final String S3_SCHEME = "s3";
   private static final String GS_SCHEME = "gs";
 
@@ -106,10 +107,7 @@ public class SchemaCopier {
 
   private boolean tryCopyToLocalFromSupportedFileSystems(String authority, String path, Path localLocation) {
     try {
-      Path hdfsPath = new Path("hdfs", authority, path);
-      LOG.info("Attempting copy from {} to {}", hdfsPath, localLocation);
-      copyToLocal(hdfsPath, localLocation);
-      LOG.info("Copy from {} to {} succeeded", hdfsPath, localLocation);
+      executeCopyToLocal(HDFS_SCHEME, authority, path, localLocation);
       return true;
     } catch (Exception e) {
       LOG.info("Could not locate avro schema in HDFS");
@@ -117,10 +115,7 @@ public class SchemaCopier {
 
     try {
       if (isNotBlank(sourceHiveConf.get(S3_FS_PARAMETER))) {
-        Path s3Path = new Path(S3_SCHEME, authority, path);
-        LOG.info("Attempting copy from {} to {}", s3Path, localLocation);
-        copyToLocal(s3Path, localLocation);
-        LOG.info("Copy from {} to {} succeeded", s3Path, localLocation);
+        executeCopyToLocal(S3_SCHEME, authority, path, localLocation);
         return true;
       }
     } catch (Exception e) {
@@ -129,16 +124,20 @@ public class SchemaCopier {
 
     try {
       if (isNotBlank(sourceHiveConf.get(GS_FS_PARAMETER))) {
-        Path gsPath = new Path(GS_SCHEME, authority, path);
-        LOG.info("Attempting copy from {} to {}", gsPath, localLocation);
-        copyToLocal(gsPath, localLocation);
-        LOG.info("Copy from {} to {} succeeded", gsPath, localLocation);
+        executeCopyToLocal(GS_SCHEME, authority, path, localLocation);
         return true;
       }
     } catch (Exception e) {
       LOG.info("Could not locate avro schema in Google Storage");
     }
     return false;
+  }
+
+  private void executeCopyToLocal(String scheme, String authority, String path, Path destination) {
+    Path source = new Path(scheme, authority, path);
+    LOG.info("Attempting copy from {} to {}", source, destination);
+    copyToLocal(source, destination);
+    LOG.info("Copy from {} to {} succeeded", source, destination);
   }
 
   @VisibleForTesting
