@@ -68,7 +68,7 @@ public class SchemaCopierTest {
   }
 
   @Test
-  public void copiedFiltestdNotDirectory() throws IOException {
+  public void copiedFileAndNotDirectory() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
     copier.copy(source.toString(), destination.toString());
