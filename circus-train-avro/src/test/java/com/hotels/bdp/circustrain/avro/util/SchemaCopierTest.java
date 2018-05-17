@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -43,6 +44,27 @@ public class SchemaCopierTest {
     copier.copy(source.toString(), destination.toString());
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(destination.toString() + "/test.txt")));
+  }
+
+  @Test
+  public void get() {
+    // TODO: Clean up
+    HiveConf conf = new HiveConf();
+    conf.set("dfs.nameservices", "prodhdp-ha");
+    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
+    assertEquals("hdfs://prodhdp-ha/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs://etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
+    assertEquals("hdfs://etl/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs://etl/EAN/avsc0/tlog.avsc", null).toString());
+    assertEquals("hdfs:/etl/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs:///etl/EAN/avsc0/tlog.avsc", null).toString());
+    assertEquals("hdfs://etl/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs:///etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
+    assertEquals("/etl/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("/etl/EAN/avsc0/tlog.avsc", null).toString());
+    assertEquals("/etl/EAN/avsc0/tlog.avsc",
+        copier.locationWithNameService("/etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
+
   }
 
   @Test

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,27 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 
@@ -36,12 +43,17 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 public class SchemaCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(SchemaCopier.class);
+  private static final String NAMESERVICES_PARAMETER = "dfs.nameservices";
+  private static final String S3_FS_PARAMETER = "fs.s3.impl";
+  private static final String GS_FS_PARAMETER = "fs.gs.impl";
+  private static final String S3_SCHEME = "s3";
+  private static final String GS_SCHEME = "gs";
 
-  private final HiveConf sourceHiveConf;
-  private final HiveConf replicaHiveConf;
+  private final Configuration sourceHiveConf;
+  private final Configuration replicaHiveConf;
 
   @Autowired
-  public SchemaCopier(HiveConf sourceHiveConf, HiveConf replicaHiveConf) {
+  public SchemaCopier(Configuration sourceHiveConf, Configuration replicaHiveConf) {
     this.sourceHiveConf = sourceHiveConf;
     this.replicaHiveConf = replicaHiveConf;
   }
@@ -52,15 +64,100 @@ public class SchemaCopier {
 
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
-    Path sourceLocation = new Path(source);
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
-    copyToLocal(sourceLocation, localLocation);
+    tryCopyToLocal(source, localLocation);
 
-    Path destinationLocation = new Path(destination, fileName(source));
+    String destinationNameService = replicaHiveConf.get(NAMESERVICES_PARAMETER);
+    Path destinationLocation = locationWithNameService(new Path(destination, fileName(source)).toString(),
+        destinationNameService);
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);
     return destinationLocation;
+  }
+
+  private void tryCopyToLocal(String source, Path localLocation) {
+    String sourceNameService = sourceHiveConf.get(NAMESERVICES_PARAMETER);
+    Path sourceLocation = locationWithNameService(source, sourceNameService);
+
+    LOG.info("Attempting to copy from supported filesystems");
+    try {
+      copyToLocal(sourceLocation, localLocation);
+      return;
+    } catch (Exception e) {
+      LOG.info("Couldn't copy from {} to {}, attempting copy from different filesystems", sourceLocation,
+          localLocation);
+    }
+
+    URI uri = URI.create(source);
+    String scheme = uri.getScheme();
+    String authority = sourceNameService;
+    String path = uri.getPath();
+
+    if (isBlank(scheme)) {
+      if (tryCopyToLocalFromSupportedFileSystems(authority, path, localLocation)
+          || tryCopyToLocalFromSupportedFileSystems(authority, StringUtils.removeStart(path, "/"), localLocation)) {
+        return;
+      }
+    }
+    throw new UnsupportedOperationException(
+        "Cannot copy from avro.schema.url " + sourceLocation + ", unsupported filesystem " + uri.getScheme());
+  }
+
+  private boolean tryCopyToLocalFromSupportedFileSystems(String authority, String path, Path localLocation) {
+    try {
+      Path hdfsPath = new Path("hdfs", authority, path);
+      LOG.info("Attempting copy from {} to {}", hdfsPath, localLocation);
+      copyToLocal(hdfsPath, localLocation);
+      LOG.info("Copy from {} to {} succeeded", hdfsPath, localLocation);
+      return true;
+    } catch (Exception e) {
+      LOG.info("Could not locate avro schema in HDFS");
+    }
+
+    try {
+      if (isNotBlank(sourceHiveConf.get(S3_FS_PARAMETER))) {
+        Path s3Path = new Path(S3_SCHEME, authority, path);
+        LOG.info("Attempting copy from {} to {}", s3Path, localLocation);
+        copyToLocal(s3Path, localLocation);
+        LOG.info("Copy from {} to {} succeeded", s3Path, localLocation);
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.info("Could not locate avro schema in S3");
+    }
+
+    try {
+      if (isNotBlank(sourceHiveConf.get(GS_FS_PARAMETER))) {
+        Path gsPath = new Path(GS_SCHEME, authority, path);
+        LOG.info("Attempting copy from {} to {}", gsPath, localLocation);
+        copyToLocal(gsPath, localLocation);
+        LOG.info("Copy from {} to {} succeeded", gsPath, localLocation);
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.info("Could not locate avro schema in Google Storage");
+    }
+    return false;
+  }
+
+  @VisibleForTesting
+  Path locationWithNameService(String url, String nameService) {
+    Path location;
+    if (isBlank(nameService)) {
+      location = new Path(url);
+    } else {
+      URI uri = URI.create(url);
+      String scheme = uri.getScheme();
+      String path = uri.getPath();
+      if (isBlank(scheme)) {
+        path = "/" + nameService + path;
+        location = new Path(path);
+      } else {
+        location = new Path(scheme, nameService, path);
+      }
+    }
+    return location;
   }
 
   private java.nio.file.Path createTempDirectory() {
@@ -80,7 +177,7 @@ public class SchemaCopier {
       sourceFileSystem = sourceLocation.getFileSystem(sourceHiveConf);
       sourceFileSystem.copyToLocalFile(false, sourceLocation, localLocation);
     } catch (IOException e) {
-      throw new CircusTrainException("Couldn't copy file from " + sourceLocation + " to" + localLocation, e);
+      throw new CircusTrainException("Couldn't copy file from " + sourceLocation + " to " + localLocation, e);
     }
   }
 
