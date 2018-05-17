@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,6 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 public class SchemaCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(SchemaCopier.class);
-  private static final String NAMESERVICES_PARAMETER = "dfs.nameservices";
 
   private final Configuration sourceHiveConf;
   private final Configuration replicaHiveConf;
@@ -64,7 +64,7 @@ public class SchemaCopier {
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     tryCopyToLocal(source, localLocation);
 
-    String destinationNameService = replicaHiveConf.get(NAMESERVICES_PARAMETER);
+    String destinationNameService = replicaHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
     Path destinationLocation = locationWithNameService(new Path(destination, fileName(source)).toString(),
         destinationNameService);
     copyToRemote(localLocation, destinationLocation);
@@ -74,7 +74,7 @@ public class SchemaCopier {
   }
 
   private void tryCopyToLocal(String source, Path localLocation) {
-    String sourceNameService = sourceHiveConf.get(NAMESERVICES_PARAMETER);
+    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
     Path sourceLocation = locationWithNameService(source, sourceNameService);
     try {
       LOG.info("Attempting to copy from {} to {}", sourceLocation, localLocation);

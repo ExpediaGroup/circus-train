@@ -49,23 +49,19 @@ public class SchemaCopierTest {
   }
 
   @Test
-  public void get() {
-    // TODO: Clean up
-    HiveConf conf = new HiveConf();
-    conf.set("dfs.nameservices", "prodhdp-ha");
-    assertEquals("hdfs://prodhdp-ha/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs://etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
-    assertEquals("hdfs://etl/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs://etl/EAN/avsc0/tlog.avsc", null).toString());
-    assertEquals("hdfs:/etl/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs:///etl/EAN/avsc0/tlog.avsc", null).toString());
-    assertEquals("hdfs://etl/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("hdfs:///etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
-    assertEquals("/etl/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("/etl/EAN/avsc0/tlog.avsc", null).toString());
-    assertEquals("/etl/EAN/avsc0/tlog.avsc",
-        copier.locationWithNameService("/etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
-
+  public void locationWithNameServiceTest() {
+    assertEquals("hdfs://etl/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs://etl/test/avsc0/tlog.avsc", null).toString());
+    assertEquals("hdfs://hdp-ha/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs://etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
+    assertEquals("hdfs:/etl/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs:///etl/test/avsc0/tlog.avsc", null).toString());
+    assertEquals("hdfs://hdp-ha/etl/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("hdfs:///etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
+    assertEquals("/etl/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("/etl/test/avsc0/tlog.avsc", null).toString());
+    assertEquals("/hdp-ha/etl/test/avsc0/tlog.avsc",
+        copier.locationWithNameService("/etl/test/avsc0/tlog.avsc", "hdp-ha").toString());
   }
 
   @Test
@@ -90,7 +86,7 @@ public class SchemaCopierTest {
   }
 
   @Test
-  public void copiedFileAndNotDirectory() throws IOException {
+  public void copiedFiltestdNotDirectory() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
     copier.copy(source.toString(), destination.toString());
