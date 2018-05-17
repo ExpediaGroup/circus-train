@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -36,11 +37,12 @@ public class SchemaCopierTest {
   @Rule
   public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+  private SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf(), Collections.<String> emptyList());
+
   @Test
   public void copiedToCorrectDestination() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(source.toString(), destination.toString());
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(destination.toString() + "/test.txt")));
@@ -51,7 +53,6 @@ public class SchemaCopierTest {
     // TODO: Clean up
     HiveConf conf = new HiveConf();
     conf.set("dfs.nameservices", "prodhdp-ha");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     assertEquals("hdfs://prodhdp-ha/EAN/avsc0/tlog.avsc",
         copier.locationWithNameService("hdfs://etl/EAN/avsc0/tlog.avsc", "prodhdp-ha").toString());
     assertEquals("hdfs://etl/EAN/avsc0/tlog.avsc",
@@ -75,7 +76,6 @@ public class SchemaCopierTest {
     File source = temporaryFolder.newFile("test.txt");
     FileUtils.writeLines(source, randomData);
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     File copy = new File(copier.copy(source.toString(), destination.toString()).toString());
     assertTrue(FileUtils.contentEquals(source, copy));
   }
@@ -84,7 +84,6 @@ public class SchemaCopierTest {
   public void copyDoesntDeleteOriginalFile() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(source.toString(), destination.toString());
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(source.toString())));
@@ -94,7 +93,6 @@ public class SchemaCopierTest {
   public void copiedFileAndNotDirectory() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(source.toString(), destination.toString());
     assertTrue(new File(destination.toString() + "/test.txt").isFile());
   }
@@ -102,28 +100,24 @@ public class SchemaCopierTest {
   @Test(expected = NullPointerException.class)
   public void copyWithNullSourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(null, destination.toString());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptySourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy("", destination.toString());
   }
 
   @Test(expected = NullPointerException.class)
   public void copyWithNullDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(source.toString(), null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptyDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
     copier.copy(source.toString(), "");
   }
 }

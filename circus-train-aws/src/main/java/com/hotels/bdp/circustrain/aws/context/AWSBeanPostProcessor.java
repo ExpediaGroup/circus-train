@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 package com.hotels.bdp.circustrain.aws.context;
 
 import static org.apache.hadoop.security.alias.CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH;
+
+import static com.hotels.bdp.circustrain.aws.AWSConstants.S3_SCHEME;
+
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.BeansException;
@@ -54,6 +58,12 @@ public class AWSBeanPostProcessor implements BeanPostProcessor {
       }
       return baseConf;
     }
+
+    if (CommonBeans.BEAN_SUPPORTED_SCHEMES.equals(beanName)) {
+      List<String> supportedSchemes = (List<String>) bean;
+      supportedSchemes.add(S3_SCHEME);
+    }
+
     return bean;
   }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ public final class AWSConstants {
 
   public static final String ACCESS_KEY = "access.key";
   public static final String SECRET_KEY = "secret.key";
+
+  public static final String S3_SCHEME = "s3";
 
   public static final String FS_PROTOCOL_S3 = "s3";
   public static final String FS_PROTOCOL_S3N = "s3n";

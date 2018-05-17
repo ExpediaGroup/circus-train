@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.context;
 
 import static org.apache.hadoop.security.alias.CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSuppli
 public class CommonBeans {
   private static final Logger LOG = LoggerFactory.getLogger(CommonBeans.class);
   public static final String BEAN_BASE_CONF = "baseConf";
+  public static final String BEAN_SUPPORTED_SCHEMES = "supportedSchemes";
 
   @Bean(name = BEAN_BASE_CONF)
   Configuration baseConf(Security security) {
@@ -67,6 +69,14 @@ public class CommonBeans {
       conf.set(entry.getKey(), entry.getValue());
     }
     return conf;
+  }
+
+  @Bean(name = BEAN_SUPPORTED_SCHEMES)
+  Iterable<String> supportedSchemes() {
+    List<String> schemes = new ArrayList<>();
+    String alwaysSupported = "hdfs";
+    schemes.add(alwaysSupported);
+    return schemes;
   }
 
   @Profile({ Modules.REPLICATION })
