@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.avro.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
-
-import java.io.IOException;
-import java.nio.file.Files;
-
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
+import java.io.IOException;
+import java.nio.file.Files;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 
 @Component
 public class SchemaCopier {
@@ -53,14 +51,12 @@ public class SchemaCopier {
 
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
-    String sourceNameService = sourceHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path sourceLocation = new NameServicePathResolver(source, sourceNameService).resolve();
+    Path sourceLocation = new NameServicePathResolver(sourceHiveConf).resolve(source);
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
-    String destinationNameService = replicaHiveConf.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path destinationLocation = new NameServicePathResolver(new Path(destination, fileName(source)).toString(),
-        destinationNameService).resolve();
+    Path destinationLocation = new NameServicePathResolver(replicaHiveConf).resolve(
+        new Path(destination, fileName(source)).toString());
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);
