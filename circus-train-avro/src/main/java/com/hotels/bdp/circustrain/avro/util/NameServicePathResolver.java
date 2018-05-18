@@ -45,7 +45,7 @@ public class NameServicePathResolver {
       String scheme = uri.getScheme();
       String path = uri.getPath();
       if (isBlank(scheme)) {
-        path = "/" + nameService + path;
+        path = String.format("/%s%s", nameService, path);
         location = new Path(path);
       } else {
         location = new Path(scheme, nameService, path);
