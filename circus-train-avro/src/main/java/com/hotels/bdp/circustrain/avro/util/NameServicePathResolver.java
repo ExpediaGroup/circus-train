@@ -16,15 +16,14 @@
 
 package com.hotels.bdp.circustrain.avro.util;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 public class NameServicePathResolver {
   private static final Logger LOG = LoggerFactory.getLogger(NameServicePathResolver.class);

@@ -16,7 +16,11 @@
 
 package com.hotels.bdp.circustrain.avro.util;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -24,12 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.nio.file.Files;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 
 @Component
 public class SchemaCopier {
@@ -76,12 +75,11 @@ public class SchemaCopier {
 
   private void copyToLocal(Path sourceLocation, Path localLocation) {
     try {
-      LOG.info("Attempting to copy from {} to {}", sourceLocation, localLocation);
       FileSystem sourceFileSystem;
       sourceFileSystem = sourceLocation.getFileSystem(sourceHiveConf);
       sourceFileSystem.copyToLocalFile(false, sourceLocation, localLocation);
       LOG.info("Copy from {} to {} succeeded", sourceLocation, localLocation);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new CircusTrainException("Couldn't copy file from " + sourceLocation + " to " + localLocation, e);
     }
   }
