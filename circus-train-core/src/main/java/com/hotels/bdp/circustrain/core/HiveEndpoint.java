@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.MetaStoreClientException;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public abstract class HiveEndpoint {
 

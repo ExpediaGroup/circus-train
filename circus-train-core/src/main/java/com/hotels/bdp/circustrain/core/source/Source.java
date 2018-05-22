@@ -40,7 +40,7 @@ import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class Source extends HiveEndpoint {
 

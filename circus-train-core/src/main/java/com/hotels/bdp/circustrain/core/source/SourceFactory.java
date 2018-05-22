@@ -29,7 +29,7 @@ import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
 @Component

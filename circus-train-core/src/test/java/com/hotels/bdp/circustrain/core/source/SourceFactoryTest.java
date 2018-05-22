@@ -33,7 +33,7 @@ import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceFactoryTest {

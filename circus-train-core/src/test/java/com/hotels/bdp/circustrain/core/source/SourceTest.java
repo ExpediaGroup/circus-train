@@ -55,7 +55,7 @@ import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceTest {

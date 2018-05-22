@@ -23,7 +23,7 @@ import org.apache.thrift.TException;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class MetadataUpdateReplicaLocationManager implements ReplicaLocationManager {
 

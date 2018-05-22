@@ -35,7 +35,7 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.hive.parser.HiveLanguageParser;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
 @Component

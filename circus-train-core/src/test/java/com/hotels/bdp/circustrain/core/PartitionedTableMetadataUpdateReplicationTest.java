@@ -61,7 +61,7 @@ import com.hotels.bdp.circustrain.core.replica.InvalidReplicationModeException;
 import com.hotels.bdp.circustrain.core.replica.MetadataUpdateReplicaLocationManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartitionedTableMetadataUpdateReplicationTest {

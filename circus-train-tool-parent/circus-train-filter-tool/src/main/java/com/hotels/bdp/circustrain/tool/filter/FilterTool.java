@@ -34,7 +34,7 @@ import org.springframework.validation.ObjectError;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;

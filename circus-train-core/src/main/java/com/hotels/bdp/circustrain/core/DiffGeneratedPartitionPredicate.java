@@ -33,7 +33,7 @@ import com.hotels.bdp.circustrain.comparator.listener.PartitionSpecCreatingDiffL
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
 import com.hotels.bdp.circustrain.hive.fetcher.PartitionFetcher;
-import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 public class DiffGeneratedPartitionPredicate implements PartitionPredicate {
