@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.replica;
 
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -25,11 +26,11 @@ import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
 @Component

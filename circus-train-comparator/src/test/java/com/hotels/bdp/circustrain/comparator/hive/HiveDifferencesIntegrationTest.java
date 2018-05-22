@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.comparator.hive;
 
+import static com.hotels.bdp.circustrain.comparator.api.ComparatorType.SHORT_CIRCUIT;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -23,8 +24,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static com.hotels.bdp.circustrain.comparator.api.ComparatorType.SHORT_CIRCUIT;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,8 +62,8 @@ import com.hotels.bdp.circustrain.comparator.api.BaseDiff;
 import com.hotels.bdp.circustrain.comparator.api.Diff;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
-import com.hotels.bdp.circustrain.hive.iterator.PartitionIterator;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HiveDifferencesIntegrationTest {

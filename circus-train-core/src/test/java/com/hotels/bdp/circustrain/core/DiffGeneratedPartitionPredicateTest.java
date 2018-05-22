@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package com.hotels.bdp.circustrain.core;
 
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
-
-import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
-import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
-import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;
-import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newTable;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,13 +49,13 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.metastore.DefaultMetaStoreClientSupplier;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.DefaultMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.MetaStoreClientFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiffGeneratedPartitionPredicateTest {

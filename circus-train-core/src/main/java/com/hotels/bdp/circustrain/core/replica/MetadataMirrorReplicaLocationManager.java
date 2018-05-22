@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.replica;
 
 import static com.hotels.bdp.circustrain.core.replica.TableType.UNPARTITIONED;
@@ -23,7 +24,7 @@ import org.apache.hadoop.hive.metastore.api.Partition;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
+import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 
 public class MetadataMirrorReplicaLocationManager implements ReplicaLocationManager {
 

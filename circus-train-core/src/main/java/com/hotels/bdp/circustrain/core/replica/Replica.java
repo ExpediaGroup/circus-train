@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.replica;
 
 import static com.google.common.base.Strings.nullToEmpty;
-
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.METADATA_MIRROR;
 import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.METADATA_UPDATE;
-import static com.hotels.bdp.circustrain.core.metastore.LocationUtils.locationAsPath;
+import static com.hotels.hcommon.hive.metastore.util.LocationUtils.locationAsPath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,8 +51,6 @@ import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
@@ -60,7 +58,9 @@ import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
-import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
+import com.hotels.hcommon.hive.metastore.MetaStoreClientException;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 
 public class Replica extends HiveEndpoint {
 
@@ -335,7 +335,7 @@ public class Replica extends HiveEndpoint {
   }
 
   private void updateTableColumnStatistics(CloseableMetaStoreClient client, TableAndStatistics replicaTable)
-    throws TException {
+      throws TException {
     if (replicaTable.getStatistics() != null) {
       LOG.debug("Updating {} column statistics for table {}.{}", replicaTable.getStatistics().getStatsObj().size(),
           replicaTable.getTable().getDbName(), replicaTable.getTable().getTableName());
@@ -351,7 +351,7 @@ public class Replica extends HiveEndpoint {
       String targetTableLocation,
       String eventId,
       SourceLocationManager sourceLocationManager)
-    throws TException {
+      throws TException {
     return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
         housekeepingListener, replicaCatalogListener);
   }

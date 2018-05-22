@@ -38,19 +38,18 @@ import org.springframework.core.annotation.Order;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.conf.MetastoreTunnel;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
-import com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars;
-import com.hotels.bdp.circustrain.core.metastore.DefaultMetaStoreClientSupplier;
-import com.hotels.bdp.circustrain.core.metastore.HiveConfFactory;
-import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
-import com.hotels.bdp.circustrain.core.metastore.ThriftMetaStoreClientFactory;
-import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.DefaultMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.MetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.MetaStoreClientFactoryManager;
+import com.hotels.hcommon.hive.metastore.client.ThriftMetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.tunnel.TunnelingMetaStoreClientSupplierBuilder;
+import com.hotels.hcommon.hive.metastore.conf.HiveConfFactory;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @org.springframework.context.annotation.Configuration
@@ -92,23 +91,9 @@ public class CommonBeans {
     if (hiveCatalog.getHiveMetastoreUris() != null) {
       properties.put(ConfVars.METASTOREURIS.varname, hiveCatalog.getHiveMetastoreUris());
     }
-    configureMetastoreTunnel(hiveCatalog.getMetastoreTunnel(), properties);
     putConfigurationProperties(hiveCatalog.getConfigurationProperties(), properties);
     HiveConf hiveConf = new HiveConfFactory(siteXml, properties).newInstance();
     return hiveConf;
-  }
-
-  private void configureMetastoreTunnel(MetastoreTunnel metastoreTunnel, Map<String, String> properties) {
-    if (metastoreTunnel != null) {
-      properties.put(CircusTrainHiveConfVars.SSH_ROUTE.varname, metastoreTunnel.getRoute());
-      properties.put(CircusTrainHiveConfVars.SSH_PORT.varname, String.valueOf(metastoreTunnel.getPort()));
-      properties.put(CircusTrainHiveConfVars.SSH_LOCALHOST.varname, metastoreTunnel.getLocalhost());
-      properties.put(CircusTrainHiveConfVars.SSH_PRIVATE_KEYS.varname, metastoreTunnel.getPrivateKeys());
-      properties.put(CircusTrainHiveConfVars.SSH_KNOWN_HOSTS.varname, metastoreTunnel.getKnownHosts());
-      properties.put(CircusTrainHiveConfVars.SSH_SESSION_TIMEOUT.varname, String.valueOf(metastoreTunnel.getTimeout()));
-      properties.put(CircusTrainHiveConfVars.SSH_STRICT_HOST_KEY_CHECKING.varname,
-          metastoreTunnel.getStrictHostKeyChecking());
-    }
   }
 
   private void setCredentialProviderPath(Security security, Map<String, String> properties) {
@@ -168,7 +153,16 @@ public class CommonBeans {
       MetastoreTunnel metastoreTunnel,
       MetaStoreClientFactory metaStoreClientFactory) {
     if (metastoreTunnel != null) {
-      return new TunnellingMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
+      return new TunnelingMetaStoreClientSupplierBuilder()
+          .withName(name)
+          .withRoute(metastoreTunnel.getRoute())
+          .withKnownHosts(metastoreTunnel.getKnownHosts())
+          .withLocalHost(metastoreTunnel.getLocalhost())
+          .withPort(metastoreTunnel.getPort())
+          .withPrivateKeys(metastoreTunnel.getPrivateKeys())
+          .withTimeout(metastoreTunnel.getTimeout())
+          .withStrictHostKeyChecking(metastoreTunnel.getStrictHostKeyChecking())
+          .build(replicaHiveConf, metaStoreClientFactory);
     } else {
       return new DefaultMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
     }

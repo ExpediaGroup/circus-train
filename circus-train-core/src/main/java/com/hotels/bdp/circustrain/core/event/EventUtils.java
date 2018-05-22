@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.event;
 
 import java.net.URI;
@@ -40,8 +41,8 @@ import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.metastore.FieldSchemaUtils;
-import com.hotels.bdp.circustrain.core.metastore.LocationUtils;
+import com.hotels.hcommon.hive.metastore.util.FieldSchemaUtils;
+import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 
 public class EventUtils {
 
@@ -92,8 +93,8 @@ public class EventUtils {
 
     EventMetastoreTunnel tunnel = replicaCatalog.getMetastoreTunnel() == null ? null
         : new EventMetastoreTunnel(replicaCatalog.getMetastoreTunnel().getRoute(),
-            replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
-            replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
+        replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
+        replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
 
     return new EventReplicaCatalog(replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), eventS3, tunnel,
         replicaCatalog.getSiteXml(), replicaCatalog.getConfigurationProperties());

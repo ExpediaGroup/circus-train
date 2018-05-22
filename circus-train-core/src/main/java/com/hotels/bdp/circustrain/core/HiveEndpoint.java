@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientException;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.hcommon.hive.metastore.MetaStoreClientException;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
 
 public abstract class HiveEndpoint {
 
@@ -145,7 +145,7 @@ public abstract class HiveEndpoint {
   }
 
   public PartitionsAndStatistics getPartitions(Table table, String partitionPredicate, int maxPartitions)
-    throws TException {
+      throws TException {
     try (CloseableMetaStoreClient client = metaStoreClientSupplier.get()) {
       List<Partition> partitions = null;
       if (Strings.isNullOrEmpty(partitionPredicate)) {
@@ -174,7 +174,7 @@ public abstract class HiveEndpoint {
   }
 
   private List<String> getPartitionNames(List<FieldSchema> partitionKeys, List<Partition> partitions)
-    throws MetaException {
+      throws MetaException {
     List<String> partitionNames = new ArrayList<>(partitions.size());
     for (Partition partition : partitions) {
       partitionNames.add(Warehouse.makePartName(partitionKeys, partition.getValues()));

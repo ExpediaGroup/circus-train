@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.source;
 
 import java.io.IOException;
@@ -32,7 +33,6 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
@@ -40,6 +40,7 @@ import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
+import com.hotels.hcommon.hive.metastore.client.CloseableMetaStoreClient;
 
 public class Source extends HiveEndpoint {
 
@@ -72,9 +73,10 @@ public class Source extends HiveEndpoint {
 
   @Override
   public PartitionsAndStatistics getPartitions(Table sourceTable, String partitionPredicate, int maxPartitions)
-    throws TException {
+      throws TException {
     PartitionsAndStatistics sourcePartitions = super.getPartitions(sourceTable, partitionPredicate, maxPartitions);
-    sourceCatalogListener.resolvedSourcePartitions(EventUtils.toEventPartitions(sourceTable, sourcePartitions.getPartitions()));
+    sourceCatalogListener.resolvedSourcePartitions(
+        EventUtils.toEventPartitions(sourceTable, sourcePartitions.getPartitions()));
     return sourcePartitions;
   }
 
@@ -91,7 +93,7 @@ public class Source extends HiveEndpoint {
       List<Partition> partitions,
       String eventId,
       Map<String, Object> copierOptions)
-    throws IOException {
+      throws IOException {
     if (MetaStoreUtils.isView(table)) {
       return new ViewLocationManager();
     }

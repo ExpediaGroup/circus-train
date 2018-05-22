@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.replica;
 
-import static com.hotels.bdp.circustrain.core.metastore.LocationUtils.locationAsPath;
 import static com.hotels.bdp.circustrain.core.replica.TableType.UNPARTITIONED;
+import static com.hotels.hcommon.hive.metastore.util.LocationUtils.locationAsPath;
 
 import java.net.URI;
 import java.util.ArrayList;
