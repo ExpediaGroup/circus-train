@@ -138,7 +138,6 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
-    <!-- SSH library -->
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>hcommon-hive-metastore</artifactId>

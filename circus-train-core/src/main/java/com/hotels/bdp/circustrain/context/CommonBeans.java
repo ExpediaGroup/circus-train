@@ -45,13 +45,13 @@ import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
-import com.hotels.hcommon.hive.metastore.client.MetaStoreClientFactoryManager;
+import com.hotels.hcommon.hive.metastore.client.conditional.MetaStoreClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.ConditionalMetaStoreClientFactory;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
-import com.hotels.hcommon.hive.metastore.client.ConditionalRetryingMetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.conditional.ConditionalRetryingMetaStoreClientFactory;
 import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
-import com.hotels.hcommon.hive.metastore.client.TunnellingMetaStoreClientSupplierBuilder;
+import com.hotels.hcommon.hive.metastore.client.tunnelling.TunnellingMetaStoreClientSupplierBuilder;
 import com.hotels.hcommon.hive.metastore.conf.HiveConfFactory;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
