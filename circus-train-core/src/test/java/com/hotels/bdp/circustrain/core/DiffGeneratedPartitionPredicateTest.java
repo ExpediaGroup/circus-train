@@ -54,7 +54,7 @@ import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
-import com.hotels.hcommon.hive.metastore.client.provider.HiveMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiffGeneratedPartitionPredicateTest {
