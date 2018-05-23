@@ -5,7 +5,7 @@
 * Replace SSH support with [hcommon-ssh](https://github.com/HotelsDotCom/hcommon-ssh) library. [#46](https://github.com/HotelsDotCom/circus-train/issues/46).
 ### Fixed
 * Housekeeping was failing when attempting to delete a path which no longer exists on the replica filesystem. Upgraded Circus Train's Housekeeping dependency to a version which fixes this bug. See [#61](https://github.com/HotelsDotCom/circus-train/issues/61).
-* Avro schemas were not being replicated when HA Hadoop is configured and the avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).
+* Avro schemas were not being replicated when a HA NameNode is configured and the Avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).
 
 # 11.4.0 - 2018-04-11
 ### Added
