@@ -1,4 +1,8 @@
-# TBD
+# 11.5.1 - 2018-05-24
+### Fixed
+* Avro schemas were not being replicated when a HA NameNode is configured and the Avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).
+
+# 11.5.0 - 2018-05-24
 ### Added
 * Add SSH timeout and SSH strict host key checking capabilities. [#64](https://github.com/HotelsDotCom/circus-train/issues/64).
 ### Changed
