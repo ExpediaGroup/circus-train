@@ -17,19 +17,25 @@
 package com.hotels.bdp.circustrain.avro.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 
 import java.io.IOException;
 import java.nio.file.Files;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import com.hotels.bdp.circustrain.api.CircusTrainException;
 
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.Modules;
+
+@Profile({ Modules.REPLICATION })
 @Component
 public class SchemaCopier {
 
@@ -54,8 +60,8 @@ public class SchemaCopier {
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
-    Path destinationLocation = new NameServicePathResolver(replicaHiveConf).resolve(
-        new Path(destination, fileName(source)).toString());
+    Path destinationLocation = new NameServicePathResolver(replicaHiveConf)
+        .resolve(new Path(destination, fileName(source)).toString());
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);
