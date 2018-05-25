@@ -45,11 +45,11 @@ import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
-import com.hotels.hcommon.hive.metastore.client.conditional.MetaStoreClientFactoryManager;
+import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
-import com.hotels.hcommon.hive.metastore.client.api.ConditionalMetaStoreClientFactory;
+import com.hotels.bdp.circustrain.core.metastore.ConditionalMetaStoreClientFactory;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
-import com.hotels.hcommon.hive.metastore.client.conditional.ConditionalRetryingMetaStoreClientFactory;
+import com.hotels.bdp.circustrain.core.metastore.ThriftHiveMetaStoreClientFactory;
 import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.tunnelling.TunnellingMetaStoreClientSupplierBuilder;
 import com.hotels.hcommon.hive.metastore.conf.HiveConfFactory;
@@ -118,13 +118,13 @@ public class CommonBeans {
       SourceCatalog sourceCatalog,
       @Value("#{sourceHiveConf}") HiveConf sourceHiveConf) {
     List<ConditionalMetaStoreClientFactory> metaStoreClientFactories = new ArrayList<>();
-    metaStoreClientFactories.add(new ConditionalRetryingMetaStoreClientFactory(sourceHiveConf, sourceCatalog.getName()));
+    metaStoreClientFactories.add(new ThriftHiveMetaStoreClientFactory(sourceHiveConf, sourceCatalog.getName()));
     MetaStoreClientFactoryManager metaStoreClientFactoryManager = new MetaStoreClientFactoryManager(
         metaStoreClientFactories);
     String metaStoreUris = sourceCatalog.getHiveMetastoreUris();
     if (metaStoreUris == null) {
       // Default to Thrift is not specified - optional attribute in SourceCatalog
-      metaStoreUris = ConditionalRetryingMetaStoreClientFactory.ACCEPT_PREFIX;
+      metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
     }
     MetaStoreClientFactory sourceMetaStoreClientFactory = metaStoreClientFactoryManager.factoryForUrl(metaStoreUris);
     return metaStoreClientSupplier(sourceHiveConf, sourceCatalog.getMetastoreTunnel(),
@@ -138,13 +138,13 @@ public class CommonBeans {
       @Value("#{replicaHiveConf}") HiveConf replicaHiveConf) {
     List<ConditionalMetaStoreClientFactory> metaStoreClientFactories = new ArrayList<>();
     metaStoreClientFactories.add(
-        new ConditionalRetryingMetaStoreClientFactory(replicaHiveConf, replicaCatalog.getName()));
+        new ThriftHiveMetaStoreClientFactory(replicaHiveConf, replicaCatalog.getName()));
     MetaStoreClientFactoryManager metaStoreClientFactoryManager = new MetaStoreClientFactoryManager(
         metaStoreClientFactories);
     String metaStoreUris = replicaCatalog.getHiveMetastoreUris();
     if (metaStoreUris == null) {
       // Default to Thrift is not specified - optional attribute in SourceCatalog
-      metaStoreUris = ConditionalRetryingMetaStoreClientFactory.ACCEPT_PREFIX;
+      metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
     }
     MetaStoreClientFactory replicaMetaStoreClientFactory = metaStoreClientFactoryManager
         .factoryForUrl(metaStoreUris);
