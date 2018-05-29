@@ -58,10 +58,10 @@ the global level, then be overriden for certain replications.
           database-name: my_database
           table-name: copied_table
           table-location: /example/url/
-          transform-options:
-            avro-serde-options:
-                #avro schema file will be copied to /base/url/<eventId>/ 
-                base-url: /base/url/
+        transform-options:
+          avro-serde-options:
+            #avro schema file will be copied to /base/url/<eventId>/ 
+            base-url: /base/url/
       -  
          source-table:
            database-name: foo
@@ -71,10 +71,10 @@ the global level, then be overriden for certain replications.
            database-name: my_database
            table-name: baz_copy
            table-location: /foo/baz/copy/is/here
-           transform-options:
-             avro-serde-options:
-                 #avro schema file will be copied to /bazs/new/url/<eventId>/ 
-                 base-url: /bazs/new/url/
+         transform-options:
+           avro-serde-options:
+             #avro schema file will be copied to /bazs/new/url/<eventId>/ 
+             base-url: /bazs/new/url/
           
            
     #Global setting with override on specific table example:
@@ -87,10 +87,10 @@ the global level, then be overriden for certain replications.
         replica-table:
           table-name: copied_table
           table-location: /example/url/
-          transform-options:
-            avro-serde-options:
-                #avro schema file will be copied to /overriden/url/<eventId>/ rather than /global/url/<eventId>/
-                base-url: /overriden/url/
+        transform-options:
+          avro-serde-options:
+            #avro schema file will be copied to /overriden/url/<eventId>/ rather than /global/url/<eventId>/
+            base-url: /overriden/url/
     
         avro-serde-options:
             base-url: /global/url

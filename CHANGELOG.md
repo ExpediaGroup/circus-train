@@ -1,3 +1,16 @@
+# 11.5.1 - 2018-05-24
+### Fixed
+* Avro schemas were not being replicated when a HA NameNode is configured and the Avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).
+
+# 11.5.0 - 2018-05-24
+### Added
+* Add SSH timeout and SSH strict host key checking capabilities. [#64](https://github.com/HotelsDotCom/circus-train/issues/64).
+### Changed
+* Using hcommon-ssh-1.0.1 dependency to fix issue where metastore exceptions were lost and not propagated properly over tunnelled connections.
+* Replace SSH support with [hcommon-ssh](https://github.com/HotelsDotCom/hcommon-ssh) library. [#46](https://github.com/HotelsDotCom/circus-train/issues/46).
+### Fixed
+* Housekeeping was failing when attempting to delete a path which no longer exists on the replica filesystem. Upgraded Circus Train's Housekeeping dependency to a version which fixes this bug. See [#61](https://github.com/HotelsDotCom/circus-train/issues/61).
+
 # 11.4.0 - 2018-04-11
 ### Added
 * Ability to select Copier via configuration. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).

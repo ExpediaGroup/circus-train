@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>11.4.1-SNAPSHOT</version>
+    <version>11.5.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-core</artifactId>
@@ -13,8 +13,6 @@
   <properties>
     <!-- must match Spring Boot dependencies -->
     <log4j.version>1.2.17</log4j.version>
-    <!-- must be compatible with Spring Boot Jsch dependencies -->
-    <jsch-extension.version>0.1.6</jsch-extension.version>
   </properties>
 
   <dependencies>
@@ -140,15 +138,10 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
-    <!-- JSch -->
+    <!-- SSH library -->
     <dependency>
-      <groupId>com.jcraft</groupId>
-      <artifactId>jsch</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.pastdev</groupId>
-      <artifactId>jsch-extension</artifactId>
-      <version>${jsch-extension.version}</version>
+      <groupId>com.hotels</groupId>
+      <artifactId>hcommon-ssh</artifactId>
     </dependency>
 
     <!-- Test -->

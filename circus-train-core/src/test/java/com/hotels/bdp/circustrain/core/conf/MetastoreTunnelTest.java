@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,106 +45,132 @@ public class MetastoreTunnelTest {
   @Test
   public void typical() {
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(0));
   }
 
   @Test
   public void portTooHigh() {
     tunnel.setPort(65536);
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void portTooLow() {
     tunnel.setPort(0);
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void nullRoute() {
     tunnel.setRoute(null);
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void emptyRoute() {
     tunnel.setRoute("");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void blankRoute() {
     tunnel.setRoute(" ");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void nullKnownHosts() {
     tunnel.setKnownHosts(null);
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void emptyKnownHosts() {
     tunnel.setKnownHosts("");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void blankKnownHosts() {
     tunnel.setKnownHosts(" ");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void nullPrivateKey() {
     tunnel.setPrivateKeys(null);
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void emptyPrivateKey() {
     tunnel.setPrivateKeys("");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
-
     assertThat(violations.size(), is(1));
   }
 
   @Test
   public void blankPrivateKey() {
     tunnel.setPrivateKeys(" ");
-
     Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(1));
+  }
 
+  @Test
+  public void zeroTimeout() {
+    tunnel.setTimeout(0);
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(0));
+  }
+
+  @Test
+  public void negativeTimeout() {
+    tunnel.setTimeout(-1);
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(1));
+  }
+
+  @Test
+  public void noStrictHostKeyChecking() {
+    tunnel.setStrictHostKeyChecking("NO");
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(0));
+  }
+
+  @Test
+  public void yesStrictHostKeyChecking() {
+    tunnel.setStrictHostKeyChecking("yEs");
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(0));
+  }
+
+  @Test
+  public void nullStrictHostKeyChecking() {
+    tunnel.setStrictHostKeyChecking(null);
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(1));
+  }
+
+  @Test
+  public void blankStrictHostKeyChecking() {
+    tunnel.setStrictHostKeyChecking(" ");
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
+    assertThat(violations.size(), is(2));
+  }
+
+  @Test
+  public void invalidStrictHostKeyChecking() {
+    tunnel.setStrictHostKeyChecking("Foo");
+    Set<ConstraintViolation<MetastoreTunnel>> violations = validator.validate(tunnel);
     assertThat(violations.size(), is(1));
   }
 

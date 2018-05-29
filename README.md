@@ -1,7 +1,5 @@
 ![Circus Train.](circus-train.png "Moving Hive data between sites.")
 
-**We’ll be speaking about Circus Train and [Waggle Dance](https://github.com/HotelsDotCom/waggle-dance) at the [DataWorks Summit Berlin 2018](https://dataworkssummit.com/berlin-2018/) at 14:50 on Wednesday the 18th of April. Please drop by for a free sticker!**
-
 # Start using
 You can obtain Circus Train from Maven Central:
 
@@ -141,20 +139,12 @@ The table below describes all the available configuration values for Circus Trai
 |`source-catalog.hive-metastore-uris`|No|Fully qualified URI of the source cluster's Hive metastore Thrift service. If not specified values are taken from the hive-site.xml on the Hadoop classpath of the machine that's running Circus Train. This property mimics the Hive property "hive.metastore.uris" and allows multiple comma separated URIs.|
 |`source-catalog.site-xml`|No|A list of Hadoop configuration XML files to add to the configuration for the source.|
 |`source-catalog.configuration-properties`|No|A list of `key: value` pairs to add to the Hadoop configuration for the source.|
-|`source-catalog.metastore-tunnel.route`|No|A SSH tunnel can be used to connect to source metastores. The tunnel may consist of one or more hops which must be declared in this property. See [Configuring a SSH tunnel](#configuring-a-ssh-tunnel) for details.|
-|`source-catalog.metastore-tunnel.private-keys`|No|A comma-separated list of paths to any SSH keys required in order to set up the SSH tunnel.|
-|`source-catalog.metastore-tunnel.known-hosts`|No|Path to a known hosts file.|
-|`source-catalog.metastore-tunnel.port`|No|The port on which SSH runs on the source master node. Default is `22`.|
-|`source-catalog.metastore-tunnel.local-host`|No|The address on which to bind the local end of the tunnel. Default is '`localhost`'.|
+|`source-catalog.metastore-tunnel.*`|No|See metastore tunnel configuration values below.|
 |`replica-catalog.name`|Yes|A name for the replica catalog for events and logging.|
 |`replica-catalog.hive-metastore-uris`|Yes|Fully qualified URI of the replica cluster's Hive metastore Thrift service. On AWS this usually comprises of the EMR master node public hostname and metastore thrift port. This property mimics the Hive property "hive.metastore.uris" and allows multiple comma separated URIs.|
 |`replica-catalog.site-xml`|No|A list of Hadoop configuration XML files to add to the configuration for the replica.|
 |`replica-catalog.configuration-properties`|No|A list of `key:value` pairs to add to the Hadoop configuration for the replica.|
-|`replica-catalog.metastore-tunnel.route`|No|A SSH tunnel can be used to connect to replica metastores. The tunnel may consist of one or more hops which must be declared in this property. See [Configuring a SSH tunnel](#configuring-a-ssh-tunnel) for details.|
-|`replica-catalog.metastore-tunnel.private-keys`|No|A comma-separated list of paths to any SSH keys required in order to set up the SSH tunnel.|
-|`replica-catalog.metastore-tunnel.known-hosts`|No|Path to a known hosts file.|
-|`replica-catalog.metastore-tunnel.port`|No|The port on which SSH runs on the replica master node. Default is `22`.|
-|`replica-catalog.metastore-tunnel.local-host`|No|The address on which to bind the local end of the tunnel. Default is '`localhost`'.|
+|`replica-catalog.metastore-tunnel.*`|No|See metastore tunnel configuration values below.|
 |`security.credential-provider`|No|URL(s) to the Java Keystore Hadoop Credential Provider(s) that contain the S3 access.key and secret.key for the source or destination S3 buckets.|
 |`copier-options`|No|Globally applied `Copier` options. See [Copier options](#copier-options) for details.|
 |`table-replications[n].source-table.database-name`|Yes|The name of the database in which the table you wish to replicate is located.|
@@ -170,6 +160,18 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
 |`table-replications[n].transform-options`|No|Map of optional options that can be used to set configuration for a custom transformation per table replication.|
 |`table-replications[n].table-mappings`|No|Only used by view replications. This is a map of source tables used by the view and their equivalent name in the replica metastore.|
+
+The table below describes the tunnel configuration values for source/replica catalog:
+
+| Property | Required | Description |
+|:----|:----:|:----|
+| `*.metastore-tunnel.route` | No |A SSH tunnel can be used to connect to source/replica metastores. The tunnel may consist of one or more hops which must be declared in this property. See [Configuring a SSH tunnel](#configuring-a-ssh-tunnel) for details. |
+| `*.metastore-tunnel.private-keys` | No |A comma-separated list of paths to any SSH keys required in order to set up the SSH tunnel. |
+| `*.metastore-tunnel.known-hosts` | No |Path to a known hosts file. |
+| `*.metastore-tunnel.port` | No |The port on which SSH runs on the replica master node. Default is `22`.|
+| `*.metastore-tunnel.localhost` | No | The address on which to bind the local end of the tunnel. Default is '`localhost`'. |
+| `*.metastore-tunnel.timeout` | No | The SSH session timeout in milliseconds, `0` means no timeout. Default is `60000` milliseconds, i.e. 1 minute. |
+| `*.metastore-tunnel.strict-host-key-checking` | No | Whether the SSH tunnel should be created with strict host key checking. Can be set to `yes` or `no`. The default is `yes`. |
 
 #### Partition filters
 Control over which data and metadata Circus Train replicates can be achieved through the use of partition filters which return a list of partitions matching the filter and only data in these partitions will be replicated. This is useful if you have a very large table where only a few partitions change every day. Instead of replicating the entire table on each run of Circus Train you could create a partition filter which matches the changed partitions and only these would then be replicated.
@@ -355,7 +357,7 @@ If _bastion-host_ is only accessible by user _ec2-user_, _jump-box_ by user _use
 
     ec2-user@bastion-host -> user-a@jump-box -> hadoop@hive-server-box
 
-Once the tunnel is established Circus Train will set up port forwarding from the local machine specified in `replica-catalog.metastore-tunnel.local-host` to the remote machine specified in `replica-catalog.hive-metastore-uris`. The last node in the tunnel expression doesn't need to be the Thrift server, the only requirement is that the this last node must be able to communicate with the Thrift service. Sometimes this is not possible due to firewall restrictions so in these cases they must be the same.
+Once the tunnel is established Circus Train will set up port forwarding from the local machine specified in `replica-catalog.metastore-tunnel.localhost` to the remote machine specified in `replica-catalog.hive-metastore-uris`. The last node in the tunnel expression doesn't need to be the Thrift server, the only requirement is that the this last node must be able to communicate with the Thrift service. Sometimes this is not possible due to firewall restrictions so in these cases they must be the same.
 
 Note that all the machines in the tunnel expression must be included in the *known_hosts* file and the keys required to access each box must be set in `replica-catalog.metastore-tunnel.private-keys`. For example, if _bastion-host_ is authenticated with _bastion.pem_ and both _jump-box_ and _hive-server-box_ are authenticated with _emr.pem_ then the property must be set as`replica-catalog.metastore-tunnel.private-keys=<path-to-ssh-keys>/bastion.pem, <path-to-ssh-keys>/emr.pem`.
 
@@ -787,9 +789,9 @@ Note that the Circus Train configuration only supports one set of AWS credential
           table-name: aws-a_table
           table-location: s3://<aws-a-data-bucket>/<pata-to-aws-a_db>/aws-a_table
 
-## Contact
+# Contact
 
-### Mailing List
+## Mailing List
 If you would like to ask any questions about or discuss Circus Train please join our mailing list at 
 
   [https://groups.google.com/forum/#!forum/circus-train-user](https://groups.google.com/forum/#!forum/circus-train-user)

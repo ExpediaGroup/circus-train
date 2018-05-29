@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,6 @@ package com.hotels.bdp.circustrain.context;
 
 import static org.apache.hadoop.security.alias.CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH;
 
-import static com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier.TUNNEL_SSH_LOCAL_HOST;
-import static com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier.TUNNEL_SSH_ROUTE;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +45,11 @@ import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
+import com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars;
 import com.hotels.bdp.circustrain.core.metastore.DefaultMetaStoreClientSupplier;
 import com.hotels.bdp.circustrain.core.metastore.HiveConfFactory;
 import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
-import com.hotels.bdp.circustrain.core.metastore.SessionFactorySupplier;
 import com.hotels.bdp.circustrain.core.metastore.ThriftMetaStoreClientFactory;
-import com.hotels.bdp.circustrain.core.metastore.TunnelConnectionManagerFactory;
 import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -105,8 +100,14 @@ public class CommonBeans {
 
   private void configureMetastoreTunnel(MetastoreTunnel metastoreTunnel, Map<String, String> properties) {
     if (metastoreTunnel != null) {
-      properties.put(TUNNEL_SSH_ROUTE, metastoreTunnel.getRoute());
-      properties.put(TUNNEL_SSH_LOCAL_HOST, metastoreTunnel.getLocalhost());
+      properties.put(CircusTrainHiveConfVars.SSH_ROUTE.varname, metastoreTunnel.getRoute());
+      properties.put(CircusTrainHiveConfVars.SSH_PORT.varname, String.valueOf(metastoreTunnel.getPort()));
+      properties.put(CircusTrainHiveConfVars.SSH_LOCALHOST.varname, metastoreTunnel.getLocalhost());
+      properties.put(CircusTrainHiveConfVars.SSH_PRIVATE_KEYS.varname, metastoreTunnel.getPrivateKeys());
+      properties.put(CircusTrainHiveConfVars.SSH_KNOWN_HOSTS.varname, metastoreTunnel.getKnownHosts());
+      properties.put(CircusTrainHiveConfVars.SSH_SESSION_TIMEOUT.varname, String.valueOf(metastoreTunnel.getTimeout()));
+      properties.put(CircusTrainHiveConfVars.SSH_STRICT_HOST_KEY_CHECKING.varname,
+          metastoreTunnel.getStrictHostKeyChecking());
     }
   }
 
@@ -167,10 +168,7 @@ public class CommonBeans {
       MetastoreTunnel metastoreTunnel,
       MetaStoreClientFactory metaStoreClientFactory) {
     if (metastoreTunnel != null) {
-      SessionFactorySupplier sessionFactorySupplier = new SessionFactorySupplier(metastoreTunnel.getPort(),
-          metastoreTunnel.getKnownHosts(), Arrays.asList(metastoreTunnel.getPrivateKeys().split(",")));
-      return new TunnellingMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory,
-          new TunnelConnectionManagerFactory(sessionFactorySupplier));
+      return new TunnellingMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
     } else {
       return new DefaultMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
     }

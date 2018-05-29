@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
+import static javax.validation.constraints.Pattern.Flag.CASE_INSENSITIVE;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -24,14 +27,21 @@ import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
 
 public class MetastoreTunnel {
 
-  private static final int DEFAULT_PORT = 22;
-  private static final String DEFAULT_LOCALHOST = "localhost";
+  public static final int DEFAULT_PORT = 22;
+  public static final String DEFAULT_LOCALHOST = "localhost";
+  public static final int DEFAULT_SESSION_TIMEOUT = 60000;
+  public static final String DEFAULT_STRICT_HOST_KEY_CHECK = "yes";
 
   private @NotBlank @TunnelRoute String route;
   private @Min(1) @Max(65535) int port = DEFAULT_PORT;
   private String localhost = DEFAULT_LOCALHOST;
   private @NotBlank String privateKeys;
   private @NotBlank String knownHosts;
+  private @Min(0) int timeout = DEFAULT_SESSION_TIMEOUT;
+
+  @NotBlank
+  @Pattern(regexp = "yes|no", flags = { CASE_INSENSITIVE })
+  private String strictHostKeyChecking = DEFAULT_STRICT_HOST_KEY_CHECK;
 
   public String getRoute() {
     return route;
@@ -71,6 +81,22 @@ public class MetastoreTunnel {
 
   public void setKnownHosts(String knownHosts) {
     this.knownHosts = knownHosts;
+  }
+
+  public int getTimeout() {
+    return timeout;
+  }
+
+  public void setTimeout(int timeout) {
+    this.timeout = timeout;
+  }
+
+  public String getStrictHostKeyChecking() {
+    return strictHostKeyChecking;
+  }
+
+  public void setStrictHostKeyChecking(String strictHostKeyChecking) {
+    this.strictHostKeyChecking = strictHostKeyChecking;
   }
 
 }
