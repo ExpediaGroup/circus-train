@@ -18,15 +18,13 @@ package com.hotels.bdp.circustrain.core.metastore;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.junit.Test;
 
 public class ThriftHiveMetaStoreClientFactoryTest {
 
   @Test
   public void accepts() {
-    ThriftHiveMetaStoreClientFactory factory = new ThriftHiveMetaStoreClientFactory(new HiveConf(),
-        "name");
+    ThriftHiveMetaStoreClientFactory factory = new ThriftHiveMetaStoreClientFactory();
     assertTrue(factory.accepts("thrift:"));
     assertFalse(factory.accepts("something-else:"));
     assertFalse(factory.accepts(""));

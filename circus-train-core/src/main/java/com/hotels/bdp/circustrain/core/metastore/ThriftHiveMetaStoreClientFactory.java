@@ -19,18 +19,20 @@ import org.apache.hadoop.hive.conf.HiveConf;
 
 import com.google.common.base.Strings;
 
-import com.hotels.hcommon.hive.metastore.client.retrying.RetryingHiveMetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.closeable.CloseableMetaStoreClientFactory;
 
-public class ThriftHiveMetaStoreClientFactory extends RetryingHiveMetaStoreClientFactory implements ConditionalMetaStoreClientFactory {
+public class ThriftHiveMetaStoreClientFactory implements ConditionalMetaStoreClientFactory {
 
   public static final String ACCEPT_PREFIX = "thrift:";
-
-  public ThriftHiveMetaStoreClientFactory(HiveConf hiveConf, String name) {
-    super(hiveConf, name);
-  }
 
   @Override
   public boolean accepts(String url) {
     return Strings.nullToEmpty(url).startsWith(ACCEPT_PREFIX);
+  }
+
+  @Override
+  public CloseableMetaStoreClient newInstance(HiveConf conf, String name) {
+    return new CloseableMetaStoreClientFactory().newInstance(conf, name);
   }
 }

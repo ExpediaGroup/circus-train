@@ -22,6 +22,8 @@ import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescri
 import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -52,9 +54,9 @@ import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
+import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
-import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiffGeneratedPartitionPredicateTest {
@@ -83,13 +85,13 @@ public class DiffGeneratedPartitionPredicateTest {
         .thenReturn(table1PartitionNames);
     when(client.getPartitionsByNames(table1.getDbName(), table1.getTableName(), table1PartitionNames))
         .thenReturn(table1Partitions);
-    when(factory.newInstance()).thenReturn(client);
+    when(factory.newInstance(any(HiveConf.class), anyString())).thenReturn(client);
     when(tableReplication.getSourceTable()).thenReturn(sourceTable);
     when(tableReplication.getPartitionIteratorBatchSize()).thenReturn((short) 100);
     when(tableReplication.getPartitionFetcherBufferSize()).thenReturn((short) 100);
     // HiveConf hiveConf = new HiveConf(catalog.conf(), HiveMetaStoreClient.class);
     HiveConf hiveConf = new HiveConf();
-    supplier = new HiveMetaStoreClientSupplier(factory);
+    supplier = new HiveMetaStoreClientSupplier(factory, hiveConf, "name");
     when(source.getHiveConf()).thenReturn(hiveConf);
     predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
     when(source.getMetaStoreClientSupplier()).thenReturn(supplier);

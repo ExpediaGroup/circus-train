@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.junit.Test;
 
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
@@ -31,7 +30,7 @@ public class MetaStoreClientFactoryManagerTest {
   public void factoryForThrift() {
     List<ConditionalMetaStoreClientFactory> list = Collections
         .<ConditionalMetaStoreClientFactory> singletonList(
-            new ThriftHiveMetaStoreClientFactory(new HiveConf(), "name"));
+            new ThriftHiveMetaStoreClientFactory());
     MetaStoreClientFactoryManager factoryManager = new MetaStoreClientFactoryManager(list);
     MetaStoreClientFactory clientFactory = factoryManager.factoryForUrl(
         ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX);
