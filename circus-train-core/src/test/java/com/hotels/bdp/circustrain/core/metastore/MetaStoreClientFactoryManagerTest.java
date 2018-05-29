@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
 public class MetaStoreClientFactoryManagerTest {
@@ -37,7 +38,7 @@ public class MetaStoreClientFactoryManagerTest {
     assertTrue(clientFactory instanceof ThriftHiveMetaStoreClientFactory);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = CircusTrainException.class)
   public void factoryForUnsupportedUrl() {
     List<ConditionalMetaStoreClientFactory> list = Collections.emptyList();
     MetaStoreClientFactoryManager factoryManager = new MetaStoreClientFactoryManager(list);

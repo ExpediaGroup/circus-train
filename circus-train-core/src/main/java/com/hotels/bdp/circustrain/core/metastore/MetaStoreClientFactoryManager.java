@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core.metastore;
 
 import java.util.List;
 
-import com.hotels.hcommon.hive.metastore.MetaStoreClientException;
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
 public class MetaStoreClientFactoryManager {
@@ -33,6 +34,6 @@ public class MetaStoreClientFactoryManager {
         return metaStoreClientFactory;
       }
     }
-    throw new MetaStoreClientException("No MetaStoreClientFactory found for url " + url);
+    throw new CircusTrainException("No MetaStoreClientFactory found for url " + url);
   }
 }
