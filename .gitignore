@@ -21,8 +21,9 @@
 # Netbeans files
 nbactions.xml
 
-# Maven target folder
+# Maven 
 target/
+dependency-reduced-pom.xml
 
 # Any left over .svn folders
 .svn/
