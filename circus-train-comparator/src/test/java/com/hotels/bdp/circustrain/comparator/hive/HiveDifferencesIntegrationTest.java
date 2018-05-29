@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.comparator.hive;
 
-import static com.hotels.bdp.circustrain.comparator.api.ComparatorType.SHORT_CIRCUIT;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -24,6 +24,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static com.hotels.bdp.circustrain.comparator.api.ComparatorType.SHORT_CIRCUIT;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,7 +135,7 @@ public class HiveDifferencesIntegrationTest {
       String sourceTable,
       String sourceLocation,
       boolean addChecksum)
-    throws Exception {
+      throws Exception {
     File partition0 = createPartitionData("part=0", tableLocation, Arrays.asList("1\tadam", "2\tsusan"));
     File partition1 = createPartitionData("part=1", tableLocation, Arrays.asList("3\tchun", "4\tkim"));
 
