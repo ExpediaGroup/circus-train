@@ -15,8 +15,6 @@
  */
 package com.hotels.bdp.circustrain.core.replica;
 
-import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
-import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -27,6 +25,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
+import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 
 import java.io.IOException;
 import java.util.ArrayList;

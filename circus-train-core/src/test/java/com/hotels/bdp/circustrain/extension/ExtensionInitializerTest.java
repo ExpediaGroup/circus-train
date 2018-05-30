@@ -30,9 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
-import com.hotels.bdp.circustrain.extension.ExtensionPackageProvider;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ExtensionInitializerTest {
   @Mock

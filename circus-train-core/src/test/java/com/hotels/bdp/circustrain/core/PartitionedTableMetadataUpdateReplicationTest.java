@@ -15,10 +15,6 @@
  */
 package com.hotels.bdp.circustrain.core;
 
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertThat;
@@ -28,6 +24,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 
 import java.io.File;
 import java.util.Collections;

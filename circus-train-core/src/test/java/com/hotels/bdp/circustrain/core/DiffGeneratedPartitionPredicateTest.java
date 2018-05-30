@@ -16,15 +16,16 @@
 
 package com.hotels.bdp.circustrain.core;
 
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
+
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
+import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
 
 import java.io.File;
 import java.io.IOException;

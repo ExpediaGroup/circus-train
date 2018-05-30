@@ -15,15 +15,16 @@
  */
 package com.hotels.bdp.circustrain.core.replica;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.PARTITION_CHECKSUM;
-import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
 import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
 import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
 import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 
 import java.io.File;
 import java.util.HashMap;

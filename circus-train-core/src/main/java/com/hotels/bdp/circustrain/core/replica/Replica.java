@@ -17,6 +17,7 @@
 package com.hotels.bdp.circustrain.core.replica;
 
 import static com.google.common.base.Strings.nullToEmpty;
+
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
