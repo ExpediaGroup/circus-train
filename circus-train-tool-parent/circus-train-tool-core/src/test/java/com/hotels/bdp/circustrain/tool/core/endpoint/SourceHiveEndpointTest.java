@@ -29,10 +29,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
-import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceHiveEndpointTest {
