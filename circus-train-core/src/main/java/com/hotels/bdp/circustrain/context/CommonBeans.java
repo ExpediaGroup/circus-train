@@ -47,9 +47,9 @@ import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
 import com.hotels.bdp.circustrain.core.metastore.ConditionalMetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
 import com.hotels.bdp.circustrain.core.metastore.ThriftHiveMetaStoreClientFactory;
-import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.tunnelling.TunnellingMetaStoreClientSupplierBuilder;
 import com.hotels.hcommon.hive.metastore.conf.HiveConfFactory;
 

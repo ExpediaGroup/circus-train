@@ -55,7 +55,7 @@ import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
-import com.hotels.hcommon.hive.metastore.client.HiveMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
