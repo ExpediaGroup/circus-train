@@ -20,10 +20,10 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newTable;
 
 import java.io.File;
 import java.util.Collections;

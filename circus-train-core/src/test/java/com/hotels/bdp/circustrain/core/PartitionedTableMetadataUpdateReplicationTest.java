@@ -25,10 +25,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newFieldSchema;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newPartition;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newStorageDescriptor;
-import static com.hotels.bdp.circustrain.core.HiveEntityFactory.newTable;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;
+import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newTable;
 
 import java.io.File;
 import java.util.Collections;
