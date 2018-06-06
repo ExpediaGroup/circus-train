@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,11 @@ import org.springframework.context.annotation.Configuration;
 public class AvroSerDeConfig {
 
   public static final String TABLE_REPLICATION_OVERRIDE_BASE_URL = "base-url";
+  public static final String TABLE_REPLICATION_OVERRIDE_SOURCE_AVRO_URL_SCHEME = "source-avro-url-scheme";
   public static final String TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS = "avro-serde-options";
+
   private String avroSchemaBaseUrl;
+  private String sourceAvroUrlScheme;
 
   public String getBaseUrl() {
     return avroSchemaBaseUrl;
@@ -33,4 +36,8 @@ public class AvroSerDeConfig {
   public void setBaseUrl(String avroSchemaBaseUrl) {
     this.avroSchemaBaseUrl = avroSchemaBaseUrl;
   }
+
+  public String getSourceAvroUrlScheme() { return sourceAvroUrlScheme; }
+
+  public void setSourceAvroUrlScheme(String sourceAvroUrlScheme) { this.sourceAvroUrlScheme = sourceAvroUrlScheme; }
 }

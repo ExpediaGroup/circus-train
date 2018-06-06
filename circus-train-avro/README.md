@@ -43,8 +43,12 @@ the global level, then be overriden for certain replications.
           table-location: /example/url
         
     avro-serde-options:
-      base-url: /example/url/
       #Schema url's for each table will be copied to /example/url/<eventId>/.schema/
+      base-url: /example/url/
+
+      #If you need to override the scheme on your avro.schema.url e.g. /etl/foo/bar/avro.avsc -> hdfs:/etl/foo/bar/avro.avsc
+      source-avro-url-scheme: hdfs
+
 
 
     #Per table replication example:
