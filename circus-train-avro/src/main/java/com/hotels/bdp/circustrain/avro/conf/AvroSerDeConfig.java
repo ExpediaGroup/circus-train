@@ -37,7 +37,11 @@ public class AvroSerDeConfig {
     this.avroSchemaBaseUrl = avroSchemaBaseUrl;
   }
 
-  public String getSourceAvroUrlScheme() { return sourceAvroUrlScheme; }
+  public String getSourceAvroUrlScheme() {
+    return sourceAvroUrlScheme;
+  }
 
-  public void setSourceAvroUrlScheme(String sourceAvroUrlScheme) { this.sourceAvroUrlScheme = sourceAvroUrlScheme; }
+  public void setSourceAvroUrlScheme(String sourceAvroUrlScheme) {
+    this.sourceAvroUrlScheme = sourceAvroUrlScheme;
+  }
 }
