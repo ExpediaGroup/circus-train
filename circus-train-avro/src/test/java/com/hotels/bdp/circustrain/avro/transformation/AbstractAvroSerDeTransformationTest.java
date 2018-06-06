@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
 
 public class AbstractAvroSerDeTransformationTest {
@@ -44,5 +45,32 @@ public class AbstractAvroSerDeTransformationTest {
     AvroSerDeConfig config = new AvroSerDeConfig();
     AbstractAvroSerDeTransformation transformation = new AvroSerDePartitionTransformation(config, null);
     assertEquals("/etl/EAN/avsc/tlog_throttled_event.avsc", transformation.constructSource("/etl/EAN/avsc/tlog_throttled_event.avsc"));
+  }
+
+  @Test(expected = CircusTrainException.class)
+  public void constructWithEmptySourceWithSpacesThrowsException() {
+    AvroSerDeConfig config = new AvroSerDeConfig();
+    config.setSourceAvroUrlScheme("hdfs");
+    AbstractAvroSerDeTransformation transformation = new AvroSerDePartitionTransformation(config, null);
+    String source = "   ";
+    transformation.constructSource(source);
+  }
+
+  @Test(expected = CircusTrainException.class)
+  public void constructWithEmptySourceThrowsException() {
+    AvroSerDeConfig config = new AvroSerDeConfig();
+    config.setSourceAvroUrlScheme("hdfs");
+    AbstractAvroSerDeTransformation transformation = new AvroSerDePartitionTransformation(config, null);
+    String source = "";
+    transformation.constructSource(source);
+  }
+
+  @Test(expected = CircusTrainException.class)
+  public void constructWithInvalidUriThrowsException() {
+    AvroSerDeConfig config = new AvroSerDeConfig();
+    config.setSourceAvroUrlScheme("hdfs");
+    AbstractAvroSerDeTransformation transformation = new AvroSerDePartitionTransformation(config, null);
+    String source = "someinvalid:uri://scheme?";
+    transformation.constructSource(source);
   }
 }
