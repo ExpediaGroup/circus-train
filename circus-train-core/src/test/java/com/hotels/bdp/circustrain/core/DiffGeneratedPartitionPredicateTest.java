@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.core;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -50,13 +51,13 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.conf.SourceTable;
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.metastore.DefaultMetaStoreClientSupplier;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
+import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiffGeneratedPartitionPredicateTest {
@@ -91,7 +92,7 @@ public class DiffGeneratedPartitionPredicateTest {
     when(tableReplication.getPartitionFetcherBufferSize()).thenReturn((short) 100);
     // HiveConf hiveConf = new HiveConf(catalog.conf(), HiveMetaStoreClient.class);
     HiveConf hiveConf = new HiveConf();
-    supplier = new DefaultMetaStoreClientSupplier(hiveConf, "test", factory);
+    supplier = new HiveMetaStoreClientSupplier(factory, hiveConf, "name");
     when(source.getHiveConf()).thenReturn(hiveConf);
     predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
     when(source.getMetaStoreClientSupplier()).thenReturn(supplier);

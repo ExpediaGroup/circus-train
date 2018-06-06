@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,19 @@
  */
 package com.hotels.bdp.circustrain.core.metastore;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.Test;
 
-public class FieldSchemaUtilsTest {
+public class ThriftHiveMetaStoreClientFactoryTest {
 
   @Test
-  public void getFieldNames() {
-    List<String> actual = FieldSchemaUtils
-        .getFieldNames(Arrays.asList(new FieldSchema("a", "string", null), new FieldSchema("b", "string", null)));
-    assertThat(actual, is(Arrays.asList("a", "b")));
+  public void accepts() {
+    ThriftHiveMetaStoreClientFactory factory = new ThriftHiveMetaStoreClientFactory();
+    assertTrue(factory.accepts("thrift:"));
+    assertFalse(factory.accepts("something-else:"));
+    assertFalse(factory.accepts(""));
+    assertFalse(factory.accepts(null));
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.ComparatorType;
 import com.hotels.bdp.circustrain.comparator.hive.HiveDifferences;
@@ -34,7 +33,8 @@ import com.hotels.bdp.circustrain.comparator.listener.PartitionSpecCreatingDiffL
 import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
 import com.hotels.bdp.circustrain.hive.fetcher.PartitionFetcher;
-import com.hotels.bdp.circustrain.hive.iterator.PartitionIterator;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 public class DiffGeneratedPartitionPredicate implements PartitionPredicate {
 

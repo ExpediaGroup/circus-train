@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.core;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -32,7 +33,6 @@ import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
-import java.util.Map;
 
 @Profile({ Modules.REPLICATION })
 @Component

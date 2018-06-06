@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.comparator.hive;
 
 import static org.mockito.Matchers.any;
@@ -63,8 +64,8 @@ import com.hotels.bdp.circustrain.comparator.api.BaseDiff;
 import com.hotels.bdp.circustrain.comparator.api.Diff;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
-import com.hotels.bdp.circustrain.hive.iterator.PartitionIterator;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HiveDifferencesIntegrationTest {
@@ -134,7 +135,7 @@ public class HiveDifferencesIntegrationTest {
       String sourceTable,
       String sourceLocation,
       boolean addChecksum)
-    throws Exception {
+      throws Exception {
     File partition0 = createPartitionData("part=0", tableLocation, Arrays.asList("1\tadam", "2\tsusan"));
     File partition1 = createPartitionData("part=1", tableLocation, Arrays.asList("3\tchun", "4\tkim"));
 

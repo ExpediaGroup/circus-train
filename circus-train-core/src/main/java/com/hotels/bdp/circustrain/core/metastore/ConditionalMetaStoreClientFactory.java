@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.metastore;
 
-import org.apache.hadoop.hive.conf.HiveConf;
+package com.hotels.bdp.circustrain.core.metastore;
 
-public interface MetaStoreClientFactory {
-  boolean accepts(String url);
+import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
-  CloseableMetaStoreClient newInstance(HiveConf conf, String name) throws MetaStoreClientException;
+public interface ConditionalMetaStoreClientFactory extends MetaStoreClientFactory {
+  public boolean accepts(String url);
 }

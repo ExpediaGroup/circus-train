@@ -70,6 +70,11 @@
       <classifier>core</classifier>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.hotels</groupId>
+      <artifactId>hcommon-hive-metastore</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

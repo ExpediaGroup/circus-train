@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.hotels.bdp.circustrain.tool.vacuum;
 
-import static com.hotels.bdp.circustrain.core.metastore.LocationUtils.locationAsPath;
+import static com.hotels.hcommon.hive.metastore.util.LocationUtils.locationAsPath;
 
 import java.net.URI;
 import java.net.URISyntaxException;

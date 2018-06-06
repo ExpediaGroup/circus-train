@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -52,7 +53,6 @@ import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
 import com.hotels.bdp.circustrain.core.source.Source;
 import com.hotels.bdp.circustrain.core.source.SourceFactory;
-import static org.mockito.Matchers.anyMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicationFactoryImplTest {

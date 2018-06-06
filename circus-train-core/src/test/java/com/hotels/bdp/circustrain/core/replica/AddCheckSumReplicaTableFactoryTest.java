@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.PARTITION_CHECKSUM;
-import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newTable;
+import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 
 import java.io.File;
 import java.util.HashMap;

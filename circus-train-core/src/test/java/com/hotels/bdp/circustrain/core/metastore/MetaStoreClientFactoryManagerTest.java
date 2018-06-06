@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,24 @@ import java.util.List;
 import org.junit.Test;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
 
 public class MetaStoreClientFactoryManagerTest {
 
   @Test
   public void factoryForThrift() {
-    List<MetaStoreClientFactory> list = Collections
-        .<MetaStoreClientFactory> singletonList(new ThriftMetaStoreClientFactory());
+    List<ConditionalMetaStoreClientFactory> list = Collections
+        .<ConditionalMetaStoreClientFactory> singletonList(
+            new ThriftHiveMetaStoreClientFactory());
     MetaStoreClientFactoryManager factoryManager = new MetaStoreClientFactoryManager(list);
-    MetaStoreClientFactory clientFactory = factoryManager.factoryForUrl(ThriftMetaStoreClientFactory.ACCEPT_PREFIX);
-    assertTrue(clientFactory instanceof ThriftMetaStoreClientFactory);
+    MetaStoreClientFactory clientFactory = factoryManager.factoryForUrl(
+        ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX);
+    assertTrue(clientFactory instanceof ThriftHiveMetaStoreClientFactory);
   }
 
   @Test(expected = CircusTrainException.class)
   public void factoryForUnsupportedUrl() {
-    List<MetaStoreClientFactory> list = Collections.emptyList();
+    List<ConditionalMetaStoreClientFactory> list = Collections.emptyList();
     MetaStoreClientFactoryManager factoryManager = new MetaStoreClientFactoryManager(list);
     factoryManager.factoryForUrl("unsupported:///bla");
   }

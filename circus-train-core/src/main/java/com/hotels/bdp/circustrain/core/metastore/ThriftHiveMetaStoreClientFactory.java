@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.tool.core.endpoint;
+package com.hotels.bdp.circustrain.core.metastore;
 
 import org.apache.hadoop.hive.conf.HiveConf;
 
-import com.google.common.base.Supplier;
+import com.google.common.base.Strings;
 
-import com.hotels.bdp.circustrain.core.HiveEndpoint;
-import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.closeable.CloseableMetaStoreClientFactory;
 
-public class ReplicaHiveEndpoint extends HiveEndpoint {
+public class ThriftHiveMetaStoreClientFactory implements ConditionalMetaStoreClientFactory {
 
-  public ReplicaHiveEndpoint(
-      String name,
-      HiveConf hiveConf,
-      Supplier<CloseableMetaStoreClient> metaStoreClientSupplier) {
-    super(name, hiveConf, metaStoreClientSupplier);
+  public static final String ACCEPT_PREFIX = "thrift:";
+
+  @Override
+  public boolean accepts(String url) {
+    return Strings.nullToEmpty(url).startsWith(ACCEPT_PREFIX);
   }
 
   @Override
-  public TableAndStatistics getTableAndStatistics(TableReplication tableReplication) {
-    return super.getTableAndStatistics(tableReplication.getReplicaDatabaseName(),
-        tableReplication.getReplicaTableName());
+  public CloseableMetaStoreClient newInstance(HiveConf conf, String name) {
+    return new CloseableMetaStoreClientFactory().newInstance(conf, name);
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.validation.ObjectError;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
@@ -47,6 +46,7 @@ import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
 import com.hotels.bdp.circustrain.tool.core.endpoint.ReplicaHiveEndpoint;
 import com.hotels.bdp.circustrain.tool.core.endpoint.SourceHiveEndpoint;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @SpringBootApplication
 @EnableConfigurationProperties

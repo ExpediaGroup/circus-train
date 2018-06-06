@@ -1,3 +1,7 @@
+## TBD
+### Changed
+* Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
+
 # 11.5.1 - 2018-05-24
 ### Fixed
 * Avro schemas were not being replicated when a HA NameNode is configured and the Avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).

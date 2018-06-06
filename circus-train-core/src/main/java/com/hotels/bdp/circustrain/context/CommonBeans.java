@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.hotels.bdp.circustrain.context;
 
 import static org.apache.hadoop.security.alias.CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH;
@@ -38,19 +39,19 @@ import org.springframework.core.annotation.Order;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.metastore.CloseableMetaStoreClient;
-import com.hotels.bdp.circustrain.api.metastore.MetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.conf.MetastoreTunnel;
 import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.conf.TunnelMetastoreCatalog;
-import com.hotels.bdp.circustrain.core.metastore.CircusTrainHiveConfVars;
-import com.hotels.bdp.circustrain.core.metastore.DefaultMetaStoreClientSupplier;
-import com.hotels.bdp.circustrain.core.metastore.HiveConfFactory;
+import com.hotels.bdp.circustrain.core.metastore.ConditionalMetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
-import com.hotels.bdp.circustrain.core.metastore.ThriftMetaStoreClientFactory;
-import com.hotels.bdp.circustrain.core.metastore.TunnellingMetaStoreClientSupplier;
+import com.hotels.bdp.circustrain.core.metastore.ThriftHiveMetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
+import com.hotels.hcommon.hive.metastore.client.tunnelling.TunnellingMetaStoreClientSupplierBuilder;
+import com.hotels.hcommon.hive.metastore.conf.HiveConfFactory;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @org.springframework.context.annotation.Configuration
@@ -92,23 +93,9 @@ public class CommonBeans {
     if (hiveCatalog.getHiveMetastoreUris() != null) {
       properties.put(ConfVars.METASTOREURIS.varname, hiveCatalog.getHiveMetastoreUris());
     }
-    configureMetastoreTunnel(hiveCatalog.getMetastoreTunnel(), properties);
     putConfigurationProperties(hiveCatalog.getConfigurationProperties(), properties);
     HiveConf hiveConf = new HiveConfFactory(siteXml, properties).newInstance();
     return hiveConf;
-  }
-
-  private void configureMetastoreTunnel(MetastoreTunnel metastoreTunnel, Map<String, String> properties) {
-    if (metastoreTunnel != null) {
-      properties.put(CircusTrainHiveConfVars.SSH_ROUTE.varname, metastoreTunnel.getRoute());
-      properties.put(CircusTrainHiveConfVars.SSH_PORT.varname, String.valueOf(metastoreTunnel.getPort()));
-      properties.put(CircusTrainHiveConfVars.SSH_LOCALHOST.varname, metastoreTunnel.getLocalhost());
-      properties.put(CircusTrainHiveConfVars.SSH_PRIVATE_KEYS.varname, metastoreTunnel.getPrivateKeys());
-      properties.put(CircusTrainHiveConfVars.SSH_KNOWN_HOSTS.varname, metastoreTunnel.getKnownHosts());
-      properties.put(CircusTrainHiveConfVars.SSH_SESSION_TIMEOUT.varname, String.valueOf(metastoreTunnel.getTimeout()));
-      properties.put(CircusTrainHiveConfVars.SSH_STRICT_HOST_KEY_CHECKING.varname,
-          metastoreTunnel.getStrictHostKeyChecking());
-    }
   }
 
   private void setCredentialProviderPath(Security security, Map<String, String> properties) {
@@ -124,14 +111,16 @@ public class CommonBeans {
     }
   }
 
+  @Profile({ Modules.REPLICATION })
   @Bean
-  MetaStoreClientFactoryManager metaStoreClientFactoryManager(List<MetaStoreClientFactory> metaStoreClientFactories) {
-    return new MetaStoreClientFactoryManager(metaStoreClientFactories);
+  ConditionalMetaStoreClientFactory thriftHiveMetaStoreClientFactory() {
+    return new ThriftHiveMetaStoreClientFactory();
   }
 
+  @Profile({ Modules.REPLICATION })
   @Bean
-  MetaStoreClientFactory thriftMetaStoreClientFactory() {
-    return new ThriftMetaStoreClientFactory();
+  MetaStoreClientFactoryManager metaStoreClientFactoryManager(List<ConditionalMetaStoreClientFactory> factories) {
+    return new MetaStoreClientFactoryManager(factories);
   }
 
   @Profile({ Modules.REPLICATION })
@@ -143,10 +132,10 @@ public class CommonBeans {
     String metaStoreUris = sourceCatalog.getHiveMetastoreUris();
     if (metaStoreUris == null) {
       // Default to Thrift is not specified - optional attribute in SourceCatalog
-      metaStoreUris = ThriftMetaStoreClientFactory.ACCEPT_PREFIX;
+      metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
     }
     MetaStoreClientFactory sourceMetaStoreClientFactory = metaStoreClientFactoryManager.factoryForUrl(metaStoreUris);
-    return metaStoreClientSupplier(sourceCatalog.getName(), sourceHiveConf, sourceCatalog.getMetastoreTunnel(),
+    return metaStoreClientSupplier(sourceHiveConf, sourceCatalog.getName(), sourceCatalog.getMetastoreTunnel(),
         sourceMetaStoreClientFactory);
   }
 
@@ -156,21 +145,35 @@ public class CommonBeans {
       ReplicaCatalog replicaCatalog,
       @Value("#{replicaHiveConf}") HiveConf replicaHiveConf,
       MetaStoreClientFactoryManager metaStoreClientFactoryManager) {
+    String metaStoreUris = replicaCatalog.getHiveMetastoreUris();
+    if (metaStoreUris == null) {
+      // Default to Thrift is not specified - optional attribute in SourceCatalog
+      metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
+    }
     MetaStoreClientFactory replicaMetaStoreClientFactory = metaStoreClientFactoryManager
-        .factoryForUrl(replicaCatalog.getHiveMetastoreUris());
-    return metaStoreClientSupplier(replicaCatalog.getName(), replicaHiveConf, replicaCatalog.getMetastoreTunnel(),
+        .factoryForUrl(metaStoreUris);
+    return metaStoreClientSupplier(replicaHiveConf, replicaCatalog.getName(), replicaCatalog.getMetastoreTunnel(),
         replicaMetaStoreClientFactory);
   }
 
   private Supplier<CloseableMetaStoreClient> metaStoreClientSupplier(
+      HiveConf hiveConf,
       String name,
-      HiveConf replicaHiveConf,
       MetastoreTunnel metastoreTunnel,
       MetaStoreClientFactory metaStoreClientFactory) {
     if (metastoreTunnel != null) {
-      return new TunnellingMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
+      return new TunnellingMetaStoreClientSupplierBuilder()
+          .withName(name)
+          .withRoute(metastoreTunnel.getRoute())
+          .withKnownHosts(metastoreTunnel.getKnownHosts())
+          .withLocalHost(metastoreTunnel.getLocalhost())
+          .withPort(metastoreTunnel.getPort())
+          .withPrivateKeys(metastoreTunnel.getPrivateKeys())
+          .withTimeout(metastoreTunnel.getTimeout())
+          .withStrictHostKeyChecking(metastoreTunnel.getStrictHostKeyChecking())
+          .build(hiveConf, metaStoreClientFactory);
     } else {
-      return new DefaultMetaStoreClientSupplier(replicaHiveConf, name, metaStoreClientFactory);
+      return new HiveMetaStoreClientSupplier(metaStoreClientFactory, hiveConf, name);
     }
   }
 }
