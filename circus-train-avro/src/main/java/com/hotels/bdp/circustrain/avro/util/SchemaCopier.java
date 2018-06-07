@@ -56,12 +56,15 @@ public class SchemaCopier {
 
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
-    Path sourceLocation = new FileSystemPathResolver(sourceHiveConf).resolve(source);
+    FileSystemPathResolver sourceFileSystemPathResolver = new FileSystemPathResolver(sourceHiveConf);
+    Path sourceLocation = sourceFileSystemPathResolver
+        .resolveNameServices(sourceFileSystemPathResolver.resolveScheme(source));
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
-    Path destinationLocation = new FileSystemPathResolver(replicaHiveConf)
-        .resolve(new Path(destination, fileName(source)).toString());
+    FileSystemPathResolver destinationFileSystemPathResolver = new FileSystemPathResolver(replicaHiveConf);
+    Path destinationLocation = destinationFileSystemPathResolver
+        .resolveNameServices(destinationFileSystemPathResolver.resolveScheme(new Path(destination, fileName(source))));
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);

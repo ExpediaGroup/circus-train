@@ -41,18 +41,25 @@ public class FileSystemPathResolver {
     this.configuration = configuration;
   }
 
-  public Path resolve(String url) {
+  public Path resolveScheme(Path path) {
+    return resolveScheme(path.toString());
+  }
+
+  public Path resolveScheme(String url) {
     try {
       URI uri = new URI(url);
       if (isEmpty(uri.getScheme())) {
         String scheme = FileSystem.get(configuration).getScheme();
-        url = new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(),
-            uri.getFragment()).toString();
+        return new Path (new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(),
+            uri.getFragment()).toString());
       }
     } catch (URISyntaxException | IOException e) {
       throw new CircusTrainException(e);
     }
+    return new Path(url);
+  }
 
+  public Path resolveNameServices(String url) {
     String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
     Path location;
     if (isBlank(nameService)) {
@@ -70,5 +77,9 @@ public class FileSystemPathResolver {
       LOG.info("Added nameservice to path. {} became {}", url, location.toString());
     }
     return location;
+  }
+
+  public Path resolveNameServices(Path path) {
+    return resolveNameServices(path.toString());
   }
 }
