@@ -50,7 +50,7 @@ public final class AvroSerDeTableTransformation extends AbstractAvroSerDeTransfo
   }
 
   private Table apply(Table table, String avroSchemaDestination) {
-    String source = constructSource(HiveObjectUtils.getParameter(table, AVRO_SCHEMA_URL_PARAMETER));
+    String source = HiveObjectUtils.getParameter(table, AVRO_SCHEMA_URL_PARAMETER);
     if (argsPresent(source, avroSchemaDestination)) {
       String destinationPath = copier.copy(source, avroSchemaDestination).toString();
       HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, destinationPath);

@@ -56,11 +56,11 @@ public class SchemaCopier {
 
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
-    Path sourceLocation = new NameServicePathResolver(sourceHiveConf).resolve(source);
+    Path sourceLocation = new FileSystemPathResolver(sourceHiveConf).resolve(source);
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
-    Path destinationLocation = new NameServicePathResolver(replicaHiveConf)
+    Path destinationLocation = new FileSystemPathResolver(replicaHiveConf)
         .resolve(new Path(destination, fileName(source)).toString());
     copyToRemote(localLocation, destinationLocation);
 

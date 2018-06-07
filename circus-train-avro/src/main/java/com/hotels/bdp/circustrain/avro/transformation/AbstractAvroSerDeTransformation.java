@@ -15,18 +15,13 @@
  */
 package com.hotels.bdp.circustrain.avro.transformation;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.argsPresent;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
 import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
@@ -53,28 +48,6 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
 
   protected boolean avroTransformationSpecified() {
     return argsPresent(getAvroSchemaDestinationFolder(), getEventId());
-  }
-
-  protected String constructSource(String source) {
-    String scheme = null;
-    Object overrideScheme = avroSerdeConfigOverride
-        .get(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_SOURCE_AVRO_URL_SCHEME);
-    if (overrideScheme != null && StringUtils.isNotBlank(overrideScheme.toString())) {
-      scheme = overrideScheme.toString();
-    } else {
-      scheme = avroSerDeConfig.getSourceAvroUrlScheme();
-    }
-
-    if (isNotEmpty(scheme)) {
-      try {
-        URI uri = new URI(source);
-        source = new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(),
-            uri.getFragment()).toString();
-      } catch (URISyntaxException e) {
-        throw new CircusTrainException(e);
-      }
-    }
-    return source;
   }
 
   protected String getAvroSchemaDestinationFolder() {

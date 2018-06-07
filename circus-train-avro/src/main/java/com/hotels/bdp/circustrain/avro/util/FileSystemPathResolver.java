@@ -17,24 +17,42 @@
 package com.hotels.bdp.circustrain.avro.util;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.springframework.util.StringUtils.isEmpty;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NameServicePathResolver {
-  private static final Logger LOG = LoggerFactory.getLogger(NameServicePathResolver.class);
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+
+public class FileSystemPathResolver {
+  private static final Logger LOG = LoggerFactory.getLogger(FileSystemPathResolver.class);
 
   private final Configuration configuration;
 
-  public NameServicePathResolver(Configuration configuration) {
+  public FileSystemPathResolver(Configuration configuration) {
     this.configuration = configuration;
   }
 
   public Path resolve(String url) {
+    try {
+      URI uri = new URI(url);
+      if (isEmpty(uri.getScheme())) {
+        String scheme = FileSystem.get(configuration).getScheme();
+        url = new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(),
+            uri.getFragment()).toString();
+      }
+    } catch (URISyntaxException | IOException e) {
+      throw new CircusTrainException(e);
+    }
+
     String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
     Path location;
     if (isBlank(nameService)) {
