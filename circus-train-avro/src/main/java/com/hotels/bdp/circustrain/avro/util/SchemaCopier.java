@@ -67,7 +67,7 @@ public class SchemaCopier {
         .resolveNameServices(destinationFileSystemPathResolver.resolveScheme(new Path(destination, fileName(source))));
     copyToRemote(localLocation, destinationLocation);
 
-    LOG.info("Avro schema has been copied from '{}' to '{}'", source, destinationLocation);
+    LOG.info("Avro schema has been copied from '{}' to '{}'", sourceLocation, destinationLocation);
     return destinationLocation;
   }
 
