@@ -62,9 +62,7 @@ public class SchemaCopier {
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
-    FileSystemPathResolver destinationFileSystemPathResolver = new FileSystemPathResolver(replicaHiveConf);
-    Path destinationLocation = destinationFileSystemPathResolver
-        .resolveNameServices(destinationFileSystemPathResolver.resolveScheme(new Path(destination, fileName(source))));
+    Path destinationLocation = new Path(destination, fileName(source));
     copyToRemote(localLocation, destinationLocation);
 
     LOG.info("Avro schema has been copied from '{}' to '{}'", sourceLocation, destinationLocation);
