@@ -1,6 +1,4 @@
 ## TBD
-### Added
-* A configuration parameter to add or replace a scheme on your source avro.schema.url. See [#74](https://github.com/HotelsDotCom/circus-train/issues/74)
 ### Changed
 * Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
 ### Fixed
