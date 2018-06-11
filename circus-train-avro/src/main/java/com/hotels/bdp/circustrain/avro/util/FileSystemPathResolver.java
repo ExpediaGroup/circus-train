@@ -17,6 +17,7 @@
 package com.hotels.bdp.circustrain.avro.util;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.io.IOException;
@@ -42,46 +43,38 @@ public class FileSystemPathResolver {
   }
 
   public Path resolveScheme(Path path) {
-    return resolveScheme(path.toString());
-  }
-
-  public Path resolveScheme(String url) {
     try {
-      URI uri = new URI(url);
+      URI uri = path.toUri();
       if (isEmpty(uri.getScheme())) {
         String scheme = FileSystem.get(configuration).getScheme();
-        Path path = new Path(new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(),
+        Path result = new Path(new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(),
             uri.getQuery(), uri.getFragment()).toString());
-        LOG.info("Added scheme {} to path {}. Resulting path is {}", scheme, uri, path);
-        return path;
+        LOG.info("Added scheme {} to path {}. Resulting path is {}", scheme, path, result);
+        return result;
       }
     } catch (URISyntaxException | IOException e) {
       throw new CircusTrainException(e);
     }
-    return new Path(url);
-  }
-
-  public Path resolveNameServices(String url) {
-    String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
-    Path location;
-    if (isBlank(nameService)) {
-      location = new Path(url);
-    } else {
-      URI uri = URI.create(url);
-      String scheme = uri.getScheme();
-      String path = uri.getPath();
-      if (isBlank(scheme)) {
-        path = String.format("/%s%s", nameService, path);
-        location = new Path(path);
-      } else {
-        location = new Path(scheme, nameService, path);
-      }
-      LOG.info("Added nameservice to path. {} became {}", url, location.toString());
-    }
-    return location;
+    return path;
   }
 
   public Path resolveNameServices(Path path) {
-    return resolveNameServices(path.toString());
+    String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
+    if (isNotBlank(nameService)) {
+      URI uri = path.toUri();
+      String scheme = uri.getScheme();
+      String url = uri.getPath();
+      final String original = path.toString();
+      if (isBlank(scheme)) {
+        url = String.format("/%s%s", nameService, path);
+        path = new Path(url);
+      } else {
+        path = new Path(scheme, nameService, url);
+      }
+      LOG.info("Added nameservice to path. {} became {}", original, path);
+    }
+
+    return path;
   }
+
 }

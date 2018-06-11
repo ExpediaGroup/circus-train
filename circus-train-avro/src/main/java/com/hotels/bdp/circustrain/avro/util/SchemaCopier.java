@@ -57,8 +57,9 @@ public class SchemaCopier {
     java.nio.file.Path temporaryDirectory = createTempDirectory();
 
     FileSystemPathResolver sourceFileSystemPathResolver = new FileSystemPathResolver(sourceHiveConf);
-    Path sourceLocation = sourceFileSystemPathResolver
-        .resolveNameServices(sourceFileSystemPathResolver.resolveScheme(source));
+    Path sourceLocation = new Path(source);
+    sourceLocation = sourceFileSystemPathResolver.resolveScheme(sourceLocation);
+    sourceLocation = sourceFileSystemPathResolver.resolveNameServices(sourceLocation);
     Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
     copyToLocal(sourceLocation, localLocation);
 
