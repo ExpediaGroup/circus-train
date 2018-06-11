@@ -50,8 +50,10 @@ public class FileSystemPathResolver {
       URI uri = new URI(url);
       if (isEmpty(uri.getScheme())) {
         String scheme = FileSystem.get(configuration).getScheme();
-        return new Path (new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(),
-            uri.getFragment()).toString());
+        Path path = new Path(new URI(scheme, uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(),
+            uri.getQuery(), uri.getFragment()).toString());
+        LOG.info("Added scheme {} to path {}. Resulting path is {}", scheme, uri, path);
+        return path;
       }
     } catch (URISyntaxException | IOException e) {
       throw new CircusTrainException(e);
