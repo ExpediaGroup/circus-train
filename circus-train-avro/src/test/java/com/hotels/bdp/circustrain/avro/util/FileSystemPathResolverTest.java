@@ -15,7 +15,8 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -25,82 +26,92 @@ import org.junit.Test;
 public class FileSystemPathResolverTest {
 
   private Configuration configuration = new Configuration();
+  private FileSystemPathResolver resolver = new FileSystemPathResolver(configuration);
 
   @Test
   public void resolveSchemeDoesntChangeSchemeForPathWithScheme() {
-    Path path = new Path("s3:/etl/test/avsc/schema.avsc");
-    assertEquals(path, new FileSystemPathResolver(configuration).resolveScheme(path));
+    Path expected = new Path("s3:/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveScheme(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveSchemeDoesntChangeSchemeForFullyQualifiedPathWithScheme() {
-    Path path = new Path("s3:///etl/test/avsc/schema.avsc");
-    assertEquals(path, new FileSystemPathResolver(configuration).resolveScheme(path.toString()));
+    Path expected = new Path("s3:///etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveScheme(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveSchemeSetsSchemeIfSchemeIsntPresent() {
-    Path path = new Path("/etl/test/avsc/schema.avsc");
-    assertEquals("file:/etl/test/avsc/schema.avsc",
-        new FileSystemPathResolver(configuration).resolveScheme(path).toString());
+    Path input = new Path("/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveScheme(input);
+    Path expected = new Path("file:/etl/test/avsc/schema.avsc");
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServiceAddsAuthorityToPathWithScheme() {
     setDfsPaths("hdp-ha");
-    assertEquals("hdfs://hdp-ha/etl/test/avsc/schema.avsc",
-        new FileSystemPathResolver(configuration).resolveNameServices("hdfs:/etl/test/avsc/schema.avsc").toString());
+    Path input = new Path("hdfs:/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(input);
+    Path expected = new Path("hdfs://hdp-ha/etl/test/avsc/schema.avsc");
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesAddsAuthorityToFullyQualifiedPathWithScheme() {
     setDfsPaths("hdp-ha");
-    assertEquals("hdfs://hdp-ha/etl/test/avsc/schema.avsc",
-        new FileSystemPathResolver(configuration).resolveNameServices("hdfs:///etl/test/avsc/schema.avsc").toString());
+    Path input = new Path("hdfs:///etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(input);
+    Path expected = new Path("hdfs://hdp-ha/etl/test/avsc/schema.avsc");
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesAddsAuthorityToPathWithoutScheme() {
     setDfsPaths("foo");
-    assertEquals("/foo/etl/test/avsc/schema.avsc",
-        new FileSystemPathResolver(configuration).resolveNameServices("/etl/test/avsc/schema.avsc").toString());
+    Path input = new Path("/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(input);
+    Path expected = new Path("/foo/etl/test/avsc/schema.avsc");
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesWithEmptyDfsNameservicesConfiguredReturnsOriginalPathFromFullyQualifiedPathWithScheme() {
     setDfsPaths("");
-    Path path = new Path("hdfs:///etl/test/avsc/schema.avsc");
-    assertEquals(path.toString(),
-        new FileSystemPathResolver(configuration).resolveNameServices(path.toString()).toString());
+    Path expected = new Path("hdfs:///etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesWithEmptyDfsNameservicesConfiguredReturnsOriginalPathFromPathWithScheme() {
     setDfsPaths("");
-    Path path = new Path("hdfs:/etl/test/avsc/schema.avsc");
-    assertEquals(path.toString(),
-        new FileSystemPathResolver(configuration).resolveNameServices(path.toString()).toString());
+    Path expected = new Path("hdfs:/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesWithoutDfsNameservicesConfiguredReturnsOriginalPathFromFullyQualifiedPathWithScheme() {
-    Path path = new Path("hdfs:///etl/test/avsc/schema.avsc");
-    assertEquals(path.toString(),
-        new FileSystemPathResolver(configuration).resolveNameServices(path.toString()).toString());
+    Path expected = new Path("hdfs:///etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesWithoutDfsNameservicesConfiguredReturnsOriginalPathFromPathWithScheme() {
-    Path path = new Path("hdfs:/etl/test/avsc/schema.avsc");
-    assertEquals(path.toString(),
-        new FileSystemPathResolver(configuration).resolveNameServices(path.toString()).toString());
+    Path expected = new Path("hdfs:/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(expected);
+    assertThat(result, is(expected));
   }
 
   @Test
   public void resolveNameServicesWithoutDfsNameservicesReturnsOriginalPathWithoutScheme() {
-    Path path = new Path("/etl/test/avsc/schema.avsc");
-    assertEquals("/etl/test/avsc/schema.avsc",
-        new FileSystemPathResolver(configuration).resolveNameServices(path.toString()).toString());
+    Path expected = new Path("/etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(expected);
+    assertThat(result, is(expected));
   }
 
   private void setDfsPaths(String Path) {
