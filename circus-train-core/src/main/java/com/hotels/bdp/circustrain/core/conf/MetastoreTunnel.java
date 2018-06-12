@@ -23,7 +23,7 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
+import com.hotels.hcommon.ssh.validation.constraint.TunnelRoute;
 
 public class MetastoreTunnel {
 
