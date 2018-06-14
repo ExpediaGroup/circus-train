@@ -1,4 +1,4 @@
-## 11.5.2 - 2018-06-13
+## 11.5.2 - 2018-06-14
 ### Changed
 * Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
 ### Fixed
