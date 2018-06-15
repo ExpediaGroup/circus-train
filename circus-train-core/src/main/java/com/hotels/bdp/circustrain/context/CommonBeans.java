@@ -119,7 +119,7 @@ public class CommonBeans {
 
   @Profile({ Modules.REPLICATION })
   @Bean
-  ConditionalMetaStoreClientFactoryManager ConditionalMetaStoreClientFactoryManager(
+  ConditionalMetaStoreClientFactoryManager conditionalMetaStoreClientFactoryManager(
       List<ConditionalMetaStoreClientFactory> factories) {
     return new ConditionalMetaStoreClientFactoryManager(factories);
   }
@@ -129,14 +129,14 @@ public class CommonBeans {
   Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier(
       SourceCatalog sourceCatalog,
       @Value("#{sourceHiveConf}") HiveConf sourceHiveConf,
-      ConditionalMetaStoreClientFactoryManager ConditionalMetaStoreClientFactoryManager) {
+      ConditionalMetaStoreClientFactoryManager conditionalMetaStoreClientFactoryManager) {
     String metaStoreUris = sourceCatalog.getHiveMetastoreUris();
     if (metaStoreUris == null) {
       // Default to Thrift is not specified - optional attribute in SourceCatalog
       metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
     }
-    MetaStoreClientFactory sourceMetaStoreClientFactory = ConditionalMetaStoreClientFactoryManager
-        .factoryForUrl(metaStoreUris);
+    MetaStoreClientFactory sourceMetaStoreClientFactory = conditionalMetaStoreClientFactoryManager
+        .factoryForUri(metaStoreUris);
     return metaStoreClientSupplier(sourceHiveConf, sourceCatalog.getName(), sourceCatalog.getMetastoreTunnel(),
         sourceMetaStoreClientFactory);
   }
@@ -146,14 +146,14 @@ public class CommonBeans {
   Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier(
       ReplicaCatalog replicaCatalog,
       @Value("#{replicaHiveConf}") HiveConf replicaHiveConf,
-      ConditionalMetaStoreClientFactoryManager ConditionalMetaStoreClientFactoryManager) {
+      ConditionalMetaStoreClientFactoryManager conditionalMetaStoreClientFactoryManager) {
     String metaStoreUris = replicaCatalog.getHiveMetastoreUris();
     if (metaStoreUris == null) {
-      // Default to Thrift is not specified - optional attribute in SourceCatalog
+      // Default to Thrift is not specified - optional attribute in ReplicaCatalog
       metaStoreUris = ThriftHiveMetaStoreClientFactory.ACCEPT_PREFIX;
     }
-    MetaStoreClientFactory replicaMetaStoreClientFactory = ConditionalMetaStoreClientFactoryManager
-        .factoryForUrl(metaStoreUris);
+    MetaStoreClientFactory replicaMetaStoreClientFactory = conditionalMetaStoreClientFactoryManager
+        .factoryForUri(metaStoreUris);
     return metaStoreClientSupplier(replicaHiveConf, replicaCatalog.getName(), replicaCatalog.getMetastoreTunnel(),
         replicaMetaStoreClientFactory);
   }
