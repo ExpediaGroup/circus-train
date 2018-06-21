@@ -15,7 +15,6 @@
   <modules>
     <module>circus-train-tool-core</module>
     <module>circus-train-filter-tool</module>
-    <module>circus-train-vacuum-tool</module>
     <module>circus-train-comparison-tool</module>
     <module>circus-train-tool</module>
   </modules>

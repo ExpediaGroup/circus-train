@@ -26,9 +26,6 @@
   <logger name="com.hotels.bdp.circustrain">
     <level value="INFO" />
   </logger>
-  <logger name="com.hotels.bdp.circustrain.tool.vacuum">
-    <level value="DEBUG" />
-  </logger>
 
   <logger name="com.pastdev.jsch">
     <level value="WARN" />

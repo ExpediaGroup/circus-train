@@ -1,3 +1,7 @@
+## TBD
+### Changed
+* circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
+
 ## 11.5.2 - 2018-06-15
 ### Changed
 * Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
