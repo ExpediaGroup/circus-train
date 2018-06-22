@@ -12,7 +12,6 @@
       <includes>
         <include>com.hotels:circus-train-comparison-tool</include>
         <include>com.hotels:circus-train-filter-tool</include>
-        <include>com.hotels:circus-train-vacuum-tool</include>
       </includes>
     </dependencySet>
   </dependencySets>
