@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,12 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
+import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
+
 public class ReplicaCatalogIntegrationTest {
 
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+  public @Rule TemporaryFolder temp = new TemporaryFolder();
+
   private File ymlFile;
 
   @Before
@@ -61,7 +63,7 @@ public class ReplicaCatalogIntegrationTest {
   }
 
   @Configuration
-  @EnableConfigurationProperties(ReplicaCatalog.class)
+  @EnableConfigurationProperties(CircusTrainReplicaCatalog.class)
   static class TestConfig {}
 
   private void writeYmlFile() throws IOException {

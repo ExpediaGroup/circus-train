@@ -46,7 +46,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -73,10 +73,8 @@ public class HiveEndpointTest {
   private static final List<FieldSchema> FIELDS = Arrays.asList(FIELD_A, FIELD_B);
   private static final List<FieldSchema> PARTITIONS = Arrays.asList(FIELD_C, FIELD_D);
 
-  @Mock
-  private Supplier<CloseableMetaStoreClient> metaStoreClientSupplier;
-  @Mock
-  private CloseableMetaStoreClient metaStoreClient;
+  private @Mock Supplier<CloseableMetaStoreClient> metaStoreClientSupplier;
+  private @Mock CloseableMetaStoreClient metaStoreClient;
 
   private Partition partitionOneTwo;
   private Partition partitionThreeFour;

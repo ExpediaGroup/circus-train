@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.core.conf.ReplicaTable;
-import com.hotels.bdp.circustrain.core.conf.Security;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.conf.TableReplications;
+import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.conf.ReplicaTable;
+import com.hotels.bdp.circustrain.conf.Security;
+import com.hotels.bdp.circustrain.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.conf.SourceTable;
+import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.conf.TableReplications;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocomotiveTest {

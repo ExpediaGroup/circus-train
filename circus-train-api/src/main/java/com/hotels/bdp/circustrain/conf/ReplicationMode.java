@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core;
+package com.hotels.bdp.circustrain.conf;
 
-import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+public enum ReplicationMode {
 
-public interface ReplicationFactory {
-
-  Replication newInstance(TableReplication tableReplication);
+  FULL,
+  METADATA_MIRROR,
+  METADATA_UPDATE;
 
 }

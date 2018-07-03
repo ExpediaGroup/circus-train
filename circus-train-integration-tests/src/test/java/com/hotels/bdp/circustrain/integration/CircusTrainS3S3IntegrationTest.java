@@ -56,7 +56,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
-import com.hotels.bdp.circustrain.core.conf.Security;
+import com.hotels.bdp.circustrain.conf.Security;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;

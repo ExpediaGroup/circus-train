@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 
 @Component
 class TableComparatorFactory {

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,11 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@ConfigurationProperties(prefix = "metrics-reporter")
-public class MetricsReporter {
+import com.hotels.bdp.circustrain.conf.Security;
 
-  private long period = 1L;
-  private TimeUnit timeUnit = TimeUnit.MINUTES;
-
-  public long getPeriod() {
-    return period;
-  }
-
-  public void setPeriod(long period) {
-    this.period = period;
-  }
-
-  public TimeUnit getTimeUnit() {
-    return timeUnit;
-  }
-
-  public void setTimeUnit(TimeUnit timeUnit) {
-    this.timeUnit = timeUnit;
-  }
-
-}
+@Configuration("security")
+@ConfigurationProperties(prefix = "security")
+public class CircusTrainSecurity extends Security {}

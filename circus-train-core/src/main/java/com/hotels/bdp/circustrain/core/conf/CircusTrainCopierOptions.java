@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,8 @@ package com.hotels.bdp.circustrain.core.conf;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@ConfigurationProperties(prefix = "security")
-public class Security {
+import com.hotels.bdp.circustrain.conf.GenericCopierOptions;
 
-  private String credentialProvider;
-
-  public String getCredentialProvider() {
-    return credentialProvider;
-  }
-
-  public void setCredentialProvider(String credentialProvider) {
-    this.credentialProvider = credentialProvider;
-  }
-
-}
+@Configuration("copierOptions")
+@ConfigurationProperties(prefix = "")
+public class CircusTrainCopierOptions extends GenericCopierOptions {}

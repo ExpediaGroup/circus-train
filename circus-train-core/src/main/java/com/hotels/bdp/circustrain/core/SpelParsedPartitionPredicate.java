@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 
 public class SpelParsedPartitionPredicate implements PartitionPredicate {
 

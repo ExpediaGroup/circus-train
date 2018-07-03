@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.conf;
+package com.hotels.bdp.circustrain.conf;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -21,21 +21,22 @@ import static org.junit.Assert.assertThat;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
-import org.hibernate.validator.HibernateValidator;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 public class MetastoreTunnelTest {
 
-  private final LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
   private final MetastoreTunnel tunnel = new MetastoreTunnel();
+  private Validator validator;
 
   @Before
   public void before() {
-    validator.setProviderClass(HibernateValidator.class);
-    validator.afterPropertiesSet();
+    ValidatorFactory config = Validation.buildDefaultValidatorFactory();
+    validator = config.getValidator();
 
     tunnel.setKnownHosts("knownHosts");
     tunnel.setPrivateKeys("privateKey");

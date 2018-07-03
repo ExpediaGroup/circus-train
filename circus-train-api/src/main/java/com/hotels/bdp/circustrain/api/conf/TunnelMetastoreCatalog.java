@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
-public enum ReplicationMode {
+import com.hotels.bdp.circustrain.api.conf.MetastoreCatalog;
+import com.hotels.bdp.circustrain.conf.MetastoreTunnel;
 
-  FULL,
-  METADATA_MIRROR,
-  METADATA_UPDATE;
+public interface TunnelMetastoreCatalog extends MetastoreCatalog {
+
+  MetastoreTunnel getMetastoreTunnel();
 
 }

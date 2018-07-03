@@ -29,10 +29,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.bdp.circustrain.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.conf.SourceTable;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)

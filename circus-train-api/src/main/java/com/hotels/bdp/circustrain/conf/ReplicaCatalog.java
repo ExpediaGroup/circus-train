@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.conf;
+package com.hotels.bdp.circustrain.conf;
 
 import java.util.List;
 import java.util.Map;
@@ -21,11 +21,9 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@ConfigurationProperties(prefix = "replica-catalog")
+import com.hotels.bdp.circustrain.api.conf.TunnelMetastoreCatalog;
+
 public class ReplicaCatalog implements TunnelMetastoreCatalog {
 
   private @NotBlank String name;

@@ -30,7 +30,7 @@ import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.ComparatorType;
 import com.hotels.bdp.circustrain.comparator.hive.HiveDifferences;
 import com.hotels.bdp.circustrain.comparator.listener.PartitionSpecCreatingDiffListener;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
 import com.hotels.bdp.circustrain.hive.fetcher.PartitionFetcher;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;

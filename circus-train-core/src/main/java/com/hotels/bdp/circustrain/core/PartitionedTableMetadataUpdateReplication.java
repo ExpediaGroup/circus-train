@@ -37,7 +37,7 @@ import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.util.DotJoiner;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.replica.InvalidReplicationModeException;
 import com.hotels.bdp.circustrain.core.replica.MetadataUpdateReplicaLocationManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;

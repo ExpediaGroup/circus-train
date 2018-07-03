@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
 
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
+import com.hotels.bdp.circustrain.conf.SourceTable;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -39,22 +39,14 @@ import com.hotels.bdp.circustrain.core.source.SourceFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class PartitionPredicateFactoryTest {
 
-  @Mock
-  private SourceFactory sourceFactory;
-  @Mock
-  private ReplicaFactory replicaFactory;
-  @Mock
-  private SpringExpressionParser expressionParser;
-  @Mock
-  private Function<Path, String> checksumFunction;
-  @Mock
-  private TableReplication tableReplication;
-  @Mock
-  private SourceTable sourceTable;
-  @Mock
-  private Source source;
-  @Mock
-  private Replica replica;
+  private @Mock SourceFactory sourceFactory;
+  private @Mock ReplicaFactory replicaFactory;
+  private @Mock SpringExpressionParser expressionParser;
+  private @Mock Function<Path, String> checksumFunction;
+  private @Mock TableReplication tableReplication;
+  private @Mock SourceTable sourceTable;
+  private @Mock Source source;
+  private @Mock Replica replica;
 
   private PartitionPredicateFactory partitionPredicateFactory;
 

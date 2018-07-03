@@ -41,8 +41,8 @@ import org.joda.time.DateTimeZone;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
+import com.hotels.bdp.circustrain.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 
 public class ReplicaTableFactory {
 

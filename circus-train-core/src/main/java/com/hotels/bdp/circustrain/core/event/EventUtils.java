@@ -36,11 +36,11 @@ import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceTable;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.core.conf.Security;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.conf.Security;
+import com.hotels.bdp.circustrain.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.conf.SourceTable;
+import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.util.FieldSchemaUtils;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 
@@ -93,8 +93,8 @@ public class EventUtils {
 
     EventMetastoreTunnel tunnel = replicaCatalog.getMetastoreTunnel() == null ? null
         : new EventMetastoreTunnel(replicaCatalog.getMetastoreTunnel().getRoute(),
-        replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
-        replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
+            replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
+            replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
 
     return new EventReplicaCatalog(replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), eventS3, tunnel,
         replicaCatalog.getSiteXml(), replicaCatalog.getConfigurationProperties());
