@@ -273,8 +273,8 @@
             <excludes>
               <exclude>src/main/java/com/hotels/bdp/circustrain/api/metastore/compatibility/HiveMetaStoreClientCompatibility12x.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/comparator/comparator/PropertyComparator.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/validation/constraints/TunnelRoute.java</exclude>
-              <exclude>src/main/java/com/hotels/bdp/circustrain/validation/constraintvalidators/TunnelRouteValidator.java</exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/api/validation/constraints/TunnelRoute.java</exclude>
+              <exclude>src/main/java/com/hotels/bdp/circustrain/api/validation/constraintvalidators/TunnelRouteValidator.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/command/RetriableCommand.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/io/BytesFormatter.java</exclude>
               <exclude>src/main/java/com/hotels/bdp/circustrain/s3mapreducecp/io/ThrottledInputStream.java</exclude>

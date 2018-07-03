@@ -1,7 +1,7 @@
 ## TBD
 ### Changed
 * circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
-* ConfiGuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/782).
+* Configuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/782).
 
 ## 11.5.2 - 2018-06-15
 ### Changed

@@ -1,5 +1,9 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2017 Expedia Inc and the original hibernate-validator contributors.
+ *
+ * Based on:
+ *
+ * https://github.com/hibernate/hibernate-validator/blob/5.2/engine/src/main/java/org/hibernate/validator/internal/constraintvalidators/hv/EmailValidator.java#L33
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
