@@ -24,11 +24,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.SourceCatalogListener;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })

@@ -27,29 +27,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaFactoryTest {
 
-  @Mock
-  private ReplicaCatalog replicaCatalog;
-  @Mock
-  private HiveConf replicaHiveConf;
-  @Mock
-  private Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
-  @Mock
-  private HousekeepingListener housekeepingListener;
-  @Mock
-  private ReplicaCatalogListener replicaCatalogListener;
-  @Mock
-  private ReplicaTableFactoryProvider replicaTableFactoryPicker;
-  @Mock
-  private TableReplication tableReplication;
+  private @Mock ReplicaCatalog replicaCatalog;
+  private @Mock HiveConf replicaHiveConf;
+  private @Mock Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
+  private @Mock HousekeepingListener housekeepingListener;
+  private @Mock ReplicaCatalogListener replicaCatalogListener;
+  private @Mock ReplicaTableFactoryProvider replicaTableFactoryPicker;
+  private @Mock TableReplication tableReplication;
 
   private ReplicaFactory replicaFactory;
 

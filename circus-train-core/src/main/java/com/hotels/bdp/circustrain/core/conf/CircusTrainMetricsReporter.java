@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,11 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.MetricsReporter;
 
-@Profile({ Modules.REPLICATION })
-@Configuration
-@ConfigurationProperties(prefix = "")
-public class TableReplications {
-
-  private @Valid @NotEmpty List<TableReplication> tableReplications;
-
-  public List<TableReplication> getTableReplications() {
-    return tableReplications;
-  }
-
-  public void setTableReplications(List<TableReplication> tableReplications) {
-    this.tableReplications = tableReplications;
-  }
-
-}
+@Configuration("metricsReporter")
+@ConfigurationProperties(prefix = "metrics-reporter")
+public class CircusTrainMetricsReporter extends MetricsReporter {}

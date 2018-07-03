@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core;
+package com.hotels.bdp.circustrain.api.conf;
 
-import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
+public class Security {
 
-public interface ReplicationFactory {
+  private String credentialProvider;
 
-  Replication newInstance(TableReplication tableReplication);
+  public String getCredentialProvider() {
+    return credentialProvider;
+  }
+
+  public void setCredentialProvider(String credentialProvider) {
+    this.credentialProvider = credentialProvider;
+  }
 
 }

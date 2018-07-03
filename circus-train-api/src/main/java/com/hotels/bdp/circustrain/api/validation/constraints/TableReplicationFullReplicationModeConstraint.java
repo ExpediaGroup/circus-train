@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraints;
+package com.hotels.bdp.circustrain.api.validation.constraints;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -25,7 +25,7 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 
-import com.hotels.bdp.circustrain.validation.constraintvalidators.TableReplicationFullReplicationModeValidator;
+import com.hotels.bdp.circustrain.api.validation.constraintvalidators.TableReplicationFullReplicationModeValidator;
 
 @Constraint(validatedBy = { TableReplicationFullReplicationModeValidator.class })
 @Target({ TYPE })

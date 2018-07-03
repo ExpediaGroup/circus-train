@@ -13,13 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core;
+package com.hotels.bdp.circustrain.api.conf;
 
-import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import java.util.concurrent.TimeUnit;
 
-public interface ReplicationFactory {
+public class MetricsReporter {
 
-  Replication newInstance(TableReplication tableReplication);
+  private long period = 1L;
+  private TimeUnit timeUnit = TimeUnit.MINUTES;
+
+  public long getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(long period) {
+    this.period = period;
+  }
+
+  public TimeUnit getTimeUnit() {
+    return timeUnit;
+  }
+
+  public void setTimeUnit(TimeUnit timeUnit) {
+    this.timeUnit = timeUnit;
+  }
 
 }

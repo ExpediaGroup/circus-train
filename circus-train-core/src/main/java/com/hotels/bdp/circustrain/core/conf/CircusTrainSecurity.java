@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core;
+package com.hotels.bdp.circustrain.core.conf;
 
-import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-public interface ReplicationFactory {
+import com.hotels.bdp.circustrain.api.conf.Security;
 
-  Replication newInstance(TableReplication tableReplication);
-
-}
+@Configuration("security")
+@ConfigurationProperties(prefix = "security")
+public class CircusTrainSecurity extends Security {}

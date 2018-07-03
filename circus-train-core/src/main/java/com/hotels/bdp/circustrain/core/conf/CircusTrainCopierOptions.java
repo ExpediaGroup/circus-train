@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import com.hotels.bdp.circustrain.api.conf.MetastoreCatalog;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-public interface TunnelMetastoreCatalog extends MetastoreCatalog {
+import com.hotels.bdp.circustrain.api.copier.GenericCopierOptions;
 
-  MetastoreTunnel getMetastoreTunnel();
-
-}
+@Configuration("copierOptions")
+@ConfigurationProperties(prefix = "")
+public class CircusTrainCopierOptions extends GenericCopierOptions {}

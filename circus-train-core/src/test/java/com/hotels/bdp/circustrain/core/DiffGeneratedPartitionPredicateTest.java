@@ -51,13 +51,13 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.source.Source;
-import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.client.api.MetaStoreClientFactory;
+import com.hotels.hcommon.hive.metastore.client.supplier.HiveMetaStoreClientSupplier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiffGeneratedPartitionPredicateTest {

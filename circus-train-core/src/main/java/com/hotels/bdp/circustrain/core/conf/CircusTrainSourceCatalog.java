@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,14 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
 
-@Configuration
-@ConfigurationProperties(prefix = "")
-public class GenericCopierOptions implements CopierOptions {
-
-  private Map<String, Object> copierOptions;
-
-  @Override
-  public Map<String, Object> getCopierOptions() {
-    return copierOptions;
-  }
-
-  public void setCopierOptions(Map<String, Object> copierOptions) {
-    this.copierOptions = copierOptions;
-  }
-
-}
+@Profile({ Modules.REPLICATION })
+@Configuration("sourceCatalog")
+@ConfigurationProperties(prefix = "source-catalog")
+public class CircusTrainSourceCatalog extends SourceCatalog {}

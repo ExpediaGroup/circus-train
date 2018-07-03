@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core;
+package com.hotels.bdp.circustrain.api.conf;
 
-import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.MetastoreCatalog;
 
-public interface ReplicationFactory {
+public interface TunnelMetastoreCatalog extends MetastoreCatalog {
 
-  Replication newInstance(TableReplication tableReplication);
+  MetastoreTunnel getMetastoreTunnel();
 
 }

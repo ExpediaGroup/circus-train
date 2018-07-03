@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.Region;
 
+import com.hotels.bdp.circustrain.api.conf.Security;
 import com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain;
-import com.hotels.bdp.circustrain.core.conf.Security;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Component

@@ -25,10 +25,10 @@ import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.google.common.base.Function;
 
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
 
 public class AddCheckSumReplicaTableFactory extends ReplicaTableFactory {
 

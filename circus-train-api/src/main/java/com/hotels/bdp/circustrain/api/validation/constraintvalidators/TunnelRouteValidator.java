@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraintvalidators;
+package com.hotels.bdp.circustrain.api.validation.constraintvalidators;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
@@ -30,7 +30,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
-import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
+import com.hotels.bdp.circustrain.api.validation.constraints.TunnelRoute;
 
 /**
  * Inspired by Hibernate's {@link EmailValidator}, this class checks that a given character sequence (e.g.

@@ -42,9 +42,9 @@ import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
-import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 
 public abstract class HiveEndpoint {
 
@@ -146,7 +146,7 @@ public abstract class HiveEndpoint {
   }
 
   public PartitionsAndStatistics getPartitions(Table table, String partitionPredicate, int maxPartitions)
-      throws TException {
+    throws TException {
     try (CloseableMetaStoreClient client = metaStoreClientSupplier.get()) {
       List<Partition> partitions = null;
       if (Strings.isNullOrEmpty(partitionPredicate)) {
@@ -175,7 +175,7 @@ public abstract class HiveEndpoint {
   }
 
   private List<String> getPartitionNames(List<FieldSchema> partitionKeys, List<Partition> partitions)
-      throws MetaException {
+    throws MetaException {
     List<String> partitionNames = new ArrayList<>(partitions.size());
     for (Partition partition : partitions) {
       partitionNames.add(Warehouse.makePartName(partitionKeys, partition.getValues()));

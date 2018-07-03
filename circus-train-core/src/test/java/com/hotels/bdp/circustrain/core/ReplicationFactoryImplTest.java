@@ -42,13 +42,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Replication;
+import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
-import com.hotels.bdp.circustrain.core.conf.ReplicaTable;
-import com.hotels.bdp.circustrain.core.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
 import com.hotels.bdp.circustrain.core.source.Source;

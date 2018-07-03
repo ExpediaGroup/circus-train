@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.conf;
+package com.hotels.bdp.circustrain.api.copier;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import java.util.Map;
 
-@Configuration
-@ConfigurationProperties(prefix = "security")
-public class Security {
+public class GenericCopierOptions implements CopierOptions {
 
-  private String credentialProvider;
+  private Map<String, Object> copierOptions;
 
-  public String getCredentialProvider() {
-    return credentialProvider;
+  @Override
+  public Map<String, Object> getCopierOptions() {
+    return copierOptions;
   }
 
-  public void setCredentialProvider(String credentialProvider) {
-    this.credentialProvider = credentialProvider;
+  public void setCopierOptions(Map<String, Object> copierOptions) {
+    this.copierOptions = copierOptions;
   }
 
 }

@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraints;
+package com.hotels.bdp.circustrain.api.validation.constraints;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -36,7 +36,7 @@ import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 import javax.validation.constraints.Pattern;
 
-import com.hotels.bdp.circustrain.validation.constraintvalidators.TunnelRouteValidator;
+import com.hotels.bdp.circustrain.api.validation.constraintvalidators.TunnelRouteValidator;
 
 /**
  * Validates the annotated {@link String} is sequence of one or more {@link java.net.URI} separated by the literal
