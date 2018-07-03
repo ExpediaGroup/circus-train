@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
 import static javax.validation.constraints.Pattern.Flag.CASE_INSENSITIVE;
 
@@ -23,7 +23,7 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
+import com.hotels.bdp.circustrain.api.validation.constraints.TunnelRoute;
 
 public class MetastoreTunnel {
 

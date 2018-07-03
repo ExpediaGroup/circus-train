@@ -21,7 +21,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import static com.hotels.bdp.circustrain.conf.ReplicationMode.FULL;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
 
 import java.util.Arrays;
 import java.util.HashMap;

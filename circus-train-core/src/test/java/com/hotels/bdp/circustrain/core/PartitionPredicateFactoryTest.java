@@ -28,8 +28,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
 
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;

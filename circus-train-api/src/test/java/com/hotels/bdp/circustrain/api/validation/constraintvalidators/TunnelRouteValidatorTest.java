@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraintvalidators;
+package com.hotels.bdp.circustrain.api.validation.constraintvalidators;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +26,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
+import com.hotels.bdp.circustrain.api.validation.constraints.TunnelRoute;
+import com.hotels.bdp.circustrain.api.validation.constraintvalidators.TunnelRouteValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TunnelRouteValidatorTest {

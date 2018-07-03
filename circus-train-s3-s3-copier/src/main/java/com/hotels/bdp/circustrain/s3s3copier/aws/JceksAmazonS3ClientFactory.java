@@ -28,8 +28,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.Region;
 
+import com.hotels.bdp.circustrain.api.conf.Security;
 import com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain;
-import com.hotels.bdp.circustrain.conf.Security;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Component

@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.copier;
 
 import java.util.Map;
-
-import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 
 public class GenericCopierOptions implements CopierOptions {
 

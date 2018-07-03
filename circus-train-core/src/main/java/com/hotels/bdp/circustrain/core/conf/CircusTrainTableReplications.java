@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.conf.TableReplications;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 
 @Profile({ Modules.REPLICATION })
 @Configuration("tableReplications")

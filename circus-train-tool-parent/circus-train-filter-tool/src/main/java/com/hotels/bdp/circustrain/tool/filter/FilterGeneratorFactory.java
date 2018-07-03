@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.ParseException;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.PartitionPredicate;
 import com.hotels.bdp.circustrain.core.PartitionPredicateFactory;

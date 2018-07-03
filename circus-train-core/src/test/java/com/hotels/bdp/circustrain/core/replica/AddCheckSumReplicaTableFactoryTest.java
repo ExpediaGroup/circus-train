@@ -20,7 +20,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.PARTITION_CHECKSUM;
-import static com.hotels.bdp.circustrain.conf.ReplicationMode.FULL;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;

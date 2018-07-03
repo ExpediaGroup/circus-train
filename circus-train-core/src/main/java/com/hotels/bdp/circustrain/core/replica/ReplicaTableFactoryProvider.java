@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 
 @Profile({ Modules.REPLICATION })
 @Component

@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
-import java.util.List;
+public enum ReplicationMode {
 
-import javax.validation.Valid;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-public class TableReplications {
-
-  private @Valid @NotEmpty List<TableReplication> tableReplications;
-
-  public List<TableReplication> getTableReplications() {
-    return tableReplications;
-  }
-
-  public void setTableReplications(List<TableReplication> tableReplications) {
-    this.tableReplications = tableReplications;
-  }
+  FULL,
+  METADATA_MIRROR,
+  METADATA_UPDATE;
 
 }

@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
 
 @Profile({ Modules.REPLICATION })
 @Configuration("sourceCatalog")

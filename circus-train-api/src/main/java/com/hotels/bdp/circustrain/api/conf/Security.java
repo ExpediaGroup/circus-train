@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
-import java.util.concurrent.TimeUnit;
+public class Security {
 
-public class MetricsReporter {
+  private String credentialProvider;
 
-  private long period = 1L;
-  private TimeUnit timeUnit = TimeUnit.MINUTES;
-
-  public long getPeriod() {
-    return period;
+  public String getCredentialProvider() {
+    return credentialProvider;
   }
 
-  public void setPeriod(long period) {
-    this.period = period;
-  }
-
-  public TimeUnit getTimeUnit() {
-    return timeUnit;
-  }
-
-  public void setTimeUnit(TimeUnit timeUnit) {
-    this.timeUnit = timeUnit;
+  public void setCredentialProvider(String credentialProvider) {
+    this.credentialProvider = credentialProvider;
   }
 
 }

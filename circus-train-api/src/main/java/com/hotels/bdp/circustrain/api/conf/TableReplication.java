@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.hotels.bdp.circustrain.validation.constraints.TableReplicationFullReplicationModeConstraint;
+import com.hotels.bdp.circustrain.api.validation.constraints.TableReplicationFullReplicationModeConstraint;
 
 @TableReplicationFullReplicationModeConstraint
 public class TableReplication {

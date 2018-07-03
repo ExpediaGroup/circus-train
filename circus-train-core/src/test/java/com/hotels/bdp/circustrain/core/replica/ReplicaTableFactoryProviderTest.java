@@ -30,11 +30,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
 
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTableFactoryProviderTest {

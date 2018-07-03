@@ -16,7 +16,7 @@
 package com.hotels.bdp.circustrain.core;
 
 import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 
 public interface ReplicationFactory {
 

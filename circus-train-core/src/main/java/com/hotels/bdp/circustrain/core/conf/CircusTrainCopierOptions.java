@@ -18,7 +18,7 @@ package com.hotels.bdp.circustrain.core.conf;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.hotels.bdp.circustrain.conf.GenericCopierOptions;
+import com.hotels.bdp.circustrain.api.copier.GenericCopierOptions;
 
 @Configuration("copierOptions")
 @ConfigurationProperties(prefix = "")

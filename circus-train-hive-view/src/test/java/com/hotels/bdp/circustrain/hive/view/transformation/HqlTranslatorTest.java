@@ -31,10 +31,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import com.hotels.bdp.circustrain.conf.ReplicaTable;
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
-import com.hotels.bdp.circustrain.conf.TableReplications;
+import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HqlTranslatorTest {

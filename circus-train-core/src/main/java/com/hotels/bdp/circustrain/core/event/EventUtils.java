@@ -26,6 +26,11 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.EventMetastoreTunnel;
 import com.hotels.bdp.circustrain.api.event.EventPartition;
 import com.hotels.bdp.circustrain.api.event.EventPartitions;
@@ -36,11 +41,6 @@ import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceTable;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.conf.Security;
-import com.hotels.bdp.circustrain.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.util.FieldSchemaUtils;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 

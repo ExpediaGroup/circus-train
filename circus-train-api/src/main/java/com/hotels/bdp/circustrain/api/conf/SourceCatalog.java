@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
 import java.util.List;
 import java.util.Map;
@@ -22,12 +22,11 @@ import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.hotels.bdp.circustrain.api.conf.TunnelMetastoreCatalog;
-
-public class ReplicaCatalog implements TunnelMetastoreCatalog {
+public class SourceCatalog implements TunnelMetastoreCatalog {
 
   private @NotBlank String name;
-  private @NotBlank String hiveMetastoreUris;
+  private boolean disableSnapshots;
+  private String hiveMetastoreUris;
   private @Valid MetastoreTunnel metastoreTunnel;
   private List<String> siteXml;
   private Map<String, String> configurationProperties;
@@ -41,13 +40,12 @@ public class ReplicaCatalog implements TunnelMetastoreCatalog {
     this.name = name;
   }
 
-  @Override
-  public String getHiveMetastoreUris() {
-    return hiveMetastoreUris;
+  public boolean isDisableSnapshots() {
+    return disableSnapshots;
   }
 
-  public void setHiveMetastoreUris(String hiveMetastoreUris) {
-    this.hiveMetastoreUris = hiveMetastoreUris;
+  public void setDisableSnapshots(boolean disableSnapshots) {
+    this.disableSnapshots = disableSnapshots;
   }
 
   @Override
@@ -75,6 +73,15 @@ public class ReplicaCatalog implements TunnelMetastoreCatalog {
 
   public void setConfigurationProperties(Map<String, String> configurationProperties) {
     this.configurationProperties = configurationProperties;
+  }
+
+  @Override
+  public String getHiveMetastoreUris() {
+    return hiveMetastoreUris;
+  }
+
+  public void setHiveMetastoreUris(String hiveMetastoreUris) {
+    this.hiveMetastoreUris = hiveMetastoreUris;
   }
 
 }

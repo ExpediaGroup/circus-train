@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
 import org.junit.Test;
 
@@ -27,6 +27,16 @@ import com.openpojo.validation.rule.impl.GetterMustExistRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
+
+import com.hotels.bdp.circustrain.api.conf.MetastoreTunnel;
+import com.hotels.bdp.circustrain.api.conf.MetricsReporter;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
+import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 
 public class ConfigurationPojosTest {
 

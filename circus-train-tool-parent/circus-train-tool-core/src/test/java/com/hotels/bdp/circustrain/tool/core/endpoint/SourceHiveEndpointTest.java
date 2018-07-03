@@ -29,8 +29,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
-import com.hotels.bdp.circustrain.conf.SourceTable;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 

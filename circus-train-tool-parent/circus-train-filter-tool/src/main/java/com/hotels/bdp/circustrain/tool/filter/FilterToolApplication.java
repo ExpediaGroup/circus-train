@@ -26,8 +26,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.hotels.bdp.circustrain.conf.TableReplication;
-import com.hotels.bdp.circustrain.conf.TableReplications;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)

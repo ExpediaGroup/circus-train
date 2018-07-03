@@ -42,7 +42,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 

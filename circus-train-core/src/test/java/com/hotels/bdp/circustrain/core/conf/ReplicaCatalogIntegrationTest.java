@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 
 public class ReplicaCatalogIntegrationTest {
 

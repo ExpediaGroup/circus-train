@@ -26,10 +26,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
 import com.hotels.bdp.circustrain.comparator.hive.HiveDifferences;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
 import com.hotels.bdp.circustrain.hive.fetcher.PartitionFetcher;

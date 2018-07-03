@@ -20,9 +20,9 @@ import static com.google.common.base.Strings.nullToEmpty;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
-import static com.hotels.bdp.circustrain.conf.ReplicationMode.FULL;
-import static com.hotels.bdp.circustrain.conf.ReplicationMode.METADATA_MIRROR;
-import static com.hotels.bdp.circustrain.conf.ReplicationMode.METADATA_UPDATE;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_MIRROR;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_UPDATE;
 import static com.hotels.hcommon.hive.metastore.util.LocationUtils.locationAsPath;
 
 import java.util.ArrayList;
@@ -50,11 +50,11 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;

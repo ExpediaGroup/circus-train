@@ -38,10 +38,10 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 
 public class ReplicaTableFactory {

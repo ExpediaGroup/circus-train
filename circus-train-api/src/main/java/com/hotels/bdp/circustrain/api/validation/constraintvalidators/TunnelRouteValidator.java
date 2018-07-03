@@ -1,9 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and the original hibernate-validator contributors.
- *
- * Based on:
- *
- * https://github.com/hibernate/hibernate-validator/blob/5.2/engine/src/main/java/org/hibernate/validator/internal/constraintvalidators/hv/EmailValidator.java#L33
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraintvalidators;
+package com.hotels.bdp.circustrain.api.validation.constraintvalidators;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
@@ -30,7 +26,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
-import com.hotels.bdp.circustrain.validation.constraints.TunnelRoute;
+import com.hotels.bdp.circustrain.api.validation.constraints.TunnelRoute;
 
 /**
  * Inspired by Hibernate's {@link EmailValidator}, this class checks that a given character sequence (e.g.

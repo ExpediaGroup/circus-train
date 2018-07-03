@@ -20,7 +20,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 
 public class SpelParsedPartitionPredicate implements PartitionPredicate {

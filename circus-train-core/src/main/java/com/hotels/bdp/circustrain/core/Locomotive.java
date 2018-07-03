@@ -36,14 +36,14 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.Replication;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
 import com.hotels.bdp.circustrain.api.metrics.MetricSender;
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.conf.Security;
-import com.hotels.bdp.circustrain.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.conf.TableReplication;
-import com.hotels.bdp.circustrain.conf.TableReplications;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 
 /**

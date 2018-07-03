@@ -1,9 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and the original hibernate-validator contributors.
- *
- * Based on:
- *
- * https://github.com/hibernate/hibernate-validator/blob/5.2/engine/src/main/java/org/hibernate/validator/constraints/Email.java#L37
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraints;
+package com.hotels.bdp.circustrain.api.validation.constraints;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -36,7 +32,7 @@ import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 import javax.validation.constraints.Pattern;
 
-import com.hotels.bdp.circustrain.validation.constraintvalidators.TunnelRouteValidator;
+import com.hotels.bdp.circustrain.api.validation.constraintvalidators.TunnelRouteValidator;
 
 /**
  * Validates the annotated {@link String} is sequence of one or more {@link java.net.URI} separated by the literal

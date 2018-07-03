@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.api.conf;
 
 import com.hotels.bdp.circustrain.api.conf.MetastoreCatalog;
-import com.hotels.bdp.circustrain.conf.MetastoreTunnel;
 
 public interface TunnelMetastoreCatalog extends MetastoreCatalog {
 

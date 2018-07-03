@@ -29,8 +29,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.conf.TableReplication;
-import com.hotels.bdp.circustrain.conf.TableReplications;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplications;
 
 @Profile({ Modules.REPLICATION })
 @Component

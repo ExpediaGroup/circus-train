@@ -18,7 +18,7 @@ package com.hotels.bdp.circustrain.core.conf;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 
 @Configuration("replicaCatalog")
 @ConfigurationProperties(prefix = "replica-catalog")

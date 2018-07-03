@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.validation.constraintvalidators;
+package com.hotels.bdp.circustrain.api.validation.constraintvalidators;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.hotels.bdp.circustrain.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.conf.TableReplication;
-import com.hotels.bdp.circustrain.validation.constraints.TableReplicationFullReplicationModeConstraint;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.validation.constraints.TableReplicationFullReplicationModeConstraint;
 
 public class TableReplicationFullReplicationModeValidator
     implements ConstraintValidator<TableReplicationFullReplicationModeConstraint, TableReplication> {

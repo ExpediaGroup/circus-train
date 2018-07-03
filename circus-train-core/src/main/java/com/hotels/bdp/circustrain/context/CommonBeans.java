@@ -39,11 +39,11 @@ import org.springframework.core.annotation.Order;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.MetastoreTunnel;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.api.conf.TunnelMetastoreCatalog;
-import com.hotels.bdp.circustrain.conf.MetastoreTunnel;
-import com.hotels.bdp.circustrain.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.conf.Security;
-import com.hotels.bdp.circustrain.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.core.metastore.ConditionalMetaStoreClientFactory;
 import com.hotels.bdp.circustrain.core.metastore.MetaStoreClientFactoryManager;
 import com.hotels.bdp.circustrain.core.metastore.ThriftHiveMetaStoreClientFactory;

@@ -19,7 +19,7 @@ import org.apache.hadoop.fs.Path;
 
 import com.google.common.base.Function;
 
-import com.hotels.bdp.circustrain.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 
 public class PartitionPredicateFactory {

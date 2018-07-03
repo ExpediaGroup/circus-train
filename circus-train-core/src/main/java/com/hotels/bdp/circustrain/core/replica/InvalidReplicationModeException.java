@@ -16,7 +16,7 @@
 package com.hotels.bdp.circustrain.core.replica;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 
 /**
  * Indicates there is an error between an existing {@link ReplicationMode} and the replicaTable {@link ReplicationMode}

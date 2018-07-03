@@ -18,7 +18,7 @@ package com.hotels.bdp.circustrain.core.conf;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.hotels.bdp.circustrain.conf.MetricsReporter;
+import com.hotels.bdp.circustrain.api.conf.MetricsReporter;
 
 @Configuration("metricsReporter")
 @ConfigurationProperties(prefix = "metrics-reporter")

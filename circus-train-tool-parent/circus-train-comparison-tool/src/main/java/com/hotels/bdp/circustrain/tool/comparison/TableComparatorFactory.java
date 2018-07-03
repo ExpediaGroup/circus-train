@@ -19,9 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
-import com.hotels.bdp.circustrain.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 
 @Component
