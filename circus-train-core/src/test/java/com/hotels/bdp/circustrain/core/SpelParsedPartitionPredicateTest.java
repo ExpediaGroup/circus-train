@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,16 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpelParsedPartitionPredicateTest {
 
-  @Mock
-  private SpringExpressionParser expressionParser;
-  @Mock
-  private TableReplication tableReplication;
-  @Mock
-  private SourceTable sourceTable;
+  private @Mock SpringExpressionParser expressionParser;
+  private @Mock TableReplication tableReplication;
+  private @Mock SourceTable sourceTable;
 
   private SpelParsedPartitionPredicate predicate;
 

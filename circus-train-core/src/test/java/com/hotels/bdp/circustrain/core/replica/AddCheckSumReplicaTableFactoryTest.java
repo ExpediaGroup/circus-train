@@ -20,11 +20,11 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.PARTITION_CHECKSUM;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newFieldSchema;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newPartition;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newStorageDescriptor;
 import static com.hotels.bdp.circustrain.core.metastore.HiveEntityFactory.newTable;
-import static com.hotels.bdp.circustrain.core.conf.ReplicationMode.FULL;
 
 import java.io.File;
 import java.util.HashMap;
@@ -49,10 +49,9 @@ import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 @RunWith(MockitoJUnitRunner.class)
 public class AddCheckSumReplicaTableFactoryTest {
 
-  @Mock
-  private HiveConf sourceHiveConf;
-  @Mock
-  private Function<Path, String> checksumFunction;
+  private @Mock HiveConf sourceHiveConf;
+  private @Mock Function<Path, String> checksumFunction;
+
   private Table sourceTable;
   private Partition sourcePartition;
   private final Path replicaPartitionLocation = new Path("/tmp/db/table/partitionKey=value1");

@@ -551,7 +551,6 @@ Below is a high level summary of the various modules that comprise Circus Train 
   * **circus-train-filter-tool:** Tool that checks partition filter expressions in table replication configurations.
   * **circus-train-tool-core:** Code common across tool implementations.
   * **circus-train-tool:** Packages tools tgz.
-  * **circus-train-vacuum-tool:** Tool that removes data orphaned by a bug in Circus Train versions prior to 2.0.0.
 
 ## Extension points
 Circus Train can be extended in various ways. This is an advanced feature that typically involves an implementation of an interface or an extension of existing classes. These are built separately from Circus Train and then placed on the classpath when Circus Train is run. Below is a summary of some common extension points.

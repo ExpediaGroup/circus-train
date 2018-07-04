@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,29 +30,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
 
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTableFactoryProviderTest {
 
-  @Mock
-  private HiveConf sourceHiveConf;
-  @Mock
-  private Function<Path, String> checksumFunction;
-  @Mock
-  private TableReplication tableReplication;
-  @Mock
-  private SourceTable sourceTable;
-  @Mock
-  private TableTransformation tableTransformation;
-  @Mock
-  private PartitionTransformation partitionTransformation;
-  @Mock
-  private ColumnStatisticsTransformation columnStatisticsTransformation;
+  private @Mock HiveConf sourceHiveConf;
+  private @Mock Function<Path, String> checksumFunction;
+  private @Mock TableReplication tableReplication;
+  private @Mock SourceTable sourceTable;
+  private @Mock TableTransformation tableTransformation;
+  private @Mock PartitionTransformation partitionTransformation;
+  private @Mock ColumnStatisticsTransformation columnStatisticsTransformation;
 
   private ReplicaTableFactoryProvider picker;
 

@@ -29,25 +29,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaHiveEndpointTest {
 
-  @Mock
-  private HiveConf hiveConf;
-  @Mock
-  private Supplier<CloseableMetaStoreClient> metastoreSupplier;
-  @Mock
-  private TableReplication tableReplication;
-  @Mock
-  private CloseableMetaStoreClient metastoreClient;
-  @Mock
-  private Table table;
-  @Mock
-  private StorageDescriptor sd;
+  private @Mock HiveConf hiveConf;
+  private @Mock Supplier<CloseableMetaStoreClient> metastoreSupplier;
+  private @Mock TableReplication tableReplication;
+  private @Mock CloseableMetaStoreClient metastoreClient;
+  private @Mock Table table;
+  private @Mock StorageDescriptor sd;
 
   @Test
   public void useCorrectReplicaTableName() throws Exception {

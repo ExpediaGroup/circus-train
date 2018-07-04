@@ -38,11 +38,11 @@ import org.springframework.validation.ObjectError;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.comparator.ComparatorRegistry;
 import com.hotels.bdp.circustrain.comparator.api.DiffListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
-import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
 import com.hotels.bdp.circustrain.tool.core.endpoint.ReplicaHiveEndpoint;
 import com.hotels.bdp.circustrain.tool.core.endpoint.SourceHiveEndpoint;

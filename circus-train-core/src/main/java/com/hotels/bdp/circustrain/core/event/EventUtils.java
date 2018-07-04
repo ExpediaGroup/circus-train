@@ -26,6 +26,11 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.EventMetastoreTunnel;
 import com.hotels.bdp.circustrain.api.event.EventPartition;
 import com.hotels.bdp.circustrain.api.event.EventPartitions;
@@ -36,11 +41,6 @@ import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceTable;
 import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.core.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.core.conf.Security;
-import com.hotels.bdp.circustrain.core.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.core.conf.SourceTable;
-import com.hotels.bdp.circustrain.core.conf.TableReplication;
 import com.hotels.hcommon.hive.metastore.util.FieldSchemaUtils;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 
@@ -93,8 +93,8 @@ public class EventUtils {
 
     EventMetastoreTunnel tunnel = replicaCatalog.getMetastoreTunnel() == null ? null
         : new EventMetastoreTunnel(replicaCatalog.getMetastoreTunnel().getRoute(),
-        replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
-        replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
+            replicaCatalog.getMetastoreTunnel().getPort(), replicaCatalog.getMetastoreTunnel().getLocalhost(),
+            replicaCatalog.getMetastoreTunnel().getPrivateKeys(), replicaCatalog.getMetastoreTunnel().getKnownHosts());
 
     return new EventReplicaCatalog(replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), eventS3, tunnel,
         replicaCatalog.getSiteXml(), replicaCatalog.getConfigurationProperties());
