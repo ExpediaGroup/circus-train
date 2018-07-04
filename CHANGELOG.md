@@ -1,5 +1,6 @@
 ## TBD
 ### Changed
+* Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
 * circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
 * Configuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/782).
 
