@@ -24,11 +24,31 @@ public class GCPSecurity {
 
   private String credentialProvider;
 
+  private String localFileSystemWorkingDirectory;
+
+  private String distributedFileSystemWorkingDirectory;
+
   public String getCredentialProvider() {
     return credentialProvider;
   }
 
   public void setCredentialProvider(String credentialProvider) {
     this.credentialProvider = credentialProvider;
+  }
+
+  public String getLocalFileSystemWorkingDirectory() {
+    return localFileSystemWorkingDirectory;
+  }
+
+  public void setLocalFileSystemWorkingDirectory(String localFileSystemWorkingDirectory) {
+    this.localFileSystemWorkingDirectory = localFileSystemWorkingDirectory;
+  }
+
+  public String getDistributedFileSystemWorkingDirectory() {
+    return distributedFileSystemWorkingDirectory;
+  }
+
+  public void setDistributedFileSystemWorkingDirectory(String distributedFileSystemWorkingDirectory) {
+    this.distributedFileSystemWorkingDirectory = distributedFileSystemWorkingDirectory;
   }
 }

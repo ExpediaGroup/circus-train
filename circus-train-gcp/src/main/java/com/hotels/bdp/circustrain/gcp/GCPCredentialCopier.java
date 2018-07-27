@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_KEYFILE_CACHED_LOCATION;
 
 import java.io.File;
@@ -32,26 +34,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
-  private static final String WORKING_DIRECTORY = System.getProperty("user.dir");
+
   private static final String RANDOM_STRING = UUID.randomUUID().toString() + System.currentTimeMillis();
   private static final String CACHED_CREDENTIAL_NAME = "/ct-gcp-key-" + RANDOM_STRING + ".json";
-  private static final String HDFS_GS_CREDENTIAL_DIRECTORY = "hdfs:///tmp/ct-gcp-" + RANDOM_STRING;
-  private static final String HDFS_GS_CREDENTIAL_ABSOLUTE_PATH = HDFS_GS_CREDENTIAL_DIRECTORY + CACHED_CREDENTIAL_NAME;
 
   private final FileSystem fs;
   private final Configuration conf;
+  private final GCPSecurity security;
   private final String credentialProvider;
+  private final String workingDirectory;
+  private final String hdfsGsCredentialDirectory;
+  private final String hdfsGsCredentialAbsolutePath;
 
-  GCPCredentialCopier(FileSystem fs, Configuration conf, String credentialProvider) {
+  GCPCredentialCopier(FileSystem fs, Configuration conf, GCPSecurity security) {
     this.fs = fs;
     this.conf = conf;
-    if (credentialProvider == null) {
+    if (security == null || isBlank(security.getCredentialProvider())) {
       throw new IllegalArgumentException("credentialProvider must be set");
     }
-    this.credentialProvider = credentialProvider;
+    this.security = security;
+    this.credentialProvider = security.getCredentialProvider();
+    this.workingDirectory = isBlank(security.getLocalFileSystemWorkingDirectory()) ? System.getProperty("user.dir")
+        : security.getLocalFileSystemWorkingDirectory();
+    this.hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
+        ? "hdfs:///tmp/ct-gcp-" + RANDOM_STRING
+        : security.getDistributedFileSystemWorkingDirectory();
+    this.hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
   }
 
   void copyCredentials() {
@@ -66,7 +78,7 @@ class GCPCredentialCopier {
 
   private void copyCredentialIntoWorkingDirectory() throws IOException {
     File source = new File(credentialProvider);
-    File destination = new File(WORKING_DIRECTORY + CACHED_CREDENTIAL_NAME);
+    File destination = new File(workingDirectory + CACHED_CREDENTIAL_NAME);
     destination.deleteOnExit();
     LOG.debug("Copying credential into working directory {}", destination);
     FileUtils.copyFile(source, destination);
@@ -74,18 +86,17 @@ class GCPCredentialCopier {
 
   private void copyCredentialIntoHdfs() throws IOException {
     Path source = new Path(credentialProvider);
-    Path destination = new Path(HDFS_GS_CREDENTIAL_ABSOLUTE_PATH);
-    Path destinationFolder = new Path(HDFS_GS_CREDENTIAL_DIRECTORY);
+    Path destination = new Path(hdfsGsCredentialAbsolutePath);
+    Path destinationFolder = new Path(hdfsGsCredentialDirectory);
     fs.deleteOnExit(destinationFolder);
     LOG.debug("Copying credential into HDFS {}", destination);
     fs.copyFromLocalFile(source, destination);
   }
 
   private void copyCredentialIntoDistributedCache() throws URISyntaxException {
-    LOG.debug("{} added to distributed cache with symlink {}", HDFS_GS_CREDENTIAL_DIRECTORY,
-        "." + CACHED_CREDENTIAL_NAME);
-    DistributedCache.addCacheFile(new URI(HDFS_GS_CREDENTIAL_ABSOLUTE_PATH), conf);
-    //The "." must be prepended for the symlink to be created correctly for reference in Map Reduce job
+    LOG.debug("{} added to distributed cache with symlink {}", hdfsGsCredentialDirectory, "." + CACHED_CREDENTIAL_NAME);
+    DistributedCache.addCacheFile(new URI(hdfsGsCredentialAbsolutePath), conf);
+    // The "." must be prepended for the symlink to be created correctly for reference in Map Reduce job
     conf.set(GCP_KEYFILE_CACHED_LOCATION, "." + CACHED_CREDENTIAL_NAME);
   }
 }
