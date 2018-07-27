@@ -15,8 +15,11 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
+import fm.last.commons.test.file.TemporaryFolder;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
@@ -28,13 +31,13 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import fm.last.commons.test.file.TemporaryFolder;
-
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ FileSystem.class })
@@ -43,32 +46,63 @@ public class GCPCredentialCopierTest {
   private @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
   private @Mock FileSystem fs;
   private Configuration conf = new Configuration();
+  private GCPSecurity gcpSecurity = new GCPSecurity();
+
+  private void setGcpSecurity(
+      String credentialProvider,
+      String localFileSystemWorkingDirectory,
+      String distributedFileSystemWorkingDirectory) {
+    gcpSecurity.setCredentialProvider(credentialProvider);
+    gcpSecurity.setLocalFileSystemWorkingDirectory(localFileSystemWorkingDirectory);
+    gcpSecurity.setDistributedFileSystemWorkingDirectory(distributedFileSystemWorkingDirectory);
+  }
 
   @Test(expected = IllegalArgumentException.class)
   public void credentialProviderNotSetThrowsException() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     doReturn(false).when(fs).exists(any(Path.class));
-    String credentialProvider = null;
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
+    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
   }
 
   @Test
-  public void copyCredentials() throws Exception {
+  public void copyCredentialsWithOnlyCredentialProviderSupplied() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     String credentialProvider = "test.json";
     temporaryFolder.newFile(credentialProvider);
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
+    setGcpSecurity(credentialProvider, null, null);
+    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     copier.copyCredentials();
     verify(fs, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
   }
 
   @Test(expected = CircusTrainException.class)
-  public void copyCredentialsWhenFileDoesntExistThrowsException() throws Exception {
+  public void copyCredentialsWhenCredentialProviderFileDoesntExistThrowsException() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     String credentialProvider = "test.json";
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
+    setGcpSecurity(credentialProvider, null, null);
+    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     copier.copyCredentials();
   }
+
+  @Test
+  public void fullConfigurationProvided() throws Exception {
+    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
+    String credentialProvider = "test.json";
+    String localFileSystem = "workdir";
+    String distributedFileSystem = "hdfs:/tmp/circus-train-gcp/workdir/";
+    temporaryFolder.newFile(credentialProvider);
+    temporaryFolder.newFolder(localFileSystem);
+    credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
+    setGcpSecurity(credentialProvider, localFileSystem, distributedFileSystem);
+    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
+
+    ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
+    copier.copyCredentials();
+    verify(fs, times(1)).copyFromLocalFile(eq(new Path(credentialProvider)), pathCaptor.capture());
+    Path destination = pathCaptor.getValue();
+    assertTrue(destination.toString().startsWith(distributedFileSystem));
+  }
+
 }

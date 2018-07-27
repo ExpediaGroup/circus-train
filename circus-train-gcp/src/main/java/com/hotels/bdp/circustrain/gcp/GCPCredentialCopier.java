@@ -55,7 +55,7 @@ class GCPCredentialCopier {
     this.fs = fs;
     this.conf = conf;
     if (security == null || isBlank(security.getCredentialProvider())) {
-      throw new IllegalArgumentException("credentialProvider must be set");
+      throw new IllegalArgumentException("gcp-security credential-provider must be set");
     }
     this.security = security;
     this.credentialProvider = security.getCredentialProvider();
@@ -65,6 +65,10 @@ class GCPCredentialCopier {
         ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
         : security.getDistributedFileSystemWorkingDirectory();
     this.hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
+    LOG.debug("Temporary working directory set to {}", workingDirectory);
+    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
+    LOG.debug("HDFS Google Cloud credential absolute path will be {}", hdfsGsCredentialAbsolutePath);
+
   }
 
   void copyCredentials() {

@@ -39,7 +39,7 @@ public class GCPCredentialConfigurer {
   public void configureCredentials() {
     try {
       LOG.debug("Configuring GCP Credentials");
-      GCPCredentialCopier copier = new GCPCredentialCopier(FileSystem.get(conf), conf, security.getCredentialProvider());
+      GCPCredentialCopier copier = new GCPCredentialCopier(FileSystem.get(conf), conf, security);
       copier.copyCredentials();
     } catch (IOException e) {
       throw new CircusTrainException(e);
