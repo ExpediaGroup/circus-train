@@ -75,6 +75,7 @@ public class GCPCredentialCopierTest {
     copier.copyCredentials();
     verify(fs, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
+
   }
 
   @Test(expected = CircusTrainException.class)
