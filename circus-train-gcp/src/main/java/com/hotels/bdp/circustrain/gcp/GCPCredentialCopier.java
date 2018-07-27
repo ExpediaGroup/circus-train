@@ -39,6 +39,7 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
 
+  private static final String DEFAULT_HDFS_PREFIX = "hdfs:///tmp/ct-gcp-";
   private static final String RANDOM_STRING = UUID.randomUUID().toString() + System.currentTimeMillis();
   private static final String CACHED_CREDENTIAL_NAME = "/ct-gcp-key-" + RANDOM_STRING + ".json";
 
@@ -61,7 +62,7 @@ class GCPCredentialCopier {
     this.workingDirectory = isBlank(security.getLocalFileSystemWorkingDirectory()) ? System.getProperty("user.dir")
         : security.getLocalFileSystemWorkingDirectory();
     this.hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
-        ? "hdfs:///tmp/ct-gcp-" + RANDOM_STRING
+        ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
         : security.getDistributedFileSystemWorkingDirectory();
     this.hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
   }
