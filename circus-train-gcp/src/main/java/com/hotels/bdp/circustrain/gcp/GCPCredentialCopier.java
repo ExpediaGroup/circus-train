@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -58,17 +57,16 @@ class GCPCredentialCopier {
       throw new IllegalArgumentException("gcp-security credential-provider must be set");
     }
     this.security = security;
-    this.credentialProvider = security.getCredentialProvider();
-    this.workingDirectory = isBlank(security.getLocalFileSystemWorkingDirectory()) ? System.getProperty("user.dir")
+    credentialProvider = security.getCredentialProvider();
+    workingDirectory = isBlank(security.getLocalFileSystemWorkingDirectory()) ? System.getProperty("user.dir")
         : security.getLocalFileSystemWorkingDirectory();
-    this.hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
+    hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
         ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
         : security.getDistributedFileSystemWorkingDirectory();
-    this.hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
+    hdfsGsCredentialAbsolutePath = hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
     LOG.debug("Temporary working directory set to {}", workingDirectory);
     LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
     LOG.debug("HDFS Google Cloud credential absolute path will be {}", hdfsGsCredentialAbsolutePath);
-
   }
 
   void copyCredentials() {
@@ -100,7 +98,7 @@ class GCPCredentialCopier {
 
   private void copyCredentialIntoDistributedCache() throws URISyntaxException {
     LOG.debug("{} added to distributed cache with symlink {}", hdfsGsCredentialDirectory, "." + CACHED_CREDENTIAL_NAME);
-    DistributedCache.addCacheFile(new URI(hdfsGsCredentialAbsolutePath), conf);
+    org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(hdfsGsCredentialAbsolutePath), conf);
     // The "." must be prepended for the symlink to be created correctly for reference in Map Reduce job
     conf.set(GCP_KEYFILE_CACHED_LOCATION, "." + CACHED_CREDENTIAL_NAME);
   }
