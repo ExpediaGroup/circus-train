@@ -23,8 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 
-import java.io.File;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -53,16 +51,11 @@ public class GCPCredentialCopierTest {
   private final GCPSecurity gcpSecurity = new GCPSecurity();
 
   private String credentialProvider = "test.json";
-  private final String localFileSystem = "workdir";
   private final String distributedFileSystem = "hdfs:/tmp/circus-train-gcp/workdir/";
   private final String defaultDistributedFileSystemRoot = "hdfs:/tmp/ct-gcp-";
 
-  private void setGcpSecurity(
-      String credentialProvider,
-      String localFileSystemWorkingDirectory,
-      String distributedFileSystemWorkingDirectory) {
+  private void setGcpSecurity(String credentialProvider, String distributedFileSystemWorkingDirectory) {
     gcpSecurity.setCredentialProvider(credentialProvider);
-    gcpSecurity.setLocalFileSystemWorkingDirectory(localFileSystemWorkingDirectory);
     gcpSecurity.setDistributedFileSystemWorkingDirectory(distributedFileSystemWorkingDirectory);
   }
 
@@ -78,7 +71,7 @@ public class GCPCredentialCopierTest {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     temporaryFolder.newFile(credentialProvider);
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    setGcpSecurity(credentialProvider, null, null);
+    setGcpSecurity(credentialProvider, null);
     GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     copier.copyCredentials();
     verify(fs).copyFromLocalFile(any(Path.class), any(Path.class));
@@ -88,8 +81,8 @@ public class GCPCredentialCopierTest {
 
   @Test(expected = CircusTrainException.class)
   public void copyCredentialsWhenCredentialProviderFileDoesntExistThrowsException() throws Exception {
-    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    setGcpSecurity(credentialProvider, null, null);
+
+    setGcpSecurity(credentialProvider, null);
     GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     copier.copyCredentials();
   }
@@ -105,9 +98,8 @@ public class GCPCredentialCopierTest {
   public void fullConfigurationProvided() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     temporaryFolder.newFile(credentialProvider);
-    temporaryFolder.newFolder(localFileSystem);
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    setGcpSecurity(credentialProvider, localFileSystem, distributedFileSystem);
+    setGcpSecurity(credentialProvider, distributedFileSystem);
     GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
     copier.copyCredentials();
@@ -121,33 +113,14 @@ public class GCPCredentialCopierTest {
   public void noDistributedFileSystemProvided() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     temporaryFolder.newFile(credentialProvider);
-    temporaryFolder.newFolder(localFileSystem);
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    setGcpSecurity(credentialProvider, localFileSystem, null);
+    setGcpSecurity(credentialProvider, null);
     GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
     copier.copyCredentials();
     verify(fs).copyFromLocalFile(eq(new Path(credentialProvider)), pathCaptor.capture());
     Path destination = pathCaptor.getValue();
     assertTrue(destination.toString().startsWith(defaultDistributedFileSystemRoot));
-  }
-
-  @Test
-  public void noLocalFileSystemProvided() throws Exception {
-    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    temporaryFolder.newFile(credentialProvider);
-    credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    setGcpSecurity(credentialProvider, null, distributedFileSystem);
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
-    copier.copyCredentials();
-
-    File userDirectory = new File(System.getProperty("user.dir"));
-    File[] files = userDirectory.listFiles();
-    boolean fileExists = false;
-    for (File file : files) {
-      fileExists = fileExists || file.toString().startsWith(userDirectory.toString() + "/ct-gcp-key");
-    }
-    assertTrue(fileExists);
   }
 
 }

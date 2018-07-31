@@ -19,13 +19,11 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_KEYFILE_CACHED_LOCATION;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -46,7 +44,6 @@ class GCPCredentialCopier {
   private final Configuration conf;
   private final GCPSecurity security;
   private final String credentialProvider;
-  private final String workingDirectory;
   private final String hdfsGsCredentialDirectory;
   private final String hdfsGsCredentialAbsolutePath;
 
@@ -58,33 +55,22 @@ class GCPCredentialCopier {
     }
     this.security = security;
     credentialProvider = security.getCredentialProvider();
-    workingDirectory = isBlank(security.getLocalFileSystemWorkingDirectory()) ? System.getProperty("user.dir")
-        : security.getLocalFileSystemWorkingDirectory();
+
     hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
         ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
         : security.getDistributedFileSystemWorkingDirectory();
     hdfsGsCredentialAbsolutePath = hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
-    LOG.debug("Temporary working directory set to {}", workingDirectory);
-    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
-    LOG.debug("HDFS Google Cloud credential absolute path will be {}", hdfsGsCredentialAbsolutePath);
+    LOG.info("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
+    LOG.info("HDFS Google Cloud credential absolute path will be {}", hdfsGsCredentialAbsolutePath);
   }
 
   void copyCredentials() {
     try {
-      copyCredentialIntoWorkingDirectory();
       copyCredentialIntoHdfs();
       copyCredentialIntoDistributedCache();
     } catch (IOException | URISyntaxException e) {
       throw new CircusTrainException(e);
     }
-  }
-
-  private void copyCredentialIntoWorkingDirectory() throws IOException {
-    File source = new File(credentialProvider);
-    File destination = new File(workingDirectory + CACHED_CREDENTIAL_NAME);
-    destination.deleteOnExit();
-    LOG.debug("Copying credential into working directory {}", destination);
-    FileUtils.copyFile(source, destination);
   }
 
   private void copyCredentialIntoHdfs() throws IOException {
@@ -96,10 +82,10 @@ class GCPCredentialCopier {
     fs.copyFromLocalFile(source, destination);
   }
 
-  private void copyCredentialIntoDistributedCache() throws URISyntaxException {
-    LOG.debug("{} added to distributed cache with symlink {}", hdfsGsCredentialDirectory, "." + CACHED_CREDENTIAL_NAME);
-    org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(hdfsGsCredentialAbsolutePath), conf);
-    // The "." must be prepended for the symlink to be created correctly for reference in Map Reduce job
-    conf.set(GCP_KEYFILE_CACHED_LOCATION, "." + CACHED_CREDENTIAL_NAME);
+  private void copyCredentialIntoDistributedCache() throws URISyntaxException, IOException {
+    org.apache.hadoop.mapreduce.filecache.DistributedCache
+        .addCacheFile(new URI(hdfsGsCredentialAbsolutePath + "#" + credentialProvider), conf);
+    LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
+    conf.set(GCP_KEYFILE_CACHED_LOCATION, credentialProvider);
   }
 }

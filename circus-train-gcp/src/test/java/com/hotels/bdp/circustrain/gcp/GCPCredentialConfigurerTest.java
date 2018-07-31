@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.gcp;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
@@ -43,7 +44,7 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 @PrepareForTest({ FileSystem.class })
 public class GCPCredentialConfigurerTest {
 
-  private @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
+  private @Rule final TemporaryFolder temporaryFolder = new TemporaryFolder();
   private @Mock FileSystem mockFS;
 
   @Test
@@ -68,7 +69,7 @@ public class GCPCredentialConfigurerTest {
     PowerMockito.mockStatic(FileSystem.class);
     Configuration conf = new Configuration();
     when(FileSystem.get(conf)).thenReturn(mockFS);
-    doNothing().when(mockFS).copyFromLocalFile(any(Path.class), any(Path.class));
+    doThrow(CircusTrainException.class).when(mockFS).copyFromLocalFile(any(Path.class), any(Path.class));
     String credentialProvider = "test.json";
     GCPSecurity security = new GCPSecurity();
     security.setCredentialProvider(credentialProvider);
