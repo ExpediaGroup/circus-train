@@ -45,14 +45,14 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 public class GCPCredentialConfigurerTest {
 
   private @Rule final TemporaryFolder temporaryFolder = new TemporaryFolder();
-  private @Mock FileSystem mockFS;
+  private @Mock FileSystem fileSystem;
 
   @Test
   public void configureCredentials() throws Exception {
     PowerMockito.mockStatic(FileSystem.class);
     Configuration conf = new Configuration();
-    when(FileSystem.get(conf)).thenReturn(mockFS);
-    doNothing().when(mockFS).copyFromLocalFile(any(Path.class), any(Path.class));
+    when(FileSystem.get(conf)).thenReturn(fileSystem);
+    doNothing().when(fileSystem).copyFromLocalFile(any(Path.class), any(Path.class));
     String credentialProvider = "test.json";
     temporaryFolder.newFile(credentialProvider);
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
@@ -60,22 +60,22 @@ public class GCPCredentialConfigurerTest {
     security.setCredentialProvider(credentialProvider);
     GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, security);
     configurer.configureCredentials();
-    verify(mockFS, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
+    verify(fileSystem, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
   }
 
-  @Test(expected = CircusTrainException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void configureCredentialsWithIncorrectPathThrowsException() throws Exception {
     PowerMockito.mockStatic(FileSystem.class);
     Configuration conf = new Configuration();
-    when(FileSystem.get(conf)).thenReturn(mockFS);
-    doThrow(CircusTrainException.class).when(mockFS).copyFromLocalFile(any(Path.class), any(Path.class));
+    when(FileSystem.get(conf)).thenReturn(fileSystem);
+    doThrow(CircusTrainException.class).when(fileSystem).copyFromLocalFile(any(Path.class), any(Path.class));
     String credentialProvider = "test.json";
     GCPSecurity security = new GCPSecurity();
     security.setCredentialProvider(credentialProvider);
     GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, security);
     configurer.configureCredentials();
-    verify(mockFS, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
+    verify(fileSystem, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
   }
 
