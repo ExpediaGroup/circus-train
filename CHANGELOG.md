@@ -1,3 +1,7 @@
+## [TBD]
+### Changed
+* circus-train-gcp: `credential-provider` can be provided as absolute or relative path to the Google Cloud key file. Using relative path avoids temporary copy of key file to `user.dir`.
+
 ## 12.0.0 - 2018-07-13
 ### Changed
 * circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
