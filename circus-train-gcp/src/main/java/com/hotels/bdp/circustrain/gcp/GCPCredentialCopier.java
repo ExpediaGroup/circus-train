@@ -61,23 +61,26 @@ class GCPCredentialCopier {
     credentialProvider = security.getCredentialProvider();
     LOG.debug("Credential Provider URI = {}", credentialProvider);
 
-    hdfsGsCredentialDirectory = isBlank(security.getDistributedFileSystemWorkingDirectory())
-        ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
-        : security.getDistributedFileSystemWorkingDirectory();
+    hdfsGsCredentialDirectory = getHdfsGsCredentialDirectory();
     hdfsGsCredentialAbsolutePath = hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
-    LOG.info("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
-    LOG.info("HDFS Google Cloud credential absolute path will be {}", hdfsGsCredentialAbsolutePath);
+    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
+    LOG.debug("HDFS Google Cloud credential path will be {}", hdfsGsCredentialAbsolutePath);
+  }
+
+  private String getHdfsGsCredentialDirectory() {
+    return isBlank(security.getDistributedFileSystemWorkingDirectory()) ? DEFAULT_HDFS_PREFIX + RANDOM_STRING
+        : security.getDistributedFileSystemWorkingDirectory();
   }
 
   void copyCredentials() {
     try {
       if (new File(credentialProvider).isAbsolute()) {
-        LOG.debug("Copying credentials from absolute path");
+        LOG.debug("Copying Google Cloud credentials from absolute path {}", credentialProvider);
         copyCredentialIntoWorkingDirectory();
         copyCredentialIntoHdfs();
         copyCredentialIntoDistributedCacheFromAbsolutePath();
       } else {
-        LOG.debug("Copying credentials from relative path");
+        LOG.debug("Copying Google Cloud credentials from relative path {}", credentialProvider);
         copyCredentialIntoHdfs();
         copyCredentialIntoDistributedCacheFromRelativePath();
       }
@@ -95,8 +98,8 @@ class GCPCredentialCopier {
   }
 
   private void copyCredentialIntoDistributedCacheFromAbsolutePath() throws URISyntaxException {
-    LOG.debug("{} added to distributed cache with symlink {}", hdfsGsCredentialDirectory, "." + CACHED_CREDENTIAL_NAME);
     DistributedCache.addCacheFile(new URI(hdfsGsCredentialAbsolutePath), conf);
+    LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
     // The "." must be prepended for the symlink to be created correctly for reference in Map Reduce job
     conf.set(GCP_KEYFILE_CACHED_LOCATION, "." + CACHED_CREDENTIAL_NAME);
   }
