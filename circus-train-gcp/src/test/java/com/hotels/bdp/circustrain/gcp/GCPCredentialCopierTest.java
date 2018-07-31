@@ -50,6 +50,9 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 @PrepareForTest({ FileSystem.class, FileUtils.class })
 public class GCPCredentialCopierTest {
 
+  private static final String DISTRIBUTED_CACHE_PROPERTY = "mapreduce.job.cache.files";
+  private static final String SYMLINK_FLAG = "#";
+
   private @Rule final TemporaryFolder temporaryFolder = new TemporaryFolder();
   private @Mock FileSystem fs;
   private final Configuration conf = new Configuration();
@@ -80,8 +83,8 @@ public class GCPCredentialCopierTest {
     GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
     copier.copyCredentials();
     verify(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    assertNotNull(conf.get("mapreduce.job.cache.files"));
-    assertFalse(conf.get("mapreduce.job.cache.files").endsWith("#" + credentialProvider));
+    assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
+    assertFalse(conf.get(DISTRIBUTED_CACHE_PROPERTY).endsWith(SYMLINK_FLAG + credentialProvider));
   }
 
   @Test
@@ -93,8 +96,8 @@ public class GCPCredentialCopierTest {
     copier.copyCredentials();
 
     verify(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    assertNotNull(conf.get("mapreduce.job.cache.files"));
-    assertTrue(conf.get("mapreduce.job.cache.files").endsWith("#" + credentialProvider));
+    assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
+    assertTrue(conf.get(DISTRIBUTED_CACHE_PROPERTY).endsWith(SYMLINK_FLAG + credentialProvider));
   }
 
   @Test(expected = CircusTrainException.class)
