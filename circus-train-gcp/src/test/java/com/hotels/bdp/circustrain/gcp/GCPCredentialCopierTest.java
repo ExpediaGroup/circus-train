@@ -57,10 +57,10 @@ public class GCPCredentialCopierTest {
   private @Mock FileSystem fs;
   private final Configuration conf = new Configuration();
   private final GCPSecurity gcpSecurity = new GCPSecurity();
-
-  private String credentialProvider = "test.json";
   private final String distributedFileSystem = "hdfs:/tmp/circus-train-gcp/workdir/";
   private final String defaultDistributedFileSystemRoot = "hdfs:/tmp/ct-gcp-";
+
+  private String credentialProvider = "test.json";
 
   private void setGcpSecurity(String credentialProvider, String distributedFileSystemWorkingDirectory) {
     gcpSecurity.setCredentialProvider(credentialProvider);
@@ -71,7 +71,7 @@ public class GCPCredentialCopierTest {
   public void credentialProviderNotSetThrowsException() throws Exception {
     doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
     doReturn(false).when(fs).exists(any(Path.class));
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, gcpSecurity);
+    new GCPCredentialCopier(fs, conf, gcpSecurity);
   }
 
   @Test
