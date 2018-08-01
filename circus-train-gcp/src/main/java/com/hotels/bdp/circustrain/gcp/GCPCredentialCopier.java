@@ -75,9 +75,13 @@ class GCPCredentialCopier {
   private String getCredentialProviderRelativePath() {
     // The DistributedCache of Hadoop can only link files from their relative path to the working directory
     java.nio.file.Path currentDirectory = Paths.get(WORKING_DIRECTORY);
-    java.nio.file.Path absolutePathToCredentialsFile = Paths.get(security.getCredentialProvider());
-    java.nio.file.Path pathRelative = currentDirectory.relativize(absolutePathToCredentialsFile);
-    return pathRelative.toString();
+    java.nio.file.Path pathToCredentialsFile = Paths.get(security.getCredentialProvider());
+    if (pathToCredentialsFile.isAbsolute()) {
+      java.nio.file.Path pathRelative = currentDirectory.relativize(pathToCredentialsFile);
+      return pathRelative.toString();
+    } else {
+      return pathToCredentialsFile.toString();
+    }
   }
 
   private String getHdfsGsCredentialAbsolutePath() {

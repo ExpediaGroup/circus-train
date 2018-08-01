@@ -64,7 +64,7 @@ public class GCPCredentialConfigurerTest {
     assertNotNull(conf.get("mapreduce.job.cache.files"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = CircusTrainException.class)
   public void configureCredentialsWithIncorrectPathThrowsException() throws Exception {
     PowerMockito.mockStatic(FileSystem.class);
     Configuration conf = new Configuration();

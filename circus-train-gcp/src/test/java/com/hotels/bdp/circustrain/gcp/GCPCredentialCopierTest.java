@@ -130,7 +130,7 @@ public class GCPCredentialCopierTest {
   }
 
   @Test
-  public void shouldGetRelativePath() throws IOException {
+  public void shouldGetRelativePathFromAbsolutePath() throws IOException {
     temporaryFolder.newFile(credentialsFilePath);
     setGcpSecurity(credentialsFilePath, null);
     GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, gcpSecurity);
@@ -139,5 +139,18 @@ public class GCPCredentialCopierTest {
     verify(fileSystem).copyFromLocalFile(pathCaptor.capture(), any(Path.class));
     Path source = pathCaptor.getValue();
     assertTrue(source.toString().equals(credentialsFileRelativePath));
+  }
+
+  @Test
+  public void shouldGetSamePathFromRelativePath() throws IOException {
+    credentialsFilePath = "../test.json";
+    temporaryFolder.newFile(credentialsFilePath);
+    setGcpSecurity(credentialsFilePath, null);
+    GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, gcpSecurity);
+    ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
+    copier.copyCredentials();
+    verify(fileSystem).copyFromLocalFile(pathCaptor.capture(), any(Path.class));
+    Path source = pathCaptor.getValue();
+    assertTrue(source.toString().equals(credentialsFilePath));
   }
 }
