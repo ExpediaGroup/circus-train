@@ -22,8 +22,6 @@ import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_KEYFILE_CACHED_LOC
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.UUID;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -37,55 +35,51 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
 
-  private static final String WORKING_DIRECTORY = System.getProperty("user.dir");
-  private static final String DEFAULT_HDFS_PREFIX = "hdfs:///tmp/ct-gcp-";
-  private static final String RANDOM_STRING = UUID.randomUUID().toString();
-  private static final String CACHED_CREDENTIAL_NAME = "/ct-gcp-key-" + RANDOM_STRING + ".json";
-
   private final FileSystem fs;
   private final Configuration conf;
   private final GCPSecurity security;
+  private final CredentialProviderRelativePathFactory credentialProviderRelativePathFactory;
+  private final HdfsGsCredentialAbsolutePathFactory hdfsGsCredentialAbsolutePathFactory;
+  private final HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory;
+  private final RandomStringFactory randomStringFactory;
   private final String credentialsFileRelativePath;
-  private final String hdfsGsCredentialDirectory;
-  private final String hdfsGsCredentialAbsolutePath;
+  private final String randomString;
+  private final Path hdfsGsCredentialDirectory;
+  private final Path hdfsGsCredentialAbsolutePath;
 
   GCPCredentialCopier(FileSystem fs, Configuration conf, GCPSecurity security) {
+    this(fs, conf, security, new CredentialProviderRelativePathFactory(), new HdfsGsCredentialAbsolutePathFactory(),
+        new HdfsGsCredentialDirectoryFactory(), new RandomStringFactory());
+  }
+
+  GCPCredentialCopier(
+      FileSystem fs,
+      Configuration conf,
+      GCPSecurity security,
+      CredentialProviderRelativePathFactory credentialProviderRelativePathFactory,
+      HdfsGsCredentialAbsolutePathFactory hdfsGsCredentialAbsolutePathFactory,
+      HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory,
+      RandomStringFactory randomStringFactory) {
     this.fs = fs;
     this.conf = conf;
+    this.credentialProviderRelativePathFactory = credentialProviderRelativePathFactory;
+    this.hdfsGsCredentialAbsolutePathFactory = hdfsGsCredentialAbsolutePathFactory;
+    this.hdfsGsCredentialDirectoryFactory = hdfsGsCredentialDirectoryFactory;
+    this.randomStringFactory = randomStringFactory;
+
     if (security == null || isBlank(security.getCredentialProvider())) {
       throw new IllegalArgumentException("gcp-security credential-provider must be set");
     }
     this.security = security;
-    credentialsFileRelativePath = getCredentialProviderRelativePath();
-    hdfsGsCredentialDirectory = getHdfsGsCredentialDirectory();
-    hdfsGsCredentialAbsolutePath = getHdfsGsCredentialAbsolutePath();
+
+    randomString = this.randomStringFactory.newInstance();
+    hdfsGsCredentialDirectory = this.hdfsGsCredentialDirectoryFactory.newInstance(security, randomString);
+    hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialAbsolutePathFactory
+        .newInstance(hdfsGsCredentialDirectory, randomString);
+    credentialsFileRelativePath = this.credentialProviderRelativePathFactory.newInstance(security);
     LOG.debug("Credential Provider URI = {}", credentialsFileRelativePath);
-    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory);
-    LOG.debug("HDFS Google Cloud credential path will be {}", hdfsGsCredentialAbsolutePath);
-  }
-
-  private String getHdfsGsCredentialDirectory() {
-    if (isBlank(security.getDistributedFileSystemWorkingDirectory())) {
-      return DEFAULT_HDFS_PREFIX + RANDOM_STRING;
-    } else {
-      return security.getDistributedFileSystemWorkingDirectory();
-    }
-  }
-
-  private String getCredentialProviderRelativePath() {
-    // The DistributedCache of Hadoop can only link files from their relative path to the working directory
-    java.nio.file.Path currentDirectory = Paths.get(WORKING_DIRECTORY);
-    java.nio.file.Path pathToCredentialsFile = Paths.get(security.getCredentialProvider());
-    if (pathToCredentialsFile.isAbsolute()) {
-      java.nio.file.Path pathRelative = currentDirectory.relativize(pathToCredentialsFile);
-      return pathRelative.toString();
-    } else {
-      return pathToCredentialsFile.toString();
-    }
-  }
-
-  private String getHdfsGsCredentialAbsolutePath() {
-    return hdfsGsCredentialDirectory + CACHED_CREDENTIAL_NAME;
+    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory.toString());
+    LOG.debug("HDFS Google Cloud credential path will be {}", hdfsGsCredentialAbsolutePath.toString());
   }
 
   void copyCredentials() {
@@ -103,8 +97,8 @@ class GCPCredentialCopier {
      * replication.
      */
     Path source = new Path(credentialsFileRelativePath);
-    Path destination = new Path(hdfsGsCredentialAbsolutePath);
-    Path destinationFolder = new Path(hdfsGsCredentialDirectory);
+    Path destination = hdfsGsCredentialAbsolutePath;
+    Path destinationFolder = hdfsGsCredentialDirectory;
     fs.deleteOnExit(destinationFolder);
     LOG.debug("Copying credential into HDFS {}", destination);
     fs.copyFromLocalFile(source, destination);
@@ -116,7 +110,7 @@ class GCPCredentialCopier {
      * GoogleHadoopFileSystem can subsequently resolve it from a local file system uri despite it being in a Distributed
      * file system when the DistCP job runs.
      */
-    String cacheFileUri = hdfsGsCredentialAbsolutePath + "#" + credentialsFileRelativePath;
+    String cacheFileUri = hdfsGsCredentialAbsolutePath.toString() + "#" + credentialsFileRelativePath;
     org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(cacheFileUri), conf);
 
     LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
