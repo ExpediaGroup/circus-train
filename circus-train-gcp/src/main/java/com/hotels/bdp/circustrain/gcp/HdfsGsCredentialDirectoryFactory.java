@@ -24,13 +24,15 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 class HdfsGsCredentialDirectoryFactory {
 
   static final String DEFAULT_HDFS_PREFIX = "hdfs:/tmp/ct-gcp-";
+  private String hdfsBaseDirectory;
 
   Path newInstance(GCPSecurity security, String randomString) {
     if (isBlank(security.getDistributedFileSystemWorkingDirectory())) {
-      return new Path(DEFAULT_HDFS_PREFIX + randomString);
+      hdfsBaseDirectory = DEFAULT_HDFS_PREFIX;
     } else {
-      return new Path(security.getDistributedFileSystemWorkingDirectory() + randomString);
+      hdfsBaseDirectory = security.getDistributedFileSystemWorkingDirectory();
     }
+    return new Path(hdfsBaseDirectory + randomString);
   }
 
 }
