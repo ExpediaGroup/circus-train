@@ -23,23 +23,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 public class GCPCredentialConfigurer {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialConfigurer.class);
 
   private final Configuration conf;
-  private final GCPSecurity security;
+  private final GCPCredentialPathProvider credentialPathProvider;
+  private final DistributedFileSystemPathProvider dfsPathProvider;
 
-  public GCPCredentialConfigurer(Configuration conf, GCPSecurity gcpSecurity) {
+  public GCPCredentialConfigurer(
+      Configuration conf,
+      GCPCredentialPathProvider credentialPathProvider,
+      DistributedFileSystemPathProvider dfsPathProvider) {
     this.conf = conf;
-    this.security = gcpSecurity;
+    this.credentialPathProvider = credentialPathProvider;
+    this.dfsPathProvider = dfsPathProvider;
   }
 
   public void configureCredentials() {
     try {
       LOG.debug("Configuring GCP Credentials");
-      GCPCredentialCopier copier = new GCPCredentialCopier(FileSystem.get(conf), conf, security);
+      GCPCredentialCopier copier = new GCPCredentialCopier(FileSystem.get(conf), conf, credentialPathProvider,
+          dfsPathProvider);
       copier.copyCredentials();
     } catch (IOException e) {
       throw new CircusTrainException(e);

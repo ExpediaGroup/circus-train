@@ -58,7 +58,9 @@ public class GCPCredentialConfigurerTest {
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
     GCPSecurity security = new GCPSecurity();
     security.setCredentialProvider(credentialProvider);
-    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, security);
+    GCPCredentialPathProvider credentialPathProvider = new GCPCredentialPathProvider(security);
+    DistributedFileSystemPathProvider distributedFileSystemPathProvider = new DistributedFileSystemPathProvider(security, new RandomStringFactory());
+    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, credentialPathProvider, distributedFileSystemPathProvider);
     configurer.configureCredentials();
     verify(fileSystem, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
@@ -73,7 +75,9 @@ public class GCPCredentialConfigurerTest {
     String credentialProvider = "test.json";
     GCPSecurity security = new GCPSecurity();
     security.setCredentialProvider(credentialProvider);
-    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, security);
+    GCPCredentialPathProvider credentialPathProvider = new GCPCredentialPathProvider(security);
+    DistributedFileSystemPathProvider distributedFileSystemPathProvider = new DistributedFileSystemPathProvider(security, new RandomStringFactory());
+    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, credentialPathProvider, distributedFileSystemPathProvider);
     configurer.configureCredentials();
     verify(fileSystem, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
     assertNotNull(conf.get("mapreduce.job.cache.files"));
@@ -89,7 +93,9 @@ public class GCPCredentialConfigurerTest {
     credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
     GCPSecurity security = new GCPSecurity();
     security.setCredentialProvider(credentialProvider);
-    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, security);
+    GCPCredentialPathProvider credentialPathProvider = new GCPCredentialPathProvider(security);
+    DistributedFileSystemPathProvider distributedFileSystemPathProvider = new DistributedFileSystemPathProvider(security, new RandomStringFactory());
+    GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(conf, credentialPathProvider, distributedFileSystemPathProvider);
     configurer.configureCredentials();
   }
 }

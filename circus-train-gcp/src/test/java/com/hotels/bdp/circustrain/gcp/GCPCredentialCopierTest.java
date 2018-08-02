@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GCPCredentialCopierTest {
@@ -44,62 +43,40 @@ public class GCPCredentialCopierTest {
   private static final String DISTRIBUTED_CACHE_PROPERTY = "mapreduce.job.cache.files";
   private static final String SYMLINK_FLAG = "#";
 
-  private @Mock FileSystem fileSystem;
-  private @Mock CredentialProviderRelativePathFactory credentialProviderRelativePathFactory;
-  private @Mock HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory;
-  private @Mock RandomStringFactory randomStringFactory;
   private final Configuration conf = new Configuration();
-  private final GCPSecurity gcpSecurity = new GCPSecurity();
+  private final Path credentialsFileRelativePath = new Path("../test.json");
+  private final Path dfsDirectory = new Path("/rootDirectory/test-random-string");
+  private final String dfsAbsolutePath = dfsDirectory + "/" + GCPCredentialCopier.GCP_KEY_NAME;
+
+  private @Mock FileSystem fileSystem;
+  private @Mock GCPCredentialPathProvider credentialPathProvider;
+  private @Mock DistributedFileSystemPathProvider distributedFileSystemPathProvider;
+
   private GCPCredentialCopier copier;
-  private final String credentialsFilePath = "/test.json";
-  private final String credentialsFileRelativePath = ".." + credentialsFilePath;
-  private final String randomString = "randomString";
-  private final String hdfsDirectory = "/rootDirectory/test-" + randomString;
-  private final String hdfsAbsolutePath = hdfsDirectory + "/" + GCPCredentialCopier.GCP_KEY_NAME;
 
   @Before
   public void init() {
-    setGcpSecurity(credentialsFilePath, null);
-    doReturn(randomString).when(randomStringFactory).newInstance();
-    doReturn(credentialsFileRelativePath).when(credentialProviderRelativePathFactory).newInstance(gcpSecurity);
-    doReturn(new Path(hdfsDirectory)).when(hdfsGsCredentialDirectoryFactory).newInstance(gcpSecurity);
-    copier = new GCPCredentialCopier(fileSystem, conf, gcpSecurity, credentialProviderRelativePathFactory,
-        hdfsGsCredentialDirectoryFactory);
-  }
-
-  private void setGcpSecurity(String credentialProvider, String distributedFileSystemWorkingDirectory) {
-    gcpSecurity.setCredentialProvider(credentialProvider);
-    gcpSecurity.setDistributedFileSystemWorkingDirectory(distributedFileSystemWorkingDirectory);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void credentialProviderNotSetThrowsException() throws Exception {
-    doReturn(false).when(fileSystem).exists(any(Path.class));
-    setGcpSecurity(null, null);
-    new GCPCredentialCopier(fileSystem, conf, gcpSecurity);
+    doReturn(credentialsFileRelativePath).when(credentialPathProvider).newPath();
+    doReturn(dfsDirectory).when(distributedFileSystemPathProvider).newPath();
+    copier = new GCPCredentialCopier(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
   }
 
   @Test
   public void copyCredentialsWithCredentialProviderSupplied() throws Exception {
     copier.copyCredentials();
-    verify(fileSystem).copyFromLocalFile(new Path(credentialsFileRelativePath), new Path(hdfsAbsolutePath));
-    verify(fileSystem).deleteOnExit(new Path(hdfsDirectory));
+    verify(fileSystem).copyFromLocalFile(credentialsFileRelativePath, new Path(dfsAbsolutePath));
+    verify(fileSystem).deleteOnExit(dfsDirectory);
     assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
-    assertThat(conf.get(DISTRIBUTED_CACHE_PROPERTY), is(hdfsAbsolutePath + SYMLINK_FLAG + credentialsFileRelativePath));
-    assertFalse(fileSystem.exists(new Path(hdfsAbsolutePath)));
+    assertThat(conf.get(DISTRIBUTED_CACHE_PROPERTY), is(dfsAbsolutePath + SYMLINK_FLAG + credentialsFileRelativePath));
+    assertFalse(fileSystem.exists(new Path(dfsAbsolutePath)));
   }
 
   @Test(expected = CircusTrainException.class)
   public void copyCredentialsWhenFileDoesntExistThrowsException() throws Exception {
-    doThrow(new IOException("foo")).when(fileSystem).copyFromLocalFile(any(Path.class), any(Path.class));
-    GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, gcpSecurity);
+    doThrow(new IOException("File doest not exist")).when(fileSystem).copyFromLocalFile(any(Path.class),
+        any(Path.class));
+    GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, credentialPathProvider,
+        distributedFileSystemPathProvider);
     copier.copyCredentials();
   }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void nullGCPSecurityThrowsException() throws Exception {
-    GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, null);
-    copier.copyCredentials();
-  }
-
 }

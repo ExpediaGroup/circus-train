@@ -15,8 +15,6 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_KEYFILE_CACHED_LOCATION;
 
 import java.io.IOException;
@@ -30,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
@@ -38,41 +35,23 @@ class GCPCredentialCopier {
 
   private final FileSystem fs;
   private final Configuration conf;
-  private final GCPSecurity security;
-  private final CredentialProviderRelativePathFactory credentialProviderRelativePathFactory;
-  private final HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory;
-  private final String credentialsFileRelativePath;
-  private final Path hdfsGsCredentialDirectory;
-  private final Path hdfsGsCredentialAbsolutePath;
+  private final Path credentialsFileRelativePath;
+  private final Path dfsGCPCredentialDirectory;
+  private final Path dfsGCPCredentialAbsolutePath;
 
-  GCPCredentialCopier(FileSystem fs, Configuration conf, GCPSecurity security) {
-    this(fs, conf, security, new CredentialProviderRelativePathFactory(),
-        new HdfsGsCredentialDirectoryFactory(new RandomStringFactory()));
-  }
-
-  GCPCredentialCopier(
-      FileSystem fs,
-      Configuration conf,
-      GCPSecurity security,
-      CredentialProviderRelativePathFactory credentialProviderRelativePathFactory,
-      HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory) {
+  GCPCredentialCopier(FileSystem fs, Configuration conf, GCPCredentialPathProvider credentialPathProvider, DistributedFileSystemPathProvider dfsPathProvider) {
     this.fs = fs;
     this.conf = conf;
-    this.credentialProviderRelativePathFactory = credentialProviderRelativePathFactory;
-    this.hdfsGsCredentialDirectoryFactory = hdfsGsCredentialDirectoryFactory;
 
-    if (security == null || isBlank(security.getCredentialProvider())) {
-      throw new IllegalArgumentException("gcp-security credential-provider must be set");
-    }
-    this.security = security;
-
-    hdfsGsCredentialDirectory = this.hdfsGsCredentialDirectoryFactory.newInstance(security);
-    hdfsGsCredentialAbsolutePath = new Path(hdfsGsCredentialDirectory, GCP_KEY_NAME);
-    credentialsFileRelativePath = this.credentialProviderRelativePathFactory.newInstance(security);
+    dfsGCPCredentialDirectory = dfsPathProvider.newPath();
+    dfsGCPCredentialAbsolutePath = new Path(dfsGCPCredentialDirectory, GCP_KEY_NAME);
+    credentialsFileRelativePath = credentialPathProvider.newPath();
     LOG.debug("Credential Provider URI = {}", credentialsFileRelativePath);
-    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory.toString());
-    LOG.debug("HDFS Google Cloud credential path will be {}", hdfsGsCredentialAbsolutePath.toString());
+    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", dfsGCPCredentialDirectory.toString());
+    LOG.debug("HDFS Google Cloud credential path will be {}", dfsGCPCredentialAbsolutePath.toString());
+
   }
+
 
   void copyCredentials() {
     try {
@@ -88,9 +67,9 @@ class GCPCredentialCopier {
      * The Google credentials file must be present in HDFS so that the DistCP map reduce job can access it upon
      * replication.
      */
-    Path source = new Path(credentialsFileRelativePath);
-    Path destination = hdfsGsCredentialAbsolutePath;
-    Path destinationFolder = hdfsGsCredentialDirectory;
+    Path source = credentialsFileRelativePath;
+    Path destination = dfsGCPCredentialAbsolutePath;
+    Path destinationFolder = dfsGCPCredentialDirectory;
     fs.deleteOnExit(destinationFolder);
     LOG.debug("Copying credential into HDFS {}", destination);
     fs.copyFromLocalFile(source, destination);
@@ -102,10 +81,10 @@ class GCPCredentialCopier {
      * GoogleHadoopFileSystem can subsequently resolve it from a local file system uri despite it being in a Distributed
      * file system when the DistCP job runs.
      */
-    String cacheFileUri = hdfsGsCredentialAbsolutePath.toString() + "#" + credentialsFileRelativePath;
+    String cacheFileUri = dfsGCPCredentialAbsolutePath.toString() + "#" + credentialsFileRelativePath;
     org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(cacheFileUri), conf);
 
     LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
-    conf.set(GCP_KEYFILE_CACHED_LOCATION, credentialsFileRelativePath);
+    conf.set(GCP_KEYFILE_CACHED_LOCATION, credentialsFileRelativePath.toString());
   }
 }

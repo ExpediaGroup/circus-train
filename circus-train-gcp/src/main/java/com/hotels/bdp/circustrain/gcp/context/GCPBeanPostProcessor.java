@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package com.hotels.bdp.circustrain.gcp.context;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,18 +25,24 @@ import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.context.CommonBeans;
 import com.hotels.bdp.circustrain.gcp.BindGoogleHadoopFileSystem;
+import com.hotels.bdp.circustrain.gcp.DistributedFileSystemPathProvider;
 import com.hotels.bdp.circustrain.gcp.GCPCredentialConfigurer;
+import com.hotels.bdp.circustrain.gcp.GCPCredentialPathProvider;
 
 @Component
 public class GCPBeanPostProcessor implements BeanPostProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(GCPBeanPostProcessor.class);
 
-  private final GCPSecurity security;
+  private final GCPCredentialPathProvider credentialPathProvider;
+  private final DistributedFileSystemPathProvider dfsPathProvider;
 
   @Autowired
-  public GCPBeanPostProcessor(GCPSecurity gcpSecurity) {
-    this.security = gcpSecurity;
+  public GCPBeanPostProcessor(
+      GCPCredentialPathProvider credentialPathProvider,
+      DistributedFileSystemPathProvider dfsPathProvider) {
+    this.credentialPathProvider = credentialPathProvider;
+    this.dfsPathProvider = dfsPathProvider;
   }
 
   @Override
@@ -58,10 +62,11 @@ public class GCPBeanPostProcessor implements BeanPostProcessor {
 
   private void setHadoopConfiguration(Configuration configuration) {
     LOG.debug("Configuring google hadoop connector");
-    if (isNotBlank(security.getCredentialProvider())) {
+    if (credentialPathProvider.newPath() != null) {
       BindGoogleHadoopFileSystem binder = new BindGoogleHadoopFileSystem(configuration);
       binder.bindFileSystem();
-      GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(configuration, security);
+      GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(configuration, credentialPathProvider,
+          dfsPathProvider);
       configurer.configureCredentials();
     }
   }

@@ -17,9 +17,12 @@ package com.hotels.bdp.circustrain.gcp;
 
 import java.util.UUID;
 
-class RandomStringFactory {
+import org.springframework.stereotype.Component;
 
-  String newInstance() {
+@Component
+public class RandomStringFactory {
+
+  public String newInstance() {
     return UUID.randomUUID().toString();
   }
 

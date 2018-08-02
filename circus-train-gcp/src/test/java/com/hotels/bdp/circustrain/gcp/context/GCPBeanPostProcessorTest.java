@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,39 +23,51 @@ import static org.mockito.Mockito.when;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.context.CommonBeans;
+import com.hotels.bdp.circustrain.gcp.DistributedFileSystemPathProvider;
+import com.hotels.bdp.circustrain.gcp.GCPCredentialPathProvider;
+import com.hotels.bdp.circustrain.gcp.RandomStringFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GCPBeanPostProcessorTest {
+  private @Mock RandomStringFactory randomStringFactory;
+
   private @Spy GCPSecurity security = new GCPSecurity();
+  private @Spy GCPCredentialPathProvider credentialPathProvider = new GCPCredentialPathProvider(security);
+  private @Spy DistributedFileSystemPathProvider distributedFileSystemPathProvider = new DistributedFileSystemPathProvider(
+      security, randomStringFactory);
   private @Spy Configuration configuration = new Configuration();
 
   @Test
   public void postProcessAfterInitializationWithCorrectBeanName() throws Exception {
     String beanName = CommonBeans.BEAN_BASE_CONF;
-    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(security);
+    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(credentialPathProvider,
+        distributedFileSystemPathProvider);
     processor.postProcessAfterInitialization(configuration, beanName);
-    verify(security, times(1)).getCredentialProvider();
+    verify(credentialPathProvider).newPath();
   }
 
   @Test
   public void postProcessAfterInitializationWithIncorrectBeanName() throws Exception {
     String beanName = "notBaseConf";
-    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(security);
+    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(credentialPathProvider,
+        distributedFileSystemPathProvider);
     processor.postProcessAfterInitialization(configuration, beanName);
-    verify(security, times(0)).getCredentialProvider();
+    verify(credentialPathProvider, times(0)).newPath();
   }
 
   @Test
   public void postProcessAfterInitializationWithBlankCredentialProviderDoesntModifyConfiguration() throws Exception {
     String beanName = CommonBeans.BEAN_BASE_CONF;
-    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(security);
+    GCPBeanPostProcessor processor = new GCPBeanPostProcessor(credentialPathProvider,
+        distributedFileSystemPathProvider);
     processor.postProcessAfterInitialization(configuration, beanName);
     when(security.getCredentialProvider()).thenReturn("");
-    verify(security, times(1)).getCredentialProvider();
+    verify(credentialPathProvider).newPath();
     verify(configuration, times(0)).set(anyString(), anyString());
   }
 }

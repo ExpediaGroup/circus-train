@@ -15,21 +15,39 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.nio.file.Paths;
+
+import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
-public class CredentialProviderRelativePathFactory {
+@Component
+public class GCPCredentialPathProvider {
 
-  String newInstance(GCPSecurity security) {
+  private final GCPSecurity security;
+
+  @Autowired
+  public GCPCredentialPathProvider(GCPSecurity security) {
+    this.security = security;
+  }
+
+  public Path newPath() {
+    String credentialProviderPath = security.getCredentialProvider();
+    if (isBlank(credentialProviderPath)) {
+      return null;
+    }
     // The DistributedCache of Hadoop can only link files from their relative path to the working directory
     java.nio.file.Path currentDirectory = Paths.get(System.getProperty("user.dir"));
     java.nio.file.Path pathToCredentialsFile = Paths.get(security.getCredentialProvider());
     if (pathToCredentialsFile.isAbsolute()) {
       java.nio.file.Path pathRelative = currentDirectory.relativize(pathToCredentialsFile);
-      return pathRelative.toString();
+      return new Path(pathRelative.toString());
     } else {
-      return pathToCredentialsFile.toString();
+      return new Path(pathToCredentialsFile.toString());
     }
   }
 }

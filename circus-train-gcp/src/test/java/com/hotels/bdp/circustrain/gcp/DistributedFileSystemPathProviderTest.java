@@ -16,37 +16,38 @@
 package com.hotels.bdp.circustrain.gcp;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CredentialProviderRelativePathFactoryTest {
+public class DistributedFileSystemPathProviderTest {
 
   private final GCPSecurity security = new GCPSecurity();
+  private @Mock RandomStringFactory randomStringFactory;
 
   @Test
-  public void newInstanceWithRelativePath() {
-    String relativePath = "../test.json";
-    security.setCredentialProvider(relativePath);
-    String result = new CredentialProviderRelativePathFactory().newInstance(security);
-    assertThat(result, is(relativePath));
+  public void newInstanceWithoutConfigurationSet() {
+    String randomString = "test";
+    doReturn(randomString).when(randomStringFactory).newInstance();
+    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
+    assertThat(directory.toString(), is(DistributedFileSystemPathProvider.DEFAULT_HDFS_PREFIX + randomString));
   }
 
   @Test
-  public void newInstanceWithAbsolutePath() {
-    String absolutePath = "/test.json";
-    security.setCredentialProvider(absolutePath);
-    String result = new CredentialProviderRelativePathFactory().newInstance(security);
-    assertFalse(new Path(result).isAbsolute());
-    assertTrue(result.startsWith("../"));
+  public void newInstanceWithConfigurationSet() {
+    String randomString = "test";
+    String providedDirectory = "hdfs:/test/directory";
+    doReturn(randomString).when(randomStringFactory).newInstance();
+    security.setDistributedFileSystemWorkingDirectory(providedDirectory);
+    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
+    assertThat(directory.toString(), is(providedDirectory + "/" + randomString));
   }
-
 }

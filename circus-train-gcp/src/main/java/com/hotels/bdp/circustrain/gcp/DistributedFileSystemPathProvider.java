@@ -18,23 +18,25 @@ package com.hotels.bdp.circustrain.gcp;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
-class HdfsGsCredentialDirectoryFactory {
+@Component
+public class DistributedFileSystemPathProvider {
 
   static final String DEFAULT_HDFS_PREFIX = "hdfs:/tmp/ct-gcp-";
+  private final GCPSecurity security;
   private final RandomStringFactory randomStringFactory;
 
-  HdfsGsCredentialDirectoryFactory() {
-    this(new RandomStringFactory());
-  }
-
-  HdfsGsCredentialDirectoryFactory(RandomStringFactory randomStringFactory) {
+  @Autowired
+  public DistributedFileSystemPathProvider(GCPSecurity security, RandomStringFactory randomStringFactory) {
+    this.security = security;
     this.randomStringFactory = randomStringFactory;
   }
 
-  Path newInstance(GCPSecurity security) {
+  public Path newPath() {
     String randomString = randomStringFactory.newInstance();
     if (isBlank(security.getDistributedFileSystemWorkingDirectory())) {
       return new Path(DEFAULT_HDFS_PREFIX + randomString);
