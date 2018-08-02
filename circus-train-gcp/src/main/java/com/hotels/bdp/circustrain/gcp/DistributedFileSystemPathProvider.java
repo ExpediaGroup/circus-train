@@ -55,7 +55,7 @@ public class DistributedFileSystemPathProvider {
   private Path getTemporaryFolder(Configuration configuration, String randomString) {
     String temporaryFolder = configuration.get("hive.exec.scratchdir");
     if (isBlank(temporaryFolder)) {
-      return new Path("hdfs:/tmp/ct-gcp-" + randomString);
+      return new Path(DEFAULT_HDFS_PREFIX + randomString);
     }
     return new Path(temporaryFolder, randomString);
   }
