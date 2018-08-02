@@ -46,7 +46,6 @@ public class GCPCredentialCopierTest {
 
   private @Mock FileSystem fileSystem;
   private @Mock CredentialProviderRelativePathFactory credentialProviderRelativePathFactory;
-  private @Mock HdfsGsCredentialAbsolutePathFactory hdfsGsCredentialAbsolutePathFactory;
   private @Mock HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory;
   private @Mock RandomStringFactory randomStringFactory;
   private final Configuration conf = new Configuration();
@@ -55,20 +54,17 @@ public class GCPCredentialCopierTest {
   private final String credentialsFilePath = "/test.json";
   private final String credentialsFileRelativePath = ".." + credentialsFilePath;
   private final String randomString = "randomString";
-  private final String hdfsDirectory = "/rootDirectory/" + randomString;
-  private final String hdfsAbsolutePath = "/rootDirectory/test-" + randomString + credentialsFilePath;
+  private final String hdfsDirectory = "/rootDirectory/test-" + randomString;
+  private final String hdfsAbsolutePath = hdfsDirectory + "/" + GCPCredentialCopier.GCP_KEY_NAME;
 
   @Before
   public void init() {
     setGcpSecurity(credentialsFilePath, null);
     doReturn(randomString).when(randomStringFactory).newInstance();
     doReturn(credentialsFileRelativePath).when(credentialProviderRelativePathFactory).newInstance(gcpSecurity);
-    doReturn(new Path(hdfsDirectory)).when(hdfsGsCredentialDirectoryFactory).newInstance(gcpSecurity, randomString);
-    doReturn(new Path(hdfsAbsolutePath))
-        .when(hdfsGsCredentialAbsolutePathFactory)
-        .newInstance(any(Path.class), any(String.class));
+    doReturn(new Path(hdfsDirectory)).when(hdfsGsCredentialDirectoryFactory).newInstance(gcpSecurity);
     copier = new GCPCredentialCopier(fileSystem, conf, gcpSecurity, credentialProviderRelativePathFactory,
-        hdfsGsCredentialAbsolutePathFactory, hdfsGsCredentialDirectoryFactory, randomStringFactory);
+        hdfsGsCredentialDirectoryFactory);
   }
 
   private void setGcpSecurity(String credentialProvider, String distributedFileSystemWorkingDirectory) {

@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.gcp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import org.apache.hadoop.fs.Path;
@@ -30,23 +31,32 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 @RunWith(MockitoJUnitRunner.class)
 public class HdfsGsCredentialDirectoryFactoryTest {
 
-  private @Mock GCPSecurity security;
+  private final GCPSecurity security = new GCPSecurity();
+  private @Mock RandomStringFactory randomStringFactory;
 
   @Test
   public void newInstanceWithoutConfigurationSet() {
-    doReturn("").when(security).getDistributedFileSystemWorkingDirectory();
     String randomString = "test";
-    Path directory = new HdfsGsCredentialDirectoryFactory().newInstance(security, randomString);
+    doReturn(randomString).when(randomStringFactory).newInstance();
+    Path directory = new HdfsGsCredentialDirectoryFactory(randomStringFactory).newInstance(security);
     assertThat(directory.toString(), is(HdfsGsCredentialDirectoryFactory.DEFAULT_HDFS_PREFIX + randomString));
   }
 
   @Test
   public void newInstanceWithConfigurationSet() {
-    String providedDirectory = "hdfs:/test/directory";
-    doReturn(providedDirectory).when(security).getDistributedFileSystemWorkingDirectory();
     String randomString = "test";
-    Path directory = new HdfsGsCredentialDirectoryFactory().newInstance(security, randomString);
-    assertThat(directory.toString(), is(providedDirectory + randomString));
+    String providedDirectory = "hdfs:/test/directory";
+    doReturn(randomString).when(randomStringFactory).newInstance();
+    security.setDistributedFileSystemWorkingDirectory(providedDirectory);
+    Path directory = new HdfsGsCredentialDirectoryFactory(randomStringFactory).newInstance(security);
+    assertThat(directory.toString(), is(providedDirectory + "/" + randomString));
+  }
+
+  @Test
+  public void noParameterConstructor() {
+    security.setCredentialProvider("");
+    Path directory = new HdfsGsCredentialDirectoryFactory().newInstance(security);
+    assertTrue(directory.toString().startsWith(HdfsGsCredentialDirectoryFactory.DEFAULT_HDFS_PREFIX));
   }
 
 }

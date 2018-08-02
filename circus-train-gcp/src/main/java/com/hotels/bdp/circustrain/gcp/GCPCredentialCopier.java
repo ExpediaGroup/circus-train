@@ -34,22 +34,20 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
 class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
+  static final String GCP_KEY_NAME = "ct-gcp-key.json";
 
   private final FileSystem fs;
   private final Configuration conf;
   private final GCPSecurity security;
   private final CredentialProviderRelativePathFactory credentialProviderRelativePathFactory;
-  private final HdfsGsCredentialAbsolutePathFactory hdfsGsCredentialAbsolutePathFactory;
   private final HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory;
-  private final RandomStringFactory randomStringFactory;
   private final String credentialsFileRelativePath;
-  private final String randomString;
   private final Path hdfsGsCredentialDirectory;
   private final Path hdfsGsCredentialAbsolutePath;
 
   GCPCredentialCopier(FileSystem fs, Configuration conf, GCPSecurity security) {
-    this(fs, conf, security, new CredentialProviderRelativePathFactory(), new HdfsGsCredentialAbsolutePathFactory(),
-        new HdfsGsCredentialDirectoryFactory(), new RandomStringFactory());
+    this(fs, conf, security, new CredentialProviderRelativePathFactory(),
+        new HdfsGsCredentialDirectoryFactory(new RandomStringFactory()));
   }
 
   GCPCredentialCopier(
@@ -57,25 +55,19 @@ class GCPCredentialCopier {
       Configuration conf,
       GCPSecurity security,
       CredentialProviderRelativePathFactory credentialProviderRelativePathFactory,
-      HdfsGsCredentialAbsolutePathFactory hdfsGsCredentialAbsolutePathFactory,
-      HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory,
-      RandomStringFactory randomStringFactory) {
+      HdfsGsCredentialDirectoryFactory hdfsGsCredentialDirectoryFactory) {
     this.fs = fs;
     this.conf = conf;
     this.credentialProviderRelativePathFactory = credentialProviderRelativePathFactory;
-    this.hdfsGsCredentialAbsolutePathFactory = hdfsGsCredentialAbsolutePathFactory;
     this.hdfsGsCredentialDirectoryFactory = hdfsGsCredentialDirectoryFactory;
-    this.randomStringFactory = randomStringFactory;
 
     if (security == null || isBlank(security.getCredentialProvider())) {
       throw new IllegalArgumentException("gcp-security credential-provider must be set");
     }
     this.security = security;
 
-    randomString = this.randomStringFactory.newInstance();
-    hdfsGsCredentialDirectory = this.hdfsGsCredentialDirectoryFactory.newInstance(security, randomString);
-    hdfsGsCredentialAbsolutePath = this.hdfsGsCredentialAbsolutePathFactory
-        .newInstance(hdfsGsCredentialDirectory, randomString);
+    hdfsGsCredentialDirectory = this.hdfsGsCredentialDirectoryFactory.newInstance(security);
+    hdfsGsCredentialAbsolutePath = new Path(hdfsGsCredentialDirectory, GCP_KEY_NAME);
     credentialsFileRelativePath = this.credentialProviderRelativePathFactory.newInstance(security);
     LOG.debug("Credential Provider URI = {}", credentialsFileRelativePath);
     LOG.debug("Temporary HDFS Google Cloud credential location set to {}", hdfsGsCredentialDirectory.toString());
