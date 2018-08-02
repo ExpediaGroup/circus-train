@@ -27,6 +27,8 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 public class DistributedFileSystemPathProvider {
 
   static final String DEFAULT_HDFS_PREFIX = "hdfs:/tmp/ct-gcp-";
+  static final String GCP_KEY_NAME = "ct-gcp-key.json";
+
   private final GCPSecurity security;
   private final RandomStringFactory randomStringFactory;
 
@@ -38,10 +40,12 @@ public class DistributedFileSystemPathProvider {
 
   public Path newPath() {
     String randomString = randomStringFactory.newInstance();
+
     if (isBlank(security.getDistributedFileSystemWorkingDirectory())) {
-      return new Path(DEFAULT_HDFS_PREFIX + randomString);
+      return new Path(DEFAULT_HDFS_PREFIX + randomString, GCP_KEY_NAME);
     } else {
-      return new Path(security.getDistributedFileSystemWorkingDirectory(), randomString);
+      Path parentDirectory = new Path(security.getDistributedFileSystemWorkingDirectory(), randomString);
+      return new Path(parentDirectory, GCP_KEY_NAME);
     }
 
   }

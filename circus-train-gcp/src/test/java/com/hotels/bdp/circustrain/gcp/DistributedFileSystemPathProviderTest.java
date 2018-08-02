@@ -38,7 +38,8 @@ public class DistributedFileSystemPathProviderTest {
     String randomString = "test";
     doReturn(randomString).when(randomStringFactory).newInstance();
     Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
-    assertThat(directory.toString(), is(DistributedFileSystemPathProvider.DEFAULT_HDFS_PREFIX + randomString));
+    String baseDirectoryExpected = DistributedFileSystemPathProvider.DEFAULT_HDFS_PREFIX + randomString;
+    assertThat(directory, is(new Path(baseDirectoryExpected, DistributedFileSystemPathProvider.GCP_KEY_NAME)));
   }
 
   @Test
@@ -48,6 +49,8 @@ public class DistributedFileSystemPathProviderTest {
     doReturn(randomString).when(randomStringFactory).newInstance();
     security.setDistributedFileSystemWorkingDirectory(providedDirectory);
     Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
-    assertThat(directory.toString(), is(providedDirectory + "/" + randomString));
+    assertThat(directory.toString(),
+        is(providedDirectory + "/" + randomString + "/" + DistributedFileSystemPathProvider.GCP_KEY_NAME));
   }
+
 }

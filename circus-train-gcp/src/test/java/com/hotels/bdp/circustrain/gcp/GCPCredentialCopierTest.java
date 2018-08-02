@@ -46,37 +46,36 @@ public class GCPCredentialCopierTest {
   private final Configuration conf = new Configuration();
   private final Path credentialsFileRelativePath = new Path("../test.json");
   private final Path dfsDirectory = new Path("/rootDirectory/test-random-string");
-  private final String dfsAbsolutePath = dfsDirectory + "/" + GCPCredentialCopier.GCP_KEY_NAME;
+  private final Path dfsAbsolutePath = new Path(dfsDirectory + "/" + DistributedFileSystemPathProvider.GCP_KEY_NAME);
 
   private @Mock FileSystem fileSystem;
   private @Mock GCPCredentialPathProvider credentialPathProvider;
   private @Mock DistributedFileSystemPathProvider distributedFileSystemPathProvider;
 
-  private GCPCredentialCopier copier;
+  private final GCPCredentialCopier copier = new GCPCredentialCopier();
 
   @Before
   public void init() {
     doReturn(credentialsFileRelativePath).when(credentialPathProvider).newPath();
-    doReturn(dfsDirectory).when(distributedFileSystemPathProvider).newPath();
-    copier = new GCPCredentialCopier(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
+    doReturn(dfsAbsolutePath).when(distributedFileSystemPathProvider).newPath();
+    // doReturn(dfsDirectory).when(distributedFileSystemPathProvider).newPath().getParent();
   }
 
   @Test
   public void copyCredentialsWithCredentialProviderSupplied() throws Exception {
-    copier.copyCredentials();
-    verify(fileSystem).copyFromLocalFile(credentialsFileRelativePath, new Path(dfsAbsolutePath));
+    copier.copyCredentials(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
+    verify(fileSystem).copyFromLocalFile(credentialsFileRelativePath, dfsAbsolutePath);
     verify(fileSystem).deleteOnExit(dfsDirectory);
     assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
     assertThat(conf.get(DISTRIBUTED_CACHE_PROPERTY), is(dfsAbsolutePath + SYMLINK_FLAG + credentialsFileRelativePath));
-    assertFalse(fileSystem.exists(new Path(dfsAbsolutePath)));
+    assertFalse(fileSystem.exists(dfsAbsolutePath));
   }
 
   @Test(expected = CircusTrainException.class)
   public void copyCredentialsWhenFileDoesntExistThrowsException() throws Exception {
-    doThrow(new IOException("File doest not exist")).when(fileSystem).copyFromLocalFile(any(Path.class),
-        any(Path.class));
-    GCPCredentialCopier copier = new GCPCredentialCopier(fileSystem, conf, credentialPathProvider,
-        distributedFileSystemPathProvider);
-    copier.copyCredentials();
+    doThrow(new IOException("File does not exist"))
+        .when(fileSystem)
+        .copyFromLocalFile(any(Path.class), any(Path.class));
+    copier.copyCredentials(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
   }
 }

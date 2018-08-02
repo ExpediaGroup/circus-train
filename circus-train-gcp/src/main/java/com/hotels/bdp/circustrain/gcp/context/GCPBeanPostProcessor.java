@@ -26,7 +26,8 @@ import org.springframework.stereotype.Component;
 import com.hotels.bdp.circustrain.context.CommonBeans;
 import com.hotels.bdp.circustrain.gcp.BindGoogleHadoopFileSystem;
 import com.hotels.bdp.circustrain.gcp.DistributedFileSystemPathProvider;
-import com.hotels.bdp.circustrain.gcp.GCPCredentialConfigurer;
+import com.hotels.bdp.circustrain.gcp.FileSystemFactory;
+import com.hotels.bdp.circustrain.gcp.GCPCredentialCopier;
 import com.hotels.bdp.circustrain.gcp.GCPCredentialPathProvider;
 
 @Component
@@ -36,13 +37,22 @@ public class GCPBeanPostProcessor implements BeanPostProcessor {
 
   private final GCPCredentialPathProvider credentialPathProvider;
   private final DistributedFileSystemPathProvider dfsPathProvider;
+  private final BindGoogleHadoopFileSystem bindGoogleHadoopFileSystem;
+  private final FileSystemFactory fileSystemFactory;
+  private final GCPCredentialCopier credentialCopier;
 
   @Autowired
   public GCPBeanPostProcessor(
       GCPCredentialPathProvider credentialPathProvider,
-      DistributedFileSystemPathProvider dfsPathProvider) {
+      DistributedFileSystemPathProvider dfsPathProvider,
+      BindGoogleHadoopFileSystem bindGoogleHadoopFileSystem,
+      FileSystemFactory fileSystemFactory,
+      GCPCredentialCopier credentialCopier) {
     this.credentialPathProvider = credentialPathProvider;
     this.dfsPathProvider = dfsPathProvider;
+    this.bindGoogleHadoopFileSystem = bindGoogleHadoopFileSystem;
+    this.fileSystemFactory = fileSystemFactory;
+    this.credentialCopier = credentialCopier;
   }
 
   @Override
@@ -63,11 +73,10 @@ public class GCPBeanPostProcessor implements BeanPostProcessor {
   private void setHadoopConfiguration(Configuration configuration) {
     LOG.debug("Configuring google hadoop connector");
     if (credentialPathProvider.newPath() != null) {
-      BindGoogleHadoopFileSystem binder = new BindGoogleHadoopFileSystem(configuration);
-      binder.bindFileSystem();
-      GCPCredentialConfigurer configurer = new GCPCredentialConfigurer(configuration, credentialPathProvider,
-          dfsPathProvider);
-      configurer.configureCredentials();
+      bindGoogleHadoopFileSystem.bindFileSystem(configuration);
+      credentialCopier
+          .copyCredentials(fileSystemFactory.getFileSystem(configuration), configuration, credentialPathProvider,
+              dfsPathProvider);
     }
   }
 }

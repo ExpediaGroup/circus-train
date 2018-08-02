@@ -26,65 +26,50 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 
-class GCPCredentialCopier {
+@Component
+public class GCPCredentialCopier {
   private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialCopier.class);
-  static final String GCP_KEY_NAME = "ct-gcp-key.json";
 
-  private final FileSystem fs;
-  private final Configuration conf;
-  private final Path credentialsFileRelativePath;
-  private final Path dfsGCPCredentialDirectory;
-  private final Path dfsGCPCredentialAbsolutePath;
-
-  GCPCredentialCopier(FileSystem fs, Configuration conf, GCPCredentialPathProvider credentialPathProvider, DistributedFileSystemPathProvider dfsPathProvider) {
-    this.fs = fs;
-    this.conf = conf;
-
-    dfsGCPCredentialDirectory = dfsPathProvider.newPath();
-    dfsGCPCredentialAbsolutePath = new Path(dfsGCPCredentialDirectory, GCP_KEY_NAME);
-    credentialsFileRelativePath = credentialPathProvider.newPath();
-    LOG.debug("Credential Provider URI = {}", credentialsFileRelativePath);
-    LOG.debug("Temporary HDFS Google Cloud credential location set to {}", dfsGCPCredentialDirectory.toString());
-    LOG.debug("HDFS Google Cloud credential path will be {}", dfsGCPCredentialAbsolutePath.toString());
-
-  }
-
-
-  void copyCredentials() {
+  public void copyCredentials(
+      FileSystem fs,
+      Configuration conf,
+      GCPCredentialPathProvider credentialPathProvider,
+      DistributedFileSystemPathProvider dfsPathProvider) {
     try {
-      copyCredentialIntoHdfs();
-      linkRelativePathInDistributedCache();
+      Path source = credentialPathProvider.newPath();
+      Path destination = dfsPathProvider.newPath();
+      copyCredentialIntoHdfs(fs, source, destination);
+      linkRelativePathInDistributedCache(conf, source, destination);
     } catch (IOException | URISyntaxException e) {
       throw new CircusTrainException(e);
     }
   }
 
-  private void copyCredentialIntoHdfs() throws IOException {
+  private void copyCredentialIntoHdfs(FileSystem fs, Path source, Path destination) throws IOException {
     /*
      * The Google credentials file must be present in HDFS so that the DistCP map reduce job can access it upon
      * replication.
      */
-    Path source = credentialsFileRelativePath;
-    Path destination = dfsGCPCredentialAbsolutePath;
-    Path destinationFolder = dfsGCPCredentialDirectory;
+    Path destinationFolder = destination.getParent();
     fs.deleteOnExit(destinationFolder);
     LOG.debug("Copying credential into HDFS {}", destination);
     fs.copyFromLocalFile(source, destination);
   }
 
-  private void linkRelativePathInDistributedCache() throws URISyntaxException, IOException {
+  private void linkRelativePathInDistributedCache(Configuration conf, Path source, Path destination)
+    throws URISyntaxException, IOException {
     /*
      * The "#" links the HDFS location for the key file to the local file system credential provider path so that the
      * GoogleHadoopFileSystem can subsequently resolve it from a local file system uri despite it being in a Distributed
      * file system when the DistCP job runs.
      */
-    String cacheFileUri = dfsGCPCredentialAbsolutePath.toString() + "#" + credentialsFileRelativePath;
+    String cacheFileUri = destination.toString() + "#" + source;
     org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(cacheFileUri), conf);
-
     LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
-    conf.set(GCP_KEYFILE_CACHED_LOCATION, credentialsFileRelativePath.toString());
+    conf.set(GCP_KEYFILE_CACHED_LOCATION, source.toString());
   }
 }
