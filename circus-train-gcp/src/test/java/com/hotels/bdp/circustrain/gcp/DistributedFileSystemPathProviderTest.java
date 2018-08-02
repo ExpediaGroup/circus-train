@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,25 +33,37 @@ public class DistributedFileSystemPathProviderTest {
 
   private final GCPSecurity security = new GCPSecurity();
   private @Mock RandomStringFactory randomStringFactory;
+  private @Mock Configuration configuration;
+
+  private final String randomString = "test";
 
   @Test
   public void newInstanceWithoutConfigurationSet() {
-    String randomString = "test";
+    String dfsDirectory = "hdfs:/test-dir/";
     doReturn(randomString).when(randomStringFactory).newInstance();
-    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
-    String baseDirectoryExpected = DistributedFileSystemPathProvider.DEFAULT_HDFS_PREFIX + randomString;
+    doReturn(dfsDirectory).when(configuration).get("hive.exec.scratchdir");
+    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath(configuration);
+    String baseDirectoryExpected = dfsDirectory + randomString;
     assertThat(directory, is(new Path(baseDirectoryExpected, DistributedFileSystemPathProvider.GCP_KEY_NAME)));
   }
 
   @Test
   public void newInstanceWithConfigurationSet() {
-    String randomString = "test";
     String providedDirectory = "hdfs:/test/directory";
     doReturn(randomString).when(randomStringFactory).newInstance();
     security.setDistributedFileSystemWorkingDirectory(providedDirectory);
-    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath();
+    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath(configuration);
     assertThat(directory.toString(),
         is(providedDirectory + "/" + randomString + "/" + DistributedFileSystemPathProvider.GCP_KEY_NAME));
+  }
+
+  @Test
+  public void newInstanceWithoutHiveConfScratchDir() {
+    doReturn("").when(configuration).get("hive.exec.scratchdir");
+    doReturn(randomString).when(randomStringFactory).newInstance();
+    Path directory = new DistributedFileSystemPathProvider(security, randomStringFactory).newPath(configuration);
+    String baseDirectoryExpected = DistributedFileSystemPathProvider.DEFAULT_HDFS_PREFIX + randomString;
+    assertThat(directory, is(new Path(baseDirectoryExpected, DistributedFileSystemPathProvider.GCP_KEY_NAME)));
   }
 
 }

@@ -16,10 +16,10 @@
 package com.hotels.bdp.circustrain.gcp;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class GCPCredentialPathProviderTest {
     security.setCredentialProvider("/test.json");
     String result = new GCPCredentialPathProvider(security).newPath().toString();
     assertFalse(new Path(result).isAbsolute());
-    assertTrue(result.startsWith("../"));
+    assertThat(result, startsWith("../"));
   }
 
   @Test

@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.gcp;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,16 +39,25 @@ public class DistributedFileSystemPathProvider {
     this.randomStringFactory = randomStringFactory;
   }
 
-  public Path newPath() {
+  public Path newPath(Configuration configuration) {
     String randomString = randomStringFactory.newInstance();
 
     if (isBlank(security.getDistributedFileSystemWorkingDirectory())) {
-      return new Path(DEFAULT_HDFS_PREFIX + randomString, GCP_KEY_NAME);
+      Path parentDirectory = getTemporaryFolder(configuration, randomString);
+      return new Path(parentDirectory, GCP_KEY_NAME);
     } else {
       Path parentDirectory = new Path(security.getDistributedFileSystemWorkingDirectory(), randomString);
       return new Path(parentDirectory, GCP_KEY_NAME);
     }
 
+  }
+
+  private Path getTemporaryFolder(Configuration configuration, String randomString) {
+    String temporaryFolder = configuration.get("hive.exec.scratchdir");
+    if (isBlank(temporaryFolder)) {
+      return new Path("hdfs:/tmp/ct-gcp-" + randomString);
+    }
+    return new Path(temporaryFolder, randomString);
   }
 
 }

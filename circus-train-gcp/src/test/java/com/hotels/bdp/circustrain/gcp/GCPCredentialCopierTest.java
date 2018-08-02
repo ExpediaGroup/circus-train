@@ -46,7 +46,7 @@ public class GCPCredentialCopierTest {
   private final Configuration conf = new Configuration();
   private final Path credentialsFileRelativePath = new Path("../test.json");
   private final Path dfsDirectory = new Path("/rootDirectory/test-random-string");
-  private final Path dfsAbsolutePath = new Path(dfsDirectory + "/" + DistributedFileSystemPathProvider.GCP_KEY_NAME);
+  private final Path dfsAbsolutePath = new Path(dfsDirectory, DistributedFileSystemPathProvider.GCP_KEY_NAME);
 
   private @Mock FileSystem fileSystem;
   private @Mock GCPCredentialPathProvider credentialPathProvider;
@@ -57,8 +57,7 @@ public class GCPCredentialCopierTest {
   @Before
   public void init() {
     doReturn(credentialsFileRelativePath).when(credentialPathProvider).newPath();
-    doReturn(dfsAbsolutePath).when(distributedFileSystemPathProvider).newPath();
-    // doReturn(dfsDirectory).when(distributedFileSystemPathProvider).newPath().getParent();
+    doReturn(dfsAbsolutePath).when(distributedFileSystemPathProvider).newPath(conf);
   }
 
   @Test

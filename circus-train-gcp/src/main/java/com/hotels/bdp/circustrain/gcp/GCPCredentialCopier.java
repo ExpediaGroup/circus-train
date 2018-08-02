@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ public class GCPCredentialCopier {
       DistributedFileSystemPathProvider dfsPathProvider) {
     try {
       Path source = credentialPathProvider.newPath();
-      Path destination = dfsPathProvider.newPath();
+      Path destination = dfsPathProvider.newPath(conf);
       copyCredentialIntoHdfs(fs, source, destination);
       linkRelativePathInDistributedCache(conf, source, destination);
     } catch (IOException | URISyntaxException e) {
@@ -68,7 +69,7 @@ public class GCPCredentialCopier {
      * file system when the DistCP job runs.
      */
     String cacheFileUri = destination.toString() + "#" + source;
-    org.apache.hadoop.mapreduce.filecache.DistributedCache.addCacheFile(new URI(cacheFileUri), conf);
+    DistributedCache.addCacheFile(new URI(cacheFileUri), conf);
     LOG.info("mapreduce.job.cache.files : {}", conf.get("mapreduce.job.cache.files"));
     conf.set(GCP_KEYFILE_CACHED_LOCATION, source.toString());
   }
