@@ -19,12 +19,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
@@ -32,12 +30,12 @@ import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialProviderRelativePathFactoryTest {
 
-  private @Mock GCPSecurity security;
+  private final GCPSecurity security = new GCPSecurity();
 
   @Test
   public void newInstanceWithRelativePath() {
     String relativePath = "../test.json";
-    doReturn(relativePath).when(security).getCredentialProvider();
+    security.setCredentialProvider(relativePath);
     String result = new CredentialProviderRelativePathFactory().newInstance(security);
     assertThat(result, is(relativePath));
   }
@@ -45,7 +43,7 @@ public class CredentialProviderRelativePathFactoryTest {
   @Test
   public void newInstanceWithAbsolutePath() {
     String absolutePath = "/test.json";
-    doReturn(absolutePath).when(security).getCredentialProvider();
+    security.setCredentialProvider(absolutePath);
     String result = new CredentialProviderRelativePathFactory().newInstance(security);
     assertFalse(new Path(result).isAbsolute());
     assertTrue(result.startsWith("../"));
