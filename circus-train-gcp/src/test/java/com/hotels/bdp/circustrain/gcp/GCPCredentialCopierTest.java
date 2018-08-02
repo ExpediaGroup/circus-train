@@ -47,12 +47,11 @@ public class GCPCredentialCopierTest {
   private final Path credentialsFileRelativePath = new Path("../test.json");
   private final Path dfsDirectory = new Path("/rootDirectory/test-random-string");
   private final Path dfsAbsolutePath = new Path(dfsDirectory, DistributedFileSystemPathProvider.GCP_KEY_NAME);
+  private final GCPCredentialCopier copier = new GCPCredentialCopier();
 
   private @Mock FileSystem fileSystem;
   private @Mock GCPCredentialPathProvider credentialPathProvider;
   private @Mock DistributedFileSystemPathProvider distributedFileSystemPathProvider;
-
-  private final GCPCredentialCopier copier = new GCPCredentialCopier();
 
   @Before
   public void init() {
