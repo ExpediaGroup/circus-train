@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.gcp;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -66,7 +65,6 @@ public class GCPCredentialCopierTest {
     verify(fileSystem).deleteOnExit(dfsDirectory);
     assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
     assertThat(conf.get(DISTRIBUTED_CACHE_PROPERTY), is(dfsAbsolutePath + SYMLINK_FLAG + credentialsFileRelativePath));
-    assertFalse(fileSystem.exists(dfsAbsolutePath));
   }
 
   @Test(expected = CircusTrainException.class)

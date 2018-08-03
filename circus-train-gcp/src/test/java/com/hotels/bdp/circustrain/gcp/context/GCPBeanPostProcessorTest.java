@@ -15,14 +15,12 @@
  */
 package com.hotels.bdp.circustrain.gcp.context;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,58 +34,51 @@ import com.hotels.bdp.circustrain.gcp.DistributedFileSystemPathProvider;
 import com.hotels.bdp.circustrain.gcp.FileSystemFactory;
 import com.hotels.bdp.circustrain.gcp.GCPCredentialCopier;
 import com.hotels.bdp.circustrain.gcp.GCPCredentialPathProvider;
-import com.hotels.bdp.circustrain.gcp.RandomStringFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GCPBeanPostProcessorTest {
-  private @Mock RandomStringFactory randomStringFactory;
 
-  private @Mock GCPSecurity security;
   private @Mock GCPCredentialPathProvider credentialPathProvider;
   private @Mock DistributedFileSystemPathProvider distributedFileSystemPathProvider;
   private @Mock Configuration configuration;
   private @Mock BindGoogleHadoopFileSystem bindGoogleHadoopFileSystem;
   private @Mock FileSystemFactory fileSystemFactory;
   private @Mock GCPCredentialCopier credentialCopier;
+  private @Mock FileSystem fileSystem;
 
   private GCPBeanPostProcessor processor;
 
   @Before
   public void init() {
-    doNothing().when(configuration).set(anyString(), anyString());
     processor = new GCPBeanPostProcessor(credentialPathProvider, distributedFileSystemPathProvider,
         bindGoogleHadoopFileSystem, fileSystemFactory, credentialCopier);
-  }
-
-  @Test
-  public void postProcessAfterInitializationWithCorrectBeanName() throws Exception {
-    String beanName = CommonBeans.BEAN_BASE_CONF;
-    processor.postProcessAfterInitialization(configuration, beanName);
-    verify(credentialPathProvider).newPath();
   }
 
   @Test
   public void postProcessAfterInitializationWithIncorrectBeanName() throws Exception {
     String beanName = "notBaseConf";
     processor.postProcessAfterInitialization(configuration, beanName);
-    verify(credentialPathProvider, times(0)).newPath();
+    verifyZeroInteractions(credentialPathProvider, bindGoogleHadoopFileSystem, credentialCopier);
   }
 
   @Test
-  public void postProcessAfterInitializationWithBlankCredentialProviderDoesntModifyConfiguration() throws Exception {
+  public void postProcessAfterInitializationWithConfigurationBeanProviderPathIsNotNull() throws Exception {
     String beanName = CommonBeans.BEAN_BASE_CONF;
-    processor.postProcessAfterInitialization(configuration, beanName);
-    when(security.getCredentialProvider()).thenReturn("");
-    verify(credentialPathProvider).newPath();
-    verify(configuration, times(0)).set(anyString(), anyString());
-  }
+    when(credentialPathProvider.newPath()).thenReturn(new Path("/test.json"));
+    when(fileSystemFactory.getFileSystem(configuration)).thenReturn(fileSystem);
 
-  @Test
-  public void postProcessorWithNonNullCredentialProvider() {
-    String beanName = CommonBeans.BEAN_BASE_CONF;
-    doReturn(new Path("/test.json")).when(credentialPathProvider).newPath();
     processor.postProcessAfterInitialization(configuration, beanName);
-    verify(credentialPathProvider).newPath();
     verify(bindGoogleHadoopFileSystem).bindFileSystem(configuration);
+    verify(credentialCopier)
+        .copyCredentials(fileSystem, configuration, credentialPathProvider, distributedFileSystemPathProvider);
+  }
+
+  @Test
+  public void postProcessAfterInitializationWithConfigurationBeanProviderPathIsNull() throws Exception {
+    String beanName = CommonBeans.BEAN_BASE_CONF;
+    when(credentialPathProvider.newPath()).thenReturn(null);
+
+    processor.postProcessAfterInitialization(configuration, beanName);
+    verifyZeroInteractions(bindGoogleHadoopFileSystem, credentialCopier, fileSystemFactory);
   }
 }
