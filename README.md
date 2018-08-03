@@ -797,7 +797,7 @@ If you would like to ask any questions about or discuss Circus Train please join
   [https://groups.google.com/forum/#!forum/circus-train-user](https://groups.google.com/forum/#!forum/circus-train-user)
   
 # Credits
-Created by [Elliot West](https://github.com/teabot), [Daniel del Castillo](https://github.com/ddcprg), [Patrick Duin](https://github.com/patduin), [Dave Maughan](https://github.com/nahguam) & [Courtney Edwards](https://github.com/ce15301) with thanks to: [Adrian Woodhead](https://github.com/massdosage), [Dave Bauman](https://github.com/baumandm), Jose Nuñez Izu and Oscar Mateos Ventura.
+Created by [Elliot West](https://github.com/teabot), [Daniel del Castillo](https://github.com/ddcprg), [Patrick Duin](https://github.com/patduin), [Dave Maughan](https://github.com/nahguam) & [Courtney Edwards](https://github.com/courtsvii) with thanks to: [Adrian Woodhead](https://github.com/massdosage), [Dave Bauman](https://github.com/baumandm), Jose Nuñez Izu and Oscar Mateos Ventura.
 
 The Circus Train logo uses the [Ewert font](http://www.1001fonts.com/ewert-font.html) by [Johan Kallas](http://www.1001fonts.com/users/kallasjohan/) under the [SIL Open Font License (OFL)](http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
 
