@@ -1,4 +1,4 @@
-## [TBD]
+## 12.1.0 - 2018-08-08
 ### Changed
 * circus-train-gcp: avoid temporary copy of key file to `user.dir` when using absolute path to Google Cloud credentials file by transforming it into relative path.
 * circus-train-gcp: relative path can now be provided in the configuration for the Google Cloud credentials file.
