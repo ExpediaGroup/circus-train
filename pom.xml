@@ -63,7 +63,7 @@
     <hamcrest-library.version>1.3</hamcrest-library.version>
     <housekeeping.version>2.0.0</housekeeping.version>
     <guava.version>20.0</guava.version>
-    <hcommon-hive-metastore.version>1.0.0</hcommon-hive-metastore.version>
+    <hcommon-hive-metastore.version>1.2.0-SNAPSHOT</hcommon-hive-metastore.version>
   </properties>
 
   <dependencyManagement>

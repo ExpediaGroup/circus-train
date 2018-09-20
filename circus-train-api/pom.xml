@@ -39,6 +39,13 @@
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
+    
+    <!-- SSH library -->
+    <dependency>
+      <groupId>com.hotels</groupId>
+      <artifactId>hcommon-hive-metastore</artifactId>
+      <version>1.1.1-SNAPSHOT</version>
+    </dependency>
 
     <!-- Test -->
     <dependency>
