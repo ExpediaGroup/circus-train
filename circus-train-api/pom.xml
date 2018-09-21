@@ -40,11 +40,10 @@
       <artifactId>metrics-core</artifactId>
     </dependency>
     
-    <!-- SSH library -->
+    <!-- Hive common -->
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>hcommon-hive-metastore</artifactId>
-      <version>1.1.1-SNAPSHOT</version>
     </dependency>
 
     <!-- Test -->
