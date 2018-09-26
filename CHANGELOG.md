@@ -1,6 +1,7 @@
 ### [TBD] - TBD
 ### Changed
 * Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
+* Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
 
 ## 12.1.0 - 2018-08-08
 ### Changed
