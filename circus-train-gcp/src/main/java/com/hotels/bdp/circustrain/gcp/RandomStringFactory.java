@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.conf;
+package com.hotels.bdp.circustrain.gcp;
 
-import com.hotels.hcommon.hive.metastore.client.tunnelling.MetastoreTunnel;
+import java.util.UUID;
 
-public interface TunnelMetastoreCatalog extends MetastoreCatalog {
+import org.springframework.stereotype.Component;
 
-  MetastoreTunnel getMetastoreTunnel();
+@Component
+public class RandomStringFactory {
+
+  public String newInstance() {
+    return UUID.randomUUID().toString();
+  }
 
 }

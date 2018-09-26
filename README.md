@@ -7,6 +7,7 @@ You can obtain Circus Train from Maven Central:
 
 ## Overview
 Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. However, it is not event driven and does not know how tables differ between sites; it merely responds to requests to copy (meta-)data. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. Circus Train employs snapshot isolation to minimise the impact of changing data at the source, and to allow consumers of data in the replica cluster to operate independently of ongoing replication tasks.
+A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2).
 
 ## Install
 Download the version to use from [Maven Central](http://mvnrepository.com/artifact/com.hotels/circus-train/) and uncompress it in a directory of your choosing.
@@ -796,7 +797,7 @@ If you would like to ask any questions about or discuss Circus Train please join
   [https://groups.google.com/forum/#!forum/circus-train-user](https://groups.google.com/forum/#!forum/circus-train-user)
   
 # Credits
-Created by [Elliot West](https://github.com/teabot), [Daniel del Castillo](https://github.com/ddcprg), [Patrick Duin](https://github.com/patduin), [Dave Maughan](https://github.com/nahguam) & [Courtney Edwards](https://github.com/ce15301) with thanks to: [Adrian Woodhead](https://github.com/massdosage), [Dave Bauman](https://github.com/baumandm), Jose Nuñez Izu and Oscar Mateos Ventura.
+Created by [Elliot West](https://github.com/teabot), [Daniel del Castillo](https://github.com/ddcprg), [Patrick Duin](https://github.com/patduin), [Dave Maughan](https://github.com/nahguam) & [Courtney Edwards](https://github.com/courtsvii) with thanks to: [Adrian Woodhead](https://github.com/massdosage), [Dave Bauman](https://github.com/baumandm), Jose Nuñez Izu and Oscar Mateos Ventura.
 
 The Circus Train logo uses the [Ewert font](http://www.1001fonts.com/ewert-font.html) by [Johan Kallas](http://www.1001fonts.com/users/kallasjohan/) under the [SIL Open Font License (OFL)](http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
 
