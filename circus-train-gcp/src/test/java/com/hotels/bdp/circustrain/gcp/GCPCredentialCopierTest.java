@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,60 +15,63 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
+
+import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import fm.last.commons.test.file.TemporaryFolder;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ FileSystem.class })
+@RunWith(MockitoJUnitRunner.class)
 public class GCPCredentialCopierTest {
 
-  private @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
-  private @Mock FileSystem fs;
-  private Configuration conf = new Configuration();
+  private static final String DISTRIBUTED_CACHE_PROPERTY = "mapreduce.job.cache.files";
+  private static final String SYMLINK_FLAG = "#";
 
-  @Test(expected = IllegalArgumentException.class)
-  public void credentialProviderNotSetThrowsException() throws Exception {
-    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    doReturn(false).when(fs).exists(any(Path.class));
-    String credentialProvider = null;
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
+  private final Configuration conf = new Configuration();
+  private final Path credentialsFileRelativePath = new Path("../test.json");
+  private final Path dfsDirectory = new Path("/rootDirectory/test-random-string");
+  private final Path dfsAbsolutePath = new Path(dfsDirectory, DistributedFileSystemPathProvider.GCP_KEY_NAME);
+  private final GCPCredentialCopier copier = new GCPCredentialCopier();
+
+  private @Mock FileSystem fileSystem;
+  private @Mock GCPCredentialPathProvider credentialPathProvider;
+  private @Mock DistributedFileSystemPathProvider distributedFileSystemPathProvider;
+
+  @Before
+  public void init() {
+    doReturn(credentialsFileRelativePath).when(credentialPathProvider).newPath();
+    doReturn(dfsAbsolutePath).when(distributedFileSystemPathProvider).newPath(conf);
   }
 
   @Test
-  public void copyCredentials() throws Exception {
-    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    String credentialProvider = "test.json";
-    temporaryFolder.newFile(credentialProvider);
-    credentialProvider = temporaryFolder.getRoot() + "/" + credentialProvider;
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
-    copier.copyCredentials();
-    verify(fs, times(1)).copyFromLocalFile(any(Path.class), any(Path.class));
-    assertNotNull(conf.get("mapreduce.job.cache.files"));
+  public void copyCredentialsWithCredentialProviderSupplied() throws Exception {
+    copier.copyCredentials(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
+    verify(fileSystem).copyFromLocalFile(credentialsFileRelativePath, dfsAbsolutePath);
+    verify(fileSystem).deleteOnExit(dfsDirectory);
+    assertNotNull(conf.get(DISTRIBUTED_CACHE_PROPERTY));
+    assertThat(conf.get(DISTRIBUTED_CACHE_PROPERTY), is(dfsAbsolutePath + SYMLINK_FLAG + credentialsFileRelativePath));
   }
 
   @Test(expected = CircusTrainException.class)
   public void copyCredentialsWhenFileDoesntExistThrowsException() throws Exception {
-    doNothing().when(fs).copyFromLocalFile(any(Path.class), any(Path.class));
-    String credentialProvider = "test.json";
-    GCPCredentialCopier copier = new GCPCredentialCopier(fs, conf, credentialProvider);
-    copier.copyCredentials();
+    doThrow(new IOException("File does not exist"))
+        .when(fileSystem)
+        .copyFromLocalFile(any(Path.class), any(Path.class));
+    copier.copyCredentials(fileSystem, conf, credentialPathProvider, distributedFileSystemPathProvider);
   }
 }

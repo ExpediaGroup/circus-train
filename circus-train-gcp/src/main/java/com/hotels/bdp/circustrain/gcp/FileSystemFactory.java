@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,16 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.gcp.context.GCPSecurity;
 
-public class GCPCredentialConfigurer {
-  private static final Logger LOG = LoggerFactory.getLogger(GCPCredentialConfigurer.class);
+@Component
+public class FileSystemFactory {
 
-  private final Configuration conf;
-  private final GCPSecurity security;
-
-  public GCPCredentialConfigurer(Configuration conf, GCPSecurity gcpSecurity) {
-    this.conf = conf;
-    this.security = gcpSecurity;
-  }
-
-  public void configureCredentials() {
+  public FileSystem getFileSystem(Configuration configuration) {
     try {
-      LOG.debug("Configuring GCP Credentials");
-      GCPCredentialCopier copier = new GCPCredentialCopier(FileSystem.get(conf), conf, security.getCredentialProvider());
-      copier.copyCredentials();
+      return FileSystem.get(configuration);
     } catch (IOException e) {
       throw new CircusTrainException(e);
     }

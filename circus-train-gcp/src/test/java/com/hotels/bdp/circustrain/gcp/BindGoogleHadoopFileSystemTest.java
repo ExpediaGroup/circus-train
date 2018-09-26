@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package com.hotels.bdp.circustrain.gcp;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_PROJECT_ID;
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GCP_SERVICE_ACCOUNT_ENABLE;
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_ABSTRACT_FS;
 import static com.hotels.bdp.circustrain.gcp.GCPConstants.GS_FS_IMPLEMENTATION;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
@@ -34,8 +34,8 @@ public class BindGoogleHadoopFileSystemTest {
   @Test
   public void bindFileSystemTest() throws Exception {
     Configuration conf = new Configuration();
-    BindGoogleHadoopFileSystem binder = new BindGoogleHadoopFileSystem(conf);
-    binder.bindFileSystem();
+    BindGoogleHadoopFileSystem binder = new BindGoogleHadoopFileSystem();
+    binder.bindFileSystem(conf);
     assertNotNull(conf.get(GCP_PROJECT_ID));
     assertEquals("true", conf.get(GCP_SERVICE_ACCOUNT_ENABLE));
     assertEquals(GoogleHadoopFileSystem.class.getName(), conf.get(GS_FS_IMPLEMENTATION));

@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS;
 import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem;
@@ -32,29 +33,25 @@ import com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
 
+@Component
 public class BindGoogleHadoopFileSystem {
 
   private static final Logger LOG = LoggerFactory.getLogger(BindGoogleHadoopFileSystem.class);
 
-  private final Configuration configuration;
-
-  public BindGoogleHadoopFileSystem(Configuration configuration) {
-    this.configuration = configuration;
-  }
-
-  public void bindFileSystem() {
+  public void bindFileSystem(Configuration configuration) {
     LOG.debug("Binding GoogleHadoopFileSystem");
     configuration.set(GS_FS_IMPLEMENTATION, GoogleHadoopFileSystem.class.getName());
     configuration.set(GS_ABSTRACT_FS, GoogleHadoopFS.class.getName());
     configuration.set(GCP_SERVICE_ACCOUNT_ENABLE, "true");
     configuration.set(GCP_PROJECT_ID, "_THIS_VALUE_DOESNT_MATTER");
-    loadGSFileSystem();
+    loadGSFileSystem(configuration);
   }
 
-  private void loadGSFileSystem() {
+  private void loadGSFileSystem(Configuration configuration) {
     try {
-      new LibJarDeployer().libjars(configuration, com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
-          com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
+      new LibJarDeployer()
+          .libjars(configuration, com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem.class,
+              com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS.class);
     } catch (IOException e) {
       throw new CircusTrainException(e);
     }
