@@ -28,15 +28,7 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
-import com.hotels.bdp.circustrain.api.conf.MetastoreTunnel;
-import com.hotels.bdp.circustrain.api.conf.MetricsReporter;
-import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
-import com.hotels.bdp.circustrain.api.conf.Security;
-import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
-import com.hotels.bdp.circustrain.api.conf.SourceTable;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.conf.TableReplications;
+import com.hotels.hcommon.hive.metastore.client.tunnelling.MetastoreTunnel;
 
 public class ConfigurationPojosTest {
 
@@ -49,8 +41,8 @@ public class ConfigurationPojosTest {
         .with(new SetterTester())
         .with(new GetterTester())
         .build()
-        .validate(Lists.transform(
-            ImmutableList
+        .validate(Lists
+            .transform(ImmutableList
                 .<Class<?>> builder()
                 .add(MetastoreTunnel.class)
                 .add(ReplicaTable.class)
@@ -61,13 +53,12 @@ public class ConfigurationPojosTest {
                 .add(TableReplication.class)
                 .add(TableReplications.class)
                 .add(MetricsReporter.class)
-                .build(),
-            new Function<Class<?>, PojoClass>() {
-              @Override
-              public PojoClass apply(Class<?> input) {
-                return PojoClassFactory.getPojoClass(input);
-              }
-            }));
+                .build(), new Function<Class<?>, PojoClass>() {
+                  @Override
+                  public PojoClass apply(Class<?> input) {
+                    return PojoClassFactory.getPojoClass(input);
+                  }
+                }));
   }
 
 }

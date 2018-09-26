@@ -22,6 +22,8 @@ import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.hotels.hcommon.hive.metastore.client.tunnelling.MetastoreTunnel;
+
 public class ReplicaCatalog implements TunnelMetastoreCatalog {
 
   private @NotBlank String name;

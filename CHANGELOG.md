@@ -1,3 +1,7 @@
+### [TBD] - TBD
+### Changed
+* Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
+
 ## 12.1.0 - 2018-08-08
 ### Changed
 * circus-train-gcp: avoid temporary copy of key file to `user.dir` when using absolute path to Google Cloud credentials file by transforming it into relative path.
