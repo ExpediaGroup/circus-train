@@ -1,5 +1,6 @@
 ### [TBD] - TBD
 ### Changed
+* Upgraded `jackson.version` to 2.9.7 (was 2.6.6), `aws-jdk.version` to 1.11.431 (was 1.11.126) and `httpcomponents.httpclient.version` to 4.5.5 (was 4.5.2). See [#91](https://github.com/HotelsDotCom/circus-train/issues/91).
 * Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
 * Refactored the remaining code in `core.metastore` from `circus-train-core` to leverage hcommon-hive-metastore libraries.
 
