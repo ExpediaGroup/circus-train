@@ -106,7 +106,7 @@ class Locomotive implements ApplicationRunner, ExitCodeGenerator {
     LOG.info("{} tables to replicate.", tableReplications.size());
     for (TableReplication tableReplication : tableReplications) {
       String summary = getReplicationSummary(tableReplication);
-      LOG.info("Replicating {} replication mode '{}'.", summary, tableReplication.getReplicationMode());
+      LOG.info("Replicating {} replication mode '{}', strategy '{}'.", summary, tableReplication.getReplicationMode(), tableReplication.getReplicationStrategy());
       try {
         Replication replication = replicationFactory.newInstance(tableReplication);
         tableReplicationListener.tableReplicationStart(EventUtils.toEventTableReplication(tableReplication),
