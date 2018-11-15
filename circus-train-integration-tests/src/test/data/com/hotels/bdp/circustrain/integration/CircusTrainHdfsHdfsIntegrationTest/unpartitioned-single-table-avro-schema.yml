@@ -1,3 +1,4 @@
+extension-packages: com.hotels.bdp.circustrain.integration
 table-replications:
   - source-table:
       database-name: ${circus-train-runner.database-name}
