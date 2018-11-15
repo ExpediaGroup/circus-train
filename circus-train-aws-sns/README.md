@@ -42,7 +42,7 @@ The SNS listener can be configured by adding something like the following to you
 configuration file:
 
     # the below is mandatory in order for Circus Train to load the SNS extension
-    extension-packages: com.hotels.bdp.circustrain.aws.sns.event 
+    extension-packages: com.hotels.bdp.circustrain.aws.sns.event
     # the below now configures the extension
     sns-event-listener:
       region: eu-west-1
