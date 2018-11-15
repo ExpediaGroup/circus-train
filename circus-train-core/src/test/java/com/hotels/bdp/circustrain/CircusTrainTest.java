@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,7 @@ public class CircusTrainTest {
     File ymlFile = temp.newFile("test-application.yml");
     List<String> lines = ImmutableList
         .<String> builder()
+        .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
         .add("source-catalog:")
         .add("  name: source")
         .add("  configuration-properties:")
@@ -121,7 +122,7 @@ public class CircusTrainTest {
   }
 
   @Test
-  public void singleYmlFileWithUserExtension() throws Exception {
+  public void singleYmlFileWithMultipleExtensions() throws Exception {
     TestLocomotiveListener.testBean = null;
     exit.expectSystemExitWithStatus(0);
     File ymlFile = temp.newFile("test-application.yml");
@@ -142,7 +143,8 @@ public class CircusTrainTest {
         .add("    replica-table:")
         .add("      table-name: replica_" + TABLE)
         .add("      table-location: " + temp.newFolder("replica"))
-        .add("extension-packages: com.hotels.test.extension")
+        .add("extension-packages: com.hotels.test.extension, "
+            + TestCopierFactory.class.getPackage().getName())
         .add("testExtensionConfig: foo")
         .build();
     Files.asCharSink(ymlFile, UTF_8).writeLines(lines);
@@ -164,6 +166,7 @@ public class CircusTrainTest {
 
     List<String> lines = ImmutableList
         .<String> builder()
+        .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
         .add("source-catalog:")
         .add("  name: source")
         .add("  configuration-properties:")

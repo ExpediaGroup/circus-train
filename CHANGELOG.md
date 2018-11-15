@@ -1,5 +1,7 @@
 ### [TBD] - TBD
 ### Changed
+* Narrowed component scanning to be internal base packages instead of `com.hotels.bdp.circustrain`. See [#95](https://github.com/HotelsDotCom/circus-train/issues/95). Note this change is _not_ backwards compatible for any Circus Train extensions that are in the `com.hotels.bdp.circustrain` package - these were in effect being 
+implicitly scanned and loaded but won't be now. Instead these extensions will now need to be added using Circus Train's [standard extension loading mechanism](https://github.com/HotelsDotCom/circus-train#loading-extensions).
 * Upgraded `jackson.version` to 2.9.7 (was 2.6.6), `aws-jdk.version` to 1.11.431 (was 1.11.126) and `httpcomponents.httpclient.version` to 4.5.5 (was 4.5.2). See [#91](https://github.com/HotelsDotCom/circus-train/issues/91).
 * Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
 * Refactored the remaining code in `core.metastore` from `circus-train-core` to leverage hcommon-hive-metastore libraries.
