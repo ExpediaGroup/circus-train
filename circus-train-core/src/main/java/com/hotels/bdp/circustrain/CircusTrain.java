@@ -75,9 +75,6 @@ import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
 
 @SpringBootApplication
 @EnableConfigurationProperties
-// TODO: not sure what to do about housekeeping module for below, surely needs to be added for
-// normal CT run with HK at end, need to test, also need to test running HK by itself and how
-// profiles work
 @ComponentScan(basePackages = {
     "com.hotels.bdp.circustrain.avro",
     "com.hotels.bdp.circustrain.aws",
