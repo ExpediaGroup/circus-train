@@ -41,7 +41,7 @@ classpath at runtime:
 The SNS listener can be configured by adding something like the following to your Circus Train YAML 
 configuration file:
 
-	 # the below is mandatory in order for Circus Train to load the SNS extension
+    # the below is mandatory in order for Circus Train to load the SNS extension
     extension-packages: com.hotels.bdp.circustrain.aws.sns.event 
     # the below now configures the extension
     sns-event-listener:
