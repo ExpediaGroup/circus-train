@@ -565,6 +565,15 @@ Circus Train can be extended in various ways. This is an advanced feature that t
 * `LocationManagers` look after the source and replica locations and are an ideal point to implement both snapshot isolation and retired data clean-up.
 * `CompositeCopierFactory` allows the provision of multiple copiers for the same table in order to add functionality to the copy process, e.g. introduce compaction, copy to multiple destinations, etc.
 
+### Loading Extensions
+Circus Train loads extensions using Spring's standard [ComponentScan](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ComponentScan.html) mechanism. Users can add their own packages to be scanned by declaring `extension-packages` as a comma separated list of package names to their YAML.
+
+Example:
+
+        extension-packages: some.extension,another.extension
+
+In order not to clash with Circus Train's internal components we recommended you use your own package structure for these extensions (i.e. do not use `com.hotels.circustrain` or any sub-packages of this). The classes involved in implementing the extensions need to be made available on Circus Train's CLASSPATH. If your extension implementations require any existing Circus Train Beans then `CircusTrainContext` can be `@Autowired` in.
+
 ### Metadata transformations
 The following transformation interfaces can be implemented to manipulate metadata during replication. Note that transformations are loaded by Spring - so they must be annotated with `@Component` - and only one transformation of each type is allowed on the classpath. In case multiple transformations are required you can compose them into a single transformation function.
 
@@ -579,15 +588,6 @@ Example:
           - ...
             transform-options:
                custom-transform-config-key1: someValue
-
-### Loading Extensions
-Circus Train loads extensions using standard Spring configuration. By default, `com.hotels.bdp.circustrain` is added to Spring's component scan. Users can add extra packages by declaring `extension-packages` as a comma separated list of package names to their YAML.
-
-Example:
-
-        extension-packages: some.extension,another.extension
-
-If your extension implementations require any existing Circus Train Beans then `CircusTrainContext` can be `@Autowired` in.
 
 ### Developing a `ReplicationEventListener`
 A high level summary that assumes some knowledge of the Spring Framework and Spring Boot. See `circus-train-aws-sns` for a concrete example.
