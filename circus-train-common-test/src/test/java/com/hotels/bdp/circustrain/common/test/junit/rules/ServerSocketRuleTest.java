@@ -20,7 +20,6 @@ import static org.junit.Assert.assertThat;
 
 import java.net.ConnectException;
 import java.net.Socket;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -36,44 +35,32 @@ public class ServerSocketRuleTest {
 
   @Test
   public void typical() throws Throwable {
-    rule.before();
     sendData(rule.port(), "my-data".getBytes());
-    rule.awaitRequests(1, 1, TimeUnit.SECONDS);
     assertThat(new String(rule.getOutput()), is("my-data"));
     rule.after();
   }
 
-  @Test
-  public void notInitialised() throws Throwable {
-    sendData(rule.port(), "my-data".getBytes());
-    assertThat(new String(rule.getOutput()), is(""));
-  }
-
   @Test(expected = ConnectException.class)
   public void alreadyShutdown() throws Throwable {
-    rule.before();
     rule.after();
 
     sendData(rule.port(), "my-data".getBytes());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void noDataSent() throws Throwable {
-    rule.before();
-    try {
-      rule.awaitRequests(100, 1, TimeUnit.SECONDS);
-    } finally {
-      rule.after();
-    }
+    byte[] output = rule.getOutput();
+    rule.after();
+    assertThat(output, is(new byte[0]));
   }
 
   @Test
   public void expectMultipleRequests() throws Throwable {
-    rule.before();
     sendData(rule.port(), "1".getBytes());
     sendData(rule.port(), "2".getBytes());
-    rule.awaitRequests(2, 1, TimeUnit.SECONDS);
     assertThat(new String(rule.getOutput()), is("12"));
+    sendData(rule.port(), "3".getBytes());
+    assertThat(new String(rule.getOutput()), is("123"));
     rule.after();
   }
 
