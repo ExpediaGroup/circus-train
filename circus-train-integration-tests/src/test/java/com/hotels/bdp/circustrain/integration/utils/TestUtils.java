@@ -65,19 +65,22 @@ public final class TestUtils {
   public static final String HOUSEKEEPING_DB_USER = "bdp";
   public static final String HOUSEKEEPING_DB_PASSWD = "Ch4ll3ng3";
 
-  public static final List<FieldSchema> DATA_COLUMNS = Arrays.asList(new FieldSchema("id", "bigint", ""),
-      new FieldSchema("name", "string", ""), new FieldSchema("city", "tinyint", ""));
+  public static final List<FieldSchema> DATA_COLUMNS = Arrays
+      .asList(new FieldSchema("id", "bigint", ""), new FieldSchema("name", "string", ""),
+          new FieldSchema("city", "tinyint", ""));
 
-  public static final List<FieldSchema> PARTITION_COLUMNS = Arrays.asList(new FieldSchema("continent", "string", ""),
-      new FieldSchema("country", "string", ""));
+  public static final List<FieldSchema> PARTITION_COLUMNS = Arrays
+      .asList(new FieldSchema("continent", "string", ""), new FieldSchema("country", "string", ""));
 
   public static List<LegacyReplicaPath> getCleanUpPaths(Connection connection, String query) throws Exception {
     List<LegacyReplicaPath> result = new ArrayList<>();
     try (PreparedStatement preparedStatement = connection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery()) {
       while (resultSet.next()) {
-        result.add(new HousekeepingLegacyReplicaPath(resultSet.getString("event_id"),
-            resultSet.getString("path_event_id"), resultSet.getString("path")));
+        result
+            .add(new HousekeepingLegacyReplicaPath(resultSet.getString("event_id"),
+                resultSet.getString("path_event_id"), resultSet.getString("path"),
+                resultSet.getString("metastore_database_name"), resultSet.getString("metastore_table_name")));
       }
     }
     return result;
