@@ -49,10 +49,12 @@ public class JdbcHousekeepingListenerTest {
     ArgumentCaptor<LegacyReplicaPath> argumentCaptor = ArgumentCaptor.forClass(LegacyReplicaPath.class);
     doNothing().when(cleanUpPathService).scheduleForHousekeeping(argumentCaptor.capture());
     Path location = new Path("/foo/bar");
-    jdbcCleanUpLocationListener.cleanUpLocation(EVENT_ID, PATH_EVENT_ID, location);
+    jdbcCleanUpLocationListener.cleanUpLocation(EVENT_ID, PATH_EVENT_ID, location, "db", "table");
     verify(cleanUpPathService).scheduleForHousekeeping(any(LegacyReplicaPath.class));
     assertThat(argumentCaptor.getValue().getEventId(), is(EVENT_ID));
     assertThat(argumentCaptor.getValue().getPathEventId(), is(PATH_EVENT_ID));
     assertThat(argumentCaptor.getValue().getPath(), is("/foo/bar"));
+    assertThat(argumentCaptor.getValue().getMetastoreDatabaseName(), is("db"));
+    assertThat(argumentCaptor.getValue().getMetastoreTableName(), is("table"));
   }
 }

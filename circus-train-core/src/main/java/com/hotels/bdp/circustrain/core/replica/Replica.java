@@ -136,8 +136,9 @@ public class Replica extends HiveEndpoint {
         Path replicaPartitionLocation = locationManager.getPartitionLocation(sourcePartition);
         LOG.debug("Generated replica partition path: {}", replicaPartitionLocation);
 
-        Partition replicaPartition = tableFactory.newReplicaPartition(eventId, sourceTableAndStatistics.getTable(),
-            sourcePartition, replicaDatabaseName, replicaTableName, replicaPartitionLocation, replicationMode);
+        Partition replicaPartition = tableFactory
+            .newReplicaPartition(eventId, sourceTableAndStatistics.getTable(), sourcePartition, replicaDatabaseName,
+                replicaTableName, replicaPartitionLocation, replicationMode);
         Partition oldPartition = oldPartitionsByKey.get(sourcePartition.getValues());
         if (oldPartition == null) {
           partitionsToCreate.add(replicaPartition);
@@ -153,8 +154,10 @@ public class Replica extends HiveEndpoint {
         ColumnStatistics sourcePartitionStatistics = sourcePartitionsAndStatistics
             .getStatisticsForPartition(sourcePartition);
         if (sourcePartitionStatistics != null) {
-          statisticsToSet.add(tableFactory.newReplicaPartitionStatistics(sourceTableAndStatistics.getTable(),
-              replicaPartition, sourcePartitionStatistics));
+          statisticsToSet
+              .add(tableFactory
+                  .newReplicaPartitionStatistics(sourceTableAndStatistics.getTable(), replicaPartition,
+                      sourcePartitionStatistics));
         }
       }
       sourcePartitionsAndStatistics.getPartitionNames();
@@ -243,8 +246,8 @@ public class Replica extends HiveEndpoint {
       Path tableLocation,
       ReplicationMode replicationMode) {
     LOG.info("Updating replica table metadata.");
-    TableAndStatistics replicaTable = tableFactory.newReplicaTable(eventId, sourceTable, replicaDatabaseName,
-        replicaTableName, tableLocation, replicationMode);
+    TableAndStatistics replicaTable = tableFactory
+        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
@@ -271,9 +274,10 @@ public class Replica extends HiveEndpoint {
 
   private void makeSureCanReplicate(Table oldReplicaTable, Table replicaTable) {
     if (!Objects.equals(oldReplicaTable.getTableType(), replicaTable.getTableType())) {
-      String message = String.format("Unable to replace %s %s.%s with %s %s.%s", oldReplicaTable.getTableType(),
-          oldReplicaTable.getDbName(), oldReplicaTable.getTableName(), replicaTable.getTableType(),
-          replicaTable.getDbName(), replicaTable.getTableName());
+      String message = String
+          .format("Unable to replace %s %s.%s with %s %s.%s", oldReplicaTable.getTableType(),
+              oldReplicaTable.getDbName(), oldReplicaTable.getTableName(), replicaTable.getTableType(),
+              replicaTable.getDbName(), replicaTable.getTableName());
       throw new CircusTrainException(message);
     }
   }
@@ -302,8 +306,9 @@ public class Replica extends HiveEndpoint {
           REPLICATION_EVENT);
     }
     LOG.debug("Checking that replication modes are compatible.");
-    Optional<ReplicationMode> replicaReplicationMode = Enums.getIfPresent(ReplicationMode.class,
-        nullToEmpty(oldReplicaTable.getParameters().get(REPLICATION_MODE.parameterName())));
+    Optional<ReplicationMode> replicaReplicationMode = Enums
+        .getIfPresent(ReplicationMode.class,
+            nullToEmpty(oldReplicaTable.getParameters().get(REPLICATION_MODE.parameterName())));
     if (replicaReplicationMode.isPresent()) {
       if (replicaReplicationMode.get() == METADATA_MIRROR && replicationMode != METADATA_MIRROR) {
         throw new InvalidReplicationModeException("Trying a "
@@ -338,12 +343,14 @@ public class Replica extends HiveEndpoint {
   private void updateTableColumnStatistics(CloseableMetaStoreClient client, TableAndStatistics replicaTable)
     throws TException {
     if (replicaTable.getStatistics() != null) {
-      LOG.debug("Updating {} column statistics for table {}.{}", replicaTable.getStatistics().getStatsObj().size(),
-          replicaTable.getTable().getDbName(), replicaTable.getTable().getTableName());
+      LOG
+          .debug("Updating {} column statistics for table {}.{}", replicaTable.getStatistics().getStatsObj().size(),
+              replicaTable.getTable().getDbName(), replicaTable.getTable().getTableName());
       client.updateTableColumnStatistics(replicaTable.getStatistics());
     } else {
-      LOG.debug("No column statistics to update for table {}.{}", replicaTable.getTable().getDbName(),
-          replicaTable.getTable().getTableName());
+      LOG
+          .debug("No column statistics to update for table {}.{}", replicaTable.getTable().getDbName(),
+              replicaTable.getTable().getTableName());
     }
   }
 
@@ -351,10 +358,12 @@ public class Replica extends HiveEndpoint {
       TableType tableType,
       String targetTableLocation,
       String eventId,
-      SourceLocationManager sourceLocationManager)
+      SourceLocationManager sourceLocationManager,
+      String replicaDatabaseName,
+      String replicaTableName)
     throws TException {
     return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
-        housekeepingListener, replicaCatalogListener);
+        housekeepingListener, replicaCatalogListener, replicaDatabaseName, replicaTableName);
   }
 
   @Override
