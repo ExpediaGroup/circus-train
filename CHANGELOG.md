@@ -1,6 +1,6 @@
 ## TBD
 ### Changed
-* Upgraded Housekeeping library to allow replicate DB/Table name storage.
+* Upgraded Housekeeping library to also store replica database and table name in Housekeeping database. See[#30](https://github.com/HotelsDotCom/housekeeping/issues/30).
 
 ## 13.0.0 - 2018-10-15
 ### Changed
