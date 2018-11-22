@@ -2,17 +2,21 @@
 
 ##  Overview
 The SNS event listener is an optional Circus Train component which, if found on the classpath, will push 
-replication events as JSON onto Amazon Web Services SNS topics.
+replication events as JSON messages onto Amazon Web Services SNS topics.
 
 ## Installation
 The listener can be activated in a number of ways which are described below.
 
 ### Classpath
-The jar file produced by this project can be retrieved from Maven Central and stored in a location available 
-when running Circus Train. The code snippet below shows how you could add this to the Circus Train classpath 
-in a script before calling out to the main Circus Train script:
+The jar file produced by this project can be retrieved from [Maven Central](http://mvnrepository.com/artifact/com.hotels/circus-train-aws-sns/) and 
+then added to Circus Train's classpath. It is highly recommended that the version of this library and the version of Circus Train are identical. The recommended way 
+to make this extension available on the classpath is to store it in a standard location and then add this to the `CIRCUS_TRAIN_CLASSPATH` environment variable 
+(e.g. via a startup script):
 
     export CIRCUS_TRAIN_CLASSPATH=$CIRCUS_TRAIN_CLASSPATH:/your-circus-train-sns-lib-path/*
+
+Another option is to place the jar file in the Circus Train `lib` folder which will automatically pick it up but risks interfering with any Circus Train jobs that do 
+not require the extension's functionality.
 
 ### Dependency
 If you have a project that is using Circus Train as a Maven dependency you could add the XML fragment below 
@@ -37,6 +41,9 @@ classpath at runtime:
 The SNS listener can be configured by adding something like the following to your Circus Train YAML 
 configuration file:
 
+    # the below is mandatory in order for Circus Train to load the SNS extension
+    extension-packages: com.hotels.bdp.circustrain.aws.sns.event
+    # the below now configures the extension
     sns-event-listener:
       region: eu-west-1
       # default topic (will be used if separate start/fail/success topics not configured)
