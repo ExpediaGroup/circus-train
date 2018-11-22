@@ -99,9 +99,19 @@ public class DestructiveReplica {
   }
 
   public void dropTable() throws TException {
-    try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
-      dropAndDeletePartitions(client, Predicates.<String> alwaysTrue());
-      client.dropTable(databaseName, tableName);
+    try {
+      try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
+        dropAndDeletePartitions(client, Predicates.<String> alwaysTrue());
+        Table table = client.getTable(databaseName, tableName);
+        client.dropTable(databaseName, tableName);
+        if (LocationUtils.hasLocation(table)) {
+          Path oldLocation = locationAsPath(table);
+          String oldEventId = table.getParameters().get(REPLICATION_EVENT.parameterName());
+          cleanupLocationManager.addCleanUpLocation(oldEventId, oldLocation);
+        }
+      }
+    } finally {
+      cleanupLocationManager.cleanUpLocations();
     }
   }
 

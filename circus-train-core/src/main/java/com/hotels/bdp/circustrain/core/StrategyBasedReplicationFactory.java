@@ -16,6 +16,7 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class StrategyBasedReplicationFactory implements ReplicationFactory {
 
+  private final EventIdFactory eventIdFactory = EventIdFactory.DEFAULT;
   private final ReplicationFactoryImpl upsertReplicationFactory;
   private final Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier;
   private final Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
@@ -37,15 +38,14 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
 
   @Override
   public Replication newInstance(TableReplication tableReplication) {
-    Replication upsertReplication = upsertReplicationFactory.newInstance(tableReplication);
+    String eventId = eventIdFactory.newEventId("ctp");
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.DESTRUCTIVE) {
-      return new DestructiveReplication(upsertReplication,
+      return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
           new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
           new DestructiveReplica(replicaMetaStoreClientSupplier,
-              getCleanUpLocationManager(upsertReplication.getEventId(), tableReplication.getReplicationMode()),
-              tableReplication));
+              getCleanUpLocationManager(eventId, tableReplication.getReplicationMode()), tableReplication));
     }
-    return upsertReplication;
+    return upsertReplicationFactory.newInstance(tableReplication);
   }
 
   private CleanupLocationManager getCleanUpLocationManager(String eventId, ReplicationMode replicationMode) {
