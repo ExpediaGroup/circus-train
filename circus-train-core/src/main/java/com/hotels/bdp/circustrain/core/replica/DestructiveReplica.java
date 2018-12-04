@@ -53,7 +53,7 @@ public class DestructiveReplica {
       String sourceTableParameterValue = client
           .getTable(databaseName, tableName)
           .getParameters()
-          .get(CircusTrainTableParameter.SOURCE_TABLE.name());
+          .get(CircusTrainTableParameter.SOURCE_TABLE.parameterName());
       if (sourceTableParameterValue != null) {
         String qualifiedName = tableReplication.getSourceTable().getQualifiedName();
         return qualifiedName.equals(sourceTableParameterValue);

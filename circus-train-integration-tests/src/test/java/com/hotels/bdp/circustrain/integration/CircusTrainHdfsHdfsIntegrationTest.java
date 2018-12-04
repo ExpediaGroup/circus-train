@@ -56,6 +56,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
@@ -76,7 +77,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 
-import com.hotels.bdp.circustrain.api.CircusTrainTableParameter;
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
@@ -355,10 +355,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   public void deleteUnpartitionedTable() throws Exception {
     // create table in replica metastore
     replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    Table table = replicaCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE);
-    table.putToParameters(CircusTrainTableParameter.SOURCE_TABLE.name(), DATABASE + "." + SOURCE_UNPARTITIONED_TABLE);
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_UNPARTITIONED_TABLE);
     final String replicaPath = table.getSd().getLocation();
-    replicaCatalog.client().alter_table(DATABASE, SOURCE_UNPARTITIONED_TABLE, table);
     LOG.info(">>>> Table {} ", table);
 
     exit.expectSystemExitWithStatus(0);
@@ -380,6 +378,54 @@ public class CircusTrainHdfsHdfsIntegrationTest {
               "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(1));
           assertThat(cleanUpPaths.get(0).getPath(), is(replicaPath));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void deletePartitionInPartitionedTable() throws Exception {
+    helper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation = partition.getSd().getLocation();
+
+    // drop a partition in source;
+    sourceCatalog
+        .client()
+        .dropPartition(DATABASE, SOURCE_PARTITIONED_TABLE,
+            Warehouse.makePartName(table.getPartitionKeys(), partition.getValues()), false);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, SOURCE_PARTITIONED_TABLE), is(true));
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
+
+        // TODO PD need to look at why we get more partitions still something is not working
+        assertThat(partitions.size(), is(1));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation));
         }
       }
     });
