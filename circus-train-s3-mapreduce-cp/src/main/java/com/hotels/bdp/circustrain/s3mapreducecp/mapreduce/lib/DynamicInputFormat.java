@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.DynamicInputFormat} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/lib/DynamicInputFormat.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/lib/DynamicInputFormat.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +201,7 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
   private static Path getListingFilePath(Configuration configuration) {
     String listingFilePathString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
 
-    assert !listingFilePathString.equals("") : "Listing file not found.";
+    assert !"".equals(listingFilePathString) : "Listing file not found.";
 
     Path listingFilePath = new Path(listingFilePathString);
     try {

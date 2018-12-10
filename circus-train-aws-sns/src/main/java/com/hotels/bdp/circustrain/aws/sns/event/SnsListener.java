@@ -84,8 +84,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
 
   SnsListener(AmazonSNSAsyncClient sns, ListenerConfig config, Clock clock) {
     this.clock = clock;
-    LOG.info("Starting listener, topics: start={}, success={}, fail={}", config.getStartTopic(),
-        config.getSuccessTopic(), config.getFailTopic());
+    LOG
+        .info("Starting listener, topics: start={}, success={}, fail={}", config.getStartTopic(),
+            config.getSuccessTopic(), config.getFailTopic());
     this.sns = sns;
     this.config = config;
     ObjectMapper mapper = new ObjectMapper();
@@ -108,9 +109,10 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     startTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
-    SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId, sourceCatalog.getName(),
-        replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, null, null, null);
+    SnsMessage message = new SnsMessage(SnsMessageType.START, config.getHeaders(), startTime, null, eventId,
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
+        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
+        replicaTable.getTableLocation(), partitionKeyTypes, null, null, null);
     publish(config.getStartTopic(), message);
   }
 
@@ -119,9 +121,10 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     String endTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(), replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
-        getBytesReplicated(), null);
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
+        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
+        replicaTable.getTableLocation(), partitionKeyTypes,
+        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), null);
     publish(config.getSuccessTopic(), message);
   }
 
@@ -133,9 +136,10 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     String endTime = clock.getTime();
     EventReplicaTable replicaTable = tableReplication.getReplicaTable();
     SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(), tableReplication.getSourceTable().getQualifiedName(),
-        tableReplication.getQualifiedReplicaName(),replicaTable.getTableLocation(), partitionKeyTypes, getModifiedPartitions(partitionsToAlter, partitionsToCreate),
-        getBytesReplicated(), t.getMessage());
+        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
+        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
+        replicaTable.getTableLocation(), partitionKeyTypes,
+        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), t.getMessage());
     publish(config.getFailTopic(), message);
   }
 
@@ -188,8 +192,9 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
         String jsonMessage = startWriter.writeValueAsString(message);
         int messageLength = jsonMessage.getBytes(StandardCharsets.UTF_8).length;
         if (messageLength > SNS_MESSAGE_SIZE_LIMIT) {
-          LOG.warn("Message length of {} exceeds SNS limit ({} bytes), clearing partition info", messageLength,
-              SNS_MESSAGE_SIZE_LIMIT);
+          LOG
+              .warn("Message length of {} exceeds SNS limit ({} bytes), clearing partition info", messageLength,
+                  SNS_MESSAGE_SIZE_LIMIT);
           message.clearModifiedPartitions();
           message.setMessageTruncated(true);
           jsonMessage = startWriter.writeValueAsString(message);

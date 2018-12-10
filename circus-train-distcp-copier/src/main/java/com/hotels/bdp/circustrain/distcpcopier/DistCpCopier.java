@@ -37,7 +37,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.core.util.LibJarDeployer;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 
 public class DistCpCopier implements Copier {

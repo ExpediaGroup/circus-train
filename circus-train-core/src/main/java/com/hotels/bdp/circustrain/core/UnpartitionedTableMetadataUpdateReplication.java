@@ -86,7 +86,8 @@ public class UnpartitionedTableMetadataUpdateReplication implements Replication 
     if (!previousTable.isPresent()) {
       throw new InvalidReplicationModeException("Trying a "
           + ReplicationMode.METADATA_UPDATE.name()
-          + " on a table that wasn't replicated before. This is not possible, rerun with a different table name or change the replication mode to "
+          + " on a table that wasn't replicated before. This is not possible,"
+          + " rerun with a different table name or change the replication mode to "
           + ReplicationMode.FULL.name()
           + ".");
 

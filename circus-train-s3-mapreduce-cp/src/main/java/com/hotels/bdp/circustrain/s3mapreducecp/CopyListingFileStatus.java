@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.CopyListingFileStatus} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/CopyListingFileStatus.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/
+ * hadoop/tools/CopyListingFileStatus.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +82,8 @@ public final class CopyListingFileStatus extends FileStatus {
    * @return List<AclEntry> containing full logical ACL
    */
   public List<AclEntry> getAclEntries() {
-    return AclUtil.getAclFromPermAndEntries(getPermission(),
-        aclEntries != null ? aclEntries : Collections.<AclEntry> emptyList());
+    return AclUtil
+        .getAclFromPermAndEntries(getPermission(), aclEntries != null ? aclEntries : Collections.<AclEntry>emptyList());
   }
 
   /**
@@ -100,7 +101,7 @@ public final class CopyListingFileStatus extends FileStatus {
    * @return Map<String, byte[]> containing all xAttrs
    */
   public Map<String, byte[]> getXAttrs() {
-    return xAttrs != null ? xAttrs : Collections.<String, byte[]> emptyMap();
+    return xAttrs != null ? xAttrs : Collections.<String, byte[]>emptyMap();
   }
 
   /**
@@ -156,12 +157,13 @@ public final class CopyListingFileStatus extends FileStatus {
     if (aclEntriesSize != NO_ACL_ENTRIES) {
       aclEntries = Lists.newArrayListWithCapacity(aclEntriesSize);
       for (int i = 0; i < aclEntriesSize; ++i) {
-        aclEntries.add(new AclEntry.Builder()
-            .setScope(ACL_ENTRY_SCOPES[in.readByte()])
-            .setType(ACL_ENTRY_TYPES[in.readByte()])
-            .setName(WritableUtils.readString(in))
-            .setPermission(FS_ACTIONS[in.readByte()])
-            .build());
+        aclEntries
+            .add(new AclEntry.Builder()
+                .setScope(ACL_ENTRY_SCOPES[in.readByte()])
+                .setType(ACL_ENTRY_TYPES[in.readByte()])
+                .setName(WritableUtils.readString(in))
+                .setPermission(FS_ACTIONS[in.readByte()])
+                .build());
       }
     } else {
       aclEntries = null;

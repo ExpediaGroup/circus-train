@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class DistCpOptionsParser {
     }
 
     List<FileAttribute> fileAttributes = MoreMapUtils.getListOfEnum(copierOptions, FILE_ATTRIBUTES,
-        Collections.<FileAttribute> emptyList(), FileAttribute.class);
+        Collections.<FileAttribute>emptyList(), FileAttribute.class);
     for (FileAttribute fileAttribute : fileAttributes) {
       distCpOptions.preserve(fileAttribute);
     }

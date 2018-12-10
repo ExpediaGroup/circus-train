@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class DistCpCopierFactory implements CopierFactory {
       Path sourceBaseLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
-    return newInstance(eventId, sourceBaseLocation, Collections.<Path> emptyList(), replicaLocation, copierOptions);
+    return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
   }
 
 }

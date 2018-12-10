@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
 
       // We expect all partitions to be under the table base path
       SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable, sourcePartitions, eventId,
-          Collections.<String, Object> emptyMap());
+          Collections.<String, Object>emptyMap());
       ReplicaLocationManager replicaLocationManager = new MetadataMirrorReplicaLocationManager(sourceLocationManager,
           TableType.PARTITIONED);
       sourceLocationManager.cleanUpLocations();
@@ -88,8 +88,8 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
         replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
             replicaLocationManager);
         LOG.info(
-            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
-            database, table, partitionPredicate);
+            "No matching partitions found on table {}.{} with predicate {}. "+
+            "Table metadata updated, no partitions were updated.", database, table, partitionPredicate);
       } else {
         replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
             replicaDatabaseName, replicaTableName, replicaLocationManager);

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class S3MapReduceCpOptions {
 
   // As we shade the AWS SDK, we can't expose AWS classes in the public classes/methods.
   public static class Builder {
-    S3MapReduceCpOptions options;
+    private final S3MapReduceCpOptions options;
 
     private Builder(List<Path> sources, URI target) {
       options = new S3MapReduceCpOptions();
@@ -393,7 +393,7 @@ public class S3MapReduceCpOptions {
 
   public Map<String, String> toMap() {
     ImmutableMap.Builder<String, String> builder = ImmutableMap
-        .<String, String> builder()
+        .<String, String>builder()
         .put(ConfigurationVariable.MINIMUM_UPLOAD_PART_SIZE.getName(), String.valueOf(multipartUploadPartSize))
         .put(ConfigurationVariable.S3_SERVER_SIDE_ENCRYPTION.getName(), String.valueOf(s3ServerSideEncryption))
         .put(ConfigurationVariable.STORAGE_CLASS.getName(), storageClass)

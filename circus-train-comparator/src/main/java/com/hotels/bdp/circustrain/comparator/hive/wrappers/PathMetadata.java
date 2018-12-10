@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class PathMetadata implements Serializable {
       checkSumLength = checksum.getLength();
       this.checksum = checksum.getBytes();
     }
-    this.childrenMetadata = childrenMetadata == null ? ImmutableList.<PathMetadata> of()
+    this.childrenMetadata = childrenMetadata == null ? ImmutableList.<PathMetadata>of()
         : ImmutableList.copyOf(childrenMetadata);
   }
 

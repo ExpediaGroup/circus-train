@@ -177,7 +177,7 @@ public class CircusTrainRunner {
   private Map<String, String> populateProperties(String configFilePath, String... modules) {
     File configFile = new File(configFilePath);
     ImmutableMap.Builder<String, String> builder = ImmutableMap
-        .<String, String> builder()
+        .<String, String>builder()
         // Configuration file
         .put("config", configFile.getAbsolutePath())
         .put("config-location", configFile.getParent())
@@ -217,7 +217,7 @@ public class CircusTrainRunner {
   }
 
   private Map<String, String> prefixProperties(String prefix, Map<String, String> properties) {
-    ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String> builder();
+    ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
     for (Entry<String, String> property : properties.entrySet()) {
       String newKey = new StringBuilder(prefix).append(".").append(property.getKey()).toString();
       builder.put(newKey, property.getValue());

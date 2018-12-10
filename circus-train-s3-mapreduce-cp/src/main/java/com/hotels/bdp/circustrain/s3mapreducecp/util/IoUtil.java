@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.io.IOUtils} from Hadoop Common 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/io/IOUtils.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-common-project/hadoop-common/src/main/java/org/
+ * apache/hadoop/io/IOUtils.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class HdfsSnapshotLocationManager implements SourceLocationManager {
       boolean snapshotsDisabled,
       String tableBasePath,
       SourceCatalogListener sourceCatalogListener) throws IOException {
-    this(sourceHiveConf, eventId, sourceTable, Collections.<Partition> emptyList(), snapshotsDisabled, tableBasePath,
+    this(sourceHiveConf, eventId, sourceTable, Collections.<Partition>emptyList(), snapshotsDisabled, tableBasePath,
         sourceCatalogListener);
   }
 
@@ -184,8 +184,9 @@ public class HdfsSnapshotLocationManager implements SourceLocationManager {
   }
 
   private Path createSnapshot() throws IOException {
-    LOG.debug("Source table {}.{} has its data located at {}", sourceTable.getDbName(), sourceTable.getTableName(),
-        sourceDataPath);
+    LOG
+        .debug("Source table {}.{} has its data located at {}", sourceTable.getDbName(), sourceTable.getTableName(),
+            sourceDataPath);
 
     FileSystem fileSystem = fileSystemFactory.get(sourceDataPath, sourceHiveConf);
     Path snapshotMetaDataPath = new Path(sourceDataPath, HdfsConstants.DOT_SNAPSHOT_DIR);

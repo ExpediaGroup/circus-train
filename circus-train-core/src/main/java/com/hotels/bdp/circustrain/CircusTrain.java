@@ -86,8 +86,7 @@ import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
     "com.hotels.bdp.circustrain.housekeeping",
     "com.hotels.bdp.circustrain.metrics.conf",
     "com.hotels.bdp.circustrain.s3mapreducecpcopier",
-    "com.hotels.bdp.circustrain.s3s3copier"
-})
+    "com.hotels.bdp.circustrain.s3s3copier" })
 public class CircusTrain {
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrain.class);
 
@@ -98,18 +97,19 @@ public class CircusTrain {
     int exitCode = -1;
     try {
       String defaultModules = Joiner.on(",").join(Modules.REPLICATION, Modules.HOUSEKEEPING);
-      exitCode = SpringApplication.exit(new SpringApplicationBuilder(CircusTrain.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:${modules:" + defaultModules + "}")
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .properties("jasypt.encryptor.password:${password:null}")
-          .properties("housekeeping.schema-name:circus_train")
-          .registerShutdownHook(true)
-          .initializers(new ExtensionInitializer())
-          .listeners(new ConfigFileValidationApplicationListener())
-          .build()
-          .run(args));
+      exitCode = SpringApplication
+          .exit(new SpringApplicationBuilder(CircusTrain.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:${modules:" + defaultModules + "}")
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .properties("jasypt.encryptor.password:${password:null}")
+              .properties("housekeeping.schema-name:circus_train")
+              .registerShutdownHook(true)
+              .initializers(new ExtensionInitializer())
+              .listeners(new ConfigFileValidationApplicationListener())
+              .build()
+              .run(args));
     } catch (ConfigFileValidationException e) {
       LOG.error(e.getMessage(), e);
       printCircusTrainHelp(e.getErrors());

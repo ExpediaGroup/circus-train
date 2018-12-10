@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.DynamicInputChunk} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/lib/DynamicInputChunk.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/lib/DynamicInputChunk.java
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,7 +69,7 @@ class DynamicInputChunk<K, V> {
 
   private static String getListingFilePath(Configuration configuration) {
     final String listingFileString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
-    assert !listingFileString.equals("") : "Listing file not found.";
+    assert !"".equals(listingFileString) : "Listing file not found.";
     return listingFileString;
   }
 
@@ -215,7 +216,7 @@ class DynamicInputChunk<K, V> {
 
   static FileStatus[] getListOfChunkFiles() throws IOException {
     Path chunkFilePattern = new Path(chunkRootPath, chunkFilePrefix + "*");
-    FileStatus chunkFiles[] = fs.globStatus(chunkFilePattern);
+    FileStatus[] chunkFiles = fs.globStatus(chunkFilePattern);
     numChunksLeft = chunkFiles.length;
     return chunkFiles;
   }

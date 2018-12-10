@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.DynamicRecordReader} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/lib/DynamicRecordReader.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/lib/DynamicRecordReader.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

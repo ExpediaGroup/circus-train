@@ -111,7 +111,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
               sourcePartitionsAndStatistics, sourceTable.getPartitionKeys());
           SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable,
               sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
-              Collections.<String, Object> emptyMap());
+              Collections.<String, Object>emptyMap());
 
           replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
               sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
@@ -155,7 +155,8 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
     if (!previousTable.isPresent()) {
       throw new InvalidReplicationModeException("Trying a "
           + ReplicationMode.METADATA_UPDATE.name()
-          + " on a table that wasn't replicated before. This is not possible, rerun with a different table name or change the replication mode to "
+          + " on a table that wasn't replicated before. This is not possible, "
+          + "rerun with a different table name or change the replication mode to "
           + ReplicationMode.FULL.name()
           + ".");
 

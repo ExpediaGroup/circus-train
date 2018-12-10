@@ -1,10 +1,13 @@
 /**
  * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
  *
- * Based on {@code org.apache.hadoop.tools.SimpleCopyListing} and {@code org.apache.hadoop.tools.GlobbedCopyListing} from Hadoop DistCp 2.7.1:
+ * Based on {@code org.apache.hadoop.tools.SimpleCopyListing} and
+ * {@code org.apache.hadoop.tools.GlobbedCopyListing} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/SimpleCopyListing.java
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/GlobbedCopyListing.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/SimpleCopyListing.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/GlobbedCopyListing.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,9 +231,10 @@ public class SimpleCopyListing extends CopyListing {
     if (fs.exists(pathToListFile)) {
       fs.delete(pathToListFile, false);
     }
-    return SequenceFile.createWriter(getConf(), SequenceFile.Writer.file(pathToListFile),
-        SequenceFile.Writer.keyClass(Text.class), SequenceFile.Writer.valueClass(CopyListingFileStatus.class),
-        SequenceFile.Writer.compression(SequenceFile.CompressionType.NONE));
+    return SequenceFile
+        .createWriter(getConf(), SequenceFile.Writer.file(pathToListFile), SequenceFile.Writer.keyClass(Text.class),
+            SequenceFile.Writer.valueClass(CopyListingFileStatus.class),
+            SequenceFile.Writer.compression(SequenceFile.CompressionType.NONE));
   }
 
   private static boolean isDirectoryAndNotEmpty(FileSystem fileSystem, FileStatus fileStatus) throws IOException {
@@ -272,8 +276,9 @@ public class SimpleCopyListing extends CopyListing {
       Path sourcePathRoot,
       S3MapReduceCpOptions options)
     throws IOException {
-    LOG.debug("REL PATH: {}, FULL PATH: {}", PathUtil.getRelativePath(sourcePathRoot, fileStatus.getPath()),
-        fileStatus.getPath());
+    LOG
+        .debug("REL PATH: {}, FULL PATH: {}", PathUtil.getRelativePath(sourcePathRoot, fileStatus.getPath()),
+            fileStatus.getPath());
 
     FileStatus status = fileStatus;
 
