@@ -3,7 +3,8 @@
  *
  * Based on {@code com.beust.jcommander.validators.PostivieInteger} from JCommander 1.48:
  *
- * https://github.com/cbeust/jcommander/blob/jcommander-1.48/src/main/java/com/beust/jcommander/validators/PositiveInteger.java
+ * https://github.com/cbeust/jcommander/blob/jcommander-1.48/src/main/java/com/beust/
+ * jcommander/validators/PositiveInteger.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

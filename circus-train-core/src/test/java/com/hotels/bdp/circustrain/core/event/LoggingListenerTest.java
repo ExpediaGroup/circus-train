@@ -72,11 +72,11 @@ public class LoggingListenerTest {
     listener.tableReplicationStart(tableReplication, "event-id");
     listener.partitionsToAlter(eventPartitions);
     listener.partitionsToCreate(eventPartitions);
-    assertThat(listener.getReplicationState().partitionsAltered, is(2));
+    assertThat(listener.getReplicationState().getPartitionsAltered(), is(2));
 
     // state should be reset
     listener.tableReplicationStart(tableReplication, "event-id");
-    assertThat(listener.getReplicationState().partitionsAltered, is(0));
+    assertThat(listener.getReplicationState().getPartitionsAltered(), is(0));
   }
 
   @Test

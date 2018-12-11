@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,10 @@ public class FilterMissingPartitionsLocationManager implements SourceLocationMan
         if (fileSystem.exists(path)) {
           result.add(path);
         } else {
-          LOG.warn("Source path '{}' does not exist skipping it for replication."
-              + " WARNING: this means there is a partition in Hive that does not have a corresponding folder in source file store, "
-              + "check your table and data.", path);
+          LOG
+              .warn("Source path '{}' does not exist skipping it for replication."
+                  + " WARNING: this means there is a partition in Hive that does not have a corresponding folder in"
+                  + " source file store, check your table and data.", path);
         }
       } catch (IOException e) {
         LOG.warn("Exception while checking path, skipping path '{}',  error {}", path, e);

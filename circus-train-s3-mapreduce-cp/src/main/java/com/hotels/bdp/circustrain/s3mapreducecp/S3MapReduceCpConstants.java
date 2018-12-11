@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.DistCpConstants} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/DistCpConstants.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/DistCpConstants.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,4 +93,6 @@ public class S3MapReduceCpConstants {
 
   /* Default buffer size used during data transfer: 0 means use the default provided by the file system */
   public static final int DEFAULT_UPLOAD_BUFFER_SIZE = 0;
+
+  private S3MapReduceCpConstants() {}
 }

@@ -32,7 +32,8 @@ import com.hotels.bdp.circustrain.api.validation.constraintvalidators.TableRepli
 @Retention(RUNTIME)
 @ReportAsSingleViolation
 public @interface TableReplicationFullReplicationModeConstraint {
-  String message() default "TableReplication.ReplicaTable.tableLocation must not be blank for ReplicationMode.FULL_REPLICATION";
+  String message() default "TableReplication.ReplicaTable.tableLocation must not be blank for"
+      + " ReplicationMode.FULL_REPLICATION";
 
   Class<?>[] groups() default {};
 

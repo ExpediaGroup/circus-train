@@ -54,7 +54,8 @@ import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;
 public class SimpleCopyListing extends CopyListing {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleCopyListing.class);
 
-  public static final String CONF_LABEL_ROOT_PATH = "com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing.rootPath";
+  public static final String CONF_LABEL_ROOT_PATH = "com.hotels.bdp.circustrain.s3mapreducecp."
+      + "SimpleCopyListing.rootPath";
 
   private long totalPaths = 0;
   private long totalBytesToCopy = 0;

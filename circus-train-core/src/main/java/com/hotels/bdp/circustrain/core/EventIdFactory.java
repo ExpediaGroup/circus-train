@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,11 @@ public interface EventIdFactory {
     public String newEventId(String prefix) {
       // These will appear in folder paths, snapshot names, etc
       // Must be lower case for Google Cloud Storage
-      String id = prefix + "-" + FORMATTER.print(System.currentTimeMillis()) + "-" + RandomStringUtils.randomAlphanumeric(8);
+      String id = prefix
+          + "-"
+          + FORMATTER.print(System.currentTimeMillis())
+          + "-"
+          + RandomStringUtils.randomAlphanumeric(8);
       id = id.toLowerCase();
       return id;
     }

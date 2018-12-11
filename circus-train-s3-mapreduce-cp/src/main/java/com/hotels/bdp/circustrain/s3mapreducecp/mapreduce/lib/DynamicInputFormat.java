@@ -59,6 +59,7 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
   private static final String CONF_LABEL_LISTING_SPLIT_RATIO = "mapred.listing.split.ratio";
   private static final String CONF_LABEL_NUM_SPLITS = "mapred.num.splits";
   private static final String CONF_LABEL_NUM_ENTRIES_PER_CHUNK = "mapred.num.entries.per.chunk";
+  private static final int N_CHUNKS_OPEN_AT_ONCE_DEFAULT = 16;
 
   /**
    * Implementation of InputFormat::getSplits(). This method splits up the copy-listing file into chunks, and assigns
@@ -93,8 +94,6 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
     ConfigurationUtil.publish(jobContext.getConfiguration(), CONF_LABEL_NUM_SPLITS, splits.size());
     return splits;
   }
-
-  private static int N_CHUNKS_OPEN_AT_ONCE_DEFAULT = 16;
 
   private List<DynamicInputChunk> splitCopyListingIntoChunksWithShuffle(JobContext context) throws IOException {
 

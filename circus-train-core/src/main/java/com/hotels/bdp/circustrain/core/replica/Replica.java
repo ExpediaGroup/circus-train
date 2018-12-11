@@ -317,7 +317,8 @@ public class Replica extends HiveEndpoint {
       if (replicaReplicationMode.get() != METADATA_MIRROR && replicationMode == METADATA_MIRROR) {
         throw new InvalidReplicationModeException("Trying to "
             + METADATA_MIRROR.name()
-            + " a previously replicated table. This is not possible, rerun with a different table name or change the replication mode to "
+            + " a previously replicated table. This is not possible, rerun with a different table name or"
+            + " change the replication mode to "
             + FULL.name()
             + " or "
             + METADATA_UPDATE.name()
@@ -327,7 +328,8 @@ public class Replica extends HiveEndpoint {
       // no replicaReplicationMode found in table settings we assume FULL_REPLICATION was intended.
       throw new InvalidReplicationModeException("Trying to "
           + METADATA_MIRROR.name()
-          + " a previously replicated table. This is not possible, rerun with a different table name or change the replication mode to "
+          + " a previously replicated table. This is not possible, rerun with a different table name or"
+          + " change the replication mode to "
           + FULL.name()
           + " or "
           + METADATA_UPDATE.name()

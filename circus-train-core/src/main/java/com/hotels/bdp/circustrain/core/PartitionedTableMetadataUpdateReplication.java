@@ -100,8 +100,8 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
           replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
               replicaLocationManager);
           LOG.info(
-              "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
-              database, table, partitionPredicate);
+              "No matching partitions found on table {}.{} with predicate {}."
+                  + " Table metadata updated, no partitions were updated.", database, table, partitionPredicate);
         } else {
           String previousLocation = getPreviousLocation(client);
           ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,

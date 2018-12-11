@@ -149,40 +149,51 @@ public class S3MapReduceCpOptions {
   @Parameter(names = "--async", description = "Should S3MapReduceCp execution be blocking")
   private boolean async = false;
 
-  @Parameter(names = "--src", description = "Locations to copy files from", required = true, converter = PathConverter.class)
+  @Parameter(names = "--src", description = "Locations to copy files from", required = true,
+      converter = PathConverter.class)
   private List<Path> sources = null;
 
-  @Parameter(names = "--dest", description = "Location to copy files to", required = true, converter = URIConverter.class)
+  @Parameter(names = "--dest", description = "Location to copy files to", required = true,
+      converter = URIConverter.class)
   private URI target = null;
 
   @Parameter(names = "--credentialsProvider", description = "Credentials provider URI", converter = URIConverter.class)
   private URI credentialsProvider = ConfigurationVariable.CREDENTIAL_PROVIDER.defaultURIValue();
 
-  @Parameter(names = "--multipartUploadChunkSize", description = "The size in MB of the multipart upload part size", validateWith = PositiveNonZeroLong.class)
+  @Parameter(names = "--multipartUploadChunkSize", description = "The size in MB of the multipart upload part size",
+      validateWith = PositiveNonZeroLong.class)
   private long multipartUploadPartSize = ConfigurationVariable.MINIMUM_UPLOAD_PART_SIZE.defaultLongValue();
 
-  @Parameter(names = "--s3ServerSideEncryption", description = "Copy files to S3 using Amazon S3 Server Side Encryption")
+  @Parameter(names = "--s3ServerSideEncryption",
+      description = "Copy files to S3 using Amazon S3 Server Side Encryption")
   private boolean s3ServerSideEncryption = ConfigurationVariable.S3_SERVER_SIDE_ENCRYPTION.defaultBooleanValue();
 
-  @Parameter(names = "--storageClass", description = "S3 storage class. See IDs in com.amazonaws.services.s3.model.StorageClass", validateWith = StorageClassValidator.class)
+  @Parameter(names = "--storageClass",
+      description = "S3 storage class. See IDs in com.amazonaws.services.s3.model.StorageClass",
+      validateWith = StorageClassValidator.class)
   private String storageClass = ConfigurationVariable.STORAGE_CLASS.defaultValue();
 
-  @Parameter(names = "--maxBandwidth", description = "Maximum bandwidth per task specified in MB", validateWith = PositiveNonZeroLong.class)
+  @Parameter(names = "--maxBandwidth", description = "Maximum bandwidth per task specified in MB",
+      validateWith = PositiveNonZeroLong.class)
   private long maxBandwidth = ConfigurationVariable.MAX_BANDWIDTH.defaultLongValue();
 
-  @Parameter(names = "--numberOfUploadWorkers", description = "Number of threads that perform uploads to S3", validateWith = PositiveNonZeroInteger.class)
+  @Parameter(names = "--numberOfUploadWorkers", description = "Number of threads that perform uploads to S3",
+      validateWith = PositiveNonZeroInteger.class)
   private int numberOfUploadWorkers = ConfigurationVariable.NUMBER_OF_UPLOAD_WORKERS.defaultIntValue();
 
-  @Parameter(names = "--multipartUploadThreshold", description = "Multipart upload threshold in MB", validateWith = PositiveNonZeroLong.class)
+  @Parameter(names = "--multipartUploadThreshold", description = "Multipart upload threshold in MB",
+      validateWith = PositiveNonZeroLong.class)
   private long multipartUploadThreshold = ConfigurationVariable.MULTIPART_UPLOAD_THRESHOLD.defaultLongValue();
 
-  @Parameter(names = "--maxMaps", description = "Maximum number of Hadoop mappers", validateWith = PositiveInteger.class)
+  @Parameter(names = "--maxMaps", description = "Maximum number of Hadoop mappers",
+      validateWith = PositiveInteger.class)
   private int maxMaps = ConfigurationVariable.MAX_MAPS.defaultIntValue();
 
   @Parameter(names = "--copyStrategy", description = "Strategy to distribute the files to be copied for each mapper")
   private String copyStrategy = ConfigurationVariable.COPY_STRATEGY.defaultValue();
 
-  @Parameter(names = "--logPath", description = "Folder on DFS where S3MapReduceCp execution logs are saved", converter = PathConverter.class)
+  @Parameter(names = "--logPath", description = "Folder on DFS where S3MapReduceCp execution logs are saved",
+      converter = PathConverter.class)
   private Path logPath = null;
 
   @Parameter(names = "--region", description = "AWS region", validateWith = RegionValidator.class)
@@ -191,16 +202,20 @@ public class S3MapReduceCpOptions {
   @Parameter(names = "--ignoreFailures", description = "Ignore read failures")
   private boolean ignoreFailures = ConfigurationVariable.IGNORE_FAILURES.defaultBooleanValue();
 
-  @Parameter(names = "--s3EndpointUri", description = "URI of the S3 end-point to be used by S3 clients", converter = URIConverter.class)
+  @Parameter(names = "--s3EndpointUri", description = "URI of the S3 end-point to be used by S3 clients",
+      converter = URIConverter.class)
   private URI s3EndpointUri = ConfigurationVariable.S3_ENDPOINT_URI.defaultURIValue();
 
-  @Parameter(names = "--uploadRetryCount", description = "Number of upload retries", validateWith = PositiveInteger.class)
+  @Parameter(names = "--uploadRetryCount", description = "Number of upload retries",
+      validateWith = PositiveInteger.class)
   private int uploadRetryCount = ConfigurationVariable.UPLOAD_RETRY_COUNT.defaultIntValue();
 
-  @Parameter(names = "--uploadRetryDelayMs", description = "Milliseconds between upload retries", validateWith = PositiveLong.class)
+  @Parameter(names = "--uploadRetryDelayMs", description = "Milliseconds between upload retries",
+      validateWith = PositiveLong.class)
   private long uploadRetryDelayMs = ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue();
 
-  @Parameter(names = "--uploadBufferSize", description = "Size of the buffer used to upload the stream of data", validateWith = PositiveInteger.class)
+  @Parameter(names = "--uploadBufferSize", description = "Size of the buffer used to upload the stream of data",
+      validateWith = PositiveInteger.class)
   private int uploadBufferSize = ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue();
 
   public S3MapReduceCpOptions() {}

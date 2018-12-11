@@ -101,8 +101,9 @@ class UnpartitionedTableReplication implements Replication {
       }
       sourceLocationManager.cleanUpLocations();
 
-      replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-          replicaLocationManager);
+      replica
+          .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+               replicaLocationManager);
       replicaLocationManager.cleanUpLocations();
 
       LOG.info("Replicated table {}.{}.", database, table);
