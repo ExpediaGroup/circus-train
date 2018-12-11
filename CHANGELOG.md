@@ -1,5 +1,7 @@
 ## TBD
 ### Changed
+* Housekeeping can be configured to control query batch size, this controls memory usage. See[#40](https://github.com/HotelsDotCom/housekeeping/issues/40).
+* Housekeeping readme moved to Housekeeping project. See[#31](https://github.com/HotelsDotCom/housekeeping/issues/31).
 * Upgraded Housekeeping library to also store replica database and table name in Housekeeping database. See[#30](https://github.com/HotelsDotCom/housekeeping/issues/30).
 
 ## 13.0.0 - 2018-10-15

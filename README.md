@@ -456,12 +456,10 @@ Housekeeping is the process that removes expired and orphaned data on the replic
 
 |Property|Required|Description|
 |----|----|----|
-|`housekeeping.h2.database`|No|The location of the h2 housekeeping database. Defaults to `${instance.home}/data/${instance.name}/housekeeping`.|
-|`housekeeping.expired-path-duration`|No|Time To Live (TTL) of legacy replica paths in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#Durations) format: only days, hours, minutes and seconds can be specified in the expression.|
-|`housekeeping.data-source.driver-class-name`|No|Java classname of the database JDBC driver.|
-|`housekeeping.data-source.url`|No|JDBC connection URL. Refer to the [Instance Globals](#instance-globals) section for more details.|
-|`housekeeping.data-source.username`|No|database user with access to `circus_train` schema.|
-|`housekeeping.data-source.password`|No|database user's password.|
+|`housekeeping.h2.database`|No|The location of the h2 housekeeping database. Defaults to `${instance.home}/data/${instance.name}/housekeeping`. Refer to the [Instance Globals](#instance-globals) section for more details.|
+|`housekeeping.schema-name`|No|Database schema name to use. Circus Train default: 'circus_train'|
+
+For more details on Housekeeping configuration, including example on how to override the H2 default Database with something a bit more robust, please consult the [housekeeping documentation](https://github.com/HotelsDotCom/housekeeping).
 
 
 ## Metric Reporting
