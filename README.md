@@ -459,7 +459,7 @@ Housekeeping is the process that removes expired and orphaned data on the replic
 |`housekeeping.h2.database`|No|The location of the h2 housekeeping database. Defaults to `${instance.home}/data/${instance.name}/housekeeping`. Refer to the [Instance Globals](#instance-globals) section for more details.|
 |`housekeeping.schema-name`|No|Database schema name to use. Circus Train default: 'circus_train'|
 
-For more details on Housekeeping configuration, including example on how to override the H2 default Database with something a bit more robust, please consult the [housekeeping documentation](https://github.com/HotelsDotCom/housekeeping).
+For more details on Housekeeping configuration, including examples on how to override the H2 default database with something a bit more robust, please consult the [Housekeeping documentation](https://github.com/HotelsDotCom/housekeeping).
 
 
 ## Metric Reporting
