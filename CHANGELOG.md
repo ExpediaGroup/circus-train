@@ -1,5 +1,6 @@
 ## TBD
 ### Changed
+* Upgraded Housekeeping library to also store replica database and table name in Housekeeping database. See[#30](https://github.com/HotelsDotCom/housekeeping/issues/30).
 * Upgraded `hotels-oss-parent` pom to 2.3.3 (was 2.0.6). See [#97](https://github.com/HotelsDotCom/circus-train/issues/97).
 
 ## 13.0.0 - 2018-10-15

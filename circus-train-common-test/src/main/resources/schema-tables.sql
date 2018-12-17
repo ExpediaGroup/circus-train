@@ -6,5 +6,7 @@ CREATE TABLE IF NOT EXISTS circus_train.legacy_replica_path (
   event_id VARCHAR(250) NOT NULL,
   path_event_id VARCHAR(250) NULL,
   path VARCHAR(4000) NOT NULL,
+  metastore_database_name VARCHAR(512) NULL,
+  metastore_table_name VARCHAR(512) NULL,
   PRIMARY KEY (id)
 );

@@ -275,6 +275,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
           assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
           assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
+          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
+          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
         }
       }
     });
@@ -309,6 +311,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
           assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
           assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
+          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
+          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
         }
       }
     });

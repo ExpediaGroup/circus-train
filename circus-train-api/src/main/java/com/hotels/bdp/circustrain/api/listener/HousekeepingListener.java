@@ -21,9 +21,19 @@ public interface HousekeepingListener {
   public static final HousekeepingListener NULL = new HousekeepingListener() {
 
     @Override
-    public void cleanUpLocation(String eventId, String pathEventId, Path location) {}
+    public void cleanUpLocation(
+        String eventId,
+        String pathEventId,
+        Path location,
+        String replicaDatabaseName,
+        String replicaTableName) {}
 
   };
 
-  void cleanUpLocation(String eventId, String pathEventId, Path location);
+  void cleanUpLocation(
+      String eventId,
+      String pathEventId,
+      Path location,
+      String replicaDatabaseName,
+      String replicaTableName);
 }
