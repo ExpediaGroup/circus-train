@@ -24,6 +24,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.housekeeping.listener.JdbcHousekeepingListener;
+import com.hotels.housekeeping.conf.Housekeeping;
 import com.hotels.housekeeping.repository.LegacyReplicaPathRepository;
 import com.hotels.housekeeping.service.HousekeepingService;
 import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
@@ -39,8 +40,10 @@ public class CircusTrainHousekeepingConfiguration {
   @Bean
   HousekeepingService housekeepingService(
       LegacyReplicaPathRepository legacyReplicaPathRepository,
-      @Qualifier("baseConf") org.apache.hadoop.conf.Configuration baseConf) {
-    return new FileSystemHousekeepingService(legacyReplicaPathRepository, baseConf);
+      @Qualifier("baseConf") org.apache.hadoop.conf.Configuration baseConf,
+      Housekeeping housekeeping) {
+    return new FileSystemHousekeepingService(legacyReplicaPathRepository, baseConf,
+        housekeeping.getFetchLegacyReplicaPathPageSize());
   }
 
   @Bean
