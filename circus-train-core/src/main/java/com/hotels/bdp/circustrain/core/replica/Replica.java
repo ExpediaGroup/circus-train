@@ -358,10 +358,13 @@ public class Replica extends HiveEndpoint {
       TableType tableType,
       String targetTableLocation,
       String eventId,
-      SourceLocationManager sourceLocationManager)
+      SourceLocationManager sourceLocationManager,
+      String replicaDatabaseName,
+      String replicaTableName)
     throws TException {
-    return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
-        new HouseKeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener),
+    return new FullReplicationReplicaLocationManager(
+        sourceLocationManager, targetTableLocation, eventId, tableType, new HouseKeepingCleanupLocationManager(eventId,
+            housekeepingListener, replicaCatalogListener, replicaDatabaseName, replicaTableName),
         replicaCatalogListener);
   }
 

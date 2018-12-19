@@ -20,12 +20,6 @@
     <!-- Circus Train -->
     <dependency>
       <groupId>com.hotels</groupId>
-      <artifactId>circus-train-common-test</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hotels</groupId>
       <artifactId>circus-train-core</artifactId>
       <version>${project.version}</version>
     </dependency>

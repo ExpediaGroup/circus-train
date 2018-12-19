@@ -88,34 +88,38 @@ class PartitionedTableReplication implements Replication {
       TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
       Table sourceTable = sourceTableAndStatistics.getTable();
 
-      PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
-          partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
+      PartitionsAndStatistics sourcePartitionsAndStatistics = source
+          .getPartitions(sourceTable, partitionPredicate.getPartitionPredicate(),
+              partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
 
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
 
       // We expect all partitions to be under the table base path
-      SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable, sourcePartitions, eventId,
-          copierOptions);
+      SourceLocationManager sourceLocationManager = source
+          .getLocationManager(sourceTable, sourcePartitions, eventId, copierOptions);
       Path sourceBaseLocation = sourceLocationManager.getTableLocation();
       List<Path> sourceSubLocations = sourceLocationManager.getPartitionLocations();
 
-      ReplicaLocationManager replicaLocationManager = replica.getLocationManager(TableType.PARTITIONED,
-          targetTableLocation, eventId, sourceLocationManager);
+      ReplicaLocationManager replicaLocationManager = replica
+          .getLocationManager(TableType.PARTITIONED, targetTableLocation, eventId, sourceLocationManager,
+              replicaDatabaseName, replicaTableName);
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
       if (sourcePartitions.isEmpty()) {
         LOG.debug("Update table {}.{} metadata only", database, table);
-        replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-            replicaLocationManager);
-        LOG.info(
-            "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
-            database, table, partitionPredicate);
+        replica
+            .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+                replicaLocationManager);
+        LOG
+            .info(
+                "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
+                database, table, partitionPredicate);
       } else {
-        CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceBaseLocation,
-            replicaPartitionBaseLocation, copierOptions);
-        Copier copier = copierFactory.newInstance(eventId, sourceBaseLocation, sourceSubLocations,
-            replicaPartitionBaseLocation, copierOptions);
+        CopierFactory copierFactory = copierFactoryManager
+            .getCopierFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
+        Copier copier = copierFactory
+            .newInstance(eventId, sourceBaseLocation, sourceSubLocations, replicaPartitionBaseLocation, copierOptions);
         copierListener.copierStart(copier.getClass().getName());
         try {
           metrics = copier.copy();
@@ -125,8 +129,9 @@ class PartitionedTableReplication implements Replication {
 
         sourceLocationManager.cleanUpLocations();
 
-        replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-            replicaDatabaseName, replicaTableName, replicaLocationManager);
+        replica
+            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
+                replicaDatabaseName, replicaTableName, replicaLocationManager);
         replicaLocationManager.cleanUpLocations();
 
         int partitionsCopied = sourcePartitions.size();

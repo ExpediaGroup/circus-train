@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2016-2018 Expedia Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.hotels.bdp.circustrain.core.replica;
 
 import java.net.URI;
@@ -21,13 +36,21 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
   private final ReplicaCatalogListener replicaCatalogListener;
   private final List<CleanUpLocation> locations = new ArrayList<>();
 
+  private final String replicaDatabase;
+
+  private final String replicaTable;
+
   public HouseKeepingCleanupLocationManager(
       String eventId,
       HousekeepingListener housekeepingListener,
-      ReplicaCatalogListener replicaCatalogListener) {
+      ReplicaCatalogListener replicaCatalogListener,
+      String replicaDatabase,
+      String replicaTable) {
     this.eventId = eventId;
     this.housekeepingListener = housekeepingListener;
     this.replicaCatalogListener = replicaCatalogListener;
+    this.replicaDatabase = replicaDatabase;
+    this.replicaTable = replicaTable;
   }
 
   @Override
@@ -35,9 +58,11 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
     try {
       List<URI> uris = new ArrayList<>();
       for (CleanUpLocation location : locations) {
-        LOG.info("Scheduling old replica data for deletion for event {}: {}", eventId, location.getPath().toUri());
-        housekeepingListener.cleanUpLocation(eventId, location.getPathEventId(), location.getPath());
-        uris.add(location.getPath().toUri());
+        LOG.info("Scheduling old replica data for deletion for event {}: {}", eventId, location.path.toUri());
+        housekeepingListener
+            .cleanUpLocation(eventId, location.pathEventId, location.path, location.replicaDatabase,
+                location.replicaTable);
+        uris.add(location.path.toUri());
       }
       replicaCatalogListener.deprecatedReplicaLocations(uris);
     } finally {
@@ -48,24 +73,20 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
   @Override
   public void addCleanUpLocation(String pathEventId, Path location) {
     LOG.debug("Adding clean up location: {}", location.toUri());
-    locations.add(new CleanUpLocation(pathEventId, location));
+    locations.add(new CleanUpLocation(pathEventId, location, replicaDatabase, replicaTable));
   }
 
   private static class CleanUpLocation {
     private final Path path;
     private final String pathEventId;
+    private final String replicaDatabase;
+    private final String replicaTable;
 
-    private CleanUpLocation(String pathEventId, Path path) {
+    private CleanUpLocation(String pathEventId, Path path, String replicaDatabase, String replicaTable) {
       this.pathEventId = pathEventId;
       this.path = path;
-    }
-
-    private Path getPath() {
-      return path;
-    }
-
-    private String getPathEventId() {
-      return pathEventId;
+      this.replicaDatabase = replicaDatabase;
+      this.replicaTable = replicaTable;
     }
 
   }

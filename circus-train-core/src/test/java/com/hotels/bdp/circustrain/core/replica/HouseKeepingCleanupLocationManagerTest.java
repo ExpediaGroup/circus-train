@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.listener;
+package com.hotels.bdp.circustrain.core.replica;
 
-import org.apache.hadoop.fs.Path;
+import static org.junit.Assert.fail;
 
-public interface HousekeepingListener {
-  public static final HousekeepingListener NULL = new HousekeepingListener() {
+import org.junit.Test;
 
-    @Override
-    public void cleanUpLocation(
-        String eventId,
-        String pathEventId,
-        Path location,
-        String replicaDatabaseName,
-        String replicaTableName) {}
+public class HouseKeepingCleanupLocationManagerTest {
 
-  };
-
-  void cleanUpLocation(
-      String eventId,
-      String pathEventId,
-      Path location,
-      String replicaDatabaseName,
-      String replicaTableName);
+  @Test
+  public void testName() throws Exception {
+    fail("write  a test");
+  }
 }
