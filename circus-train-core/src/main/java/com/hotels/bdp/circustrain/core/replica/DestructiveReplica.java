@@ -83,7 +83,7 @@ public class DestructiveReplica {
       dropAndDeletePartitions(client, new Predicate<String>() {
         @Override
         public boolean apply(String partitionName) {
-          return sourcePartitionNames.contains(partitionName);
+          return !sourcePartitionNames.contains(partitionName);
         }
       });
     }

@@ -421,7 +421,6 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             .client()
             .listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
 
-        // TODO PD need to look at why we get more partitions still something is not working
         assertThat(partitions.size(), is(1));
         // Assert deleted path
         String jdbcUrl = housekeepingDbJdbcUrl();
