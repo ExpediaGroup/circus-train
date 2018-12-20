@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.comparator.hive.functions;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -63,7 +64,7 @@ public class PathDigest implements Function<PathMetadata, String> {
         o.writeObject(pathDescriptor);
       }
       return b.toByteArray();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new CircusTrainException("Unable to serialize pathDescriptor " + pathDescriptor, e);
     }
   }

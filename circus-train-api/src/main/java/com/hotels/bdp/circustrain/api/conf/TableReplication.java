@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.api.conf;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -73,7 +74,7 @@ public class TableReplication {
     ReplicaTable replicaTable = getReplicaTable();
     String databaseName = replicaTable.getDatabaseName() != null ? replicaTable.getDatabaseName()
         : sourceTable.getDatabaseName();
-    return databaseName.toLowerCase();
+    return databaseName.toLowerCase(Locale.ROOT);
   }
 
   public String getReplicaTableName() {
@@ -81,7 +82,7 @@ public class TableReplication {
     ReplicaTable replicaTable = getReplicaTable();
     String tableNameName = replicaTable.getTableName() != null ? replicaTable.getTableName()
         : sourceTable.getTableName();
-    return tableNameName.toLowerCase();
+    return tableNameName.toLowerCase(Locale.ROOT);
   }
 
   public String getQualifiedReplicaName() {
