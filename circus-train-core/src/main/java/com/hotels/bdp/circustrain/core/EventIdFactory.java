@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.core;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -50,7 +52,7 @@ public interface EventIdFactory {
           + FORMATTER.print(System.currentTimeMillis())
           + "-"
           + RandomStringUtils.randomAlphanumeric(8);
-      id = id.toLowerCase();
+      id = id.toLowerCase(Locale.ROOT);
       return id;
     }
   };
