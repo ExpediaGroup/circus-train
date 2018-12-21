@@ -356,12 +356,49 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void deleteUnpartitionedTable() throws Exception {
+  public void unpartitionedTableDestructive() throws Exception {
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    LOG.info(">>>> Created Source Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+
     // create table in replica metastore
     replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
     Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_UNPARTITIONED_TABLE);
     final String replicaPath = table.getSd().getLocation();
-    LOG.info(">>>> Table {} ", table);
+    LOG.info(">>>> Created Replica Table {} ", table);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-unpartitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        // table still exist (new data is replicated)
+        assertThat(replicaCatalog.client().tableExists(DATABASE, SOURCE_UNPARTITIONED_TABLE), is(true));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(replicaPath));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableDestructiveDeleteSource() throws Exception {
+    // create table in replica metastore (No table in source metastore, mimicks a delete)
+    replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_UNPARTITIONED_TABLE);
+    final String replicaPath = table.getSd().getLocation();
+    LOG.info(">>>> Created Replica Table {} ", table);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("destructive-unpartitioned-single-table.yml");
@@ -389,7 +426,48 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void deletePartitionInPartitionedTable() throws Exception {
+  public void partitionedTableDestructive() throws Exception {
+    helper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation = partition.getSd().getLocation();
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, SOURCE_PARTITIONED_TABLE), is(true));
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
+
+        assertThat(partitions.size(), is(2));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDestructiveDeletePartition() throws Exception {
     helper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
     // create table + partitions in replica metastore
     replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
@@ -429,6 +507,46 @@ public class CircusTrainHdfsHdfsIntegrationTest {
               "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(1));
           assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDestructiveDeleteTable() throws Exception {
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, SOURCE_PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, SOURCE_PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation1 = partition.getSd().getLocation();
+    Partition partition2 = partitions.get(1);
+    final String partitionLocation2 = partition2.getSd().getLocation();
+    final String tableLocation = table.getSd().getLocation();
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, SOURCE_PARTITIONED_TABLE), is(false));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(3));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation1));
+          assertThat(cleanUpPaths.get(1).getPath(), is(partitionLocation2));
+          assertThat(cleanUpPaths.get(2).getPath(), is(tableLocation));
         }
       }
     });

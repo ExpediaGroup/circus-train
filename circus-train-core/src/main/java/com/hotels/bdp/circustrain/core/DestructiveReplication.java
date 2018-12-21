@@ -49,7 +49,7 @@ public class DestructiveReplication implements Replication {
     try {
       if (!destructiveReplica.tableIsUnderCircusTrainControl()) {
         throw new CircusTrainException("Replica table '"
-            + destructiveReplica.getQualifiedTableName()
+            + tableReplication.getQualifiedReplicaName()
             + "' is not controlled by circus train aborting replication, check configuration for correct replica name");
       }
       if (destructiveSource.tableExists()) {
