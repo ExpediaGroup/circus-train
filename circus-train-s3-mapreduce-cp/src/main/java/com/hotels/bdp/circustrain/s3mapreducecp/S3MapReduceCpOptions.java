@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.s3mapreducecp;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
@@ -300,11 +301,11 @@ public class S3MapReduceCpOptions {
   }
 
   public String getStorageClass() {
-    return storageClass.toString();
+    return storageClass;
   }
 
   void setStorageClass(String storageClass) {
-    storageClass = storageClass.toUpperCase();
+    storageClass = storageClass.toUpperCase(Locale.ROOT);
     AwsUtil.toStorageClass(storageClass);
     this.storageClass = storageClass;
   }

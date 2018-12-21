@@ -115,8 +115,9 @@ public class CircusTrain {
       printCircusTrainHelp(e.getErrors());
     } catch (BeanCreationException e) {
       LOG.error(e.getMessage(), e);
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printCircusTrainHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printCircusTrainHelp(((BindException) mostSpecificCause).getAllErrors());
       }
     }
 

@@ -23,7 +23,7 @@ public class SnsMessage {
 
   final static String PROTOCOL_VERSION = "1.2";
 
-  private final String protocolVersion = PROTOCOL_VERSION;
+  private static final String protocolVersion = PROTOCOL_VERSION;
   private final SnsMessageType type;
   private final Map<String, String> headers;
   private final String startTime;
@@ -122,7 +122,7 @@ public class SnsMessage {
     return replicaMetastoreUris;
   }
 
-  public LinkedHashMap<String,String> getPartitionKeys() {
+  public LinkedHashMap<String, String> getPartitionKeys() {
     return partitionKeys;
   }
 

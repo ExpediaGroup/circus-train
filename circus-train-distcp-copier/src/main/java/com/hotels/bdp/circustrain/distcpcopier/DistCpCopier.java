@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -118,7 +119,8 @@ public class DistCpCopier implements Copier {
     try {
       distCpOptions.setBlocking(false);
       Job job = executor.exec(conf, distCpOptions);
-      String counter = String.format("%s_BYTES_WRITTEN", replicaDataLocation.toUri().getScheme().toUpperCase());
+      String counter = String
+          .format("%s_BYTES_WRITTEN", replicaDataLocation.toUri().getScheme().toUpperCase(Locale.ROOT));
       registerRunningJobMetrics(job, counter);
       if (!job.waitForCompletion(true)) {
         throw new IOException(

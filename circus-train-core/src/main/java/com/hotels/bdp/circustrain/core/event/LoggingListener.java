@@ -51,58 +51,61 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   private ReplicationState replicationState = new ReplicationState();
 
   @VisibleForTesting
-  class ReplicationState {
+  static class ReplicationState {
     private List<String> partitionKeys;
     private int partitionsAltered;
     private long bytesReplicated;
-    
+
     public List<String> getPartitionKeys() {
       return partitionKeys;
     }
-    
+
     public void setPartitionKeys(List<String> partitionKeys) {
       this.partitionKeys = partitionKeys;
     }
-    
+
     public int getPartitionsAltered() {
       return partitionsAltered;
     }
-    
+
     public void setPartitionsAltered(int partitionsAltered) {
       this.partitionsAltered = partitionsAltered;
     }
-    
+
     public long getBytesReplicated() {
       return bytesReplicated;
     }
-    
+
     public void setBytesReplicated(long bytesReplicated) {
       this.bytesReplicated = bytesReplicated;
     }
-    
+
   }
 
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     replicationState = new ReplicationState();
-    LOG.info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
-        tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName());
+    LOG
+        .info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
+            tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+            tableReplication.getQualifiedReplicaName());
   }
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String amount = transferAmount(replicationState.getPartitionKeys(), replicationState.getPartitionsAltered());
-    LOG.info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
-        sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName(), replicationState.getBytesReplicated());
+    LOG
+        .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
+            sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+            tableReplication.getQualifiedReplicaName(), replicationState.getBytesReplicated());
   }
 
   @Override
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    LOG.error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
-        tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName(), t.getMessage());
+    LOG
+        .error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
+            tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+            tableReplication.getQualifiedReplicaName(), t.getMessage());
   }
 
   private static String transferAmount(List<String> partitionKeys, int partitionsAltered) {

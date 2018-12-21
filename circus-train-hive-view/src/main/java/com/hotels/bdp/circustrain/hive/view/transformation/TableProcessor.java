@@ -37,10 +37,8 @@ public class TableProcessor implements NodeProcessor {
     throws SemanticException {
     ASTNode astNode = (ASTNode) node;
     if (astNode.getToken() != null && astNode.getToken().getText() != null) {
-      switch (astNode.getToken().getText()) {
-      case "TOK_TABNAME":
+      if ("TOK_TABNAME".equals(astNode.getToken().getText())) {
         tables.add(extractTableName(astNode));
-        break;
       }
     }
     return null;

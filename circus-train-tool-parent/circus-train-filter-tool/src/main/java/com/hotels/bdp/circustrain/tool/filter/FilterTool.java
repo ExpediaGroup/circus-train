@@ -68,8 +68,9 @@ public class FilterTool {
           .build()
           .run(args));
     } catch (BeanCreationException e) {
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printFilterToolHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printFilterToolHelp(((BindException) mostSpecificCause).getAllErrors());
       }
       throw e;
     }

@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecp.aws;
 
+import java.util.Locale;
+
 import com.amazonaws.services.s3.model.StorageClass;
 
 public final class AwsUtil {
@@ -25,7 +27,7 @@ public final class AwsUtil {
     if (storageClass == null) {
       return null;
     }
-    return StorageClass.fromValue(storageClass.toUpperCase());
+    return StorageClass.fromValue(storageClass.toUpperCase(Locale.ROOT));
   }
 
 }

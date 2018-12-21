@@ -73,8 +73,9 @@ public class ComparisonTool {
               .build()
               .run(args));
     } catch (BeanCreationException e) {
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printComparisonToolHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printComparisonToolHelp(((BindException) mostSpecificCause).getAllErrors());
         throw e;
       }
       if (e.getMostSpecificCause() instanceof IllegalArgumentException) {
