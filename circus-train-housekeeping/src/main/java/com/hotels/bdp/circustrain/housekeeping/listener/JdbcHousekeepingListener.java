@@ -28,8 +28,14 @@ public class JdbcHousekeepingListener implements HousekeepingListener {
   private HousekeepingService cleanUpPathService;
 
   @Override
-  public void cleanUpLocation(String eventId, String pathEventId, Path location) {
+  public void cleanUpLocation(
+      String eventId,
+      String pathEventId,
+      Path location,
+      String replicaDatabaseName,
+      String replicaTableName) {
     cleanUpPathService
-        .scheduleForHousekeeping(new HousekeepingLegacyReplicaPath(eventId, pathEventId, location.toUri().toString()));
+        .scheduleForHousekeeping(new HousekeepingLegacyReplicaPath(eventId, pathEventId, location.toUri().toString(),
+            replicaDatabaseName, replicaTableName));
   }
 }

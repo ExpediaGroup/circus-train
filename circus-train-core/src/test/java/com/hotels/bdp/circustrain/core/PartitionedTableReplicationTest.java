@@ -92,12 +92,12 @@ public class PartitionedTableReplicationTest {
         .thenReturn(sourceLocationManager);
     when(sourceLocationManager.getTableLocation()).thenReturn(sourceTableLocation);
     when(sourceLocationManager.getPartitionLocations()).thenReturn(sourcePartitionLocations);
-    when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
-        .thenReturn(replicaLocationManager);
     when(replicaLocationManager.getPartitionBaseLocation()).thenReturn(replicaTableLocation);
-    when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions)).thenReturn(copierFactory);
-    when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation,
-        copierOptions)).thenReturn(copier);
+    when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions))
+        .thenReturn(copierFactory);
+    when(copierFactory
+        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions))
+            .thenReturn(copier);
     when(partitionsAndStatistics.getPartitions()).thenReturn(sourcePartitions);
     when(copierOptions.get("task-count")).thenReturn(Integer.valueOf(2));
     when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
@@ -106,6 +106,9 @@ public class PartitionedTableReplicationTest {
 
   @Test
   public void noMatchingPartitions() throws Exception {
+    when(replica
+        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
+            TABLE)).thenReturn(replicaLocationManager);
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
@@ -120,12 +123,16 @@ public class PartitionedTableReplicationTest {
     verifyZeroInteractions(copier);
     InOrder replicationOrder = inOrder(sourceLocationManager, replica, replicaLocationManager, listener);
     replicationOrder.verify(replica).validateReplicaTable(DATABASE, TABLE);
-    replicationOrder.verify(replica).updateMetadata(EVENT_ID, sourceTableAndStatistics, DATABASE, TABLE,
-        replicaLocationManager);
+    replicationOrder
+        .verify(replica)
+        .updateMetadata(EVENT_ID, sourceTableAndStatistics, DATABASE, TABLE, replicaLocationManager);
   }
 
   @Test
   public void typical() throws Exception {
+    when(replica
+        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
+            TABLE)).thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
@@ -136,20 +143,28 @@ public class PartitionedTableReplicationTest {
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
         replicaLocationManager, listener);
     replicationOrder.verify(replica).validateReplicaTable(DATABASE, TABLE);
-    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder.verify(copierFactory).newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations,
-        replicaTableLocation, copierOptions);
+    replicationOrder
+        .verify(copierFactoryManager)
+        .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
+    replicationOrder
+        .verify(copierFactory)
+        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions);
     replicationOrder.verify(listener).copierStart(anyString());
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(listener).copierEnd(any(Metrics.class));
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
-    replicationOrder.verify(replica).updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics,
-        sourceLocationManager, DATABASE, TABLE, replicaLocationManager);
+    replicationOrder
+        .verify(replica)
+        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, sourceLocationManager, DATABASE,
+            TABLE, replicaLocationManager);
     replicationOrder.verify(replicaLocationManager).cleanUpLocations();
   }
 
   @Test
   public void mappedNames() throws Exception {
+    when(replica
+        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager,
+            MAPPED_DATABASE, MAPPED_TABLE)).thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
@@ -160,18 +175,26 @@ public class PartitionedTableReplicationTest {
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
         replicaLocationManager);
     replicationOrder.verify(replica).validateReplicaTable(MAPPED_DATABASE, MAPPED_TABLE);
-    replicationOrder.verify(copierFactoryManager).getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder.verify(copierFactory).newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations,
-        replicaTableLocation, copierOptions);
+    replicationOrder
+        .verify(copierFactoryManager)
+        .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
+    replicationOrder
+        .verify(copierFactory)
+        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions);
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
-    replicationOrder.verify(replica).updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics,
-        sourceLocationManager, MAPPED_DATABASE, MAPPED_TABLE, replicaLocationManager);
+    replicationOrder
+        .verify(replica)
+        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, sourceLocationManager,
+            MAPPED_DATABASE, MAPPED_TABLE, replicaLocationManager);
     replicationOrder.verify(replicaLocationManager).cleanUpLocations();
   }
 
   @Test
   public void copierListenerCalledWhenException() throws Exception {
+    when(replica
+        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
+            TABLE)).thenReturn(replicaLocationManager);
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
@@ -189,17 +212,4 @@ public class PartitionedTableReplicationTest {
       replicationOrder.verify(listener).copierEnd(any(Metrics.class));
     }
   }
-
-  // TODO check this in Locomotive.
-  // @Test
-  // public void nothingReplicated() {
-  // PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, PARTITION_PREDICATE,
-  // MAX_PARTITIONS, source, replica, copierFactoryManager, eventIdFactory, SOURCE_TABLE_LOCATION_BASE,
-  // targetTableLocation, MAPPED_DATABASE, MAPPED_TABLE, copierOptions, sessionHandler);
-  // replication.replicate();
-  //
-  // Metrics metrics = sessionHandler.getSession().getCopierMetrics();
-  // assertThat(metrics, is(Metrics.NULL_VALUE));
-  // }
-
 }

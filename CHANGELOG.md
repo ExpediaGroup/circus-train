@@ -1,4 +1,11 @@
-### 13.0.0 - 2018-10-15
+## 13.1.0 - 2018-12-20
+### Changed
+* Housekeeping can be configured to control query batch size, this controls memory usage. See [#40](https://github.com/HotelsDotCom/housekeeping/issues/40).
+* Housekeeping readme moved to Housekeeping project. See [#31](https://github.com/HotelsDotCom/housekeeping/issues/31).
+* Upgraded Housekeeping library to also store replica database and table name in Housekeeping database. See [#30](https://github.com/HotelsDotCom/housekeeping/issues/30).
+* Upgraded `hotels-oss-parent` pom to 2.3.3 (was 2.0.6). See [#97](https://github.com/HotelsDotCom/circus-train/issues/97).
+
+## 13.0.0 - 2018-10-15
 ### Changed
 * Narrowed component scanning to be internal base packages instead of `com.hotels.bdp.circustrain`. See [#95](https://github.com/HotelsDotCom/circus-train/issues/95). Note this change is _not_ backwards compatible for any Circus Train extensions that are in the `com.hotels.bdp.circustrain` package - these were in effect being 
 implicitly scanned and loaded but won't be now. Instead these extensions will now need to be added using Circus Train's [standard extension loading mechanism](https://github.com/HotelsDotCom/circus-train#loading-extensions).

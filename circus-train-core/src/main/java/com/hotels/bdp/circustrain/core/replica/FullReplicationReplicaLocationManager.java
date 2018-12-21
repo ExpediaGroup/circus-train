@@ -47,18 +47,26 @@ public class FullReplicationReplicaLocationManager implements ReplicaLocationMan
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
 
+  private final String replicaDatabaseName;
+
+  private final String replicaTableName;
+
   FullReplicationReplicaLocationManager(
       SourceLocationManager sourceLocationManager,
       String tablePath,
       String eventId,
       TableType tableType,
       HousekeepingListener housekeepingListener,
-      ReplicaCatalogListener replicaCatalogListener) {
+      ReplicaCatalogListener replicaCatalogListener,
+      String replicaDatabaseName,
+      String replicaTableName) {
     this.sourceLocationManager = sourceLocationManager;
     this.tablePath = tablePath;
     this.eventId = eventId;
     this.tableType = tableType;
     this.replicaCatalogListener = replicaCatalogListener;
+    this.replicaDatabaseName = replicaDatabaseName;
+    this.replicaTableName = replicaTableName;
     previousLocations = new ArrayList<>();
     this.housekeepingListener = housekeepingListener;
   }
@@ -95,7 +103,9 @@ public class FullReplicationReplicaLocationManager implements ReplicaLocationMan
     List<URI> uris = new ArrayList<>();
     for (CleanUpLocation location : previousLocations) {
       LOG.info("Scheduling old replica data for deletion for event {}: {}", eventId, location.getPath().toUri());
-      housekeepingListener.cleanUpLocation(eventId, location.getPathEventId(), location.getPath());
+      housekeepingListener
+          .cleanUpLocation(eventId, location.getPathEventId(), location.getPath(), replicaDatabaseName,
+              replicaTableName);
       uris.add(location.getPath().toUri());
     }
     replicaCatalogListener.deprecatedReplicaLocations(uris);

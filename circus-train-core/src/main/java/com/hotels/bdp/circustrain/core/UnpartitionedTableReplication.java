@@ -87,11 +87,13 @@ class UnpartitionedTableReplication implements Replication {
       SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable, eventId);
       Path sourceLocation = sourceLocationManager.getTableLocation();
 
-      ReplicaLocationManager replicaLocationManager = replica.getLocationManager(TableType.UNPARTITIONED,
-          targetTableLocation, eventId, sourceLocationManager);
+      ReplicaLocationManager replicaLocationManager = replica
+          .getLocationManager(TableType.UNPARTITIONED, targetTableLocation, eventId, sourceLocationManager,
+              replicaDatabaseName, replicaTableName);
       Path replicaLocation = replicaLocationManager.getTableLocation();
 
-      CopierFactory copierFactory = copierFactoryManager.getCopierFactory(sourceLocation, replicaLocation, copierOptions);
+      CopierFactory copierFactory = copierFactoryManager
+          .getCopierFactory(sourceLocation, replicaLocation, copierOptions);
       Copier copier = copierFactory.newInstance(eventId, sourceLocation, replicaLocation, copierOptions);
       copierListener.copierStart(copier.getClass().getName());
       try {
@@ -103,7 +105,7 @@ class UnpartitionedTableReplication implements Replication {
 
       replica
           .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-               replicaLocationManager);
+              replicaLocationManager);
       replicaLocationManager.cleanUpLocations();
 
       LOG.info("Replicated table {}.{}.", database, table);
