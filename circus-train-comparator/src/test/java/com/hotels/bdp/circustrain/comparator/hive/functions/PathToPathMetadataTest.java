@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class PathToPathMetadataTest {
     assertThat(metadata.getLastModifiedTimestamp(), is(0L));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
-    assertThat(metadata.getChecksum(), is(nullValue()));
+    assertThat(metadata.getChecksum().length, is(0));
     assertThat(metadata.getChildrenMetadata().size(), is(1));
     verify(fs, times(1)).listStatus(path);
     verify(fs, never()).getFileChecksum(path);

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,13 @@ public class TableProcessor implements NodeProcessor {
   @Override
   public Object process(Node node, Stack<Node> stack, NodeProcessorCtx procCtx, Object... nodeOutputs)
     throws SemanticException {
-    ASTNode astNode = (ASTNode) node;
+    ASTNode astNode;
+    if (node instanceof ASTNode) {
+      astNode = (ASTNode) node;
+    } else {
+      throw new ClassCastException("Cannot cast Node to ASTNode");
+    }
+    // ASTNode astNode = (ASTNode) node;
     if (astNode.getToken() != null && astNode.getToken().getText() != null) {
       if ("TOK_TABNAME".equals(astNode.getToken().getText())) {
         tables.add(extractTableName(astNode));

@@ -22,6 +22,7 @@ package com.hotels.bdp.circustrain.s3mapreducecp;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -215,16 +216,17 @@ public abstract class CopyListing extends Configured {
     Class<? extends CopyListing> copyListingClass;
     try {
       if (!copyListingClassName.isEmpty()) {
-        copyListingClass = configuration.getClass(S3MapReduceCpConstants.CONF_LABEL_COPY_LISTING_CLASS,
-            SimpleCopyListing.class, CopyListing.class);
+        copyListingClass = configuration
+            .getClass(S3MapReduceCpConstants.CONF_LABEL_COPY_LISTING_CLASS, SimpleCopyListing.class, CopyListing.class);
       } else {
         copyListingClass = SimpleCopyListing.class;
       }
       copyListingClassName = copyListingClass.getName();
-      Constructor<? extends CopyListing> constructor = copyListingClass.getDeclaredConstructor(Configuration.class,
-          Credentials.class);
+      Constructor<? extends CopyListing> constructor = copyListingClass
+          .getDeclaredConstructor(Configuration.class, Credentials.class);
       return constructor.newInstance(configuration, credentials);
-    } catch (Exception e) {
+    } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        | IllegalArgumentException | InvocationTargetException e) {
       throw new IOException("Unable to instantiate " + copyListingClassName, e);
     }
   }

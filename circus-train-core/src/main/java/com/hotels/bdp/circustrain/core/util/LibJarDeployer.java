@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.PrivilegedAction;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,15 +43,36 @@ public class LibJarDeployer {
 
   private static final Logger LOG = LoggerFactory.getLogger(LibJarDeployer.class);
 
+  private static class PriviledgedClassLoader implements PrivilegedAction<Void> {
+    private final Configuration conf;
+    private final URL[] libjars;
+
+    public PriviledgedClassLoader(Configuration conf, URL[] libjars) {
+      this.conf = conf;
+      this.libjars = libjars;
+    }
+
+    @Override
+    public Void run() {
+      conf.setClassLoader(new URLClassLoader(libjars, conf.getClassLoader()));
+      Thread
+          .currentThread()
+          .setContextClassLoader(new URLClassLoader(libjars, Thread.currentThread().getContextClassLoader()));
+      return null; // nothing to return
+    }
+  }
+
   public void libjars(Configuration conf, Class<?>... targetClasses) throws IOException {
     String libjarsList = createLibJarList(targetClasses);
     conf.set("tmpjars", validateFiles(libjarsList, conf), "from -libjars command line option");
     // setting libjars in client classpath
     URL[] libjars = GenericOptionsParser.getLibJars(conf);
     if (libjars != null && libjars.length > 0) {
-      conf.setClassLoader(new URLClassLoader(libjars, conf.getClassLoader()));
-      Thread.currentThread().setContextClassLoader(
-          new URLClassLoader(libjars, Thread.currentThread().getContextClassLoader()));
+      // conf.setClassLoader(new URLClassLoader(libjars, conf.getClassLoader()));
+      // Thread
+      // .currentThread()
+      // .setContextClassLoader(new URLClassLoader(libjars, Thread.currentThread().getContextClassLoader()));
+      new PriviledgedClassLoader(conf, libjars).run();
     }
   }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
+ * Copyright (C) 2016-2019 Expedia Inc and Apache Hadoop contributors.
  *
  * Based on {@code org.apache.hadoop.tools.mapred.RetriableFileCopyCommand} from Hadoop DistCp 2.7.1:
  *
@@ -134,10 +134,9 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
   }
 
   private static ThrottledInputStream getInputStream(Path path, Configuration conf) throws IOException {
-    try {
-      FileSystem fs = path.getFileSystem(conf);
-      long bandwidthMB = conf.getInt(ConfigurationVariable.MAX_BANDWIDTH.getName(),
-          ConfigurationVariable.MAX_BANDWIDTH.defaultIntValue());
+    try (FileSystem fs = path.getFileSystem(conf)) {
+      long bandwidthMB = conf
+          .getInt(ConfigurationVariable.MAX_BANDWIDTH.getName(), ConfigurationVariable.MAX_BANDWIDTH.defaultIntValue());
       FSDataInputStream in = fs.open(path);
       return new ThrottledInputStream(in, bandwidthMB * 1024 * 1024);
     } catch (IOException e) {
@@ -160,8 +159,9 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
           input, uploadDescriptor.getMetadata());
       // We add 1 to the buffer size as per the com.amazonaws.RequestClientOptions doc
       request.getRequestClientOptions().setReadLimit(bufferSize + 1);
+      input.close();
       return transferManager.upload(request);
-    } catch (Exception e) {
+    } catch (AmazonClientException | IOException e) {
       throw new CopyReadException(e);
     }
   }

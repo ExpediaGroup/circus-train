@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class PathToPathMetadataIntegrationTest {
     assertThat(metadata.getLocation(), is(baseDir.toURI().toString()));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
-    assertThat(metadata.getChecksum(), is(nullValue()));
+    assertThat(metadata.getChecksum().length, is(0));
     assertThat(metadata.getChildrenMetadata().size(), is(NUM_OF_DATA_FILES));
 
     for (int i = 0; i < NUM_OF_DATA_FILES; ++i) {
@@ -79,7 +79,7 @@ public class PathToPathMetadataIntegrationTest {
       assertThat(childMetadata.getLastModifiedTimestamp(), is(dataFile.lastModified()));
       assertThat(childMetadata.getChecksumAlgorithmName(), is(nullValue()));
       assertThat(childMetadata.getChecksumLength(), is(0));
-      assertThat(childMetadata.getChecksum(), is(nullValue()));
+      assertThat(childMetadata.getChecksum().length, is(0));
       assertThat(childMetadata.getChildrenMetadata().size(), is(0));
     }
   }
