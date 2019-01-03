@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,27 +85,37 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     replicationState = new ReplicationState();
-    LOG
-        .info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
-            tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-            tableReplication.getQualifiedReplicaName());
+    if (catalogsNotNull()) {
+      LOG
+          .info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
+              tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName());
+    }
   }
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String amount = transferAmount(replicationState.getPartitionKeys(), replicationState.getPartitionsAltered());
-    LOG
-        .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
-            sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-            tableReplication.getQualifiedReplicaName(), replicationState.getBytesReplicated());
+    if (catalogsNotNull()) {
+      LOG
+          .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
+              sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName(), replicationState.getBytesReplicated());
+    }
   }
 
   @Override
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    LOG
-        .error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
-            tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-            tableReplication.getQualifiedReplicaName(), t.getMessage());
+    if (catalogsNotNull()) {
+      LOG
+          .error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
+              tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName(), t.getMessage());
+    }
+  }
+
+  private boolean catalogsNotNull() {
+    return sourceCatalog != null && replicaCatalog != null;
   }
 
   private static String transferAmount(List<String> partitionKeys, int partitionsAltered) {

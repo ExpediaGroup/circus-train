@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,10 @@ class MetricsListener implements TableReplicationListener, CopierListener {
 
   @Override
   public void copierEnd(Metrics metrics) {
-    runningMetricsReporter.report();
-    runningMetricsReporter.stop();
+    if (runningMetricsReporter != null) {
+      runningMetricsReporter.report();
+      runningMetricsReporter.stop();
+    }
     // once stopped unusable so get rid of it
     runningMetricsReporter = null;
     this.metrics = metrics;
