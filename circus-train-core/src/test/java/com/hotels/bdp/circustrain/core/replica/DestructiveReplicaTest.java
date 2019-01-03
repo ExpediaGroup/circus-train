@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core.replica;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyShort;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -108,6 +109,7 @@ public class DestructiveReplicaTest {
 
   @Test
   public void tableIsUnderCircusTrainControl() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 
     assertThat(replica.tableIsUnderCircusTrainControl(), is(true));
@@ -115,7 +117,16 @@ public class DestructiveReplicaTest {
   }
 
   @Test
+  public void tableIsUnderCircusTrainControlTableDoesNotExist() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(false);
+
+    assertThat(replica.tableIsUnderCircusTrainControl(), is(true));
+    verify(client).close();
+  }
+
+  @Test
   public void tableIsUnderCircusTrainControlParameterDoesNotMatch() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     table.putToParameters(CircusTrainTableParameter.SOURCE_TABLE.parameterName(), "different.table");
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 
@@ -125,6 +136,7 @@ public class DestructiveReplicaTest {
 
   @Test
   public void tableIsUnderCircusTrainControlParameterIsNull() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     Map<String, String> parameters = new HashMap<>();
     table.setParameters(parameters);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
@@ -135,6 +147,7 @@ public class DestructiveReplicaTest {
 
   @Test
   public void dropDeletedPartitions() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
     Path location1 = new Path("loc1");
     Partition replicaPartition1 = newPartition("value1", location1);
@@ -151,6 +164,17 @@ public class DestructiveReplicaTest {
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value2", false);
     verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location1);
     verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location2);
+    verify(client).close();
+    verify(cleanupLocationManager).cleanUpLocations();
+  }
+
+  @Test
+  public void dropDeletedPartitionsTableDoesNotExist() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(false);
+
+    replica.dropDeletedPartitions(Lists.<String> newArrayList());
+    verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
+    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
     verify(client).close();
     verify(cleanupLocationManager).cleanUpLocations();
   }
@@ -189,6 +213,7 @@ public class DestructiveReplicaTest {
 
   @Test
   public void dropTablePartitioned() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
     Path location1 = new Path("loc1");
     Partition replicaPartition1 = newPartition("value1", location1);
@@ -210,7 +235,22 @@ public class DestructiveReplicaTest {
   }
 
   @Test
+  public void dropTableButTableDoesNotExist() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(false);
+    List<Partition> replicaPartitions = Lists.newArrayList();
+    mockPartitionIterator(replicaPartitions);
+
+    replica.dropTable();
+    verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
+    verify(client, never()).dropTable(eq(DATABASE), eq(REPLICA_TABLE), anyBoolean(), anyBoolean());
+    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(client).close();
+    verify(cleanupLocationManager).cleanUpLocations();
+  }
+
+  @Test
   public void dropTableUnpartitioned() throws Exception {
+    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     table.setPartitionKeys(null);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 

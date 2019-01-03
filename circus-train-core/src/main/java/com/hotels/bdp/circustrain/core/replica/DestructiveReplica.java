@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -39,6 +41,8 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 public class DestructiveReplica {
+
+  private final static Logger log = LoggerFactory.getLogger(DestructiveReplica.class);
 
   private static final boolean DELETE_DATA = false;
   private static final boolean IGNORE_UNKNOWN = true;
@@ -67,6 +71,9 @@ public class DestructiveReplica {
 
   public boolean tableIsUnderCircusTrainControl() throws TException {
     try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
+      if (!client.tableExists(databaseName, tableName)) {
+        return true;
+      }
       String sourceTableParameterValue = client
           .getTable(databaseName, tableName)
           .getParameters()
@@ -75,13 +82,16 @@ public class DestructiveReplica {
         String qualifiedName = tableReplication.getSourceTable().getQualifiedName();
         return qualifiedName.equals(sourceTableParameterValue);
       }
+
     }
     return false;
   }
 
   public void dropDeletedPartitions(final List<String> sourcePartitionNames) throws TException {
     try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
-
+      if (!client.tableExists(databaseName, tableName)) {
+        return;
+      }
       dropAndDeletePartitions(client, new Predicate<String>() {
         @Override
         public boolean apply(String partitionName) {
@@ -107,6 +117,14 @@ public class DestructiveReplica {
       List<String> values = replicaPartition.getValues();
       String partitionName = Warehouse.makePartName(partitionKeys, values);
       if (shouldDelete.apply(partitionName)) {
+        log
+            .info("Dropping partition for replica table: "
+                + databaseName
+                + "."
+                + tableName
+                + ", partition value: '"
+                + partitionName
+                + "'");
         client.dropPartition(databaseName, tableName, partitionName, DELETE_DATA);
         Path oldLocation = locationAsPath(replicaPartition);
         String oldEventId = replicaPartition.getParameters().get(REPLICATION_EVENT.parameterName());
@@ -118,8 +136,12 @@ public class DestructiveReplica {
   public void dropTable() throws TException {
     try {
       try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
+        if (!client.tableExists(databaseName, tableName)) {
+          return;
+        }
         dropAndDeletePartitions(client, Predicates.<String> alwaysTrue());
         Table table = client.getTable(databaseName, tableName);
+        log.info("Dropping replica table: " + databaseName + "." + tableName);
         client.dropTable(databaseName, tableName, DELETE_DATA, IGNORE_UNKNOWN);
         Path oldLocation = locationAsPath(table);
         String oldEventId = table.getParameters().get(REPLICATION_EVENT.parameterName());

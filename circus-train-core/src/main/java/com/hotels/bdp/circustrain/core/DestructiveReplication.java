@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ public class DestructiveReplication implements Replication {
             + "' is not controlled by circus train aborting replication, check configuration for correct replica name");
       }
       if (destructiveSource.tableExists()) {
-        Replication replication = upsertReplicationFactory.newInstance(tableReplication);
         destructiveReplica.dropDeletedPartitions(destructiveSource.getPartitionNames());
         // do normal replication
+        Replication replication = upsertReplicationFactory.newInstance(tableReplication);
         replication.replicate();
       } else {
         destructiveReplica.dropTable();
