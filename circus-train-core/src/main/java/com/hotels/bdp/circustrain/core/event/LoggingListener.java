@@ -85,7 +85,7 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     replicationState = new ReplicationState();
-    if (catalogsNotNull()) {
+    if (sourceCatalog != null && replicaCatalog != null) {
       LOG
           .info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
               tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
@@ -96,7 +96,7 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String amount = transferAmount(replicationState.getPartitionKeys(), replicationState.getPartitionsAltered());
-    if (catalogsNotNull()) {
+    if (sourceCatalog != null && replicaCatalog != null) {
       LOG
           .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
               sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
@@ -106,16 +106,12 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
 
   @Override
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    if (catalogsNotNull()) {
+    if (sourceCatalog != null && replicaCatalog != null) {
       LOG
           .error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
               tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
               tableReplication.getQualifiedReplicaName(), t.getMessage());
     }
-  }
-
-  private boolean catalogsNotNull() {
-    return sourceCatalog != null && replicaCatalog != null;
   }
 
   private static String transferAmount(List<String> partitionKeys, int partitionsAltered) {
