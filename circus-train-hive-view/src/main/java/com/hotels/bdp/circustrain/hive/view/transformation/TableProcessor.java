@@ -41,7 +41,6 @@ public class TableProcessor implements NodeProcessor {
     } else {
       throw new ClassCastException("Cannot cast Node to ASTNode");
     }
-    // ASTNode astNode = (ASTNode) node;
     if (astNode.getToken() != null && astNode.getToken().getText() != null) {
       if ("TOK_TABNAME".equals(astNode.getToken().getText())) {
         tables.add(extractTableName(astNode));

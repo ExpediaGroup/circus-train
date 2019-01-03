@@ -68,10 +68,6 @@ public class LibJarDeployer {
     // setting libjars in client classpath
     URL[] libjars = GenericOptionsParser.getLibJars(conf);
     if (libjars != null && libjars.length > 0) {
-      // conf.setClassLoader(new URLClassLoader(libjars, conf.getClassLoader()));
-      // Thread
-      // .currentThread()
-      // .setContextClassLoader(new URLClassLoader(libjars, Thread.currentThread().getContextClassLoader()));
       new PriviledgedClassLoader(conf, libjars).run();
     }
   }

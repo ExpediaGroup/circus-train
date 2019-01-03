@@ -58,15 +58,16 @@ public class FilterTool {
     logVersionInfo();
 
     try {
-      SpringApplication.exit(new SpringApplicationBuilder(FilterTool.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:" + Modules.REPLICATION)
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .bannerMode(Mode.OFF)
-          .registerShutdownHook(true)
-          .build()
-          .run(args));
+      SpringApplication
+          .exit(new SpringApplicationBuilder(FilterTool.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:" + Modules.REPLICATION)
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .bannerMode(Mode.OFF)
+              .registerShutdownHook(true)
+              .build()
+              .run(args));
     } catch (BeanCreationException e) {
       Throwable mostSpecificCause = e.getMostSpecificCause();
       if (mostSpecificCause instanceof BindException) {
