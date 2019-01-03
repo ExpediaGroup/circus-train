@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,27 @@ public class DistCpCopier implements Copier {
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(DistCpCopier.class);
+
+  private static class JobCounter implements Gauge<Long> {
+
+    private final Job job;
+    private final String counter;
+
+    public JobCounter(Job job, String counter) {
+      this.job = job;
+      this.counter = counter;
+    }
+
+    @Override
+    public Long getValue() {
+      try {
+        return job.getCounters().findCounter(FileSystemCounter.class.getName(), counter).getValue();
+      } catch (IOException e) {
+        LOG.warn("Could not get value for counter " + counter, e);
+      }
+      return 0L;
+    }
+  }
 
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
@@ -136,17 +157,7 @@ public class DistCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final String counter) {
     registry.remove(RunningMetrics.DIST_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(), new Gauge<Long>() {
-      @Override
-      public Long getValue() {
-        try {
-          return job.getCounters().findCounter(FileSystemCounter.class.getName(), counter).getValue();
-        } catch (IOException e) {
-          LOG.warn("Could not get value for counter " + counter, e);
-        }
-        return 0L;
-      }
-    });
+    registry.register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(), new JobCounter(job, counter));
   }
 
   private void cleanUpReplicaDataLocation() {
