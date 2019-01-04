@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ final class Constants {
 
 public enum ConfigurationVariable {
 
+  CANNED_ACL("com.hotels.bdp.circustrain.s3mapreducecp.cannedAcl", null),
   CREDENTIAL_PROVIDER("com.hotels.bdp.circustrain.s3mapreducecp.credentialsProvider", null),
   MINIMUM_UPLOAD_PART_SIZE("com.hotels.bdp.circustrain.s3mapreducecp.minimumUploadPartSize",
       String.valueOf(DEFAULT_TRANSFER_MANAGER_CONFIGURATION.getMinimumUploadPartSize())),

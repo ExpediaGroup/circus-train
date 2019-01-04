@@ -319,7 +319,8 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-retry-count`|No|Maximum number of upload retries. Defaults to `3`|
 | `copier-options.upload-retry-delay-ms`|No|Milliseconds between upload retries. The actual delay will be computed as `delay = attempt * copier-options.upload-retry-delay-ms` where `attempt` is the current retry number. Defaults to `300` ms.|
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
-|`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+| `copier-options.canned-acl`|No|AWS Canned ACL name.  See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL.|
+| `copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 
 ##### S3 to S3 copier options
 If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
@@ -330,6 +331,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3s3-multipart-copy-part-size-in-bytes`|No|Default value should be OK for most replications. See [TransferManagerConfiguration](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManagerConfiguration.html)|
 |`copier-options.s3-endpoint-uri`|No|URI of the S3 end-point used by the S3 client. Defaults to `null` which means the client will select the end-point.|
 |`copier-options.s3-server-side-encryption`|No|Whether to enable server side encryption. Defaults to `false`.|
+|`copier-options.canned-acl`|No|AWS Canned ACL name.  See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL.|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 
 ### S3 Secret Configuration

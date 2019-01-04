@@ -30,6 +30,7 @@ The copy is done in map-only job using multipart uploads to improve the throughp
 | `--uploadRetryCount`                    | No       | Maximum number of upload retries. Defaults to `3` |
 | `--uploadRetryDelayMs`                  | No       | Milliseconds between upload retries. The actual delay will be computed as `delay = attempt * uploadRetryDelayMs` where `attempt` is the current retry number. Defaults to `300` ms. |
 | `--uploadBufferSize`                    | No       | Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0` |
+| `--cannedAcl`                           | No       | AWS Canned ACL name.  See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL. |
 
 ## Architecture
 

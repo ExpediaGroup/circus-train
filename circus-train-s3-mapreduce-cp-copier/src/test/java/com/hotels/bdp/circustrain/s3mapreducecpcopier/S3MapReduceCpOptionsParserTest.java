@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.CANNED_ACL;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.COPY_STRATEGY;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.CREDENTIAL_PROVIDER;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.IGNORE_FAILURES;
@@ -80,6 +81,7 @@ public class S3MapReduceCpOptionsParserTest {
     copierOptions.put(UPLOAD_RETRY_COUNT, 5);
     copierOptions.put(UPLOAD_RETRY_DELAY_MS, 520);
     copierOptions.put(UPLOAD_BUFFER_SIZE, 1024);
+    copierOptions.put(CANNED_ACL, "bucket-owner-full-control");
     parser = new S3MapReduceCpOptionsParser(SOURCES, TARGET, DEFAULT_CREDS_PROVIDER);
   }
 
@@ -100,6 +102,7 @@ public class S3MapReduceCpOptionsParserTest {
     assertThat(options.getUploadRetryCount(), is(5));
     assertThat(options.getUploadRetryDelayMs(), is(520L));
     assertThat(options.getUploadBufferSize(), is(1024));
+    assertThat(options.getCannedAcl(), is("bucket-owner-full-control"));
   }
 
   @Test
@@ -419,4 +422,16 @@ public class S3MapReduceCpOptionsParserTest {
     parser.parse(copierOptions);
   }
 
+  @Test
+  public void missingCannedAcl() {
+    copierOptions.remove(CANNED_ACL);
+    S3MapReduceCpOptions options = parser.parse(copierOptions);
+    assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void invalidCannedAcl() {
+    copierOptions.put(CANNED_ACL, "my-canned-acl");
+    parser.parse(copierOptions);
+  }
 }

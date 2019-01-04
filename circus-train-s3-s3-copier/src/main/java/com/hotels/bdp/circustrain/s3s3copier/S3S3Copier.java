@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,6 +155,11 @@ public class S3S3Copier implements Copier {
 
       CopyObjectRequest copyObjectRequest = new CopyObjectRequest(s3ObjectSummary.getBucketName(),
           s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey);
+
+      if (s3s3CopierOptions.getCannedAcl() != null) {
+        copyObjectRequest.withCannedAccessControlList(s3s3CopierOptions.getCannedAcl());
+      }
+
       applyObjectMetadata(copyObjectRequest);
 
       TransferStateChangeListener stateChangeListener = new TransferStateChangeListener() {

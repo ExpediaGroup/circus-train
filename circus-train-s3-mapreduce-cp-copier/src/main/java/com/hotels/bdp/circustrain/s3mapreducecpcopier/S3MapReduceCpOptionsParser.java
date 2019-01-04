@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class S3MapReduceCpOptionsParser {
   public static final String UPLOAD_RETRY_COUNT = "upload-retry-count";
   public static final String UPLOAD_RETRY_DELAY_MS = "upload-retry-delay-ms";
   public static final String UPLOAD_BUFFER_SIZE = "upload-buffer-size";
+  public static final String CANNED_ACL = "canned-acl";
 
   private final S3MapReduceCpOptions.Builder optionsBuilder;
   private final URI defaultCredentialsProvider;
@@ -143,6 +144,8 @@ public class S3MapReduceCpOptionsParser {
       throw new IllegalArgumentException("Parameter " + UPLOAD_BUFFER_SIZE + " must be a positive number");
     }
     optionsBuilder.uploadBufferSize(uploadBufferSize);
+
+    optionsBuilder.cannedAcl(MapUtils.getString(copierOptions, CANNED_ACL, ConfigurationVariable.CANNED_ACL.defaultValue()));
 
     return optionsBuilder.build();
   }
