@@ -53,6 +53,48 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 public class FilterTool {
   private static final Logger LOG = LoggerFactory.getLogger(FilterTool.class);
 
+  private static class SourceHiveEndpointFactory implements HiveEndpointFactory<SourceHiveEndpoint> {
+
+    private final SourceCatalog sourceCatalog;
+    private final HiveConf sourceHiveConf;
+    private final Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier;
+
+    public SourceHiveEndpointFactory(
+        SourceCatalog sourceCatalog,
+        HiveConf sourceHiveConf,
+        Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier) {
+      this.sourceCatalog = sourceCatalog;
+      this.sourceHiveConf = sourceHiveConf;
+      this.sourceMetaStoreClientSupplier = sourceMetaStoreClientSupplier;
+    }
+
+    @Override
+    public SourceHiveEndpoint newInstance(TableReplication tableReplication) {
+      return new SourceHiveEndpoint(sourceCatalog.getName(), sourceHiveConf, sourceMetaStoreClientSupplier);
+    }
+  }
+
+  private static class ReplicaHiveEndpointFactory implements HiveEndpointFactory<ReplicaHiveEndpoint> {
+
+    private final ReplicaCatalog replicaCatalog;
+    private final HiveConf replicaHiveConf;
+    private final Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
+
+    public ReplicaHiveEndpointFactory(
+        ReplicaCatalog replicaCatalog,
+        HiveConf replicaHiveConf,
+        Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier) {
+      this.replicaCatalog = replicaCatalog;
+      this.replicaHiveConf = replicaHiveConf;
+      this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
+    }
+
+    @Override
+    public ReplicaHiveEndpoint newInstance(TableReplication tableReplication) {
+      return new ReplicaHiveEndpoint(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
+    }
+  }
+
   public static void main(String[] args) throws Exception {
     // below is output *before* logging is configured so will appear on console
     logVersionInfo();
@@ -104,12 +146,7 @@ public class FilterTool {
       final SourceCatalog sourceCatalog,
       final HiveConf sourceHiveConf,
       final Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier) {
-    return new HiveEndpointFactory<SourceHiveEndpoint>() {
-      @Override
-      public SourceHiveEndpoint newInstance(TableReplication tableReplication) {
-        return new SourceHiveEndpoint(sourceCatalog.getName(), sourceHiveConf, sourceMetaStoreClientSupplier);
-      }
-    };
+    return new SourceHiveEndpointFactory(sourceCatalog, sourceHiveConf, sourceMetaStoreClientSupplier);
   }
 
   @Bean
@@ -117,11 +154,6 @@ public class FilterTool {
       final ReplicaCatalog replicaCatalog,
       final HiveConf replicaHiveConf,
       final Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier) {
-    return new HiveEndpointFactory<ReplicaHiveEndpoint>() {
-      @Override
-      public ReplicaHiveEndpoint newInstance(TableReplication tableReplication) {
-        return new ReplicaHiveEndpoint(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
-      }
-    };
+    return new ReplicaHiveEndpointFactory(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier);
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,49 @@ import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 public class S3S3Copier implements Copier {
 
   private final static Logger LOG = LoggerFactory.getLogger(S3S3Copier.class);
+
+  private static class BytesTransferStateChangeListener implements TransferStateChangeListener {
+
+    private final S3ObjectSummary s3ObjectSummary;
+    private final AmazonS3URI targetS3Uri;
+    private final String targetKey;
+
+    public BytesTransferStateChangeListener(
+        S3ObjectSummary s3ObjectSummary,
+        AmazonS3URI targetS3Uri,
+        String targetKey) {
+      this.s3ObjectSummary = s3ObjectSummary;
+      this.targetS3Uri = targetS3Uri;
+      this.targetKey = targetKey;
+    }
+
+    @Override
+    public void transferStateChanged(Transfer transfer, TransferState state) {
+      if (state == TransferState.Completed) {
+        // NOTE: running progress doesn't seem to be reported correctly.
+        // transfer.getProgress().getBytesTransferred() is always 0. Unsure what is the cause of this at this moment
+        // so just printing total bytes when completed.
+        LOG
+            .debug("copied object from '{}/{}' to '{}/{}': {} bytes transferred", s3ObjectSummary.getBucketName(),
+                s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey,
+                transfer.getProgress().getTotalBytesToTransfer());
+      }
+    }
+  }
+
+  private static class BytesGauge implements Gauge<Long> {
+
+    private final AtomicLong bytesReplicated;
+
+    public BytesGauge(AtomicLong bytesReplicated) {
+      this.bytesReplicated = bytesReplicated;
+    }
+
+    @Override
+    public Long getValue() {
+      return bytesReplicated.get();
+    }
+  }
 
   private final Path sourceBaseLocation;
   private final List<Path> sourceSubLocations;
@@ -129,8 +172,10 @@ public class S3S3Copier implements Copier {
   }
 
   private void copy(AmazonS3URI source, AmazonS3URI target) {
-    ListObjectsRequest request = listObjectsRequestFactory.newInstance().withBucketName(source.getBucket()).withPrefix(
-        source.getKey());
+    ListObjectsRequest request = listObjectsRequestFactory
+        .newInstance()
+        .withBucketName(source.getBucket())
+        .withPrefix(source.getKey());
     ObjectListing listing = srcClient.listObjects(request);
     submitCopyJobsFromListing(source, target, request, listing);
     while (listing.isTruncated()) {
@@ -144,33 +189,23 @@ public class S3S3Copier implements Copier {
       final AmazonS3URI targetS3Uri,
       ListObjectsRequest request,
       ObjectListing listing) {
-    LOG.debug("Found objects to copy {}, for request {}/{}", listing.getObjectSummaries(), request.getBucketName(),
-        request.getPrefix());
+    LOG
+        .debug("Found objects to copy {}, for request {}/{}", listing.getObjectSummaries(), request.getBucketName(),
+            request.getPrefix());
     List<S3ObjectSummary> objectSummaries = listing.getObjectSummaries();
     for (final S3ObjectSummary s3ObjectSummary : objectSummaries) {
       String fileName = StringUtils.removeStart(s3ObjectSummary.getKey(), sourceS3Uri.getKey());
       final String targetKey = Strings.nullToEmpty(targetS3Uri.getKey()) + fileName;
-      LOG.info("copying object from '{}/{}' to '{}/{}'", s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey(),
-          targetS3Uri.getBucket(), targetKey);
+      LOG
+          .info("copying object from '{}/{}' to '{}/{}'", s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey(),
+              targetS3Uri.getBucket(), targetKey);
 
       CopyObjectRequest copyObjectRequest = new CopyObjectRequest(s3ObjectSummary.getBucketName(),
           s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey);
       applyObjectMetadata(copyObjectRequest);
 
-      TransferStateChangeListener stateChangeListener = new TransferStateChangeListener() {
-
-        @Override
-        public void transferStateChanged(Transfer transfer, TransferState state) {
-          if (state == TransferState.Completed) {
-            // NOTE: running progress doesn't seem to be reported correctly.
-            // transfer.getProgress().getBytesTransferred() is always 0. Unsure what is the cause of this at this moment
-            // so just printing total bytes when completed.
-            LOG.debug("copied object from '{}/{}' to '{}/{}': {} bytes transferred", s3ObjectSummary.getBucketName(),
-                s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey,
-                transfer.getProgress().getTotalBytesToTransfer());
-          }
-        }
-      };
+      TransferStateChangeListener stateChangeListener = new BytesTransferStateChangeListener(s3ObjectSummary,
+          targetS3Uri, targetKey);
       Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
       totalBytesToReplicate += copy.getProgress().getTotalBytesToTransfer();
       copyJobs.add(copy);
@@ -193,25 +228,21 @@ public class S3S3Copier implements Copier {
         copyJob.waitForCompletion();
         long alreadyReplicated = bytesReplicated.addAndGet(copyJob.getProgress().getTotalBytesToTransfer());
         if (totalBytesToReplicate > 0) {
-          LOG.info("Replicating...': {}% complete",
-              String.format("%.0f", (alreadyReplicated / (double) totalBytesToReplicate) * 100.0));
+          LOG
+              .info("Replicating...': {}% complete",
+                  String.format("%.0f", (alreadyReplicated / (double) totalBytesToReplicate) * 100.0));
         }
       } catch (InterruptedException e) {
         throw new CircusTrainException(e);
       }
     }
-    ImmutableMap<String, Long> metrics = ImmutableMap.of(S3S3CopierMetrics.Metrics.TOTAL_BYTES_TO_REPLICATE.name(),
-        totalBytesToReplicate);
+    ImmutableMap<String, Long> metrics = ImmutableMap
+        .of(S3S3CopierMetrics.Metrics.TOTAL_BYTES_TO_REPLICATE.name(), totalBytesToReplicate);
     return new S3S3CopierMetrics(metrics, bytesReplicated.get());
   }
 
   private void registerRunningMetrics(final AtomicLong bytesReplicated) {
-    Gauge<Long> gauge = new Gauge<Long>() {
-      @Override
-      public Long getValue() {
-        return bytesReplicated.get();
-      }
-    };
+    Gauge<Long> gauge = new BytesGauge(bytesReplicated);
     registry.remove(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name());
     registry.register(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name(), gauge);
   }

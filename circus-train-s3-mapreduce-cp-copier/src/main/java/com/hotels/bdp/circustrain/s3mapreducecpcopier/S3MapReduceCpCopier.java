@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,26 @@ public class S3MapReduceCpCopier implements Copier {
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(S3MapReduceCpCopier.class);
+
+  private static class JobCounter implements Gauge<Long> {
+    private final Job job;
+    private final Enum<?> counter;
+
+    public JobCounter(Job job, Enum<?> counter) {
+      this.job = job;
+      this.counter = counter;
+    }
+
+    @Override
+    public Long getValue() {
+      try {
+        return job.getCounters().findCounter(counter).getValue();
+      } catch (IOException e) {
+        LOG.warn("Could not get value for counter " + counter.name(), e);
+      }
+      return 0L;
+    }
+  }
 
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
@@ -150,17 +170,7 @@ public class S3MapReduceCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final Enum<?> counter) {
     registry.remove(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new Gauge<Long>() {
-      @Override
-      public Long getValue() {
-        try {
-          return job.getCounters().findCounter(counter).getValue();
-        } catch (IOException e) {
-          LOG.warn("Could not get value for counter " + counter.name(), e);
-        }
-        return 0L;
-      }
-    });
+    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new JobCounter(job, counter));
 
   }
 
