@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
   private final String eventId;
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
-  private final List<CleanUpLocation> locations = new ArrayList<>();
+  private final List<CleanupLocation> locations = new ArrayList<>();
 
   private final String replicaDatabase;
 
@@ -54,10 +54,10 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
   }
 
   @Override
-  public void cleanUpLocations() throws CircusTrainException {
+  public void scheduleLocations() throws CircusTrainException {
     try {
       List<URI> uris = new ArrayList<>();
-      for (CleanUpLocation location : locations) {
+      for (CleanupLocation location : locations) {
         LOG.info("Scheduling old replica data for deletion for event {}: {}", eventId, location.path.toUri());
         housekeepingListener
             .cleanUpLocation(eventId, location.pathEventId, location.path, location.replicaDatabase,
@@ -71,18 +71,18 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
   }
 
   @Override
-  public void addCleanUpLocation(String pathEventId, Path location) {
+  public void addCleanupLocation(String pathEventId, Path location) {
     LOG.debug("Adding clean up location: {}", location.toUri());
-    locations.add(new CleanUpLocation(pathEventId, location, replicaDatabase, replicaTable));
+    locations.add(new CleanupLocation(pathEventId, location, replicaDatabase, replicaTable));
   }
 
-  private static class CleanUpLocation {
+  private static class CleanupLocation {
     private final Path path;
     private final String pathEventId;
     private final String replicaDatabase;
     private final String replicaTable;
 
-    private CleanUpLocation(String pathEventId, Path path, String replicaDatabase, String replicaTable) {
+    private CleanupLocation(String pathEventId, Path path, String replicaDatabase, String replicaTable) {
       this.pathEventId = pathEventId;
       this.path = path;
       this.replicaDatabase = replicaDatabase;

@@ -100,14 +100,6 @@ public class DestructiveReplicaTest {
   }
 
   @Test
-  public void tableExists() throws Exception {
-    when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
-
-    assertThat(replica.tableExists(), is(true));
-    verify(client).close();
-  }
-
-  @Test
   public void tableIsUnderCircusTrainControl() throws Exception {
     when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(true);
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
@@ -162,10 +154,10 @@ public class DestructiveReplicaTest {
     replica.dropDeletedPartitions(sourcePartitionNames);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value2", false);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location1);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location2);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, location1);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, location2);
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -174,9 +166,9 @@ public class DestructiveReplicaTest {
 
     replica.dropDeletedPartitions(Lists.<String> newArrayList());
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
-    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -193,9 +185,9 @@ public class DestructiveReplicaTest {
     List<String> sourcePartitionNames = Lists.newArrayList("part1=value1");
     replica.dropDeletedPartitions(sourcePartitionNames);
     verify(client, never()).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
-    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -206,9 +198,9 @@ public class DestructiveReplicaTest {
     List<String> sourcePartitionNames = Lists.newArrayList();
     replica.dropDeletedPartitions(sourcePartitionNames);
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), eq(false));
-    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -227,11 +219,11 @@ public class DestructiveReplicaTest {
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value2", false);
     verify(client).dropTable(DATABASE, REPLICA_TABLE, false, true);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location1);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, location2);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, tableLocation);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, location1);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, location2);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, tableLocation);
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -243,9 +235,9 @@ public class DestructiveReplicaTest {
     replica.dropTable();
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
     verify(client, never()).dropTable(eq(DATABASE), eq(REPLICA_TABLE), anyBoolean(), anyBoolean());
-    verify(cleanupLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   @Test
@@ -256,9 +248,9 @@ public class DestructiveReplicaTest {
 
     replica.dropTable();
     verify(client).dropTable(DATABASE, REPLICA_TABLE, false, true);
-    verify(cleanupLocationManager).addCleanUpLocation(EVENT_ID, tableLocation);
+    verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, tableLocation);
     verify(client).close();
-    verify(cleanupLocationManager).cleanUpLocations();
+    verify(cleanupLocationManager).scheduleLocations();
   }
 
   private void mockPartitionIterator(List<Partition> replicaPartitions)

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,14 @@ public class HouseKeepingCleanupLocationManagerTest {
   private @Mock ReplicaCatalogListener replicaCatalogListener;
 
   @Test
-  public void cleanUpLocations() throws Exception {
+  public void scheduleLocations() throws Exception {
     HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path = new Path("location1");
 
-    manager.addCleanUpLocation(pathEventId, path);
-    manager.cleanUpLocations();
+    manager.addCleanupLocation(pathEventId, path);
+    manager.scheduleLocations();
 
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path, DATABASE, TABLE);
     List<URI> uris = Lists.newArrayList(path.toUri());
@@ -57,16 +57,16 @@ public class HouseKeepingCleanupLocationManagerTest {
   }
 
   @Test
-  public void cleanUpLocationsMultipleCallsDoNothing() throws Exception {
+  public void scheduleLocationsMultipleCallsDoNothing() throws Exception {
     HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path = new Path("location1");
 
-    manager.addCleanUpLocation(pathEventId, path);
-    manager.cleanUpLocations();
-    manager.cleanUpLocations();
-    manager.cleanUpLocations();
+    manager.addCleanupLocation(pathEventId, path);
+    manager.scheduleLocations();
+    manager.scheduleLocations();
+    manager.scheduleLocations();
 
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path, DATABASE, TABLE);
     List<URI> uris = Lists.newArrayList(path.toUri());
@@ -74,16 +74,16 @@ public class HouseKeepingCleanupLocationManagerTest {
   }
 
   @Test
-  public void cleanUpLocationsMultipleAdds() throws Exception {
+  public void scheduleLocationsMultipleAdds() throws Exception {
     HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path1 = new Path("location1");
     Path path2 = new Path("location2");
 
-    manager.addCleanUpLocation(pathEventId, path1);
-    manager.addCleanUpLocation(pathEventId, path2);
-    manager.cleanUpLocations();
+    manager.addCleanupLocation(pathEventId, path1);
+    manager.addCleanupLocation(pathEventId, path2);
+    manager.scheduleLocations();
 
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path1, DATABASE, TABLE);
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path2, DATABASE, TABLE);
@@ -92,21 +92,21 @@ public class HouseKeepingCleanupLocationManagerTest {
   }
 
   @Test
-  public void cleanUpLocationsMultipleAddsAlternate() throws Exception {
+  public void scheduleLocationsMultipleAddsAlternate() throws Exception {
     HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path1 = new Path("location1");
     Path path2 = new Path("location2");
 
-    manager.addCleanUpLocation(pathEventId, path1);
-    manager.cleanUpLocations();
+    manager.addCleanupLocation(pathEventId, path1);
+    manager.scheduleLocations();
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path1, DATABASE, TABLE);
     List<URI> uris = Lists.newArrayList(path1.toUri());
     verify(replicaCatalogListener).deprecatedReplicaLocations(uris);
 
-    manager.addCleanUpLocation(pathEventId, path2);
-    manager.cleanUpLocations();
+    manager.addCleanupLocation(pathEventId, path2);
+    manager.scheduleLocations();
     verify(housekeepingListener).cleanUpLocation(EVENT_ID, pathEventId, path2, DATABASE, TABLE);
     List<URI> urisSecondCleanup = Lists.newArrayList(path2.toUri());
     verify(replicaCatalogListener).deprecatedReplicaLocations(urisSecondCleanup);

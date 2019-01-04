@@ -159,7 +159,7 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
-|`table-replications[n].replication-strategy`|No|Table replication strategu. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT.|
+|`table-replications[n].replication-strategy`|No|Table replication strategy. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT`.|
 |`table-replications[n].transform-options`|No|Map of optional options that can be used to set configuration for a custom transformation per table replication.|
 |`table-replications[n].table-mappings`|No|Only used by view replications. This is a map of source tables used by the view and their equivalent name in the replica metastore.|
 
@@ -242,7 +242,7 @@ Circus Train provided configurable replication strategy which can be used to con
 
 It has the following options:
 * `UPSERT`: Default behaviour, data is only added to the replica side, either by overriding an data of an existing table/partition. No table or partitions are dropped.
-* `DESTRUCTIVE`: Like UPSERT but CT will also drop a replica table if the source table was dropped. Similarly it will check if there are any partitions in the source table that have been dropped if so it will drop them in the replica table and schedule the dropped data for deletion via Housekeeping.
+* `PROPAGATE_DELETES`: Like UPSERT but CT will also drop a replica table if the source table was dropped. Similarly it will check if there are any partitions in the source table that have been dropped if so it will drop them in the replica table and schedule the dropped data for deletion via Housekeeping.
  
 #### Copier options
 Circus Train uses highly configurable means to copy the actual data between clusters. Control over this is provided by "copier options" which allow fine grained configuration of the copier processes. The default values should suffice for most use cases but the below sections describe the various options available as they might be useful in certain situations.

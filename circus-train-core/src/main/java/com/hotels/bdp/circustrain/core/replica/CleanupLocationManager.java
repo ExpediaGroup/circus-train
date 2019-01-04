@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ public interface CleanupLocationManager {
   CleanupLocationManager NULL_CLEANUP_LOCATION_MANAGER = new CleanupLocationManager() {
 
     @Override
-    public void cleanUpLocations() throws CircusTrainException {
+    public void scheduleLocations() throws CircusTrainException {
       // do nothing
     }
 
     @Override
-    public void addCleanUpLocation(String pathEventId, Path location) {
+    public void addCleanupLocation(String pathEventId, Path location) {
       // do nothing
     }
   };
 
   /**
-   * Cleans up locations added by {@link #addCleanUpLocation(String, Path)}
+   * Schedules locations for cleanup, locations can be added by {@link #addCleanupLocation(String, Path)}
    *
    * @throws CircusTrainException
    */
-  void cleanUpLocations() throws CircusTrainException;
+  void scheduleLocations() throws CircusTrainException;
 
-  void addCleanUpLocation(String pathEventId, Path location);
+  void addCleanupLocation(String pathEventId, Path location);
 
 }

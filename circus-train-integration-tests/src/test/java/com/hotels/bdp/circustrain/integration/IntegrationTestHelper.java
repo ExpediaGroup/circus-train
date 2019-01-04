@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ public class IntegrationTestHelper {
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
 
   public static final String DATABASE = "ct_database";
-  public static final String SOURCE_PARTITIONED_TABLE = "ct_table_p";
+  public static final String PARTITIONED_TABLE = "ct_table_p";
   public static final String SOURCE_ENCODED_TABLE = "ct_table_encoded";
-  public static final String SOURCE_UNPARTITIONED_TABLE = "ct_table_u";
+  public static final String UNPARTITIONED_TABLE = "ct_table_u";
   public static final String SOURCE_MANAGED_UNPARTITIONED_TABLE = "ct_table_u_managed";
   public static final String SOURCE_MANAGED_PARTITIONED_TABLE = "ct_table_p_managed";
   public static final String SOURCE_PARTITIONED_VIEW = "ct_view_p";
@@ -55,7 +55,7 @@ public class IntegrationTestHelper {
 
   void createPartitionedTable(URI sourceTableUri) throws Exception {
     Table hiveTable = TestUtils
-        .createPartitionedTable(metaStoreClient, DATABASE, SOURCE_PARTITIONED_TABLE, sourceTableUri);
+        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri);
 
     URI partitionEurope = URI.create(sourceTableUri + "/continent=Europe");
     URI partitionUk = URI.create(partitionEurope + "/country=UK");
@@ -78,7 +78,7 @@ public class IntegrationTestHelper {
     File dataFile = new File(sourceTableUri.getPath(), PART_00000);
     FileUtils.writeStringToFile(dataFile, "1\tadam\tlondon\n2\tsusan\tmilan\n");
 
-    TestUtils.createUnpartitionedTable(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_TABLE, sourceTableUri);
+    TestUtils.createUnpartitionedTable(metaStoreClient, DATABASE, UNPARTITIONED_TABLE, sourceTableUri);
   }
 
   void createManagedUnpartitionedTable(URI sourceTableUri) throws Exception {
@@ -119,7 +119,7 @@ public class IntegrationTestHelper {
 
   void createPartitionedView() throws Exception {
     Table view = TestUtils
-        .createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW, SOURCE_PARTITIONED_TABLE);
+        .createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW, PARTITIONED_TABLE);
     metaStoreClient
         .add_partitions(Arrays
             .asList(newViewPartition(view, Arrays.asList("Europe", "UK")),
@@ -127,7 +127,7 @@ public class IntegrationTestHelper {
   }
 
   void createUnpartitionedView() throws Exception {
-    TestUtils.createUnpartitionedView(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_VIEW, SOURCE_UNPARTITIONED_TABLE);
+    TestUtils.createUnpartitionedView(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_VIEW, UNPARTITIONED_TABLE);
   }
 
   void createTableWithEncodedPartition(URI sourceTableUri) throws Exception {

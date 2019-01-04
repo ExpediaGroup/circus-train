@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,20 +53,25 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
 
   @Override
   public Replication newInstance(TableReplication tableReplication) {
-    String eventId = eventIdFactory.newEventId("ctp");
-    if (tableReplication.getReplicationStrategy() == ReplicationStrategy.DESTRUCTIVE) {
+    if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
+      String eventId = eventIdFactory.newEventId("ctdestructive");
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
-          new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication), new DestructiveReplica(
-              replicaMetaStoreClientSupplier, getCleanUpLocationManager(eventId, tableReplication), tableReplication));
+          new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
+          new DestructiveReplica(replicaMetaStoreClientSupplier,
+              createDestructiveCleanupLocationManager(eventId, tableReplication), tableReplication));
     }
     return upsertReplicationFactory.newInstance(tableReplication);
   }
 
-  private CleanupLocationManager getCleanUpLocationManager(String eventId, TableReplication tableReplication) {
+  private CleanupLocationManager createDestructiveCleanupLocationManager(
+      String eventId,
+      TableReplication tableReplication) {
     if (tableReplication.getReplicationMode() == ReplicationMode.FULL) {
       return new HouseKeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
           tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
     } else {
+      // Metadata Mirror and Metadata Update should not delete files, so dummy CleanupLocationManager is created and
+      // used.
       return CleanupLocationManager.NULL_CLEANUP_LOCATION_MANAGER;
     }
   }

@@ -63,12 +63,6 @@ public class DestructiveReplica {
     tableName = tableReplication.getReplicaTableName();
   }
 
-  public boolean tableExists() throws TException {
-    try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
-      return client.tableExists(databaseName, tableName);
-    }
-  }
-
   public boolean tableIsUnderCircusTrainControl() throws TException {
     try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
       if (!client.tableExists(databaseName, tableName)) {
@@ -99,7 +93,7 @@ public class DestructiveReplica {
         }
       });
     } finally {
-      cleanupLocationManager.cleanUpLocations();
+      cleanupLocationManager.scheduleLocations();
     }
   }
 
@@ -128,7 +122,7 @@ public class DestructiveReplica {
         client.dropPartition(databaseName, tableName, partitionName, DELETE_DATA);
         Path oldLocation = locationAsPath(replicaPartition);
         String oldEventId = replicaPartition.getParameters().get(REPLICATION_EVENT.parameterName());
-        cleanupLocationManager.addCleanUpLocation(oldEventId, oldLocation);
+        cleanupLocationManager.addCleanupLocation(oldEventId, oldLocation);
       }
     }
   }
@@ -145,10 +139,10 @@ public class DestructiveReplica {
         client.dropTable(databaseName, tableName, DELETE_DATA, IGNORE_UNKNOWN);
         Path oldLocation = locationAsPath(table);
         String oldEventId = table.getParameters().get(REPLICATION_EVENT.parameterName());
-        cleanupLocationManager.addCleanUpLocation(oldEventId, oldLocation);
+        cleanupLocationManager.addCleanupLocation(oldEventId, oldLocation);
       }
     } finally {
-      cleanupLocationManager.cleanUpLocations();
+      cleanupLocationManager.scheduleLocations();
     }
   }
 

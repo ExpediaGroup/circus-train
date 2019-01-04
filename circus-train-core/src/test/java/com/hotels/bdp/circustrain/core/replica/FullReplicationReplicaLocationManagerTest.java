@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class FullReplicationReplicaLocationManagerTest {
     manager.addCleanUpLocation("pev2", new Path("path2"));
     manager.cleanUpLocations();
 
-    verify(cleanupLocationManager).addCleanUpLocation("pev1", new Path("path1"));
-    verify(cleanupLocationManager).addCleanUpLocation("pev2", new Path("path2"));
+    verify(cleanupLocationManager).addCleanupLocation("pev1", new Path("path1"));
+    verify(cleanupLocationManager).addCleanupLocation("pev2", new Path("path2"));
   }
 }
