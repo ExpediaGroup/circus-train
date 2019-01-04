@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public class SnsMessage {
 
   final static String PROTOCOL_VERSION = "1.2";
 
-  private static final String protocolVersion = PROTOCOL_VERSION;
+  private final String protocolVersion = PROTOCOL_VERSION;
   private final SnsMessageType type;
   private final Map<String, String> headers;
   private final String startTime;
