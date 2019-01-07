@@ -255,7 +255,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
             file-attribute: replication, blocksize, user, group, permission, checksumtype, acl, xattr, times
             preserve-raw-xattrs: true
             atomic-commit: false
-            atomic-work-path: /foo/bar/workReplication Strategy
+            atomic-work-path: /foo/bar/work
             blocking: true
             copy-strategy: uniformsize
             filters-file: /foo/bar/filters
