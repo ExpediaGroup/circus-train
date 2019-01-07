@@ -160,7 +160,6 @@ public class Replica extends HiveEndpoint {
                       sourcePartitionStatistics));
         }
       }
-      // sourcePartitionsAndStatistics.getPartitionNames(); // doesn't do anything
       replicaCatalogListener
           .partitionsToAlter(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), partitionsToAlter));
       replicaCatalogListener
