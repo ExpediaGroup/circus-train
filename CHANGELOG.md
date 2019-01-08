@@ -1,3 +1,7 @@
+## TBD
+### Added
+* Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
+
 ## 13.1.0 - 2018-12-20
 ### Changed
 * Housekeeping can be configured to control query batch size, this controls memory usage. See [#40](https://github.com/HotelsDotCom/housekeeping/issues/40).
