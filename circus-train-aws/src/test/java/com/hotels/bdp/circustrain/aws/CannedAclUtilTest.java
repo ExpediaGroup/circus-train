@@ -36,7 +36,7 @@ public class CannedAclUtilTest {
   }
 
   @Test
-  public void toCannedAccessControlListCaseSensitiveness() {
+  public void toCannedAccessControlListCaseInsensitiveness() {
     assertThat(CannedAclUtils.toCannedAccessControlList("bucket-owner-read"), is(CannedAccessControlList.BucketOwnerRead));
     assertThat(CannedAclUtils.toCannedAccessControlList("BUCKET-OWNER-READ"), is(CannedAccessControlList.BucketOwnerRead));
   }

@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.aws;
 
+import java.util.Locale;
+
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 
 public final class CannedAclUtils {
@@ -32,7 +34,7 @@ public final class CannedAclUtils {
       return null;
     }
 
-    cannedAcl = cannedAcl.toLowerCase();
+    cannedAcl = cannedAcl.toLowerCase(Locale.ROOT);
 
     for (CannedAccessControlList acl : CannedAccessControlList.values()) {
       if (acl.toString().equals(cannedAcl)) {
