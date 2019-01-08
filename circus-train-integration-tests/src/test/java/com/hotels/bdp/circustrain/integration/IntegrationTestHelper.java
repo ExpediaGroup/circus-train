@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,17 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hotels.bdp.circustrain.api.CircusTrainTableParameter;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 
 public class IntegrationTestHelper {
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
 
   public static final String DATABASE = "ct_database";
-  public static final String SOURCE_PARTITIONED_TABLE = "ct_table_p";
+  public static final String PARTITIONED_TABLE = "ct_table_p";
   public static final String SOURCE_ENCODED_TABLE = "ct_table_encoded";
-  public static final String SOURCE_UNPARTITIONED_TABLE = "ct_table_u";
+  public static final String UNPARTITIONED_TABLE = "ct_table_u";
   public static final String SOURCE_MANAGED_UNPARTITIONED_TABLE = "ct_table_u_managed";
   public static final String SOURCE_MANAGED_PARTITIONED_TABLE = "ct_table_p_managed";
   public static final String SOURCE_PARTITIONED_VIEW = "ct_view_p";
@@ -52,8 +54,8 @@ public class IntegrationTestHelper {
   }
 
   void createPartitionedTable(URI sourceTableUri) throws Exception {
-    Table hiveTable = TestUtils.createPartitionedTable(metaStoreClient, DATABASE, SOURCE_PARTITIONED_TABLE,
-        sourceTableUri);
+    Table hiveTable = TestUtils
+        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri);
 
     URI partitionEurope = URI.create(sourceTableUri + "/continent=Europe");
     URI partitionUk = URI.create(partitionEurope + "/country=UK");
@@ -64,17 +66,19 @@ public class IntegrationTestHelper {
     URI partitionChina = URI.create(partitionAsia + "/country=China");
     File dataFileChina = new File(partitionChina.getPath(), PART_00000);
     FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tshanghai\tmilan\n");
-    LOG.info(">>>> Partitions added: {}",
-        metaStoreClient
-            .add_partitions(Arrays.asList(newTablePartition(hiveTable, Arrays.asList("Europe", "UK"), partitionUk),
-                newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
+    LOG
+        .info(">>>> Partitions added: {}",
+            metaStoreClient
+                .add_partitions(Arrays
+                    .asList(newTablePartition(hiveTable, Arrays.asList("Europe", "UK"), partitionUk),
+                        newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
   }
 
   void createUnpartitionedTable(URI sourceTableUri) throws Exception {
     File dataFile = new File(sourceTableUri.getPath(), PART_00000);
     FileUtils.writeStringToFile(dataFile, "1\tadam\tlondon\n2\tsusan\tmilan\n");
 
-    TestUtils.createUnpartitionedTable(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_TABLE, sourceTableUri);
+    TestUtils.createUnpartitionedTable(metaStoreClient, DATABASE, UNPARTITIONED_TABLE, sourceTableUri);
   }
 
   void createManagedUnpartitionedTable(URI sourceTableUri) throws Exception {
@@ -105,21 +109,25 @@ public class IntegrationTestHelper {
     File dataFileChina = new File(partitionChina.getPath(), PART_00000);
     FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tshanghai\tmilan\n");
 
-    LOG.info(">>>> Partitions added: {}",
-        metaStoreClient
-            .add_partitions(Arrays.asList(newTablePartition(table, Arrays.asList("Europe", "UK"), partitionUk),
-                newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina))));
+    LOG
+        .info(">>>> Partitions added: {}",
+            metaStoreClient
+                .add_partitions(Arrays
+                    .asList(newTablePartition(table, Arrays.asList("Europe", "UK"), partitionUk),
+                        newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina))));
   }
 
   void createPartitionedView() throws Exception {
-    Table view = TestUtils.createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW,
-        SOURCE_PARTITIONED_TABLE);
-    metaStoreClient.add_partitions(Arrays.asList(newViewPartition(view, Arrays.asList("Europe", "UK")),
-        newViewPartition(view, Arrays.asList("Asia", "China"))));
+    Table view = TestUtils
+        .createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW, PARTITIONED_TABLE);
+    metaStoreClient
+        .add_partitions(Arrays
+            .asList(newViewPartition(view, Arrays.asList("Europe", "UK")),
+                newViewPartition(view, Arrays.asList("Asia", "China"))));
   }
 
   void createUnpartitionedView() throws Exception {
-    TestUtils.createUnpartitionedView(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_VIEW, SOURCE_UNPARTITIONED_TABLE);
+    TestUtils.createUnpartitionedView(metaStoreClient, DATABASE, SOURCE_UNPARTITIONED_VIEW, UNPARTITIONED_TABLE);
   }
 
   void createTableWithEncodedPartition(URI sourceTableUri) throws Exception {
@@ -130,8 +138,21 @@ public class IntegrationTestHelper {
     File dataFileUk = new File(partitionUk.getPath(), PART_00000);
     FileUtils.writeStringToFile(dataFileUk, "1\tadam\tlondon\n2\tsusan\tglasgow\n");
 
-    LOG.info(">>>> Partitions added: {}", metaStoreClient.add_partitions(Arrays.asList(
-        newTablePartition(hiveTable, Arrays.asList("Europe", "U%K"), URI.create(partitionEurope + "/country=U%25K")))));
+    LOG
+        .info(">>>> Partitions added: {}",
+            metaStoreClient
+                .add_partitions(Arrays
+                    .asList(newTablePartition(hiveTable, Arrays.asList("Europe", "U%K"),
+                        URI.create(partitionEurope + "/country=U%25K")))));
+  }
+
+  public Table alterTableSetCircusTrainParameter(String database, String tableName) throws Exception {
+    Table table = metaStoreClient.getTable(database, tableName);
+    table.putToParameters(CircusTrainTableParameter.SOURCE_TABLE.parameterName(), database + "." + tableName);
+    table.putToParameters(CircusTrainTableParameter.REPLICATION_EVENT.parameterName(), "unitTest1");
+    table.putToParameters(CircusTrainTableParameter.REPLICATION_MODE.parameterName(), ReplicationMode.FULL.name());
+    metaStoreClient.alter_table(database, tableName, table);
+    return table;
   }
 
 }

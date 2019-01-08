@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import static org.junit.Assert.assertThat;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_TABLE;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
@@ -134,7 +134,7 @@ public class CircusTrainHdfsS3IntegrationTest {
 
   @Test
   public void unpartitionedTable() throws Exception {
-    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE);
+    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE);
     helper.createUnpartitionedTable(sourceTableUri);
 
     exit.expectSystemExitWithStatus(0);
@@ -174,8 +174,8 @@ public class CircusTrainHdfsS3IntegrationTest {
 
   @Test
   public void partitionedTableWithNoPartitions() throws Exception {
-    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_PARTITIONED_TABLE, sourceTableUri);
+    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE);
+    TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE, sourceTableUri);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-with-no-partitions.yml");
@@ -212,8 +212,8 @@ public class CircusTrainHdfsS3IntegrationTest {
 
   @Test
   public void partitionedTableWithNoPartitionsMetadataUpdate() throws Exception {
-    URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE);
-    Table sourceTable = TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_PARTITIONED_TABLE,
+    URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE);
+    Table sourceTable = TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE,
         sourceTableUri);
 
     // creating replicaTable

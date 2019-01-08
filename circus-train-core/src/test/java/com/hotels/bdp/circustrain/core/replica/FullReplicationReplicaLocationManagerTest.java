@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,20 +33,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
-import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FullReplicationReplicaLocationManagerTest {
 
-  private static final String DATABASE_NAME = "db";
-  private static final String TABLE_NAME = "table";
   private static final String TABLE_PATH = "tablePath";
   private static final String EVENT_ID = "eventId";
 
   @Mock
-  private HousekeepingListener listener;
+  private CleanupLocationManager cleanupLocationManager;
   @Mock
-  private ReplicaCatalogListener eventCoordinator;
+  private ReplicaCatalogListener replicaCatalogListener;
   @Mock
   private SourceLocationManager sourceLocationManager;
   @Mock
@@ -57,7 +54,7 @@ public class FullReplicationReplicaLocationManagerTest {
   @Test
   public void getTableOnUnpartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, UNPARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, UNPARTITIONED, cleanupLocationManager, replicaCatalogListener);
     Path path = manager.getTableLocation();
     assertThat(path, is(new Path(TABLE_PATH, new Path(EVENT_ID))));
   }
@@ -65,21 +62,21 @@ public class FullReplicationReplicaLocationManagerTest {
   @Test(expected = UnsupportedOperationException.class)
   public void getPartitionBaseOnUnpartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, UNPARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, UNPARTITIONED, cleanupLocationManager, replicaCatalogListener);
     manager.getPartitionBaseLocation();
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void getPartitionLocationOnUnpartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, UNPARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, UNPARTITIONED, cleanupLocationManager, replicaCatalogListener);
     manager.getPartitionLocation(sourcePartition);
   }
 
   @Test
   public void getPartitionLocationOnPartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, PARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, PARTITIONED, cleanupLocationManager, replicaCatalogListener);
     when(sourcePartition.getSd()).thenReturn(sd);
     String partitionLocation = TABLE_PATH + "/" + EVENT_ID + "/partitionKey1=value";
     when(sd.getLocation()).thenReturn(partitionLocation);
@@ -93,7 +90,7 @@ public class FullReplicationReplicaLocationManagerTest {
   @Test
   public void getTableOnPartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, PARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, PARTITIONED, cleanupLocationManager, replicaCatalogListener);
     Path path = manager.getTableLocation();
     assertThat(path, is(new Path(TABLE_PATH)));
   }
@@ -101,7 +98,7 @@ public class FullReplicationReplicaLocationManagerTest {
   @Test
   public void getPartitionBaseOnPartitionedTable() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, PARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, PARTITIONED, cleanupLocationManager, replicaCatalogListener);
     Path path = manager.getPartitionBaseLocation();
     assertThat(path, is(new Path(TABLE_PATH, new Path(EVENT_ID))));
   }
@@ -109,12 +106,12 @@ public class FullReplicationReplicaLocationManagerTest {
   @Test
   public void cleanUp() throws Exception {
     FullReplicationReplicaLocationManager manager = new FullReplicationReplicaLocationManager(sourceLocationManager,
-        TABLE_PATH, EVENT_ID, UNPARTITIONED, listener, eventCoordinator, DATABASE_NAME, TABLE_NAME);
+        TABLE_PATH, EVENT_ID, UNPARTITIONED, cleanupLocationManager, replicaCatalogListener);
     manager.addCleanUpLocation("pev1", new Path("path1"));
     manager.addCleanUpLocation("pev2", new Path("path2"));
     manager.cleanUpLocations();
 
-    verify(listener).cleanUpLocation(EVENT_ID, "pev1", new Path("path1"), DATABASE_NAME, TABLE_NAME);
-    verify(listener).cleanUpLocation(EVENT_ID, "pev2", new Path("path2"), DATABASE_NAME, TABLE_NAME);
+    verify(cleanupLocationManager).addCleanupLocation("pev1", new Path("path1"));
+    verify(cleanupLocationManager).addCleanupLocation("pev2", new Path("path2"));
   }
 }

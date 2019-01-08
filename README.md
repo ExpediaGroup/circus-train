@@ -159,6 +159,7 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
+|`table-replications[n].replication-strategy`|No|Table replication strategy. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT`.|
 |`table-replications[n].transform-options`|No|Map of optional options that can be used to set configuration for a custom transformation per table replication.|
 |`table-replications[n].table-mappings`|No|Only used by view replications. This is a map of source tables used by the view and their equivalent name in the replica metastore.|
 
@@ -235,6 +236,14 @@ It has the following options:
 ***Restrictions***:
 * `METADATA_MIRROR` the only supported replication mode for Hive views.
 * You cannot `METADATA_MIRROR` a previously fully replicated table (use `METADATA_UPDATE` if you want to do that). Similarly you cannot go from `METADATA_MIRROR` to `FULL`/`METADATA_UPDATE` as you then might end up with a table that points both to original and replicated data. Replicate to new a table if `METADATA_UPDATE` doesn't suffice for your use case. Circus Train will fail with an exception if any of these restrictions are not met.
+
+#### Replication Strategy
+Circus Train provides configurable replication strategies which can be used to control whether "destructive actions" like dropping tables or partitions should be propagated to the replica table. 
+
+It has the following options:
+
+* `UPSERT`: Default behaviour, data is only added to the replica. If the source tables or partitions are deleted these changes are *not* propagated to the replica.
+* `PROPAGATE_DELETES`: Like UPSERT but Circus Train will also propagate deletes from the source to the replica. If a source table is deleted then the replica table will also be deleted. Similarly if there are any partitions in the source table that have been deleted they will also be deleted from the replica table. The deletes apply to both metadata and the underlying data (which is scheduled for deletion using Circus Train's Housekeeping mechanism).
  
 #### Copier options
 Circus Train uses highly configurable means to copy the actual data between clusters. Control over this is provided by "copier options" which allow fine grained configuration of the copier processes. The default values should suffice for most use cases but the below sections describe the various options available as they might be useful in certain situations.

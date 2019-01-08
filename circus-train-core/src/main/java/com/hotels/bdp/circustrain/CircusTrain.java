@@ -39,6 +39,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Joiner;
+import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
@@ -60,6 +61,7 @@ import com.hotels.bdp.circustrain.core.CopierFactoryManager;
 import com.hotels.bdp.circustrain.core.PartitionPredicateFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactoryImpl;
+import com.hotels.bdp.circustrain.core.StrategyBasedReplicationFactory;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 import com.hotels.bdp.circustrain.core.event.CompositeCopierListener;
 import com.hotels.bdp.circustrain.core.event.CompositeLocomotiveListener;
@@ -72,6 +74,7 @@ import com.hotels.bdp.circustrain.core.transformation.CompositePartitionTransfor
 import com.hotels.bdp.circustrain.core.transformation.CompositeTableTransformation;
 import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -98,18 +101,19 @@ public class CircusTrain {
     int exitCode = -1;
     try {
       String defaultModules = Joiner.on(",").join(Modules.REPLICATION, Modules.HOUSEKEEPING);
-      exitCode = SpringApplication.exit(new SpringApplicationBuilder(CircusTrain.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:${modules:" + defaultModules + "}")
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .properties("jasypt.encryptor.password:${password:null}")
-          .properties("housekeeping.schema-name:circus_train")
-          .registerShutdownHook(true)
-          .initializers(new ExtensionInitializer())
-          .listeners(new ConfigFileValidationApplicationListener())
-          .build()
-          .run(args));
+      exitCode = SpringApplication
+          .exit(new SpringApplicationBuilder(CircusTrain.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:${modules:" + defaultModules + "}")
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .properties("jasypt.encryptor.password:${password:null}")
+              .properties("housekeeping.schema-name:circus_train")
+              .registerShutdownHook(true)
+              .initializers(new ExtensionInitializer())
+              .listeners(new ConfigFileValidationApplicationListener())
+              .build()
+              .run(args));
     } catch (ConfigFileValidationException e) {
       LOG.error(e.getMessage(), e);
       printCircusTrainHelp(e.getErrors());
@@ -232,9 +236,16 @@ public class CircusTrain {
       CopierFactoryManager copierFactoryManager,
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
-      CopierOptions copierOptions) {
-    return new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager, copierListener,
-        partitionPredicateFactory, copierOptions);
+      CopierOptions copierOptions,
+      Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
+      Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+      HousekeepingListener housekeepingListener,
+      ReplicaCatalogListener replicaCatalogListener) {
+    ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
+        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions);
+    return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
+        replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
+
   }
 
   @Profile({ Modules.REPLICATION })

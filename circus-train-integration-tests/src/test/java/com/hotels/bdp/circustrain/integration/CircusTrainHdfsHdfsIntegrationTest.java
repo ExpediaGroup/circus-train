@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATAB
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_ENCODED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_UNPARTITIONED_TABLE;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_VIEW;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_VIEW;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.HOUSEKEEPING_DB_PASSWD;
@@ -56,6 +56,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
@@ -105,6 +106,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   private File housekeepingDbLocation;
 
   private IntegrationTestHelper helper;
+  private IntegrationTestHelper replicaHelper;
 
   @Before
   public void init() throws Exception {
@@ -114,6 +116,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
 
     helper = new IntegrationTestHelper(sourceCatalog.client());
+    replicaHelper = new IntegrationTestHelper(replicaCatalog.client());
   }
 
   private String housekeepingDbJdbcUrl() throws ClassNotFoundException {
@@ -155,8 +158,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
-          List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path");
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+              .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
             getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
@@ -171,11 +174,11 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void twoTablesWithGraphiteNoHousekeeping() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("mixed-two-tables-with-graphite-no-housekeeping.yml");
@@ -216,8 +219,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedTableHousekeepingEnabledNoAudit() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-no-housekeeping.yml");
@@ -232,8 +235,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       public void checkAssertion() throws Exception {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
-          List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path");
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+              .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
             getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
@@ -248,8 +251,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedTableHousekeepingEnabledWithAudit() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-with-housekeeping.yml");
@@ -285,8 +288,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void unpartitionedTableHousekeepingEnabledWithAudit() throws Exception {
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("unpartitioned-single-table-with-housekeeping.yml");
@@ -321,8 +324,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void unpartitionedTableHousekeepingEnabledNoAudit() throws Exception {
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("unpartitioned-single-table-no-housekeeping.yml");
@@ -346,6 +349,204 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           } catch (SQLException e) {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableDestructive() throws Exception {
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Created Source Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
+
+    // create table in replica metastore
+    replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, UNPARTITIONED_TABLE);
+    final String replicaPath = table.getSd().getLocation();
+    LOG.info(">>>> Created Replica Table {} ", table);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-unpartitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        // table still exist (new data is replicated)
+        assertThat(replicaCatalog.client().tableExists(DATABASE, UNPARTITIONED_TABLE), is(true));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(replicaPath));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableDestructiveDeleteSource() throws Exception {
+    // create table in replica metastore (No table in source metastore, mimicks a delete)
+    replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, UNPARTITIONED_TABLE);
+    final String replicaPath = table.getSd().getLocation();
+    LOG.info(">>>> Created Replica Table {} ", table);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-unpartitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, UNPARTITIONED_TABLE), is(false));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(replicaPath));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDestructive() throws Exception {
+    helper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation = partition.getSd().getLocation();
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, PARTITIONED_TABLE), is(true));
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, PARTITIONED_TABLE, (short) 10);
+
+        assertThat(partitions.size(), is(2));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDestructiveDeletePartition() throws Exception {
+    helper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation = partition.getSd().getLocation();
+
+    // drop a partition in source;
+    sourceCatalog
+        .client()
+        .dropPartition(DATABASE, PARTITIONED_TABLE,
+            Warehouse.makePartName(table.getPartitionKeys(), partition.getValues()), false);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, PARTITIONED_TABLE), is(true));
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, PARTITIONED_TABLE, (short) 10);
+
+        assertThat(partitions.size(), is(1));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(1));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation));
+        }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDestructiveDeleteTable() throws Exception {
+    // create table + partitions in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, PARTITIONED_TABLE);
+    LOG.info(">>>> Table {} ", table);
+    List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, PARTITIONED_TABLE, (short) 10);
+    Partition partition = partitions.get(0);
+    final String partitionLocation1 = partition.getSd().getLocation();
+    Partition partition2 = partitions.get(1);
+    final String partitionLocation2 = partition2.getSd().getLocation();
+    final String tableLocation = table.getSd().getLocation();
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-partitioned-single-table.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(replicaCatalog.client().tableExists(DATABASE, PARTITIONED_TABLE), is(false));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+              "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(3));
+          assertThat(cleanUpPaths.get(0).getPath(), is(partitionLocation1));
+          assertThat(cleanUpPaths.get(1).getPath(), is(partitionLocation2));
+          assertThat(cleanUpPaths.get(2).getPath(), is(tableLocation));
         }
       }
     });
@@ -397,8 +598,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
     sourceTable.putToParameters("paramToUpdate", "updated");
     sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-    Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE,
-        "continent=Asia/country=China");
+    Partition partition = sourceCatalog
+        .client()
+        .getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, "continent=Asia/country=China");
     partition.putToParameters("partition_paramToUpdate", "updated");
     sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
 
@@ -426,8 +628,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         File sameAsSourceLocation = new File(sourceWarehouseUri, DATABASE + "/" + SOURCE_MANAGED_PARTITIONED_TABLE);
         assertThat(hiveTable.getSd().getLocation() + "/", is(sameAsSourceLocation.toURI().toString()));
 
-        List<Partition> listPartitions = replicaCatalog.client().listPartitions(DATABASE,
-            TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
+        List<Partition> listPartitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
         assertThat(listPartitions.size(), is(2));
         assertThat(listPartitions.get(0).getSd().getLocation(),
             is(sameAsSourceLocation.toURI().toString() + "continent=Asia/country=China"));
@@ -446,8 +649,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
     // creating replicaTable
     final URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE);
-    TestUtils.createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE,
-        replicaLocation);
+    TestUtils
+        .createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE,
+            replicaLocation);
     Table table = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
     table.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
     replicaCatalog.client().alter_table(table.getDbName(), table.getTableName(), table);
@@ -489,22 +693,24 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
     // creating replicaTable
     final URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_MANAGED_TABLE,
-        replicaLocation);
+    TestUtils
+        .createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, replicaLocation);
     Table table = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE);
     table.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
     URI partitionAsia = URI.create(replicaLocation + "/dummyEventID/continent=Asia");
     final URI partitionChina = URI.create(partitionAsia + "/country=China");
-    replicaCatalog.client().add_partitions(
-        Arrays.asList(newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina)));
+    replicaCatalog
+        .client()
+        .add_partitions(Arrays.asList(newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina)));
     replicaCatalog.client().alter_table(table.getDbName(), table.getTableName(), table);
 
     // adjusting the sourceTable, mimicking the change we want to update
     Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
     sourceTable.putToParameters("paramToUpdate", "updated");
     sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-    Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE,
-        "continent=Asia/country=China");
+    Partition partition = sourceCatalog
+        .client()
+        .getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, "continent=Asia/country=China");
     partition.putToParameters("partition_paramToUpdate", "updated");
     sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
 
@@ -529,8 +735,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
 
         assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
-        List<Partition> listPartitions = replicaCatalog.client().listPartitions(DATABASE,
-            TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
+        List<Partition> listPartitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
         assertThat(listPartitions.size(), is(1));
         // Only previously replicated partitions are updated, no NEW partitions are created
         assertThat(listPartitions.get(0).getSd().getLocation(), is(partitionChina.toString()));
@@ -542,8 +749,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void replicaInSourceMetastore() throws Exception {
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("unpartitioned-single-table-same-metastore.yml");
@@ -568,8 +775,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedTablePartitionFilterGenerationEnabled() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     final File config = dataFolder.getFile("partitioned-single-table-partition-filter-generation-enabled.yml");
@@ -587,8 +794,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(hiveTable.getTableName(), is(TARGET_PARTITIONED_TABLE));
         assertThat(isExternalTable(hiveTable), is(true));
         assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
-        List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, TARGET_PARTITIONED_TABLE,
-            (short) 10);
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) 10);
         assertThat(partitions.size(), is(2));
 
         // We kick of another run, the filter generation should find no differences since everything was replicated in
@@ -599,8 +807,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
               "ExpectedSystemExit should throw CheckExitCalled this in the checkAssertionAfterwards() phase so this is expected.");
         } catch (CheckExitCalled expected) {
           assertThat(expected.getStatus(), is(0));
-          List<Partition> partitionsAfterSecondRun = replicaCatalog.client().listPartitions(DATABASE,
-              TARGET_PARTITIONED_TABLE, (short) 10);
+          List<Partition> partitionsAfterSecondRun = replicaCatalog
+              .client()
+              .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) 10);
           // If this fails it is most likely the partition location and the second run replicating the data again
           // (generating a new CT-event-id in the path). Root cause is probably the filter generation finding
           // differences and doing an unnecessary replication
@@ -643,8 +852,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedTableHousekeepingEnabledNoAuditPartialReplication() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(-2);
     File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-partial-replication.yml");
@@ -659,8 +868,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       public void checkAssertion() throws Exception {
         String jdbcUrl = housekeepingDbJdbcUrl();
         try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
-          List<LegacyReplicaPath> cleanUpPaths = TestUtils.getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path");
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+              .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
           assertThat(cleanUpPaths.size(), is(0));
           try {
             getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
@@ -756,8 +965,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     String avroSchemaBaseUrl = sourceAvroSchemaUploadPath.toString();
 
     URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE);
-    TestUtils.createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE,
-        replicaLocation);
+    TestUtils
+        .createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE,
+            replicaLocation);
     Table table = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
     table.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
     replicaCatalog.client().alter_table(table.getDbName(), table.getTableName(), table);
@@ -796,23 +1006,25 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     String avroSchemaBaseUrl = sourceAvroSchemaUploadPath.toString();
 
     URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_MANAGED_TABLE,
-        replicaLocation);
+    TestUtils
+        .createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, replicaLocation);
     Table table = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE);
     table.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
 
     URI partitionAsia = URI.create(replicaLocation + "/dummyEventID/continent=Asia");
     URI partitionChina = URI.create(partitionAsia + "/country=China");
-    replicaCatalog.client().add_partitions(
-        Arrays.asList(newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina)));
+    replicaCatalog
+        .client()
+        .add_partitions(Arrays.asList(newTablePartition(table, Arrays.asList("Asia", "China"), partitionChina)));
     replicaCatalog.client().alter_table(table.getDbName(), table.getTableName(), table);
 
     Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
     sourceTable.putToParameters("avro.schema.url", avroSchemaBaseUrl);
 
     sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-    Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE,
-        "continent=Asia/country=China");
+    Partition partition = sourceCatalog
+        .client()
+        .getPartition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, "continent=Asia/country=China");
     partition.putToParameters("avro.schema.url", avroSchemaBaseUrl);
 
     sourceCatalog.client().alter_partition(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE, partition);
@@ -833,8 +1045,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         String transformedAvroUrl = replicaHiveTable.getParameters().get("avro.schema.url");
         assertThat(transformedAvroUrl, startsWith(expectedReplicaSchemaUrl));
 
-        List<Partition> listPartitions = replicaCatalog.client().listPartitions(DATABASE,
-            TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
+        List<Partition> listPartitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
         transformedAvroUrl = listPartitions.get(0).getParameters().get("avro.schema.url");
         assertThat(transformedAvroUrl, startsWith(expectedReplicaSchemaUrl));
       }
@@ -896,14 +1109,15 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionTableReplicateIgnoringMissingData() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     // Note this is using the DistCpCopier (Not s3). We can't force S3DistcpCopier in the integration tests currently
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-ignore-missing-folders.yml");
-    Partition partition = sourceCatalog.client().getPartition(DATABASE, SOURCE_PARTITIONED_TABLE,
-        Arrays.asList("Europe", "UK"));
+    Partition partition = sourceCatalog
+        .client()
+        .getPartition(DATABASE, PARTITIONED_TABLE, Arrays.asList("Europe", "UK"));
     // Delete source partition
     File partitionFolder = new File(new Path(partition.getSd().getLocation()).toUri());
     FileUtils.deleteDirectory(partitionFolder);
@@ -918,8 +1132,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       @Override
       public void checkAssertion() throws Exception {
         // The partition is replicated despite missing source folder.
-        Partition partition = replicaCatalog.client().getPartition(DATABASE, SOURCE_PARTITIONED_TABLE,
-            Arrays.asList("Europe", "UK"));
+        Partition partition = replicaCatalog
+            .client()
+            .getPartition(DATABASE, PARTITIONED_TABLE, Arrays.asList("Europe", "UK"));
         assertNotNull(partition);
         File partitionFolder = new File(new Path(partition.getSd().getLocation()).toUri());
         // Hive creates the empty partition folder for us.
@@ -931,8 +1146,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedView() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     helper.createPartitionedView();
     LOG.info(">>>> VIEW {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_VIEW));
@@ -960,8 +1175,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedViewFailure() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_TABLE));
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     helper.createPartitionedView();
     LOG.info(">>>> VIEW {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_PARTITIONED_VIEW));
@@ -979,8 +1194,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void unpartitionedView() throws Exception {
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
     helper.createUnpartitionedView();
     LOG.info(">>>> VIEW {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_UNPARTITIONED_VIEW));
@@ -1033,9 +1248,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(hiveView.getViewOriginalText(),
             is(String.format("SELECT * FROM %s.%s", DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE)));
         assertThat(hiveView.getViewExpandedText(),
-            is(String.format("SELECT `%s`.`id`, `%s`.`name`, `%s`.`city` FROM `%s`.`%s`",
-                TARGET_UNPARTITIONED_MANAGED_TABLE, TARGET_UNPARTITIONED_MANAGED_TABLE,
-                TARGET_UNPARTITIONED_MANAGED_TABLE, DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE)));
+            is(String
+                .format("SELECT `%s`.`id`, `%s`.`name`, `%s`.`city` FROM `%s`.`%s`", TARGET_UNPARTITIONED_MANAGED_TABLE,
+                    TARGET_UNPARTITIONED_MANAGED_TABLE, TARGET_UNPARTITIONED_MANAGED_TABLE, DATABASE,
+                    TARGET_UNPARTITIONED_MANAGED_TABLE)));
       }
     });
     runner.run(config.getAbsolutePath());

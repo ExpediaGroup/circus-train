@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import static org.junit.Assert.assertThat;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_TABLE;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
@@ -128,12 +128,12 @@ public class CircusTrainS3S3IntegrationTest {
 
   @Test
   public void unpartitionedTable() throws Exception {
-    TestUtils.createUnpartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_UNPARTITIONED_TABLE,
-        toUri("s3a://source/", DATABASE, SOURCE_UNPARTITIONED_TABLE));
+    TestUtils.createUnpartitionedTable(sourceCatalog.client(), DATABASE, UNPARTITIONED_TABLE,
+        toUri("s3a://source/", DATABASE, UNPARTITIONED_TABLE));
 
     final File dataFile = temporaryFolder.newFile();
     FileUtils.writeStringToFile(dataFile, "1\trob\tbristol\n2\tsam\ttoronto\n");
-    String fileKey = String.format("%s/%s/%s", DATABASE, SOURCE_UNPARTITIONED_TABLE, PART_00000);
+    String fileKey = String.format("%s/%s/%s", DATABASE, UNPARTITIONED_TABLE, PART_00000);
     s3Client.putObject("source", fileKey, dataFile);
 
     exit.expectSystemExitWithStatus(0);
@@ -170,8 +170,8 @@ public class CircusTrainS3S3IntegrationTest {
 
   @Test
   public void partitionedTableWithNoPartitionsMirror() throws Exception {
-    final URI sourceTableLocation = toUri("s3a://source/", DATABASE, SOURCE_PARTITIONED_TABLE);
-    TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, SOURCE_PARTITIONED_TABLE, sourceTableLocation);
+    final URI sourceTableLocation = toUri("s3a://source/", DATABASE, PARTITIONED_TABLE);
+    TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE, sourceTableLocation);
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-with-no-partitions-mirror.yml");
