@@ -76,7 +76,6 @@ public class DestructiveReplica {
         String qualifiedName = tableReplication.getSourceTable().getQualifiedName();
         return qualifiedName.equals(sourceTableParameterValue);
       }
-
     }
     return false;
   }
