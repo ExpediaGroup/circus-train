@@ -55,7 +55,7 @@ class DynamicInputChunk<K, V> {
   private static int numChunksLeft = -1; // Un-initialized before 1st dir-scan.
   private static FileSystem fs;
 
-  private Path chunkFilePath;
+  private final Path chunkFilePath;
   private SequenceFileRecordReader<K, V> reader;
   private SequenceFile.Writer writer;
 
@@ -69,7 +69,9 @@ class DynamicInputChunk<K, V> {
 
   private static String getListingFilePath(Configuration configuration) {
     final String listingFileString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
-    assert !"".equals(listingFileString) : "Listing file not found.";
+    if ("".equals(listingFileString)) {
+      throw new IllegalArgumentException("Listing file not found");
+    }
     return listingFileString;
   }
 
@@ -87,8 +89,9 @@ class DynamicInputChunk<K, V> {
   }
 
   private void openForWrite() throws IOException {
-    writer = SequenceFile.createWriter(chunkFilePath.getFileSystem(configuration), configuration, chunkFilePath,
-        Text.class, CopyListingFileStatus.class, SequenceFile.CompressionType.NONE);
+    writer = SequenceFile
+        .createWriter(chunkFilePath.getFileSystem(configuration), configuration, chunkFilePath, Text.class,
+            CopyListingFileStatus.class, SequenceFile.CompressionType.NONE);
 
   }
 
@@ -148,8 +151,9 @@ class DynamicInputChunk<K, V> {
 
   private void openForRead(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     reader = new SequenceFileRecordReader<>();
-    reader.initialize(new FileSplit(chunkFilePath, 0, getFileSize(chunkFilePath, configuration), null),
-        taskAttemptContext);
+    reader
+        .initialize(new FileSplit(chunkFilePath, 0, getFileSize(chunkFilePath, configuration), null),
+            taskAttemptContext);
   }
 
   /**

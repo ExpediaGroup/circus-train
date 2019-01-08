@@ -52,34 +52,9 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
 
   @VisibleForTesting
   static class ReplicationState {
-    private List<String> partitionKeys;
-    private int partitionsAltered;
-    private long bytesReplicated;
-
-    public List<String> getPartitionKeys() {
-      return partitionKeys;
-    }
-
-    public void setPartitionKeys(List<String> partitionKeys) {
-      this.partitionKeys = partitionKeys;
-    }
-
-    public int getPartitionsAltered() {
-      return partitionsAltered;
-    }
-
-    public void setPartitionsAltered(int partitionsAltered) {
-      this.partitionsAltered = partitionsAltered;
-    }
-
-    public long getBytesReplicated() {
-      return bytesReplicated;
-    }
-
-    public void setBytesReplicated(long bytesReplicated) {
-      this.bytesReplicated = bytesReplicated;
-    }
-
+    List<String> partitionKeys;
+    int partitionsAltered;
+    long bytesReplicated;
   }
 
   @Override
@@ -95,12 +70,12 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
-    String amount = transferAmount(replicationState.getPartitionKeys(), replicationState.getPartitionsAltered());
+    String amount = transferAmount(replicationState.partitionKeys, replicationState.partitionsAltered);
     if (sourceCatalog != null && replicaCatalog != null) {
       LOG
           .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
               sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-              tableReplication.getQualifiedReplicaName(), replicationState.getBytesReplicated());
+              tableReplication.getQualifiedReplicaName(), replicationState.bytesReplicated);
     }
   }
 
@@ -127,24 +102,22 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
 
   @Override
   public void resolvedMetaStoreSourceTable(EventTable table) {
-    replicationState.setPartitionKeys(table.getPartitionKeys());
+    replicationState.partitionKeys = table.getPartitionKeys();
   }
 
   @Override
   public void partitionsToCreate(EventPartitions partitions) {
-    replicationState
-        .setPartitionsAltered(replicationState.getPartitionsAltered() + partitions.getEventPartitions().size());
+    replicationState.partitionsAltered = replicationState.partitionsAltered + partitions.getEventPartitions().size();
   }
 
   @Override
   public void partitionsToAlter(EventPartitions partitions) {
-    replicationState
-        .setPartitionsAltered(replicationState.getPartitionsAltered() + partitions.getEventPartitions().size());
+    replicationState.partitionsAltered = replicationState.partitionsAltered + partitions.getEventPartitions().size();
   }
 
   @Override
   public void copierEnd(Metrics metrics) {
-    replicationState.setBytesReplicated(metrics.getBytesReplicated());
+    replicationState.bytesReplicated = metrics.getBytesReplicated();
   }
 
   @Override

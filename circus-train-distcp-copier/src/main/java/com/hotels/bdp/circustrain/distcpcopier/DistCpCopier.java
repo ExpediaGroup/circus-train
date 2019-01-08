@@ -32,12 +32,12 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 
 public class DistCpCopier implements Copier {
@@ -55,27 +55,6 @@ public class DistCpCopier implements Copier {
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(DistCpCopier.class);
-
-  private static class JobCounter implements Gauge<Long> {
-
-    private final Job job;
-    private final String counter;
-
-    public JobCounter(Job job, String counter) {
-      this.job = job;
-      this.counter = counter;
-    }
-
-    @Override
-    public Long getValue() {
-      try {
-        return job.getCounters().findCounter(FileSystemCounter.class.getName(), counter).getValue();
-      } catch (IOException e) {
-        LOG.warn("Could not get value for counter " + counter, e);
-      }
-      return 0L;
-    }
-  }
 
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
@@ -157,7 +136,7 @@ public class DistCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final String counter) {
     registry.remove(RunningMetrics.DIST_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(), new JobCounter(job, counter));
+    registry.register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(), new JobCounterGauge(job, counter));
   }
 
   private void cleanUpReplicaDataLocation() {

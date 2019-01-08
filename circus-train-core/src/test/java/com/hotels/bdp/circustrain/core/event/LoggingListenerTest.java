@@ -66,17 +66,17 @@ public class LoggingListenerTest {
 
   @Test
   public void resetAlteredPartitionsCount() {
-    EventPartitions eventPartitions = new EventPartitions(new LinkedHashMap<String,String>());
+    EventPartitions eventPartitions = new EventPartitions(new LinkedHashMap<String, String>());
     eventPartitions.add(eventPartition);
 
     listener.tableReplicationStart(tableReplication, "event-id");
     listener.partitionsToAlter(eventPartitions);
     listener.partitionsToCreate(eventPartitions);
-    assertThat(listener.getReplicationState().getPartitionsAltered(), is(2));
+    assertThat(listener.getReplicationState().partitionsAltered, is(2));
 
     // state should be reset
     listener.tableReplicationStart(tableReplication, "event-id");
-    assertThat(listener.getReplicationState().getPartitionsAltered(), is(0));
+    assertThat(listener.getReplicationState().partitionsAltered, is(0));
   }
 
   @Test

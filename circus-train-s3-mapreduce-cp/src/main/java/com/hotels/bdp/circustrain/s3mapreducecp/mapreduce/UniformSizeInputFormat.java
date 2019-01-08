@@ -88,8 +88,9 @@ public class UniformSizeInputFormat extends InputFormat<Text, CopyListingFileSta
 
     final Path listingFilePath = getListingFilePath(configuration);
 
-    LOG.debug("Average bytes per map: {}, Number of maps: {}, total size: {}", nBytesPerSplit, numSplits,
-        totalSizeBytes);
+    LOG
+        .debug("Average bytes per map: {}, Number of maps: {}, total size: {}", nBytesPerSplit, numSplits,
+            totalSizeBytes);
     SequenceFile.Reader reader = null;
     try {
       reader = getListingFileReader(configuration);
@@ -126,7 +127,9 @@ public class UniformSizeInputFormat extends InputFormat<Text, CopyListingFileSta
   private static Path getListingFilePath(Configuration configuration) {
     final String listingFilePathString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
 
-    assert !"".equals(listingFilePathString) : "Couldn't find listing file. Invalid input.";
+    if ("".equals(listingFilePathString)) {
+      throw new IllegalArgumentException("Couldn't find listing file. Invalid input.");
+    }
     return new Path(listingFilePathString);
   }
 

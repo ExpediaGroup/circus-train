@@ -29,12 +29,12 @@ import org.apache.hadoop.security.alias.CredentialProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
@@ -56,26 +56,6 @@ public class S3MapReduceCpCopier implements Copier {
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(S3MapReduceCpCopier.class);
-
-  private static class JobCounter implements Gauge<Long> {
-    private final Job job;
-    private final Enum<?> counter;
-
-    public JobCounter(Job job, Enum<?> counter) {
-      this.job = job;
-      this.counter = counter;
-    }
-
-    @Override
-    public Long getValue() {
-      try {
-        return job.getCounters().findCounter(counter).getValue();
-      } catch (IOException e) {
-        LOG.warn("Could not get value for counter " + counter.name(), e);
-      }
-      return 0L;
-    }
-  }
 
   private final Configuration conf;
   private final Path sourceDataBaseLocation;
@@ -170,7 +150,7 @@ public class S3MapReduceCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final Enum<?> counter) {
     registry.remove(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new JobCounter(job, counter));
+    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new JobCounterGauge(job, counter));
 
   }
 

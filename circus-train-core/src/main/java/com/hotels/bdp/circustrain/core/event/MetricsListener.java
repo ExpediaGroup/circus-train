@@ -80,10 +80,11 @@ class MetricsListener implements TableReplicationListener, CopierListener {
 
   @Override
   public void copierEnd(Metrics metrics) {
-    if (runningMetricsReporter != null) {
-      runningMetricsReporter.report();
-      runningMetricsReporter.stop();
+    if (runningMetricsReporter == null) {
+      throw new IllegalStateException("Metrics report should not be null");
     }
+    runningMetricsReporter.report();
+    runningMetricsReporter.stop();
     // once stopped unusable so get rid of it
     runningMetricsReporter = null;
     this.metrics = metrics;
