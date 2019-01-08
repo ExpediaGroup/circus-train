@@ -51,7 +51,7 @@ public class PathMetadata implements Serializable {
       checkSumLength = checksum.getLength();
       this.checksum = checksum.getBytes();
     }
-    this.childrenMetadata = childrenMetadata == null ? ImmutableList.<PathMetadata>of()
+    this.childrenMetadata = childrenMetadata == null ? ImmutableList.<PathMetadata> of()
         : ImmutableList.copyOf(childrenMetadata);
   }
 
@@ -73,7 +73,7 @@ public class PathMetadata implements Serializable {
 
   public byte[] getChecksum() {
     if (checksum == null) {
-      return new byte[] {};
+      return null;
     } else {
       return Arrays.copyOf(checksum, checksum.length);
     }

@@ -117,7 +117,7 @@ public class PathToPathMetadataTest {
     assertThat(metadata.getLastModifiedTimestamp(), is(0L));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
-    assertThat(metadata.getChecksum().length, is(0));
+    assertThat(metadata.getChecksum(), is(nullValue()));
     assertThat(metadata.getChildrenMetadata().size(), is(1));
     verify(fs, times(1)).listStatus(path);
     verify(fs, never()).getFileChecksum(path);

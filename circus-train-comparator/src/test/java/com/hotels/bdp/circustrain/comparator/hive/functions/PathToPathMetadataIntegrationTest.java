@@ -69,7 +69,7 @@ public class PathToPathMetadataIntegrationTest {
     assertThat(metadata.getLocation(), is(baseDir.toURI().toString()));
     assertThat(metadata.getChecksumAlgorithmName(), is(nullValue()));
     assertThat(metadata.getChecksumLength(), is(0));
-    assertThat(metadata.getChecksum().length, is(0));
+    assertThat(metadata.getChecksum(), is(nullValue()));
     assertThat(metadata.getChildrenMetadata().size(), is(NUM_OF_DATA_FILES));
 
     for (int i = 0; i < NUM_OF_DATA_FILES; ++i) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class PartitionedTableReplication implements Replication {
     this.replicaTableName = replicaTableName;
     this.copierOptions = copierOptions;
     this.copierListener = copierListener;
-    eventId = eventIdFactory.newEventId("ctp");
+    eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_PARTITIONED_TABLE.getPrefix());
   }
 
   @Override

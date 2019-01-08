@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hotels.bdp.circustrain.core.replica;
 
 import static com.google.common.base.Strings.nullToEmpty;
@@ -363,8 +362,10 @@ public class Replica extends HiveEndpoint {
       String replicaDatabaseName,
       String replicaTableName)
     throws TException {
-    return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
-        housekeepingListener, replicaCatalogListener, replicaDatabaseName, replicaTableName);
+    return new FullReplicationReplicaLocationManager(
+        sourceLocationManager, targetTableLocation, eventId, tableType, new HousekeepingCleanupLocationManager(eventId,
+            housekeepingListener, replicaCatalogListener, replicaDatabaseName, replicaTableName),
+        replicaCatalogListener);
   }
 
   @Override

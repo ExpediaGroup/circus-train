@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class UnpartitionedTableMetadataUpdateReplication implements Replication 
     this.replica = replica;
     this.replicaDatabaseName = replicaDatabaseName;
     this.replicaTableName = replicaTableName;
-    eventId = eventIdFactory.newEventId("ctt");
+    eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_UNPARTITIONED_TABLE.getPrefix());
   }
 
   @Override
@@ -72,8 +72,9 @@ public class UnpartitionedTableMetadataUpdateReplication implements Replication 
         ReplicaLocationManager replicaLocationManager = new MetadataUpdateReplicaLocationManager(client,
             TableType.UNPARTITIONED, previousLocation, replicaDatabaseName, replicaTableName);
         TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
-        replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-            replicaLocationManager);
+        replica
+            .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+                replicaLocationManager);
       }
       LOG.info("Metadata updated for table {}.{} (no data copied).", database, table);
     } catch (Throwable t) {

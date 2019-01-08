@@ -1,5 +1,9 @@
 /**
+<<<<<<< HEAD
  * Copyright (C) 2016-2018 Expedia Inc.
+=======
+ * Copyright (C) 2016-2019 Expedia Inc.
+>>>>>>> master
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +66,7 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
     this.replica = replica;
     this.replicaDatabaseName = replicaDatabaseName;
     this.replicaTableName = replicaTableName;
-    eventId = eventIdFactory.newEventId("ctp");
+    eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_PARTITIONED_TABLE.getPrefix());
   }
 
   @Override
@@ -71,31 +75,36 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
       TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
       Table sourceTable = sourceTableAndStatistics.getTable();
 
-      PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
-          partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
+      PartitionsAndStatistics sourcePartitionsAndStatistics = source
+          .getPartitions(sourceTable, partitionPredicate.getPartitionPredicate(),
+              partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
 
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
 
       // We expect all partitions to be under the table base path
-      SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable, sourcePartitions, eventId,
-          Collections.<String, Object>emptyMap());
+      SourceLocationManager sourceLocationManager = source
+          .getLocationManager(sourceTable, sourcePartitions, eventId, Collections.<String, Object> emptyMap());
       ReplicaLocationManager replicaLocationManager = new MetadataMirrorReplicaLocationManager(sourceLocationManager,
           TableType.PARTITIONED);
       sourceLocationManager.cleanUpLocations();
       if (sourcePartitions.isEmpty()) {
         LOG.debug("Update table {}.{} metadata only", database, table);
-        replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-            replicaLocationManager);
-        LOG.info(
-            "No matching partitions found on table {}.{} with predicate {}. "+
-            "Table metadata updated, no partitions were updated.", database, table, partitionPredicate);
+        replica
+            .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+                replicaLocationManager);
+        LOG
+            .info(
+                "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
+                database, table, partitionPredicate);
       } else {
-        replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-            replicaDatabaseName, replicaTableName, replicaLocationManager);
+        replica
+            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
+                replicaDatabaseName, replicaTableName, replicaLocationManager);
         int partitionsCopied = sourcePartitions.size();
-        LOG.info("Metadata mirrored for {} partitions of table {}.{} (no data copied).", partitionsCopied, database,
-            table);
+        LOG
+            .info("Metadata mirrored for {} partitions of table {}.{} (no data copied).", partitionsCopied, database,
+                table);
       }
     } catch (Throwable t) {
       throw new CircusTrainException("Unable to replicate", t);

@@ -39,6 +39,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Joiner;
+import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
@@ -60,6 +61,7 @@ import com.hotels.bdp.circustrain.core.CopierFactoryManager;
 import com.hotels.bdp.circustrain.core.PartitionPredicateFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactoryImpl;
+import com.hotels.bdp.circustrain.core.StrategyBasedReplicationFactory;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 import com.hotels.bdp.circustrain.core.event.CompositeCopierListener;
 import com.hotels.bdp.circustrain.core.event.CompositeLocomotiveListener;
@@ -72,6 +74,7 @@ import com.hotels.bdp.circustrain.core.transformation.CompositePartitionTransfor
 import com.hotels.bdp.circustrain.core.transformation.CompositeTableTransformation;
 import com.hotels.bdp.circustrain.extension.ExtensionInitializer;
 import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -233,9 +236,16 @@ public class CircusTrain {
       CopierFactoryManager copierFactoryManager,
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
-      CopierOptions copierOptions) {
-    return new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager, copierListener,
-        partitionPredicateFactory, copierOptions);
+      CopierOptions copierOptions,
+      Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
+      Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+      HousekeepingListener housekeepingListener,
+      ReplicaCatalogListener replicaCatalogListener) {
+    ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
+        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions);
+    return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
+        replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
+
   }
 
   @Profile({ Modules.REPLICATION })

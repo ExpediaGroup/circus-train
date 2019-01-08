@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>13.1.1-SNAPSHOT</version>
+    <version>13.2.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-integration-tests</artifactId>
@@ -18,12 +18,6 @@
 
   <dependencies>
     <!-- Circus Train -->
-    <dependency>
-      <groupId>com.hotels</groupId>
-      <artifactId>circus-train-common-test</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>circus-train-core</artifactId>

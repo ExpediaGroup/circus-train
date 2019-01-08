@@ -34,6 +34,7 @@ public class TableReplication {
   private short partitionIteratorBatchSize = (short) 1000;
   private short partitionFetcherBufferSize = (short) 1000;
   private @NotNull ReplicationMode replicationMode = ReplicationMode.FULL;
+  private @NotNull ReplicationStrategy replicationStrategy = ReplicationStrategy.UPSERT;
   // Only relevant to view replications
   private Map<String, String> tableMappings;
 
@@ -121,4 +122,11 @@ public class TableReplication {
     this.tableMappings = tableMappings;
   }
 
+  public ReplicationStrategy getReplicationStrategy() {
+    return replicationStrategy;
+  }
+
+  public void setReplicationStrategy(ReplicationStrategy replicationStrategy) {
+    this.replicationStrategy = replicationStrategy;
+  }
 }

@@ -2,6 +2,8 @@
 ### Changed
 * Refactored project to remove checkstyle and findbugs warnings, which does not impact functionality.
 * Upgraded `hotels-oss-parent` to 2.3.5 (was 2.3.3).
+### Added
+* Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
 
 ## 13.1.0 - 2018-12-20
 ### Changed

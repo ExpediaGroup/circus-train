@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
     this.targetTableLocation = targetTableLocation;
     this.replicaDatabaseName = replicaDatabaseName;
     this.replicaTableName = replicaTableName;
-    eventId = eventIdFactory.newEventId("ctp");
+    eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_PARTITIONED_TABLE.getPrefix());
   }
 
   @Override
@@ -86,8 +86,9 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
       TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
       Table sourceTable = sourceTableAndStatistics.getTable();
 
-      PartitionsAndStatistics sourcePartitionsAndStatistics = source.getPartitions(sourceTable,
-          partitionPredicate.getPartitionPredicate(), partitionPredicate.getPartitionPredicateLimit());
+      PartitionsAndStatistics sourcePartitionsAndStatistics = source
+          .getPartitions(sourceTable, partitionPredicate.getPartitionPredicate(),
+              partitionPredicate.getPartitionPredicateLimit());
       List<Partition> sourcePartitions = sourcePartitionsAndStatistics.getPartitions();
 
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
@@ -97,11 +98,13 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
           ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
               targetTableLocation);
           LOG.debug("Update table {}.{} metadata only", database, table);
-          replica.updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-              replicaLocationManager);
-          LOG.info(
-              "No matching partitions found on table {}.{} with predicate {}."
-                  + " Table metadata updated, no partitions were updated.", database, table, partitionPredicate);
+          replica
+              .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
+                  replicaLocationManager);
+          LOG
+              .info(
+                  "No matching partitions found on table {}.{} with predicate {}. Table metadata updated, no partitions were updated.",
+                  database, table, partitionPredicate);
         } else {
           String previousLocation = getPreviousLocation(client);
           ReplicaLocationManager replicaLocationManager = newMetadataUpdateReplicaLocationManager(client,
@@ -109,15 +112,17 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
 
           PartitionsAndStatistics sourcePartitionsAndStatisticsThatWereReplicated = filterOnReplicatedPartitions(client,
               sourcePartitionsAndStatistics, sourceTable.getPartitionKeys());
-          SourceLocationManager sourceLocationManager = source.getLocationManager(sourceTable,
-              sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
-              Collections.<String, Object>emptyMap());
+          SourceLocationManager sourceLocationManager = source
+              .getLocationManager(sourceTable, sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
+                  Collections.<String, Object> emptyMap());
 
-          replica.updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
-              sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
+          replica
+              .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
+                  sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
           int partitionsCopied = sourcePartitions.size();
-          LOG.info("Metadata updated for {} partitions of table {}.{}. (no data copied)", partitionsCopied, database,
-              table);
+          LOG
+              .info("Metadata updated for {} partitions of table {}.{}. (no data copied)", partitionsCopied, database,
+                  table);
         }
       }
 
