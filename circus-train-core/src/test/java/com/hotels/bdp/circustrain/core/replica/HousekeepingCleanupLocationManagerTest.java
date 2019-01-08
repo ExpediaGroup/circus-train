@@ -32,7 +32,7 @@ import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HouseKeepingCleanupLocationManagerTest {
+public class HousekeepingCleanupLocationManagerTest {
 
   private static final String EVENT_ID = "eventId";
   private static final String DATABASE = "db";
@@ -43,7 +43,7 @@ public class HouseKeepingCleanupLocationManagerTest {
 
   @Test
   public void scheduleLocations() throws Exception {
-    HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
+    HousekeepingCleanupLocationManager manager = new HousekeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path = new Path("location1");
@@ -58,7 +58,7 @@ public class HouseKeepingCleanupLocationManagerTest {
 
   @Test
   public void scheduleLocationsMultipleCallsDoNothing() throws Exception {
-    HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
+    HousekeepingCleanupLocationManager manager = new HousekeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path = new Path("location1");
@@ -75,7 +75,7 @@ public class HouseKeepingCleanupLocationManagerTest {
 
   @Test
   public void scheduleLocationsMultipleAdds() throws Exception {
-    HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
+    HousekeepingCleanupLocationManager manager = new HousekeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path1 = new Path("location1");
@@ -93,7 +93,7 @@ public class HouseKeepingCleanupLocationManagerTest {
 
   @Test
   public void scheduleLocationsMultipleAddsAlternate() throws Exception {
-    HouseKeepingCleanupLocationManager manager = new HouseKeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
+    HousekeepingCleanupLocationManager manager = new HousekeepingCleanupLocationManager(EVENT_ID, housekeepingListener,
         replicaCatalogListener, DATABASE, TABLE);
     String pathEventId = "pathEventId";
     Path path1 = new Path("location1");

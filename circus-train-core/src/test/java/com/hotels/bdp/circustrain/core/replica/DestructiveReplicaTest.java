@@ -96,7 +96,6 @@ public class DestructiveReplicaTest {
     StorageDescriptor sd1 = new StorageDescriptor();
     sd1.setLocation(tableLocation.toString());
     table.setSd(sd1);
-
   }
 
   @Test

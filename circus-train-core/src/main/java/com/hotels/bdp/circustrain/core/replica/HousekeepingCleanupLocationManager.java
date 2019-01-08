@@ -27,9 +27,9 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 
-public class HouseKeepingCleanupLocationManager implements CleanupLocationManager {
+public class HousekeepingCleanupLocationManager implements CleanupLocationManager {
 
-  private final static Logger LOG = LoggerFactory.getLogger(HouseKeepingCleanupLocationManager.class);
+  private final static Logger LOG = LoggerFactory.getLogger(HousekeepingCleanupLocationManager.class);
 
   private final String eventId;
   private final HousekeepingListener housekeepingListener;
@@ -40,7 +40,7 @@ public class HouseKeepingCleanupLocationManager implements CleanupLocationManage
 
   private final String replicaTable;
 
-  public HouseKeepingCleanupLocationManager(
+  public HousekeepingCleanupLocationManager(
       String eventId,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,

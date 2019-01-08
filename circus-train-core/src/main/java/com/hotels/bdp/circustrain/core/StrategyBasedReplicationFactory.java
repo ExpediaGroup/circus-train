@@ -25,7 +25,7 @@ import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
-import com.hotels.bdp.circustrain.core.replica.HouseKeepingCleanupLocationManager;
+import com.hotels.bdp.circustrain.core.replica.HousekeepingCleanupLocationManager;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
@@ -54,7 +54,7 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
   @Override
   public Replication newInstance(TableReplication tableReplication) {
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
-      String eventId = eventIdFactory.newEventId("ctdestructive");
+      String eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_DESTRUCTIVE.getPrefix());
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
           new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
           new DestructiveReplica(replicaMetaStoreClientSupplier,
@@ -67,7 +67,7 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
       String eventId,
       TableReplication tableReplication) {
     if (tableReplication.getReplicationMode() == ReplicationMode.FULL) {
-      return new HouseKeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
+      return new HousekeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
           tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
     } else {
       // Metadata Mirror and Metadata Update should not delete files, so dummy CleanupLocationManager is created and
