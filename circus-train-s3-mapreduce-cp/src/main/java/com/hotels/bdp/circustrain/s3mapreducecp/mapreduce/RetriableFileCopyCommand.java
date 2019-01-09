@@ -134,7 +134,8 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
   }
 
   private static ThrottledInputStream getInputStream(Path path, Configuration conf) throws IOException {
-    try (FileSystem fs = path.getFileSystem(conf)) {
+    try {
+      FileSystem fs = path.getFileSystem(conf);
       long bandwidthMB = conf
           .getInt(ConfigurationVariable.MAX_BANDWIDTH.getName(), ConfigurationVariable.MAX_BANDWIDTH.defaultIntValue());
       FSDataInputStream in = fs.open(path);

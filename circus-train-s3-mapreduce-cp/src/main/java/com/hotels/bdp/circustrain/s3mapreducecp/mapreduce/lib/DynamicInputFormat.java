@@ -85,11 +85,12 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
     for (int i = 0; i < nSplits; ++i) {
       TaskID taskId = new TaskID(jobContext.getJobID(), TaskType.MAP, i);
       chunks.get(i).assignTo(taskId);
-      splits.add(new FileSplit(chunks.get(i).getPath(), 0,
-          // Setting non-zero length for FileSplit size, to avoid a possible
-          // future when 0-sized file-splits are considered "empty" and skipped
-          // over.
-          getMinRecordsPerChunk(jobContext.getConfiguration()), null));
+      splits
+          .add(new FileSplit(chunks.get(i).getPath(), 0,
+              // Setting non-zero length for FileSplit size, to avoid a possible
+              // future when 0-sized file-splits are considered "empty" and skipped
+              // over.
+              getMinRecordsPerChunk(jobContext.getConfiguration()), null));
     }
     ConfigurationUtil.publish(jobContext.getConfiguration(), CONF_LABEL_NUM_SPLITS, splits.size());
     return splits;
@@ -200,7 +201,9 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
   private static Path getListingFilePath(Configuration configuration) {
     String listingFilePathString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
 
-    assert !"".equals(listingFilePathString) : "Listing file not found.";
+    if ("".equals(listingFilePathString)) {
+      throw new IllegalArgumentException("Listing file not found.");
+    }
 
     Path listingFilePath = new Path(listingFilePathString);
     try {
@@ -226,45 +229,52 @@ public class DynamicInputFormat<K, V> extends InputFormat<K, V> {
   }
 
   private static int getMaxChunksTolerable(Configuration conf) {
-    int maxChunksTolerable = conf.getInt(S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_TOLERABLE,
-        S3MapReduceCpConstants.MAX_CHUNKS_TOLERABLE_DEFAULT);
+    int maxChunksTolerable = conf
+        .getInt(S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_TOLERABLE,
+            S3MapReduceCpConstants.MAX_CHUNKS_TOLERABLE_DEFAULT);
     if (maxChunksTolerable <= 0) {
-      LOG.warn("{} should be positive. Fall back to default value: {}",
-          S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_TOLERABLE, S3MapReduceCpConstants.MAX_CHUNKS_TOLERABLE_DEFAULT);
+      LOG
+          .warn("{} should be positive. Fall back to default value: {}",
+              S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_TOLERABLE,
+              S3MapReduceCpConstants.MAX_CHUNKS_TOLERABLE_DEFAULT);
       maxChunksTolerable = S3MapReduceCpConstants.MAX_CHUNKS_TOLERABLE_DEFAULT;
     }
     return maxChunksTolerable;
   }
 
   private static int getMaxChunksIdeal(Configuration conf) {
-    int maxChunksIdeal = conf.getInt(S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_IDEAL,
-        S3MapReduceCpConstants.MAX_CHUNKS_IDEAL_DEFAULT);
+    int maxChunksIdeal = conf
+        .getInt(S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_IDEAL, S3MapReduceCpConstants.MAX_CHUNKS_IDEAL_DEFAULT);
     if (maxChunksIdeal <= 0) {
-      LOG.warn("{} should be positive. Fall back to default value: {}",
-          S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_IDEAL, S3MapReduceCpConstants.MAX_CHUNKS_IDEAL_DEFAULT);
+      LOG
+          .warn("{} should be positive. Fall back to default value: {}",
+              S3MapReduceCpConstants.CONF_LABEL_MAX_CHUNKS_IDEAL, S3MapReduceCpConstants.MAX_CHUNKS_IDEAL_DEFAULT);
       maxChunksIdeal = S3MapReduceCpConstants.MAX_CHUNKS_IDEAL_DEFAULT;
     }
     return maxChunksIdeal;
   }
 
   private static int getMinRecordsPerChunk(Configuration conf) {
-    int minRecordsPerChunk = conf.getInt(S3MapReduceCpConstants.CONF_LABEL_MIN_RECORDS_PER_CHUNK,
-        S3MapReduceCpConstants.MIN_RECORDS_PER_CHUNK_DEFAULT);
+    int minRecordsPerChunk = conf
+        .getInt(S3MapReduceCpConstants.CONF_LABEL_MIN_RECORDS_PER_CHUNK,
+            S3MapReduceCpConstants.MIN_RECORDS_PER_CHUNK_DEFAULT);
     if (minRecordsPerChunk <= 0) {
-      LOG.warn("{} should be positive. Fall back to default value: {}",
-          S3MapReduceCpConstants.CONF_LABEL_MIN_RECORDS_PER_CHUNK,
-          S3MapReduceCpConstants.MIN_RECORDS_PER_CHUNK_DEFAULT);
+      LOG
+          .warn("{} should be positive. Fall back to default value: {}",
+              S3MapReduceCpConstants.CONF_LABEL_MIN_RECORDS_PER_CHUNK,
+              S3MapReduceCpConstants.MIN_RECORDS_PER_CHUNK_DEFAULT);
       minRecordsPerChunk = S3MapReduceCpConstants.MIN_RECORDS_PER_CHUNK_DEFAULT;
     }
     return minRecordsPerChunk;
   }
 
   private static int getSplitRatio(Configuration conf) {
-    int splitRatio = conf.getInt(S3MapReduceCpConstants.CONF_LABEL_SPLIT_RATIO,
-        S3MapReduceCpConstants.SPLIT_RATIO_DEFAULT);
+    int splitRatio = conf
+        .getInt(S3MapReduceCpConstants.CONF_LABEL_SPLIT_RATIO, S3MapReduceCpConstants.SPLIT_RATIO_DEFAULT);
     if (splitRatio <= 0) {
-      LOG.warn("{} should be positive. Fall back to default value: {}", S3MapReduceCpConstants.CONF_LABEL_SPLIT_RATIO,
-          S3MapReduceCpConstants.SPLIT_RATIO_DEFAULT);
+      LOG
+          .warn("{} should be positive. Fall back to default value: {}", S3MapReduceCpConstants.CONF_LABEL_SPLIT_RATIO,
+              S3MapReduceCpConstants.SPLIT_RATIO_DEFAULT);
       splitRatio = S3MapReduceCpConstants.SPLIT_RATIO_DEFAULT;
     }
     return splitRatio;

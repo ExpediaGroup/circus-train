@@ -84,17 +84,17 @@ public class S3S3Copier implements Copier {
     }
   }
 
-  private static class BytesGauge implements Gauge<Long> {
+  private static class AtomicLongGauge implements Gauge<Long> {
 
-    private final AtomicLong bytesReplicated;
+    private final AtomicLong value;
 
-    public BytesGauge(AtomicLong bytesReplicated) {
-      this.bytesReplicated = bytesReplicated;
+    public AtomicLongGauge(AtomicLong value) {
+      this.value = value;
     }
 
     @Override
     public Long getValue() {
-      return bytesReplicated.get();
+      return value.get();
     }
   }
 
@@ -242,7 +242,7 @@ public class S3S3Copier implements Copier {
   }
 
   private void registerRunningMetrics(final AtomicLong bytesReplicated) {
-    Gauge<Long> gauge = new BytesGauge(bytesReplicated);
+    Gauge<Long> gauge = new AtomicLongGauge(bytesReplicated);
     registry.remove(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name());
     registry.register(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name(), gauge);
   }

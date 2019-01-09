@@ -79,7 +79,7 @@ public class PathToPathMetadataIntegrationTest {
       assertThat(childMetadata.getLastModifiedTimestamp(), is(dataFile.lastModified()));
       assertThat(childMetadata.getChecksumAlgorithmName(), is(nullValue()));
       assertThat(childMetadata.getChecksumLength(), is(0));
-      assertThat(childMetadata.getChecksum().length, is(0));
+      assertThat(childMetadata.getChecksum(), is(nullValue()));
       assertThat(childMetadata.getChildrenMetadata().size(), is(0));
     }
   }

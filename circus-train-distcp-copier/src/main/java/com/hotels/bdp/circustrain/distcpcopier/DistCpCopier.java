@@ -136,7 +136,9 @@ public class DistCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final String counter) {
     registry.remove(RunningMetrics.DIST_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(), new JobCounterGauge(job, counter));
+    registry
+        .register(RunningMetrics.DIST_CP_BYTES_REPLICATED.name(),
+            new JobCounterGauge(job, FileSystemCounter.class.getName(), counter));
   }
 
   private void cleanUpReplicaDataLocation() {

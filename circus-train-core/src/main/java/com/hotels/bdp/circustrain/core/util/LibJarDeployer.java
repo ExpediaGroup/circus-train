@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,7 +69,9 @@ public class LibJarDeployer {
     // setting libjars in client classpath
     URL[] libjars = GenericOptionsParser.getLibJars(conf);
     if (libjars != null && libjars.length > 0) {
-      new PriviledgedClassLoader(conf, libjars).run();
+      AccessController.doPrivileged(new PriviledgedClassLoader(conf, libjars));
+
+      // new PriviledgedClassLoader(conf, libjars).run();
     }
   }
 
