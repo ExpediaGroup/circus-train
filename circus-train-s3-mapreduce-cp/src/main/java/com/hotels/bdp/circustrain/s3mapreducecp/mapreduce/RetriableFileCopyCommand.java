@@ -154,13 +154,12 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
       bufferSize = context.getConfiguration().getInt(IO_FILE_BUFFER_SIZE_KEY, IO_FILE_BUFFER_SIZE_DEFAULT);
     }
     LOG.info("Buffer of the input stream is {} for file {}", bufferSize, uploadDescriptor.getSource());
-    input = new BufferedInputStream(input, bufferSize);
-    try {
+
+    try (BufferedInputStream bufferedInputStream = new BufferedInputStream(input, bufferSize)) {
       PutObjectRequest request = new PutObjectRequest(uploadDescriptor.getBucketName(), uploadDescriptor.getKey(),
-          input, uploadDescriptor.getMetadata());
+          bufferedInputStream, uploadDescriptor.getMetadata());
       // We add 1 to the buffer size as per the com.amazonaws.RequestClientOptions doc
       request.getRequestClientOptions().setReadLimit(bufferSize + 1);
-      input.close();
       return transferManager.upload(request);
     } catch (AmazonClientException | IOException e) {
       throw new CopyReadException(e);

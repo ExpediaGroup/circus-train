@@ -16,11 +16,13 @@
 package com.hotels.bdp.circustrain.core.event;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,22 +35,20 @@ import com.hotels.bdp.circustrain.api.event.EventPartitions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceCatalog;
 import com.hotels.bdp.circustrain.api.event.EventSourceTable;
+import com.hotels.bdp.circustrain.api.event.EventTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.core.event.LoggingListener.ReplicationState;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoggingListenerTest {
 
-  @Mock
-  private EventPartition eventPartition;
-  @Mock
-  private EventTableReplication tableReplication;
-  @Mock
-  private EventSourceCatalog sourceCatalog;
-  @Mock
-  private EventReplicaCatalog replicaCatalog;
-  @Mock
-  private EventSourceTable eventSourceTable;
+  private @Mock EventPartition eventPartition;
+  private @Mock EventTableReplication tableReplication;
+  private @Mock EventSourceCatalog sourceCatalog;
+  private @Mock EventReplicaCatalog replicaCatalog;
+  private @Mock EventSourceTable eventSourceTable;
+  private @Mock EventTable eventTable;
+  private @Mock Metrics metrics;
 
   private final LoggingListener listener = new LoggingListener();
 
@@ -72,19 +72,35 @@ public class LoggingListenerTest {
     listener.tableReplicationStart(tableReplication, "event-id");
     listener.partitionsToAlter(eventPartitions);
     listener.partitionsToCreate(eventPartitions);
-    assertThat(listener.getReplicationState().partitionsAltered, is(2));
+    assertThat(listener.getPartitionsAltered(), is(2));
 
     // state should be reset
     listener.tableReplicationStart(tableReplication, "event-id");
-    assertThat(listener.getReplicationState().partitionsAltered, is(0));
+    assertThat(listener.getPartitionsAltered(), is(0));
   }
 
   @Test
-  public void tableReplicationStartResetsReplicationState() {
-    ReplicationState replicationState1 = listener.getReplicationState();
+  public void resetPartitionKeys() {
+    List<String> tablePartitions = Arrays.asList("test1", "test2");
+    when(eventTable.getPartitionKeys()).thenReturn(tablePartitions);
+    listener.resolvedMetaStoreSourceTable(eventTable);
+    assertThat(listener.getPartitionKeys(), is(tablePartitions));
+
+    // state should be reset
     listener.tableReplicationStart(tableReplication, "event-id");
-    ReplicationState replicationState2 = listener.getReplicationState();
-    assertThat(replicationState1, not(is(replicationState2)));
+    assertThat(listener.getPartitionKeys(), is(Collections.EMPTY_LIST));
+  }
+
+  @Test
+  public void resetBytesReplicated() {
+    long bytesReplicated = 100L;
+    when(metrics.getBytesReplicated()).thenReturn(bytesReplicated);
+    listener.copierEnd(metrics);
+    assertThat(listener.getBytesReplicated(), is(bytesReplicated));
+
+    // state should be reset
+    listener.tableReplicationStart(tableReplication, "event-id");
+    assertThat(listener.getBytesReplicated(), is(0L));
   }
 
 }

@@ -16,14 +16,13 @@
 package com.hotels.bdp.circustrain.core.event;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
@@ -50,9 +49,8 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   private EventReplicaCatalog replicaCatalog;
   private ReplicationState replicationState = new ReplicationState();
 
-  @VisibleForTesting
-  static class ReplicationState {
-    List<String> partitionKeys;
+  private static class ReplicationState {
+    List<String> partitionKeys = Collections.emptyList();
     int partitionsAltered;
     long bytesReplicated;
   }
@@ -107,12 +105,12 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
 
   @Override
   public void partitionsToCreate(EventPartitions partitions) {
-    replicationState.partitionsAltered = replicationState.partitionsAltered + partitions.getEventPartitions().size();
+    replicationState.partitionsAltered += partitions.getEventPartitions().size();
   }
 
   @Override
   public void partitionsToAlter(EventPartitions partitions) {
-    replicationState.partitionsAltered = replicationState.partitionsAltered + partitions.getEventPartitions().size();
+    replicationState.partitionsAltered += partitions.getEventPartitions().size();
   }
 
   @Override
@@ -141,9 +139,16 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void copierStart(String copierImplementation) {}
 
-  @VisibleForTesting
-  ReplicationState getReplicationState() {
-    return replicationState;
+  List<String> getPartitionKeys() {
+    return Collections.unmodifiableList(replicationState.partitionKeys);
+  }
+
+  int getPartitionsAltered() {
+    return replicationState.partitionsAltered;
+  }
+
+  long getBytesReplicated() {
+    return replicationState.bytesReplicated;
   }
 
 }
