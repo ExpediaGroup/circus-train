@@ -202,6 +202,11 @@ public class S3S3Copier implements Copier {
 
       CopyObjectRequest copyObjectRequest = new CopyObjectRequest(s3ObjectSummary.getBucketName(),
           s3ObjectSummary.getKey(), targetS3Uri.getBucket(), targetKey);
+
+      if (s3s3CopierOptions.getCannedAcl() != null) {
+        copyObjectRequest.withCannedAccessControlList(s3s3CopierOptions.getCannedAcl());
+      }
+
       applyObjectMetadata(copyObjectRequest);
 
       TransferStateChangeListener stateChangeListener = new BytesTransferStateChangeListener(s3ObjectSummary,

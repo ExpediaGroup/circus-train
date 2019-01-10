@@ -39,10 +39,12 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressListener;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.Transfer;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
+import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 import com.hotels.bdp.circustrain.s3mapreducecp.ConfigurationVariable;
 import com.hotels.bdp.circustrain.s3mapreducecp.command.RetriableCommand;
 import com.hotels.bdp.circustrain.s3mapreducecp.io.ThrottledInputStream;
@@ -157,7 +159,15 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
 
     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(input, bufferSize)) {
       PutObjectRequest request = new PutObjectRequest(uploadDescriptor.getBucketName(), uploadDescriptor.getKey(),
-          bufferedInputStream, uploadDescriptor.getMetadata());
+          input, uploadDescriptor.getMetadata());
+
+      String cannedAcl = context.getConfiguration().get(ConfigurationVariable.CANNED_ACL.getName());
+      if (cannedAcl != null) {
+        CannedAccessControlList acl = CannedAclUtils.toCannedAccessControlList(cannedAcl);
+        LOG.debug("Using CannedACL {}", acl.name());
+        request.withCannedAcl(acl);
+      }
+
       // We add 1 to the buffer size as per the com.amazonaws.RequestClientOptions doc
       request.getRequestClientOptions().setReadLimit(bufferSize + 1);
       return transferManager.upload(request);

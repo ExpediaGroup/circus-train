@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.CANNED_ACL;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.COPY_STRATEGY;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.CREDENTIAL_PROVIDER;
 import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOptionsParser.IGNORE_FAILURES;
@@ -56,6 +57,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.codahale.metrics.MetricRegistry;
 
@@ -116,6 +118,7 @@ public class S3MapReduceCpCopierTest {
     when(copierOptions.get(LOG_PATH)).thenReturn("hdfs://path/to/logs/");
     when(copierOptions.get(REGION)).thenReturn("us-east-1");
     when(copierOptions.get(IGNORE_FAILURES)).thenReturn("true");
+    when(copierOptions.get(CANNED_ACL)).thenReturn(CannedAccessControlList.BucketOwnerFullControl.toString());
 
     S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, Collections.<Path> emptyList(),
         replicaDataLocation, copierOptions, executor, metricRegistry);
@@ -139,6 +142,7 @@ public class S3MapReduceCpCopierTest {
     assertThat(options.getLogPath(), is(new Path("hdfs://path/to/logs/")));
     assertThat(options.getRegion(), is(Regions.US_EAST_1.getName()));
     assertThat(options.isIgnoreFailures(), is(true));
+    assertThat(options.getCannedAcl(), is(CannedAccessControlList.BucketOwnerFullControl.toString()));
   }
 
   @Test
