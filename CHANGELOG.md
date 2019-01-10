@@ -1,7 +1,8 @@
 ## TBD
 ### Changed
-* Refactored project to remove checkstyle and findbugs warnings, which does not impact functionality.
+* Refactored project to remove checkstyle and findbugs warnings.
 * Upgraded `hotels-oss-parent` to 2.3.5 (was 2.3.3).
+* Upgraded `housekeeping` to 3.0.1 (was 3.0.0).
 ### Added
 * Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
 * Ability to specify an S3 canned ACL via `copier-options.canned-acl`. See [#99](https://github.com/HotelsDotCom/circus-train/issues/99).
