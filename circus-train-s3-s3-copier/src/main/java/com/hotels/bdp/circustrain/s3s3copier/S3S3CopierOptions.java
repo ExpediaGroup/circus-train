@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
+
+import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 
 public class S3S3CopierOptions {
 
@@ -46,7 +49,12 @@ public class S3S3CopierOptions {
      * {@link ObjectMetadata#setSSEAlgorithm(String)}
      * Whether to enable server side encryption.
      */
-    S3_SERVER_SIDE_ENCRYPTION("s3-server-side-encryption");
+    S3_SERVER_SIDE_ENCRYPTION("s3-server-side-encryption"),
+    /**
+     * {@link com.amazonaws.services.s3.model.CannedAccessControlList}
+     * Optional AWS Canned ACL
+     */
+    CANNED_ACL("canned-acl");
 
     private final String keyName;
 
@@ -99,6 +107,15 @@ public class S3S3CopierOptions {
 
   public Boolean isS3ServerSideEncryption() {
     return MapUtils.getBoolean(copierOptions, Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), false);
+  }
+
+  public CannedAccessControlList getCannedAcl() {
+     String cannedAcl = MapUtils.getString(copierOptions, Keys.CANNED_ACL.keyName(), null);
+     if (cannedAcl != null) {
+       return CannedAclUtils.toCannedAccessControlList(cannedAcl);
+     }
+
+     return null;
   }
 
 }

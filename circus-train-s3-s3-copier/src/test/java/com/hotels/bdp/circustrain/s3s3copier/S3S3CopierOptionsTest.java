@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 
 public class S3S3CopierOptionsTest {
 
@@ -79,6 +81,19 @@ public class S3S3CopierOptionsTest {
   public void defaultS3ServerSideEncryption() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertThat(options.isS3ServerSideEncryption(), is(false));
+  }
+
+  @Test
+  public void getCannedAcl() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.CANNED_ACL.keyName(), CannedAccessControlList.BucketOwnerFullControl.toString());
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.getCannedAcl(), is(CannedAccessControlList.BucketOwnerFullControl));
+  }
+
+  @Test
+  public void getCannedAclDefaultIsNull() throws Exception {
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertNull(options.getCannedAcl());
   }
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.beust.jcommander.converters.URIConverter;
 import com.beust.jcommander.validators.PositiveInteger;
 import com.google.common.collect.ImmutableMap;
 
+import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 import com.hotels.bdp.circustrain.s3mapreducecp.aws.AwsUtil;
 import com.hotels.bdp.circustrain.s3mapreducecp.jcommander.PathConverter;
 import com.hotels.bdp.circustrain.s3mapreducecp.jcommander.PositiveLong;
@@ -134,6 +135,11 @@ public class S3MapReduceCpOptions {
       return this;
     }
 
+    public Builder cannedAcl(String cannedAcl) {
+      options.setCannedAcl(cannedAcl);
+      return this;
+    }
+
     public S3MapReduceCpOptions build() {
       return options;
     }
@@ -203,6 +209,9 @@ public class S3MapReduceCpOptions {
   @Parameter(names = "--uploadBufferSize", description = "Size of the buffer used to upload the stream of data", validateWith = PositiveInteger.class)
   private int uploadBufferSize = ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue();
 
+  @Parameter(names = "--cannedAcl", description = "AWS Canned ACL")
+  private String cannedAcl = ConfigurationVariable.CANNED_ACL.defaultValue();
+
   public S3MapReduceCpOptions() {}
 
   public S3MapReduceCpOptions(S3MapReduceCpOptions options) {
@@ -226,6 +235,7 @@ public class S3MapReduceCpOptions {
     uploadRetryCount = options.uploadRetryCount;
     uploadRetryDelayMs = options.uploadRetryDelayMs;
     uploadBufferSize = options.uploadBufferSize;
+    cannedAcl = options.cannedAcl;
   }
 
   public boolean isHelp() {
@@ -391,6 +401,15 @@ public class S3MapReduceCpOptions {
     this.uploadBufferSize = uploadBufferSize;
   }
 
+  public String getCannedAcl() {
+    return cannedAcl;
+  }
+
+  public void setCannedAcl(String cannedAcl) {
+    CannedAclUtils.toCannedAccessControlList(cannedAcl);
+    this.cannedAcl = cannedAcl;
+  }
+
   public Map<String, String> toMap() {
     ImmutableMap.Builder<String, String> builder = ImmutableMap
         .<String, String> builder()
@@ -415,7 +434,36 @@ public class S3MapReduceCpOptions {
     if (s3EndpointUri != null) {
       builder.put(ConfigurationVariable.S3_ENDPOINT_URI.getName(), s3EndpointUri.toString());
     }
+    if (cannedAcl != null) {
+      builder.put(ConfigurationVariable.CANNED_ACL.getName(), cannedAcl);
+    }
     return builder.build();
   }
 
+  @Override
+  public String toString() {
+    return "S3MapReduceCpOptions{" +
+            "help=" + help +
+            ", async=" + async +
+            ", sources=" + sources +
+            ", target=" + target +
+            ", credentialsProvider=" + credentialsProvider +
+            ", multipartUploadPartSize=" + multipartUploadPartSize +
+            ", s3ServerSideEncryption=" + s3ServerSideEncryption +
+            ", storageClass='" + storageClass + '\'' +
+            ", maxBandwidth=" + maxBandwidth +
+            ", numberOfUploadWorkers=" + numberOfUploadWorkers +
+            ", multipartUploadThreshold=" + multipartUploadThreshold +
+            ", maxMaps=" + maxMaps +
+            ", copyStrategy='" + copyStrategy + '\'' +
+            ", logPath=" + logPath +
+            ", region='" + region + '\'' +
+            ", ignoreFailures=" + ignoreFailures +
+            ", s3EndpointUri=" + s3EndpointUri +
+            ", uploadRetryCount=" + uploadRetryCount +
+            ", uploadRetryDelayMs=" + uploadRetryDelayMs +
+            ", uploadBufferSize=" + uploadBufferSize +
+            ", cannedAcl='" + cannedAcl + '\'' +
+            '}';
+  }
 }
