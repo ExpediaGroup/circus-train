@@ -1,3 +1,7 @@
+## TBD
+### Changed
+* Upgraded `jackson` version to 2.9.8 (was 2.9.7).
+
 ## 13.2.0 - 2019-01-11
 ### Added
 * Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
