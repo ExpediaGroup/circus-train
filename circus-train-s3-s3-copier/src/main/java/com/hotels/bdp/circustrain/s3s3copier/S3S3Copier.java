@@ -61,7 +61,7 @@ public class S3S3Copier implements Copier {
     private final AmazonS3URI targetS3Uri;
     private final String targetKey;
 
-    public BytesTransferStateChangeListener(
+    private BytesTransferStateChangeListener(
         S3ObjectSummary s3ObjectSummary,
         AmazonS3URI targetS3Uri,
         String targetKey) {

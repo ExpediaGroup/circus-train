@@ -70,8 +70,6 @@ public class LibJarDeployer {
     URL[] libjars = GenericOptionsParser.getLibJars(conf);
     if (libjars != null && libjars.length > 0) {
       AccessController.doPrivileged(new PriviledgedClassLoader(conf, libjars));
-
-      // new PriviledgedClassLoader(conf, libjars).run();
     }
   }
 

@@ -159,7 +159,7 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
 
     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(input, bufferSize)) {
       PutObjectRequest request = new PutObjectRequest(uploadDescriptor.getBucketName(), uploadDescriptor.getKey(),
-          input, uploadDescriptor.getMetadata());
+          bufferedInputStream, uploadDescriptor.getMetadata());
 
       String cannedAcl = context.getConfiguration().get(ConfigurationVariable.CANNED_ACL.getName());
       if (cannedAcl != null) {
