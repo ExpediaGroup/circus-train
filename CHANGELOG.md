@@ -2,6 +2,7 @@
 ### Added
 * Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
 * Ability to specify an S3 canned ACL via `copier-options.canned-acl`. See [#99](https://github.com/HotelsDotCom/circus-train/issues/99).
+* Support for getting AWS Credentials within a FARGATE instance in ECS.
 
 ### Fixed
 * Increased version (1.2.4) of hcommon-hive-metastore to fix an issue where the wrong exception was being propagated in the compatibility layer.
