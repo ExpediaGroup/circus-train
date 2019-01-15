@@ -1,6 +1,6 @@
 ## TBD
 ### Added
-* Support for getting AWS Credentials within a FARGATE instance in ECS.
+* Support for getting AWS Credentials within a FARGATE instance in ECS. See [#109](https://github.com/HotelsDotCom/circus-train/issues/109).
 
 ## 13.2.0 - 2019-01-11
 ### Added
