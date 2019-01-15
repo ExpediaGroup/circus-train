@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,23 @@ package com.hotels.bdp.circustrain.aws;
 import org.apache.hadoop.conf.Configuration;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 
 /**
  * AWS credentials provider chain that looks for credentials in this order:
  * <ul>
  * <li>Credentials from Hadoop configuration set via JCE KS - if a JCE KS path or Hadoop {@code Configuration} is
  * provided</li>
- * <li>Instance profile credentials delivered through the Amazon EC2 metadata service</li>
+ * <li>{@link EC2ContainerCredentialsProviderWrapper} that loads credentials from an Amazon Container (e.g. EC2)</li>
  * </ul>
  *
  * @see JceksAWSCredentialProvider
- * @see InstanceProfileCredentialsProvider
+ * @see EC2ContainerCredentialsProviderWrapper
  */
 public class HadoopAWSCredentialProviderChain extends AWSCredentialsProviderChain {
 
   public HadoopAWSCredentialProviderChain() {
-    super(InstanceProfileCredentialsProvider.getInstance());
+    super(new EC2ContainerCredentialsProviderWrapper());
   }
 
   public HadoopAWSCredentialProviderChain(String credentialProviderPath) {
@@ -42,7 +42,7 @@ public class HadoopAWSCredentialProviderChain extends AWSCredentialsProviderChai
   }
 
   public HadoopAWSCredentialProviderChain(Configuration conf) {
-    super(new JceksAWSCredentialProvider(conf), InstanceProfileCredentialsProvider.getInstance());
+    super(new JceksAWSCredentialProvider(conf), new EC2ContainerCredentialsProviderWrapper());
   }
 
 }
