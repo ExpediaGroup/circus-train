@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,8 @@ class ComparisonToolHelp {
         .append(System.lineSeparator())
         .append(TAB)
         .append("For more information and help please refer to ")
-        .append(
-            "https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-tool/circus-train-comparison-tool/README.md");
+        .append("https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-tool/"
+            + "circus-train-comparison-tool/README.md");
     return help.toString();
   }
 

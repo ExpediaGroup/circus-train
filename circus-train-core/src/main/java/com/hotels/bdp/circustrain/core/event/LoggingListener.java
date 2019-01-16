@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 package com.hotels.bdp.circustrain.core.event;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import com.hotels.bdp.circustrain.api.CompletionCode;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
@@ -50,9 +49,8 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   private EventReplicaCatalog replicaCatalog;
   private ReplicationState replicationState = new ReplicationState();
 
-  @VisibleForTesting
-  class ReplicationState {
-    List<String> partitionKeys;
+  private static class ReplicationState {
+    List<String> partitionKeys = Collections.emptyList();
     int partitionsAltered;
     long bytesReplicated;
   }
@@ -60,24 +58,33 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     replicationState = new ReplicationState();
-    LOG.info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
-        tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName());
+    if (sourceCatalog != null && replicaCatalog != null) {
+      LOG
+          .info("[{}] Attempting to replicate '{}:{}' to '{}:{}'", eventId, sourceCatalog.getName(),
+              tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName());
+    }
   }
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
     String amount = transferAmount(replicationState.partitionKeys, replicationState.partitionsAltered);
-    LOG.info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
-        sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName(), replicationState.bytesReplicated);
+    if (sourceCatalog != null && replicaCatalog != null) {
+      LOG
+          .info("[{}] Successfully replicated {} of '{}:{}' to '{}:{}' ({} bytes)", eventId, amount,
+              sourceCatalog.getName(), tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName(), replicationState.bytesReplicated);
+    }
   }
 
   @Override
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    LOG.error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
-        tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
-        tableReplication.getQualifiedReplicaName(), t.getMessage());
+    if (sourceCatalog != null && replicaCatalog != null) {
+      LOG
+          .error("[{}] Failed to replicate '{}:{}' to '{}:{}' with error '{}'", eventId, sourceCatalog.getName(),
+              tableReplication.getSourceTable().getQualifiedName(), replicaCatalog.getName(),
+              tableReplication.getQualifiedReplicaName(), t.getMessage());
+    }
   }
 
   private static String transferAmount(List<String> partitionKeys, int partitionsAltered) {
@@ -132,9 +139,16 @@ public class LoggingListener implements TableReplicationListener, LocomotiveList
   @Override
   public void copierStart(String copierImplementation) {}
 
-  @VisibleForTesting
-  ReplicationState getReplicationState() {
-    return replicationState;
+  List<String> getPartitionKeys() {
+    return Collections.unmodifiableList(replicationState.partitionKeys);
+  }
+
+  int getPartitionsAltered() {
+    return replicationState.partitionsAltered;
+  }
+
+  long getBytesReplicated() {
+    return replicationState.bytesReplicated;
   }
 
 }

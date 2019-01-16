@@ -41,7 +41,7 @@ public class HqlTranslator {
   private final Map<String, List<TableTranslation>> mappings;
 
   private static List<TableTranslation> buildTableTranslations(TableReplication tableReplication) {
-    ImmutableList.Builder<TableTranslation> replicaMappings = ImmutableList.<TableTranslation> builder();
+    ImmutableList.Builder<TableTranslation> replicaMappings = ImmutableList.<TableTranslation>builder();
     for (Entry<String, String> mapping : tableReplication.getTableMappings().entrySet()) {
       List<String> source = DOT_SPLITTER.splitToList(mapping.getKey());
       if (source.size() != 2) {
@@ -58,7 +58,7 @@ public class HqlTranslator {
 
   @Autowired
   public HqlTranslator(TableReplications tableReplications) {
-    Builder<String, List<TableTranslation>> mappingsBuilder = ImmutableMap.<String, List<TableTranslation>> builder();
+    Builder<String, List<TableTranslation>> mappingsBuilder = ImmutableMap.<String, List<TableTranslation>>builder();
     for (TableReplication tableReplication : tableReplications.getTableReplications()) {
       if (tableReplication.getTableMappings() == null || tableReplication.getTableMappings().isEmpty()) {
         continue;

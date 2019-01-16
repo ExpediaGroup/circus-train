@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ public class PropertyExtensionPackageProvider implements ExtensionPackageProvide
   public Set<String> getPackageNames(ConfigurableEnvironment env) {
     @SuppressWarnings("unchecked")
     Set<String> packageNames = env.getProperty("extension-packages", Set.class);
-    return packageNames == null ? Collections.<String> emptySet() : packageNames;
+    return packageNames == null ? Collections.<String>emptySet() : packageNames;
   }
 }

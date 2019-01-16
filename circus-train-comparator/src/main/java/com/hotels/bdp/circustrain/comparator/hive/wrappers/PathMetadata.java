@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.comparator.hive.wrappers;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.fs.FileChecksum;
@@ -71,7 +72,11 @@ public class PathMetadata implements Serializable {
   }
 
   public byte[] getChecksum() {
-    return checksum;
+    if (checksum == null) {
+      return null;
+    } else {
+      return Arrays.copyOf(checksum, checksum.length);
+    }
   }
 
   public List<PathMetadata> getChildrenMetadata() {

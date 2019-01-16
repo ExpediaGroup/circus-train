@@ -62,23 +62,25 @@ public class ComparisonTool {
     logVersionInfo();
 
     try {
-      SpringApplication.exit(new SpringApplicationBuilder(ComparisonTool.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:" + Modules.REPLICATION)
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .bannerMode(Mode.OFF)
-          .registerShutdownHook(true)
-          .build()
-          .run(args));
+      SpringApplication
+          .exit(new SpringApplicationBuilder(ComparisonTool.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:" + Modules.REPLICATION)
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .bannerMode(Mode.OFF)
+              .registerShutdownHook(true)
+              .build()
+              .run(args));
     } catch (BeanCreationException e) {
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printComparisonToolHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printComparisonToolHelp(((BindException) mostSpecificCause).getAllErrors());
         throw e;
       }
       if (e.getMostSpecificCause() instanceof IllegalArgumentException) {
         LOG.error(e.getMessage(), e);
-        printComparisonToolHelp(Collections.<ObjectError> emptyList());
+        printComparisonToolHelp(Collections.<ObjectError>emptyList());
       }
     }
   }

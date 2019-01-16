@@ -89,8 +89,7 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
     "com.hotels.bdp.circustrain.housekeeping",
     "com.hotels.bdp.circustrain.metrics.conf",
     "com.hotels.bdp.circustrain.s3mapreducecpcopier",
-    "com.hotels.bdp.circustrain.s3s3copier"
-})
+    "com.hotels.bdp.circustrain.s3s3copier" })
 public class CircusTrain {
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrain.class);
 
@@ -119,8 +118,9 @@ public class CircusTrain {
       printCircusTrainHelp(e.getErrors());
     } catch (BeanCreationException e) {
       LOG.error(e.getMessage(), e);
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printCircusTrainHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printCircusTrainHelp(((BindException) mostSpecificCause).getAllErrors());
       }
     }
 

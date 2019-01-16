@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.mapred.UniformSizeInputFormat} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/UniformSizeInputFormat.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/UniformSizeInputFormat.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +88,9 @@ public class UniformSizeInputFormat extends InputFormat<Text, CopyListingFileSta
 
     final Path listingFilePath = getListingFilePath(configuration);
 
-    LOG.debug("Average bytes per map: {}, Number of maps: {}, total size: {}", nBytesPerSplit, numSplits,
-        totalSizeBytes);
+    LOG
+        .debug("Average bytes per map: {}, Number of maps: {}, total size: {}", nBytesPerSplit, numSplits,
+            totalSizeBytes);
     SequenceFile.Reader reader = null;
     try {
       reader = getListingFileReader(configuration);
@@ -125,7 +127,9 @@ public class UniformSizeInputFormat extends InputFormat<Text, CopyListingFileSta
   private static Path getListingFilePath(Configuration configuration) {
     final String listingFilePathString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
 
-    assert !listingFilePathString.equals("") : "Couldn't find listing file. Invalid input.";
+    if ("".equals(listingFilePathString)) {
+      throw new IllegalArgumentException("Couldn't find listing file. Invalid input.");
+    }
     return new Path(listingFilePathString);
   }
 

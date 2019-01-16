@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.api.conf;
 
+import java.util.Locale;
+
 import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 
@@ -70,7 +72,7 @@ public class SourceTable {
   }
 
   public String getQualifiedName() {
-    return databaseName.toLowerCase() + "." + tableName.toLowerCase();
+    return databaseName.toLowerCase(Locale.ROOT) + "." + tableName.toLowerCase(Locale.ROOT);
   }
 
   public boolean isGeneratePartitionFilter() {

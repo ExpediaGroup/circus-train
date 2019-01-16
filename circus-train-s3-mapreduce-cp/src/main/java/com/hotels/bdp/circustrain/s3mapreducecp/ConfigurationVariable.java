@@ -26,6 +26,8 @@ import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
 
 final class Constants {
   static final TransferManagerConfiguration DEFAULT_TRANSFER_MANAGER_CONFIGURATION = new TransferManagerConfiguration();
+
+  private Constants() {}
 }
 
 public enum ConfigurationVariable {
@@ -73,11 +75,11 @@ public enum ConfigurationVariable {
   }
 
   public int defaultIntValue() {
-    return Integer.valueOf(defaultValue);
+    return Integer.parseInt(defaultValue);
   }
 
   public long defaultLongValue() {
-    return Long.valueOf(defaultValue);
+    return Long.parseLong(defaultValue);
   }
 
   public boolean defaultBooleanValue() {

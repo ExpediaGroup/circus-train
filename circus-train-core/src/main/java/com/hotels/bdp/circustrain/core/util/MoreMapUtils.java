@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
@@ -66,7 +67,7 @@ public final class MoreMapUtils {
         if (enumClass.isAssignableFrom(input.getClass())) {
           return enumClass.cast(input);
         }
-        return Enum.valueOf(enumClass, input.toString().trim().toUpperCase());
+        return Enum.valueOf(enumClass, input.toString().trim().toUpperCase(Locale.ROOT));
       }
     });
   }

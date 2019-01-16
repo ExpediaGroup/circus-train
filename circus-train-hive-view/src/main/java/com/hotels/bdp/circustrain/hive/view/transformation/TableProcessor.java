@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,8 @@ public class TableProcessor implements NodeProcessor {
     throws SemanticException {
     ASTNode astNode = (ASTNode) node;
     if (astNode.getToken() != null && astNode.getToken().getText() != null) {
-      switch (astNode.getToken().getText()) {
-      case "TOK_TABNAME":
+      if ("TOK_TABNAME".equals(astNode.getToken().getText())) {
         tables.add(extractTableName(astNode));
-        break;
       }
     }
     return null;

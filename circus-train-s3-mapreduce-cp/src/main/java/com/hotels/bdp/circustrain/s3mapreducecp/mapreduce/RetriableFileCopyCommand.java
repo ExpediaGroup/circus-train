@@ -1,9 +1,10 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc and Apache Hadoop contributors.
+ * Copyright (C) 2016-2019 Expedia Inc and Apache Hadoop contributors.
  *
  * Based on {@code org.apache.hadoop.tools.mapred.RetriableFileCopyCommand} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/RetriableFileCopyCommand.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/RetriableFileCopyCommand.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +138,8 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
   private static ThrottledInputStream getInputStream(Path path, Configuration conf) throws IOException {
     try {
       FileSystem fs = path.getFileSystem(conf);
-      long bandwidthMB = conf.getInt(ConfigurationVariable.MAX_BANDWIDTH.getName(),
-          ConfigurationVariable.MAX_BANDWIDTH.defaultIntValue());
+      long bandwidthMB = conf
+          .getInt(ConfigurationVariable.MAX_BANDWIDTH.getName(), ConfigurationVariable.MAX_BANDWIDTH.defaultIntValue());
       FSDataInputStream in = fs.open(path);
       return new ThrottledInputStream(in, bandwidthMB * 1024 * 1024);
     } catch (IOException e) {
@@ -155,10 +156,10 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
       bufferSize = context.getConfiguration().getInt(IO_FILE_BUFFER_SIZE_KEY, IO_FILE_BUFFER_SIZE_DEFAULT);
     }
     LOG.info("Buffer of the input stream is {} for file {}", bufferSize, uploadDescriptor.getSource());
-    input = new BufferedInputStream(input, bufferSize);
-    try {
+
+    try (BufferedInputStream bufferedInputStream = new BufferedInputStream(input, bufferSize)) {
       PutObjectRequest request = new PutObjectRequest(uploadDescriptor.getBucketName(), uploadDescriptor.getKey(),
-          input, uploadDescriptor.getMetadata());
+          bufferedInputStream, uploadDescriptor.getMetadata());
 
       String cannedAcl = context.getConfiguration().get(ConfigurationVariable.CANNED_ACL.getName());
       if (cannedAcl != null) {
@@ -170,7 +171,7 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
       // We add 1 to the buffer size as per the com.amazonaws.RequestClientOptions doc
       request.getRequestClientOptions().setReadLimit(bufferSize + 1);
       return transferManager.upload(request);
-    } catch (Exception e) {
+    } catch (AmazonClientException | IOException e) {
       throw new CopyReadException(e);
     }
   }

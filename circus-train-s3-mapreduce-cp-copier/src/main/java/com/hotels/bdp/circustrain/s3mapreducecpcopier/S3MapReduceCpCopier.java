@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.apache.hadoop.security.alias.CredentialProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
@@ -150,17 +150,7 @@ public class S3MapReduceCpCopier implements Copier {
 
   private void registerRunningJobMetrics(final Job job, final Enum<?> counter) {
     registry.remove(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name());
-    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new Gauge<Long>() {
-      @Override
-      public Long getValue() {
-        try {
-          return job.getCounters().findCounter(counter).getValue();
-        } catch (IOException e) {
-          LOG.warn("Could not get value for counter " + counter.name(), e);
-        }
-        return 0L;
-      }
-    });
+    registry.register(RunningMetrics.S3_MAPREDUCE_CP_BYTES_REPLICATED.name(), new JobCounterGauge(job, counter));
 
   }
 

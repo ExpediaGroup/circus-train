@@ -76,7 +76,7 @@ public class SchemaCopier {
       temporaryDirectory = Files.createTempDirectory("avro-schema-download-folder");
       temporaryDirectory.toFile().deleteOnExit();
     } catch (IOException e) {
-      throw new CircusTrainException("Couldn't create temporaryDirectory " + temporaryDirectory, e);
+      throw new CircusTrainException("Couldn't create temporaryDirectory in the default temporary directory", e);
     }
     return temporaryDirectory;
   }

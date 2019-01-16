@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,4 +21,6 @@ class GCPConstants {
   static final String GCP_KEYFILE_CACHED_LOCATION = "google.cloud.auth.service.account.json.keyfile";
   static final String GS_FS_IMPLEMENTATION = "fs.gs.impl";
   static final String GS_ABSTRACT_FS = "fs.AbstractFileSystem.gs.impl";
+
+  private GCPConstants() {}
 }

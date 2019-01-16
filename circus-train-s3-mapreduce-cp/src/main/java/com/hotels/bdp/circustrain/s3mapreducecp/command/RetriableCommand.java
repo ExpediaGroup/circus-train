@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.util.RetriableCommand} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/util/RetriableCommand.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/util/RetriableCommand.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +39,8 @@ public abstract class RetriableCommand<T> {
   private static final long DELAY_MILLISECONDS = 500;
   private static final int MAX_RETRIES = 3;
 
-  private RetryPolicy retryPolicy = RetryPolicies.exponentialBackoffRetry(MAX_RETRIES, DELAY_MILLISECONDS,
-      TimeUnit.MILLISECONDS);
+  private RetryPolicy retryPolicy = RetryPolicies
+      .exponentialBackoffRetry(MAX_RETRIES, DELAY_MILLISECONDS, TimeUnit.MILLISECONDS);
   protected String description;
 
   /**

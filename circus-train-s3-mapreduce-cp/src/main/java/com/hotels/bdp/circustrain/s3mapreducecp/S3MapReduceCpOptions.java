@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.s3mapreducecp;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
@@ -42,7 +43,7 @@ public class S3MapReduceCpOptions {
 
   // As we shade the AWS SDK, we can't expose AWS classes in the public classes/methods.
   public static class Builder {
-    S3MapReduceCpOptions options;
+    private final S3MapReduceCpOptions options;
 
     private Builder(List<Path> sources, URI target) {
       options = new S3MapReduceCpOptions();
@@ -295,11 +296,11 @@ public class S3MapReduceCpOptions {
   }
 
   public String getStorageClass() {
-    return storageClass.toString();
+    return storageClass;
   }
 
   void setStorageClass(String storageClass) {
-    storageClass = storageClass.toUpperCase();
+    storageClass = storageClass.toUpperCase(Locale.ROOT);
     AwsUtil.toStorageClass(storageClass);
     this.storageClass = storageClass;
   }
@@ -412,7 +413,7 @@ public class S3MapReduceCpOptions {
 
   public Map<String, String> toMap() {
     ImmutableMap.Builder<String, String> builder = ImmutableMap
-        .<String, String> builder()
+        .<String, String>builder()
         .put(ConfigurationVariable.MINIMUM_UPLOAD_PART_SIZE.getName(), String.valueOf(multipartUploadPartSize))
         .put(ConfigurationVariable.S3_SERVER_SIDE_ENCRYPTION.getName(), String.valueOf(s3ServerSideEncryption))
         .put(ConfigurationVariable.STORAGE_CLASS.getName(), storageClass)
@@ -443,27 +444,27 @@ public class S3MapReduceCpOptions {
   @Override
   public String toString() {
     return "S3MapReduceCpOptions{" +
-            "help=" + help +
-            ", async=" + async +
-            ", sources=" + sources +
-            ", target=" + target +
-            ", credentialsProvider=" + credentialsProvider +
-            ", multipartUploadPartSize=" + multipartUploadPartSize +
-            ", s3ServerSideEncryption=" + s3ServerSideEncryption +
-            ", storageClass='" + storageClass + '\'' +
-            ", maxBandwidth=" + maxBandwidth +
-            ", numberOfUploadWorkers=" + numberOfUploadWorkers +
-            ", multipartUploadThreshold=" + multipartUploadThreshold +
-            ", maxMaps=" + maxMaps +
-            ", copyStrategy='" + copyStrategy + '\'' +
-            ", logPath=" + logPath +
-            ", region='" + region + '\'' +
-            ", ignoreFailures=" + ignoreFailures +
-            ", s3EndpointUri=" + s3EndpointUri +
-            ", uploadRetryCount=" + uploadRetryCount +
-            ", uploadRetryDelayMs=" + uploadRetryDelayMs +
-            ", uploadBufferSize=" + uploadBufferSize +
-            ", cannedAcl='" + cannedAcl + '\'' +
-            '}';
+        "help=" + help +
+        ", async=" + async +
+        ", sources=" + sources +
+        ", target=" + target +
+        ", credentialsProvider=" + credentialsProvider +
+        ", multipartUploadPartSize=" + multipartUploadPartSize +
+        ", s3ServerSideEncryption=" + s3ServerSideEncryption +
+        ", storageClass='" + storageClass + '\'' +
+        ", maxBandwidth=" + maxBandwidth +
+        ", numberOfUploadWorkers=" + numberOfUploadWorkers +
+        ", multipartUploadThreshold=" + multipartUploadThreshold +
+        ", maxMaps=" + maxMaps +
+        ", copyStrategy='" + copyStrategy + '\'' +
+        ", logPath=" + logPath +
+        ", region='" + region + '\'' +
+        ", ignoreFailures=" + ignoreFailures +
+        ", s3EndpointUri=" + s3EndpointUri +
+        ", uploadRetryCount=" + uploadRetryCount +
+        ", uploadRetryDelayMs=" + uploadRetryDelayMs +
+        ", uploadBufferSize=" + uploadBufferSize +
+        ", cannedAcl='" + cannedAcl + '\'' +
+        '}';
   }
 }

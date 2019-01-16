@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.util.DistCpUtils} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/util/DistCpUtils.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/util/DistCpUtils.java
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +44,7 @@ public final class PathUtil {
   public static String getRelativePath(Path sourceRootPath, Path childPath) {
     String childPathString = childPath.toUri().getPath();
     String sourceRootPathString = sourceRootPath.toUri().getPath();
-    return sourceRootPathString.equals("/") ? childPathString
+    return "/".equals(sourceRootPathString) ? childPathString
         : childPathString.substring(sourceRootPathString.length());
   }
 

@@ -48,6 +48,8 @@ public class EventUtils {
 
   public static final String EVENT_ID_UNAVAILABLE = "event-id-unavailable";
 
+  private EventUtils() {}
+  
   public static List<URI> toUris(List<Path> paths) {
     if (paths == null) {
       return null;

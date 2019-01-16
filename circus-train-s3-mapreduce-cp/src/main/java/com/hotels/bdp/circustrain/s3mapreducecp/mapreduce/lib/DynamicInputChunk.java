@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.mapred.lib.DynamicInputChunk} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/mapred/lib/DynamicInputChunk.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/mapred/lib/DynamicInputChunk.java
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +55,7 @@ class DynamicInputChunk<K, V> {
   private static int numChunksLeft = -1; // Un-initialized before 1st dir-scan.
   private static FileSystem fs;
 
-  private Path chunkFilePath;
+  private final Path chunkFilePath;
   private SequenceFileRecordReader<K, V> reader;
   private SequenceFile.Writer writer;
 
@@ -68,7 +69,9 @@ class DynamicInputChunk<K, V> {
 
   private static String getListingFilePath(Configuration configuration) {
     final String listingFileString = configuration.get(S3MapReduceCpConstants.CONF_LABEL_LISTING_FILE_PATH, "");
-    assert !listingFileString.equals("") : "Listing file not found.";
+    if ("".equals(listingFileString)) {
+      throw new IllegalArgumentException("Listing file not found");
+    }
     return listingFileString;
   }
 
@@ -86,8 +89,9 @@ class DynamicInputChunk<K, V> {
   }
 
   private void openForWrite() throws IOException {
-    writer = SequenceFile.createWriter(chunkFilePath.getFileSystem(configuration), configuration, chunkFilePath,
-        Text.class, CopyListingFileStatus.class, SequenceFile.CompressionType.NONE);
+    writer = SequenceFile
+        .createWriter(chunkFilePath.getFileSystem(configuration), configuration, chunkFilePath, Text.class,
+            CopyListingFileStatus.class, SequenceFile.CompressionType.NONE);
 
   }
 
@@ -147,8 +151,9 @@ class DynamicInputChunk<K, V> {
 
   private void openForRead(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     reader = new SequenceFileRecordReader<>();
-    reader.initialize(new FileSplit(chunkFilePath, 0, getFileSize(chunkFilePath, configuration), null),
-        taskAttemptContext);
+    reader
+        .initialize(new FileSplit(chunkFilePath, 0, getFileSize(chunkFilePath, configuration), null),
+            taskAttemptContext);
   }
 
   /**
@@ -215,7 +220,7 @@ class DynamicInputChunk<K, V> {
 
   static FileStatus[] getListOfChunkFiles() throws IOException {
     Path chunkFilePattern = new Path(chunkRootPath, chunkFilePrefix + "*");
-    FileStatus chunkFiles[] = fs.globStatus(chunkFilePattern);
+    FileStatus[] chunkFiles = fs.globStatus(chunkFilePattern);
     numChunksLeft = chunkFiles.length;
     return chunkFiles;
   }

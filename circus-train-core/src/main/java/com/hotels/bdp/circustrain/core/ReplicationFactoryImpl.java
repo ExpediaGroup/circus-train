@@ -86,10 +86,10 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
     Replication replication = null;
     if (partitionKeys == null || partitionKeys.isEmpty()) {
       replication = createUnpartitionedTableReplication(tableReplication, source, replica, sourceDatabaseName,
-          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation, replication);
+          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation);
     } else {
       replication = createPartitionedTableReplication(tableReplication, source, replica, sourceDatabaseName,
-          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation, replication);
+          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation);
     }
     return replication;
   }
@@ -102,8 +102,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       String sourceTableName,
       String replicaDatabaseName,
       String replicaTableName,
-      String replicaTableLocation,
-      Replication replication) {
+      String replicaTableLocation) {
+    Replication replication = null;
     PartitionPredicate partitionPredicate = partitionPredicateFactory.newInstance(tableReplication);
     switch (tableReplication.getReplicationMode()) {
     case METADATA_MIRROR:
@@ -136,8 +136,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       String sourceTableName,
       String replicaDatabaseName,
       String replicaTableName,
-      String replicaTableLocation,
-      Replication replication) {
+      String replicaTableLocation) {
+    Replication replication = null;
     switch (tableReplication.getReplicationMode()) {
     case METADATA_MIRROR:
       replication = new UnpartitionedTableMetadataMirrorReplication(sourceDatabaseName, sourceTableName, source,
@@ -167,8 +167,9 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
     TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(tableReplication);
     if (tableReplication.getReplicationMode() != ReplicationMode.METADATA_MIRROR
         && MetaStoreUtils.isView(sourceTableAndStatistics.getTable())) {
-      throw new CircusTrainException(String.format("Cannot replicate view %s. Only %s is supported for views",
-          tableReplication.getSourceTable().getQualifiedName(), ReplicationMode.METADATA_MIRROR.name()));
+      throw new CircusTrainException(String
+          .format("Cannot replicate view %s. Only %s is supported for views",
+              tableReplication.getSourceTable().getQualifiedName(), ReplicationMode.METADATA_MIRROR.name()));
     }
   }
 

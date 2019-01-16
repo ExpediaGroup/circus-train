@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public final class AWSConstants {
   public static final String FS_PROTOCOL_S3 = "s3";
   public static final String FS_PROTOCOL_S3N = "s3n";
   public static final String FS_PROTOCOL_S3A = "s3a";
-  public static final String[] S3_FS_PROTOCOLS = { FS_PROTOCOL_S3, FS_PROTOCOL_S3N, FS_PROTOCOL_S3A };
+  static final String[] S3_FS_PROTOCOLS = { FS_PROTOCOL_S3, FS_PROTOCOL_S3N, FS_PROTOCOL_S3A };
 
   private AWSConstants() {}
 }

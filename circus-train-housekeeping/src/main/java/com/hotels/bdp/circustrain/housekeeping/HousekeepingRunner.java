@@ -67,7 +67,7 @@ class HousekeepingRunner implements ApplicationRunner {
       throw e;
     } finally {
       Map<String, Long> metricsMap = ImmutableMap
-          .<String, Long> builder()
+          .<String, Long>builder()
           .put("housekeeping", completionCode.getCode())
           .build();
       metricSender.send(metricsMap);

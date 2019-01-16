@@ -44,7 +44,8 @@ public class ViewTransformation implements TableTransformation {
   private static final Logger LOG = LoggerFactory.getLogger(ViewTransformation.class);
 
   @VisibleForTesting
-  final static String SKIP_TABLE_EXIST_CHECKS = "com.hotels.bdp.circustrain.hive.view.transformation.ViewTransformation.skip_table_exist_checks";
+  final static String SKIP_TABLE_EXIST_CHECKS = "com.hotels.bdp.circustrain.hive.view.transformation."
+      + "ViewTransformation.skip_table_exist_checks";
 
   private final HiveConf replicaHiveConf;
   private final HqlTranslator hqlTranslator;
@@ -76,8 +77,9 @@ public class ViewTransformation implements TableTransformation {
     transformedView.setViewExpandedText(expandedHql);
 
     if (!replicaHiveConf.getBoolean(SKIP_TABLE_EXIST_CHECKS, false)) {
-      LOG.info("Validating that tables used by the view {}.{} exist in the replica catalog", table.getDbName(),
-          table.getTableName());
+      LOG
+          .info("Validating that tables used by the view {}.{} exist in the replica catalog", table.getDbName(),
+              table.getTableName());
       validateReferencedTables(transformedView);
     }
 
@@ -98,8 +100,8 @@ public class ViewTransformation implements TableTransformation {
           String message = String.format("Table or view %s does not exists in replica catalog", replicaTable);
           throw new CircusTrainException(message, e);
         } catch (Exception e) {
-          String message = String.format("Unable to validate tables used by view %s.%s", view.getDbName(),
-              view.getTableName());
+          String message = String
+              .format("Unable to validate tables used by view %s.%s", view.getDbName(), view.getTableName());
           throw new CircusTrainException(message, e);
         }
       }

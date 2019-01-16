@@ -3,7 +3,8 @@
  *
  * Based on {@code org.apache.hadoop.tools.util.DistCpUtils} from Hadoop DistCp 2.7.1:
  *
- * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/apache/hadoop/tools/util/DistCpUtils.java
+ * https://github.com/apache/hadoop/blob/release-2.7.1/hadoop-tools/hadoop-distcp/src/main/java/org/
+ * apache/hadoop/tools/util/DistCpUtils.java
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +27,12 @@ import java.text.DecimalFormat;
  */
 public class BytesFormatter {
 
+  private BytesFormatter() {}
+
   /**
    * String utility to convert a number-of-bytes to human readable format.
    */
-  private static ThreadLocal<DecimalFormat> FORMATTER = new ThreadLocal<DecimalFormat>() {
+  private static ThreadLocal<DecimalFormat> formatter = new ThreadLocal<DecimalFormat>() {
     @Override
     protected DecimalFormat initialValue() {
       return new DecimalFormat("0.0");
@@ -37,12 +40,12 @@ public class BytesFormatter {
   };
 
   public static DecimalFormat getFormatter() {
-    return FORMATTER.get();
+    return formatter.get();
   }
 
   public static String getStringDescriptionFor(long nBytes) {
 
-    char units[] = { 'B', 'K', 'M', 'G', 'T', 'P' };
+    char[] units = { 'B', 'K', 'M', 'G', 'T', 'P' };
 
     double current = nBytes;
     double prev = current;

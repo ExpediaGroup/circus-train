@@ -3,7 +3,8 @@
  *
  * The method PropertyComparator#get(T,String) is a copy of:
  *
- * https://github.com/spring-projects/spring-integration/blob/4.3.x/spring-integration-test/src/main/java/org/springframework/integration/test/util/TestUtils.java#L61
+ * https://github.com/spring-projects/spring-integration/blob/4.3.x/spring-integration-test/src/main/java/org/
+ * springframework/integration/test/util/TestUtils.java#L61
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

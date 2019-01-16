@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,18 +58,20 @@ public class FilterTool {
     logVersionInfo();
 
     try {
-      SpringApplication.exit(new SpringApplicationBuilder(FilterTool.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:" + Modules.REPLICATION)
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .bannerMode(Mode.OFF)
-          .registerShutdownHook(true)
-          .build()
-          .run(args));
+      SpringApplication
+          .exit(new SpringApplicationBuilder(FilterTool.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:" + Modules.REPLICATION)
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .bannerMode(Mode.OFF)
+              .registerShutdownHook(true)
+              .build()
+              .run(args));
     } catch (BeanCreationException e) {
-      if (e.getMostSpecificCause() instanceof BindException) {
-        printFilterToolHelp(((BindException) e.getMostSpecificCause()).getAllErrors());
+      Throwable mostSpecificCause = e.getMostSpecificCause();
+      if (mostSpecificCause instanceof BindException) {
+        printFilterToolHelp(((BindException) mostSpecificCause).getAllErrors());
       }
       throw e;
     }
