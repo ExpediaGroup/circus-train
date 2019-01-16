@@ -157,9 +157,11 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
     }
     LOG.info("Buffer of the input stream is {} for file {}", bufferSize, uploadDescriptor.getSource());
 
-    try (BufferedInputStream bufferedInputStream = new BufferedInputStream(input, bufferSize)) {
+    // input stream should not be closed; transfer manager will do it
+    input = new BufferedInputStream(input, bufferSize);
+    try {
       PutObjectRequest request = new PutObjectRequest(uploadDescriptor.getBucketName(), uploadDescriptor.getKey(),
-          bufferedInputStream, uploadDescriptor.getMetadata());
+          input, uploadDescriptor.getMetadata());
 
       String cannedAcl = context.getConfiguration().get(ConfigurationVariable.CANNED_ACL.getName());
       if (cannedAcl != null) {
@@ -171,7 +173,7 @@ public class RetriableFileCopyCommand extends RetriableCommand<Long> {
       // We add 1 to the buffer size as per the com.amazonaws.RequestClientOptions doc
       request.getRequestClientOptions().setReadLimit(bufferSize + 1);
       return transferManager.upload(request);
-    } catch (AmazonClientException | IOException e) {
+    } catch (AmazonClientException e) {
       throw new CopyReadException(e);
     }
   }
