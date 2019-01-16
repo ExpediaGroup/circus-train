@@ -4,6 +4,9 @@
 * Upgraded `hotels-oss-parent` to 2.3.5 (was 2.3.3).
 * Upgraded `housekeeping` to 3.0.4 (was 3.0.0).
 
+### Added
+* Support for getting AWS Credentials within a FARGATE instance in ECS. See [#109](https://github.com/HotelsDotCom/circus-train/issues/109).
+
 ## 13.2.0 - 2019-01-11
 ### Added
 * Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
@@ -35,7 +38,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ## 12.0.0 - 2018-07-13
 ### Changed
 * circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
-* Configuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/782).
+* Configuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/78).
 
 ## 11.5.2 - 2018-06-15
 ### Changed
