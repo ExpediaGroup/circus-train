@@ -443,53 +443,28 @@ public class S3MapReduceCpOptions {
 
   @Override
   public String toString() {
-    return "S3MapReduceCpOptions{"
-        + "help="
-        + help
-        + ", async="
-        + async
-        + ", sources="
-        + sources
-        + ", target="
-        + target
-        + ", credentialsProvider="
-        + credentialsProvider
-        + ", multipartUploadPartSize="
-        + multipartUploadPartSize
-        + ", s3ServerSideEncryption="
-        + s3ServerSideEncryption
-        + ", storageClass='"
-        + storageClass
-        + '\''
-        + ", maxBandwidth="
-        + maxBandwidth
-        + ", numberOfUploadWorkers="
-        + numberOfUploadWorkers
-        + ", multipartUploadThreshold="
-        + multipartUploadThreshold
-        + ", maxMaps="
-        + maxMaps
-        + ", copyStrategy='"
-        + copyStrategy
-        + '\''
-        + ", logPath="
-        + logPath
-        + ", region='"
-        + region
-        + '\''
-        + ", ignoreFailures="
-        + ignoreFailures
-        + ", s3EndpointUri="
-        + s3EndpointUri
-        + ", uploadRetryCount="
-        + uploadRetryCount
-        + ", uploadRetryDelayMs="
-        + uploadRetryDelayMs
-        + ", uploadBufferSize="
-        + uploadBufferSize
-        + ", cannedAcl='"
-        + cannedAcl
-        + '\''
-        + '}';
+    return "S3MapReduceCpOptions{" +
+        "help=" + help +
+        ", async=" + async +
+        ", sources=" + sources +
+        ", target=" + target +
+        ", credentialsProvider=" + credentialsProvider +
+        ", multipartUploadPartSize=" + multipartUploadPartSize +
+        ", s3ServerSideEncryption=" + s3ServerSideEncryption +
+        ", storageClass='" + storageClass + '\'' +
+        ", maxBandwidth=" + maxBandwidth +
+        ", numberOfUploadWorkers=" + numberOfUploadWorkers +
+        ", multipartUploadThreshold=" + multipartUploadThreshold +
+        ", maxMaps=" + maxMaps +
+        ", copyStrategy='" + copyStrategy + '\'' +
+        ", logPath=" + logPath +
+        ", region='" + region + '\'' +
+        ", ignoreFailures=" + ignoreFailures +
+        ", s3EndpointUri=" + s3EndpointUri +
+        ", uploadRetryCount=" + uploadRetryCount +
+        ", uploadRetryDelayMs=" + uploadRetryDelayMs +
+        ", uploadBufferSize=" + uploadBufferSize +
+        ", cannedAcl='" + cannedAcl + '\'' +
+        '}';
   }
 }
