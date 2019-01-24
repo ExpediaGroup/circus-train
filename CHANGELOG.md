@@ -1,8 +1,8 @@
 ## TBD
 ### Changed
 * Refactored project to remove checkstyle and findbugs warnings.
-* Upgraded `hotels-oss-parent` to 2.3.5 (was 2.3.3).
-* Upgraded `housekeeping` to 3.0.5 (was 3.0.0).
+* Upgraded `hotels-oss-parent` version to 2.3.5 (was 2.3.3).
+* Upgraded `housekeeping` version to 3.0.5 (was 3.0.0).
 * Upgraded `jackson` version to 2.9.8 (was 2.9.7).
 
 ### Added
