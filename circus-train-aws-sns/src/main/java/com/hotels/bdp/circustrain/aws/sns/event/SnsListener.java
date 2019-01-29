@@ -136,7 +136,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
     try {
       if (startTime == null) {
-
         startTime = clock.getTime();
       }
       String endTime = clock.getTime();
