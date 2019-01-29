@@ -1,3 +1,7 @@
+## TBD
+### Fixed
+* Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
+
 ## 13.2.1 - 2019-01-24
 ### Changed
 * Refactored project to remove checkstyle and findbugs warnings.
