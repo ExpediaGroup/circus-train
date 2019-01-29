@@ -159,15 +159,8 @@ public class Replica extends HiveEndpoint {
                       sourcePartitionStatistics));
         }
       }
-      LOG
-          .info("Replica sets listener {} to have {} as partitions to alter", replicaCatalogListener.toString(),
-              partitionsToAlter.toString());
-      LOG.info("replicaCatalogListener is of type {}", replicaCatalogListener.getClass());
       replicaCatalogListener
           .partitionsToAlter(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), partitionsToAlter));
-      LOG
-          .info("Replica sets listener {} to have {} as partitions to create", replicaCatalogListener.toString(),
-              partitionsToAlter.toString());
       replicaCatalogListener
           .partitionsToCreate(EventUtils.toEventPartitions(sourceTableAndStatistics.getTable(), partitionsToCreate));
 

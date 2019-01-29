@@ -99,12 +99,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     this.sourceCatalog = sourceCatalog;
     this.replicaCatalog = replicaCatalog;
 
-    LOG.info("Resetting paramters");
-
-    // reset registered partitions between database cycles
-    partitionsToCreate = null;
-    partitionsToAlter = null;
-    partitionKeyTypes = null;
   }
 
   @Override
@@ -125,29 +119,44 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
 
   @Override
   public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
-    String endTime = clock.getTime();
-    EventReplicaTable replicaTable = tableReplication.getReplicaTable();
-    SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
-        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
-        replicaTable.getTableLocation(), partitionKeyTypes,
-        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), null);
-    publish(config.getSuccessTopic(), message);
+    try {
+      String endTime = clock.getTime();
+      EventReplicaTable replicaTable = tableReplication.getReplicaTable();
+      SnsMessage message = new SnsMessage(SnsMessageType.SUCCESS, config.getHeaders(), startTime, endTime, eventId,
+          sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
+          tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
+          replicaTable.getTableLocation(), partitionKeyTypes,
+          getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), null);
+      publish(config.getSuccessTopic(), message);
+    } finally {
+      // reset registered partitions between database cycles
+      partitionsToCreate = null;
+      partitionsToAlter = null;
+      partitionKeyTypes = null;
+    }
   }
 
   @Override
   public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    if (startTime == null) {
-      startTime = clock.getTime();
+    try {
+      if (startTime == null) {
+
+        startTime = clock.getTime();
+      }
+      String endTime = clock.getTime();
+      EventReplicaTable replicaTable = tableReplication.getReplicaTable();
+      SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
+          sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
+          tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
+          replicaTable.getTableLocation(), partitionKeyTypes,
+          getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), t.getMessage());
+      publish(config.getFailTopic(), message);
+    } finally {
+      // reset registered partitions between database cycles
+      partitionsToCreate = null;
+      partitionsToAlter = null;
+      partitionKeyTypes = null;
     }
-    String endTime = clock.getTime();
-    EventReplicaTable replicaTable = tableReplication.getReplicaTable();
-    SnsMessage message = new SnsMessage(SnsMessageType.FAILURE, config.getHeaders(), startTime, endTime, eventId,
-        sourceCatalog.getName(), replicaCatalog.getName(), replicaCatalog.getHiveMetastoreUris(),
-        tableReplication.getSourceTable().getQualifiedName(), tableReplication.getQualifiedReplicaName(),
-        replicaTable.getTableLocation(), partitionKeyTypes,
-        getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), t.getMessage());
-    publish(config.getFailTopic(), message);
   }
 
   private Long getBytesReplicated() {
@@ -181,18 +190,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
       List<EventPartition> partitionsToCreate) {
     if (partitionsToAlter == null && partitionsToCreate == null) {
       return null;
-    }
-    if (partitionsToAlter != null && partitionsToAlter.size() < 50) {
-      LOG.info("------------ partitions to alter:");
-      for (EventPartition partition : partitionsToAlter) {
-        LOG.info("------------   " + partition.getLocation() + " " + partition.getValues());
-      }
-    }
-    if (partitionsToCreate != null && partitionsToCreate.size() < 50) {
-      LOG.info(">>>>>>>>>>>> partitions to create:");
-      for (EventPartition partition : partitionsToCreate) {
-        LOG.info(">>>>>>>>>>>>   " + partition.getLocation() + " " + partition.getValues());
-      }
     }
     List<List<String>> partitionValues = new ArrayList<>();
     for (List<EventPartition> partitions : Arrays.asList(partitionsToAlter, partitionsToCreate)) {

@@ -61,8 +61,6 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
   public void partitionsToCreate(EventPartitions partitions) {
     for (final ReplicaCatalogListener listener : listeners) {
       try {
-        LOG.info("Setting partitions to create for listener {}", listener.toString());
-        LOG.info("Partitions is {}", partitions.toString());
         listener.partitionsToCreate(partitions);
       } catch (Exception e) {
         LOG.error("Listener '{}' threw exception on partitionsToCreate.", listener, e);
@@ -74,8 +72,6 @@ public class CompositeReplicaCatalogListener implements ReplicaCatalogListener {
   public void partitionsToAlter(EventPartitions partitions) {
     for (final ReplicaCatalogListener listener : listeners) {
       try {
-        LOG.info("Setting partitions tp alter for listener {}", listener.toString());
-        LOG.info("Partitions is {}", partitions.toString());
         listener.partitionsToAlter(partitions);
       } catch (Exception e) {
         LOG.error("Listener '{}' threw exception on partitionsToAlter.", listener, e);

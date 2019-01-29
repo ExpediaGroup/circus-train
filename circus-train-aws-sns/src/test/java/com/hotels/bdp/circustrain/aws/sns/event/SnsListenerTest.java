@@ -84,6 +84,7 @@ public class SnsListenerTest {
   private @Mock EventTableReplication tableReplication;
   private @Mock Metrics metrics;
   private @Mock Clock clock;
+
   private @Captor ArgumentCaptor<PublishRequest> requestCaptor;
 
   private final LinkedHashMap<String, String> partitionKeyTypes = new LinkedHashMap<>();
@@ -119,8 +120,8 @@ public class SnsListenerTest {
   @Test
   public void start() {
     SnsListener listener = new SnsListener(client, config, clock);
-
-    sendStartMessage(listener);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
     verify(client).publish(requestCaptor.capture());
     PublishRequest request = requestCaptor.getValue();
@@ -138,54 +139,103 @@ public class SnsListenerTest {
   @Test
   public void successPartitionedTable() {
     SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
-    sendStartMessage(listener);
-    setPartitionsForListener(listener);
-    sendSuccessMessage(listener);
+    EventPartitions alteredPartitions = new EventPartitions(partitionKeyTypes);
+    alteredPartitions.add(PARTITION_0);
+    listener.partitionsToAlter(alteredPartitions);
+
+    EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
+    createdPartitions.add(PARTITION_1);
+    listener.partitionsToCreate(createdPartitions);
+
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
 
     verify(client, times(2)).publish(requestCaptor.capture());
     PublishRequest request = requestCaptor.getAllValues().get(1);
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
-
-    String messageString = stringify("SUCCESS", "sourceCatalogName", "replicaCatalogName", "notNull", 40, null);
-    assertThat(request.getMessage(), is(messageString));
-
+    assertThat(request.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+            + "\"modifiedPartitions\":"
+            + "[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40}"));
   }
 
   @Test
   public void successUnpartitionedTable() {
     SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
-    sendStartMessage(listener);
-    sendSuccessMessage(listener);
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
 
     verify(client, times(2)).publish(requestCaptor.capture());
     PublishRequest request = requestCaptor.getAllValues().get(1);
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
-    String messageString = stringify("SUCCESS", "sourceCatalogName", "replicaCatalogName", null, 40, null);
-    assertThat(request.getMessage(), is(messageString));
-
+    assertThat(request.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"bytesReplicated\":40}"));
   }
 
   @Test
   public void failure() {
     SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
-    sendStartMessage(listener);
-    setPartitionsForListener(listener);
+    EventPartitions alteredPartitions = new EventPartitions(partitionKeyTypes);
+    alteredPartitions.add(PARTITION_0);
+    listener.partitionsToAlter(alteredPartitions);
+
+    EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
+    createdPartitions.add(PARTITION_1);
+    listener.partitionsToCreate(createdPartitions);
 
     listener.copierEnd(metrics);
     listener.tableReplicationFailure(tableReplication, EVENT_ID, ERROR);
 
     verify(client, times(2)).publish(requestCaptor.capture());
-    PublishRequest request = requestCaptor.getAllValues().get(1);
+    PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
-
-    String messageString = stringify("FAILURE", "sourceCatalogName", "replicaCatalogName", "notNull", 40, "error");
-    assertThat(request.getMessage(), is(messageString));
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\""
+        + PROTOCOL_VERSION
+        + "\""
+        + ",\"type\":\"FAILURE\",\"headers\":"
+        + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
+        + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
+        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+        + "\"replicaTableLocation\":\""
+        + REPLICA_TABLE_LOCATION
+        + "\",\"replicaMetastoreUris\":\""
+        + REPLICA_METASTORE_URIS
+        + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+        + "\"modifiedPartitions\":[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40,\"errorMessage\":\"error message\"}"));
   }
 
   @Test
@@ -194,7 +244,7 @@ public class SnsListenerTest {
     listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
     listener.tableReplicationFailure(tableReplication, EVENT_ID, ERROR);
 
-    verify(client).publish(requestCaptor.capture());
+    verify(client, times(1)).publish(requestCaptor.capture());
     PublishRequest request = requestCaptor.getValue();
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("failArn"));
@@ -237,7 +287,8 @@ public class SnsListenerTest {
   @Test
   public void messageSizeExceeded() throws Exception {
     SnsListener listener = new SnsListener(client, config, clock);
-    sendStartMessage(listener);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
     EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
     LocalDate date = LocalDate.now();
@@ -250,62 +301,38 @@ public class SnsListenerTest {
     }
     listener.partitionsToCreate(createdPartitions);
 
-    sendSuccessMessage(listener);
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
 
     verify(client, times(2)).publish(requestCaptor.capture());
     PublishRequest request = requestCaptor.getAllValues().get(1);
     assertThat(request.getSubject(), is(SUBJECT));
     assertThat(request.getTopicArn(), is("successArn"));
-
-    String messageString = stringify("SUCCESS", "sourceCatalogName", "replicaCatalogName", "", 40, null);
-    assertThat(request.getMessage(), is(messageString));
+    assertThat(request.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+            + "\"modifiedPartitions\":[],\"bytesReplicated\":40,"
+            + "\"messageTruncated\":true}"));
   }
 
   @Test
-  public void consecutiveReplications() {
+  public void partitionedAndUnpartitionedReplication() {
     SnsListener listener = new SnsListener(client, config, clock);
-    replicatePartitionedTable(listener);
-    replicateUnpartitionedTable(listener);
-  }
-
-  private void replicatePartitionedTable(SnsListener listener) {
-    sendStartMessage(listener);
-    setPartitionsForListener(listener);
-    sendSuccessMessage(listener);
-
-    verify(client, times(2)).publish(requestCaptor.capture());
-    PublishRequest request = requestCaptor.getAllValues().get(1);
-    assertThat(request.getSubject(), is(SUBJECT));
-    assertThat(request.getTopicArn(), is("successArn"));
-
-    String messageString = stringify("SUCCESS", "sourceCatalogName", "replicaCatalogName", "notNull", 40, null);
-    assertThat(request.getMessage(), is(messageString));
-
-  }
-
-  private void replicateUnpartitionedTable(SnsListener listener) {
-    when(sourceCatalog.getName()).thenReturn("sourceUnpartitioned");
-    when(replicaCatalog.getName()).thenReturn("replicaUnpartitioned");
-    when(clock.getTime()).thenReturn(STARTTIME, ENDTIME);
-
-    sendStartMessage(listener);
-    sendSuccessMessage(listener);
-
-    verify(client, times(4)).publish(requestCaptor.capture());
-    PublishRequest request = requestCaptor.getAllValues().get(5);
-    assertThat(request.getSubject(), is(SUBJECT));
-    assertThat(request.getTopicArn(), is("successArn"));
-
-    String messageString = stringify("SUCCESS", "sourceUnpartitioned", "replicaUnpartitioned", null, 40, null);
-    assertThat(request.getMessage(), is(messageString));
-  }
-
-  private void sendStartMessage(SnsListener listener) {
     listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
-    listener.tableReplicationStart(tableReplication, EVENT_ID);
-  }
 
-  private void setPartitionsForListener(SnsListener listener) {
+    // replicate partitioned table
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
+
     EventPartitions alteredPartitions = new EventPartitions(partitionKeyTypes);
     alteredPartitions.add(PARTITION_0);
     listener.partitionsToAlter(alteredPartitions);
@@ -313,55 +340,58 @@ public class SnsListenerTest {
     EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
     createdPartitions.add(PARTITION_1);
     listener.partitionsToCreate(createdPartitions);
-  }
 
-  private void sendSuccessMessage(SnsListener listener) {
     listener.copierEnd(metrics);
     listener.tableReplicationSuccess(tableReplication, EVENT_ID);
-  }
 
-  private String stringify(
-      String type,
-      String sourceCatalog,
-      String replicaCatalog,
-      String partitions,
-      int bytes,
-      String error) {
-    String message = "{";
-    message += "\"protocolVersion\":\"" + PROTOCOL_VERSION + "\"";
-    message += ",\"type\":\"" + type + "\"";
-    message += ",\"headers\":{\"pipeline-id\":\"0943879438\"}";
-    message += ",\"startTime\":\"starttime\"";
-    message += ",\"endTime\":\"endtime\"";
-    message += ",\"eventId\":\"EVENT_ID\"";
-    message += ",\"sourceCatalog\":\"" + sourceCatalog + "\"";
-    message += ",\"replicaCatalog\":\"" + replicaCatalog + "\"";
-    message += ",\"sourceTable\":\"srcDb.srcTable\"";
-    message += ",\"replicaTable\":\"replicaDb.replicaTable\"";
-    message += ",\"replicaTableLocation\":\"" + REPLICA_TABLE_LOCATION + "\"";
-    message += ",\"replicaMetastoreUris\":\"" + REPLICA_METASTORE_URIS + "\"";
+    verify(client, times(2)).publish(requestCaptor.capture());
+    PublishRequest request = requestCaptor.getAllValues().get(1);
+    assertThat(request.getSubject(), is(SUBJECT));
+    assertThat(request.getTopicArn(), is("successArn"));
+    assertThat(request.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+            + "\"modifiedPartitions\":"
+            + "[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40}"));
 
-    if (partitions != null && !"".equals(partitions)) {
-      message += ",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"}";
-      message += ",\"modifiedPartitions\":[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]]";
-      message += ",\"bytesReplicated\":" + bytes;
+    // replicate unpartitioned table
+    when(sourceCatalog.getName()).thenReturn("sourceUnpartitioned");
+    when(replicaCatalog.getName()).thenReturn("replicaUnpartitioned");
+    when(clock.getTime()).thenReturn(STARTTIME, ENDTIME);
 
-    } else if ("".equals(partitions)) {
-      message += ",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"}";
-      message += ",\"modifiedPartitions\":[]";
-      message += ",\"bytesReplicated\":" + bytes;
-      message += ",\"messageTruncated\":" + true;
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
 
-    } else {
-      message += ",\"bytesReplicated\":" + bytes;
-    }
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
 
-    if (error != null) {
-      message += ",\"errorMessage\":\"error message\"";
-    }
-    message += "}";
+    verify(client, times(4)).publish(requestCaptor.capture());
+    PublishRequest unpartitionedRequest = requestCaptor.getAllValues().get(5);
+    assertThat(unpartitionedRequest.getSubject(), is(SUBJECT));
+    assertThat(unpartitionedRequest.getTopicArn(), is("successArn"));
 
-    return message;
+    assertThat(unpartitionedRequest.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceUnpartitioned\",\"replicaCatalog\":\"replicaUnpartitioned\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"bytesReplicated\":40}"));
   }
 
 }
