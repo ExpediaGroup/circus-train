@@ -98,7 +98,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void circusTrainStartUp(String[] args, EventSourceCatalog sourceCatalog, EventReplicaCatalog replicaCatalog) {
     this.sourceCatalog = sourceCatalog;
     this.replicaCatalog = replicaCatalog;
-
   }
 
   @Override
