@@ -98,6 +98,13 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   public void circusTrainStartUp(String[] args, EventSourceCatalog sourceCatalog, EventReplicaCatalog replicaCatalog) {
     this.sourceCatalog = sourceCatalog;
     this.replicaCatalog = replicaCatalog;
+
+    LOG.info("Resetting paramters");
+
+    // reset registered partitions between database cycles
+    partitionsToCreate = null;
+    partitionsToAlter = null;
+    partitionKeyTypes = null;
   }
 
   @Override
@@ -174,6 +181,18 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
       List<EventPartition> partitionsToCreate) {
     if (partitionsToAlter == null && partitionsToCreate == null) {
       return null;
+    }
+    if (partitionsToAlter != null && partitionsToAlter.size() < 50) {
+      LOG.info("------------ partitions to alter:");
+      for (EventPartition partition : partitionsToAlter) {
+        LOG.info("------------   " + partition.getLocation() + " " + partition.getValues());
+      }
+    }
+    if (partitionsToCreate != null && partitionsToCreate.size() < 50) {
+      LOG.info(">>>>>>>>>>>> partitions to create:");
+      for (EventPartition partition : partitionsToCreate) {
+        LOG.info(">>>>>>>>>>>>   " + partition.getLocation() + " " + partition.getValues());
+      }
     }
     List<List<String>> partitionValues = new ArrayList<>();
     for (List<EventPartition> partitions : Arrays.asList(partitionsToAlter, partitionsToCreate)) {
