@@ -128,7 +128,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
           getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), null);
       publish(config.getSuccessTopic(), message);
     } finally {
-      resetPartitionState();
+      resetState();
     }
   }
 
@@ -147,7 +147,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
           getModifiedPartitions(partitionsToAlter, partitionsToCreate), getBytesReplicated(), t.getMessage());
       publish(config.getFailTopic(), message);
     } finally {
-      resetPartitionState();
+      resetState();
     }
   }
 
@@ -158,10 +158,11 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
     return 0L;
   }
 
-  private void resetPartitionState() {
+  private void resetState() {
     partitionsToCreate = null;
     partitionsToAlter = null;
     partitionKeyTypes = null;
+    startTime = null;
   }
 
   @Override
