@@ -460,4 +460,47 @@ public class SnsListenerTest {
             + REPLICA_METASTORE_URIS
             + "\",\"bytesReplicated\":40}"));
   }
+
+  @Test
+  public void noTableReplicationStartForConsecutiveReplications() {
+    SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+    listener.tableReplicationFailure(tableReplication, EVENT_ID, ERROR);
+
+    verify(client, times(1)).publish(requestCaptor.capture());
+    PublishRequest request = requestCaptor.getValue();
+    assertThat(request.getSubject(), is(SUBJECT));
+    assertThat(request.getTopicArn(), is("failArn"));
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\""
+        + PROTOCOL_VERSION
+        + "\""
+        + ",\"type\":\"FAILURE\",\"headers\":"
+        + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
+        + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
+        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"replicaTableLocation\":\"s3://bucket/path\",\"replicaMetastoreUris\":\"thrift://host:9083\",\"bytesReplicated\":0,\"errorMessage\":\"error message\"}"));
+
+    // the second message should contain these times
+    String startTime = "differentStartTime";
+    String endTime = "differentEndTime";
+    when(clock.getTime()).thenReturn(startTime, endTime);
+
+    listener.tableReplicationFailure(tableReplication, EVENT_ID, ERROR);
+
+    verify(client, times(2)).publish(requestCaptor.capture());
+    PublishRequest secondRequest = requestCaptor.getAllValues().get(2);
+    assertThat(secondRequest.getSubject(), is(SUBJECT));
+    assertThat(secondRequest.getTopicArn(), is("failArn"));
+    assertThat(secondRequest.getMessage(), is("{\"protocolVersion\":\""
+        + PROTOCOL_VERSION
+        + "\""
+        + ",\"type\":\"FAILURE\",\"headers\":"
+        + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\""
+        + startTime
+        + "\",\"endTime\":\""
+        + endTime
+        + "\",\"eventId\":"
+        + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
+        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\",\"replicaTableLocation\":\"s3://bucket/path\",\"replicaMetastoreUris\":\"thrift://host:9083\",\"bytesReplicated\":0,\"errorMessage\":\"error message\"}"));
+  }
+
 }
