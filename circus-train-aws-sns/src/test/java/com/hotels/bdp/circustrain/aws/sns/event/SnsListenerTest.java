@@ -394,4 +394,70 @@ public class SnsListenerTest {
             + "\",\"bytesReplicated\":40}"));
   }
 
+  @Test
+  public void partitionedAndUnpartitionedReplicationFailure() {
+    SnsListener listener = new SnsListener(client, config, clock);
+    listener.circusTrainStartUp(new String[] {}, sourceCatalog, replicaCatalog);
+
+    // replicate partitioned table with failure
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
+
+    EventPartitions alteredPartitions = new EventPartitions(partitionKeyTypes);
+    alteredPartitions.add(PARTITION_0);
+    listener.partitionsToAlter(alteredPartitions);
+
+    EventPartitions createdPartitions = new EventPartitions(partitionKeyTypes);
+    createdPartitions.add(PARTITION_1);
+    listener.partitionsToCreate(createdPartitions);
+
+    listener.copierEnd(metrics);
+    listener.tableReplicationFailure(tableReplication, EVENT_ID, ERROR);
+
+    verify(client, times(2)).publish(requestCaptor.capture());
+    PublishRequest request = requestCaptor.getValue();
+    assertThat(request.getSubject(), is(SUBJECT));
+    assertThat(request.getTopicArn(), is("failArn"));
+    assertThat(request.getMessage(), is("{\"protocolVersion\":\""
+        + PROTOCOL_VERSION
+        + "\""
+        + ",\"type\":\"FAILURE\",\"headers\":"
+        + "{\"pipeline-id\":\"0943879438\"},\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":"
+        + "\"EVENT_ID\",\"sourceCatalog\":\"sourceCatalogName\",\"replicaCatalog\":\"replicaCatalogName\","
+        + "\"sourceTable\":\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+        + "\"replicaTableLocation\":\""
+        + REPLICA_TABLE_LOCATION
+        + "\",\"replicaMetastoreUris\":\""
+        + REPLICA_METASTORE_URIS
+        + "\",\"partitionKeys\":{\"local_date\":\"string\",\"local_hour\":\"int\"},"
+        + "\"modifiedPartitions\":[[\"2014-01-01\",\"0\"],[\"2014-01-01\",\"1\"]],\"bytesReplicated\":40,\"errorMessage\":\"error message\"}"));
+
+    // replicate unpartitioned table
+    when(sourceCatalog.getName()).thenReturn("sourceUnpartitioned");
+    when(replicaCatalog.getName()).thenReturn("replicaUnpartitioned");
+    when(clock.getTime()).thenReturn(STARTTIME, ENDTIME);
+
+    listener.tableReplicationStart(tableReplication, EVENT_ID);
+
+    listener.copierEnd(metrics);
+    listener.tableReplicationSuccess(tableReplication, EVENT_ID);
+
+    verify(client, times(4)).publish(requestCaptor.capture());
+    PublishRequest unpartitionedRequest = requestCaptor.getAllValues().get(5);
+    assertThat(unpartitionedRequest.getSubject(), is(SUBJECT));
+    assertThat(unpartitionedRequest.getTopicArn(), is("successArn"));
+
+    assertThat(unpartitionedRequest.getMessage(),
+        is("{\"protocolVersion\":\""
+            + PROTOCOL_VERSION
+            + "\""
+            + ",\"type\":\"SUCCESS\",\"headers\":{\"pipeline-id\":\"0943879438\"},"
+            + "\"startTime\":\"starttime\",\"endTime\":\"endtime\",\"eventId\":\"EVENT_ID\",\"sourceCatalog\""
+            + ":\"sourceUnpartitioned\",\"replicaCatalog\":\"replicaUnpartitioned\",\"sourceTable\":"
+            + "\"srcDb.srcTable\",\"replicaTable\":\"replicaDb.replicaTable\","
+            + "\"replicaTableLocation\":\""
+            + REPLICA_TABLE_LOCATION
+            + "\",\"replicaMetastoreUris\":\""
+            + REPLICA_METASTORE_URIS
+            + "\",\"bytesReplicated\":40}"));
+  }
 }
