@@ -72,7 +72,6 @@ import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
-import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -109,7 +108,6 @@ public class ReplicaTest {
   private @Mock ReplicaCatalog replicaCatalog;
   private @Mock Supplier<CloseableMetaStoreClient> metaStoreClientSupplier;
   private @Mock CloseableMetaStoreClient mockMetaStoreClient;
-  private @Mock SourceLocationManager mockSourceLocationManager;
   private @Mock ReplicaLocationManager mockReplicaLocationManager;
   private @Captor ArgumentCaptor<List<Partition>> alterPartitionCaptor;
   private @Captor ArgumentCaptor<List<Partition>> addPartitionCaptor;
