@@ -519,7 +519,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void updateMetadataCalledWithoutPartitionsDoesCleanUpLocations() throws TException, IOException {
+  public void updateMetadataCalledWithoutPartitionsDoesNotCleanUpLocations() throws TException, IOException {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
