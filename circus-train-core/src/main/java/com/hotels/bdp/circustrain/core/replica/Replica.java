@@ -98,12 +98,19 @@ public class Replica extends HiveEndpoint {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
       Optional<Table> oldReplicaTable = updateTableMetadata(client, eventId, sourceTable, replicaDatabaseName,
           replicaTableName, locationManager.getTableLocation(), replicationMode);
-      if (oldReplicaTable.isPresent() && LocationUtils.hasLocation(oldReplicaTable.get())) {
+      if (oldReplicaTable.isPresent()
+          && LocationUtils.hasLocation(oldReplicaTable.get())
+          && isUnpartitioned(oldReplicaTable.get())) {
+
         Path oldLocation = locationAsPath(oldReplicaTable.get());
         String oldEventId = oldReplicaTable.get().getParameters().get(REPLICATION_EVENT.parameterName());
         locationManager.addCleanUpLocation(oldEventId, oldLocation);
       }
     }
+  }
+
+  private boolean isUnpartitioned(Table table) {
+    return table.getPartitionKeysSize() == 0;
   }
 
   public void updateMetadata(

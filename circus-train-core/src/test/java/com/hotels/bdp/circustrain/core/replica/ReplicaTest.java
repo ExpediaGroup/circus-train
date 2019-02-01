@@ -164,7 +164,7 @@ public class ReplicaTest {
     sourceTable.setTableType(TableType.VIRTUAL_VIEW.name());
     sourceTable.getSd().setLocation(null);
     when(mockSourceLocationManager.getTableLocation()).thenReturn(null);
-    when(mockSourceLocationManager.getPartitionLocations()).thenReturn(Collections.<Path> emptyList());
+    when(mockSourceLocationManager.getPartitionLocations()).thenReturn(Collections.<Path>emptyList());
     when(mockSourceLocationManager.getPartitionSubPath(any(Path.class))).thenReturn(null);
   }
 
@@ -513,6 +513,15 @@ public class ReplicaTest {
     assertThat(columnStats.get(1).getStatsDesc().getTableName(), is(TABLE_NAME));
     assertThat(columnStats.get(1).getStatsDesc().getPartName(), is("c=three/d=four"));
     assertThat(columnStats.get(1).getStatsObj().size(), is(2));
+  }
+
+  @Test
+  public void updateMetadataCalledWithoutPartitionsDoesCleanUpLocations() throws TException, IOException {
+    existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
+    replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
 
   private Table newTable() {

@@ -1,6 +1,7 @@
 ## TBD
 ### Fixed
 * Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
+* Fixed issue where in certain cases the table location of a partitioned table would be scheduled for housekeeping.
 
 ## 13.2.1 - 2019-01-24
 ### Changed
