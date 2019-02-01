@@ -15,7 +15,6 @@
  */
 package com.hotels.bdp.circustrain.core;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,6 @@ import com.google.common.base.Optional;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.util.DotJoiner;
 import com.hotels.bdp.circustrain.core.replica.InvalidReplicationModeException;
@@ -112,13 +110,9 @@ public class PartitionedTableMetadataUpdateReplication implements Replication {
 
           PartitionsAndStatistics sourcePartitionsAndStatisticsThatWereReplicated = filterOnReplicatedPartitions(client,
               sourcePartitionsAndStatistics, sourceTable.getPartitionKeys());
-          SourceLocationManager sourceLocationManager = source
-              .getLocationManager(sourceTable, sourcePartitionsAndStatisticsThatWereReplicated.getPartitions(), eventId,
-                  Collections.<String, Object> emptyMap());
-
           replica
               .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatisticsThatWereReplicated,
-                  sourceLocationManager, replicaDatabaseName, replicaTableName, replicaLocationManager);
+                  replicaDatabaseName, replicaTableName, replicaLocationManager);
           int partitionsCopied = sourcePartitions.size();
           LOG
               .info("Metadata updated for {} partitions of table {}.{}. (no data copied)", partitionsCopied, database,

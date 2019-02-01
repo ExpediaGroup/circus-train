@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,9 +110,9 @@ public class PartitionedTableReplicationTest {
         .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
             TABLE)).thenReturn(replicaLocationManager);
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
-        Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
+        Collections.<Partition>emptyList(), Collections.<String, List<ColumnStatisticsObj>>emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
-    when(source.getLocationManager(sourceTable, Collections.<Partition> emptyList(), EVENT_ID, copierOptions))
+    when(source.getLocationManager(sourceTable, Collections.<Partition>emptyList(), EVENT_ID, copierOptions))
         .thenReturn(sourceLocationManager);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
@@ -155,8 +155,8 @@ public class PartitionedTableReplicationTest {
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
         .verify(replica)
-        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, sourceLocationManager, DATABASE,
-            TABLE, replicaLocationManager);
+        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, DATABASE, TABLE,
+            replicaLocationManager);
     replicationOrder.verify(replicaLocationManager).cleanUpLocations();
   }
 
@@ -185,8 +185,8 @@ public class PartitionedTableReplicationTest {
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
         .verify(replica)
-        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, sourceLocationManager,
-            MAPPED_DATABASE, MAPPED_TABLE, replicaLocationManager);
+        .updateMetadata(EVENT_ID, sourceTableAndStatistics, partitionsAndStatistics, MAPPED_DATABASE, MAPPED_TABLE,
+            replicaLocationManager);
     replicationOrder.verify(replicaLocationManager).cleanUpLocations();
   }
 

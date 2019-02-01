@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class PartitionedTableMetadataMirrorReplicationTest {
   private final Partition partition1 = new Partition();
   private final Partition partition2 = new Partition();;
   private final List<Partition> sourcePartitions = Arrays.asList(partition1, partition2);
-  private final Map<String, Object> copierOptions = Collections.<String, Object> emptyMap();
+  private final Map<String, Object> copierOptions = Collections.<String, Object>emptyMap();
 
   @Before
   public void injectMocks() throws Exception {
@@ -88,17 +88,18 @@ public class PartitionedTableMetadataMirrorReplicationTest {
     InOrder replicationOrder = inOrder(sourceLocationManager, replica);
     replicationOrder.verify(replica).validateReplicaTable(DATABASE, TABLE);
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
-    replicationOrder.verify(replica).updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics),
-        eq(partitionsAndStatistics), eq(sourceLocationManager), eq(DATABASE), eq(TABLE),
-        any(ReplicaLocationManager.class));
+    replicationOrder
+        .verify(replica)
+        .updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics), eq(partitionsAndStatistics), eq(DATABASE),
+            eq(TABLE), any(ReplicaLocationManager.class));
   }
 
   @Test
   public void noMatchingPartitions() throws Exception {
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
-        Collections.<Partition> emptyList(), Collections.<String, List<ColumnStatisticsObj>> emptyMap());
+        Collections.<Partition>emptyList(), Collections.<String, List<ColumnStatisticsObj>>emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
-    when(source.getLocationManager(sourceTable, Collections.<Partition> emptyList(), EVENT_ID, copierOptions))
+    when(source.getLocationManager(sourceTable, Collections.<Partition>emptyList(), EVENT_ID, copierOptions))
         .thenReturn(sourceLocationManager);
 
     PartitionedTableMetadataMirrorReplication replication = new PartitionedTableMetadataMirrorReplication(DATABASE,
@@ -106,7 +107,8 @@ public class PartitionedTableMetadataMirrorReplicationTest {
     replication.replicate();
 
     verify(replica).validateReplicaTable(DATABASE, TABLE);
-    verify(replica).updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics), eq(DATABASE), eq(TABLE),
-        any(ReplicaLocationManager.class));
+    verify(replica)
+        .updateMetadata(eq(EVENT_ID), eq(sourceTableAndStatistics), eq(DATABASE), eq(TABLE),
+            any(ReplicaLocationManager.class));
   }
 }

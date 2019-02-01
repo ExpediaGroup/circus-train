@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,9 +163,6 @@ public class ReplicaTest {
   private void convertSourceTableToView() {
     sourceTable.setTableType(TableType.VIRTUAL_VIEW.name());
     sourceTable.getSd().setLocation(null);
-    when(mockSourceLocationManager.getTableLocation()).thenReturn(null);
-    when(mockSourceLocationManager.getPartitionLocations()).thenReturn(Collections.<Path>emptyList());
-    when(mockSourceLocationManager.getPartitionSubPath(any(Path.class))).thenReturn(null);
   }
 
   private void convertExistingReplicaTableToView() {
@@ -317,13 +314,15 @@ public class ReplicaTest {
 
   @Test
   public void alteringExistingPartitionedReplicaTableSucceeds() throws TException, IOException {
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
+    when(mockMetaStoreClient
+        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
+            .thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
-    replica.updateMetadata(EVENT_ID, tableAndStatistics,
-        new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition> emptyList(),
-            Collections.<String, List<ColumnStatisticsObj>> emptyMap()),
-        mockSourceLocationManager, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
   }
@@ -332,13 +331,15 @@ public class ReplicaTest {
   public void alteringExistingPartitionedReplicaViewSucceeds() throws TException, IOException {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
+    when(mockMetaStoreClient
+        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
+            .thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
-    replica.updateMetadata(EVENT_ID, tableAndStatistics,
-        new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition> emptyList(),
-            Collections.<String, List<ColumnStatisticsObj>> emptyMap()),
-        mockSourceLocationManager, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
@@ -346,25 +347,23 @@ public class ReplicaTest {
   @Test(expected = CircusTrainException.class)
   public void tryToReplaceExistingPartitionedReplicaViewWithTable() throws TException, IOException {
     convertExistingReplicaTableToView();
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
-    replica.updateMetadata(EVENT_ID, tableAndStatistics,
-        new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition> emptyList(),
-            Collections.<String, List<ColumnStatisticsObj>> emptyMap()),
-        mockSourceLocationManager, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
   }
 
   @Test(expected = CircusTrainException.class)
   public void tryToReplaceExistingPartitionedReplicaTableWithView() throws TException, IOException {
     convertSourceTableToView();
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
-    replica.updateMetadata(EVENT_ID, tableAndStatistics,
-        new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition> emptyList(),
-            Collections.<String, List<ColumnStatisticsObj>> emptyMap()),
-        mockSourceLocationManager, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
   }
 
   @Test(expected = DestinationNotReplicaException.class)
@@ -391,14 +390,16 @@ public class ReplicaTest {
     ColumnStatistics newPartitionStatistics = newPartitionStatistics("three", "four");
     Partition modifiedPartition = new Partition(existingPartition);
     ColumnStatistics modifiedPartitionStatistics = newPartitionStatistics("one", "two");
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
+    when(mockMetaStoreClient
+        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
+            .thenReturn(Arrays.asList(existingPartition));
 
     Map<String, List<ColumnStatisticsObj>> partitionStatsMap = new HashMap<>();
-    partitionStatsMap.put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()),
-        newPartitionStatistics.getStatsObj());
-    partitionStatsMap.put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()),
-        modifiedPartitionStatistics.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()), newPartitionStatistics.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()),
+            modifiedPartitionStatistics.getStatsObj());
 
     PartitionsAndStatistics partitionsAndStatistics = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Arrays.asList(modifiedPartition, newPartition), partitionStatsMap);
@@ -409,8 +410,9 @@ public class ReplicaTest {
 
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
 
-    replica.updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, mockSourceLocationManager, DB_NAME,
-        TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, DB_NAME, TABLE_NAME,
+            mockReplicaLocationManager);
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
@@ -459,22 +461,25 @@ public class ReplicaTest {
     ColumnStatistics newPartitionStatistics = newPartitionStatistics("three", "four");
     Partition modifiedPartition = new Partition(existingPartition);
     ColumnStatistics modifiedPartitionStatistics = newPartitionStatistics("one", "two");
-    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME,
-        Lists.newArrayList("c=one/d=two", "c=three/d=four"))).thenReturn(Arrays.asList(existingPartition));
+    when(mockMetaStoreClient
+        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
+            .thenReturn(Arrays.asList(existingPartition));
 
     Map<String, List<ColumnStatisticsObj>> partitionStatsMap = new HashMap<>();
-    partitionStatsMap.put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()),
-        newPartitionStatistics.getStatsObj());
-    partitionStatsMap.put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()),
-        modifiedPartitionStatistics.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()), newPartitionStatistics.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()),
+            modifiedPartitionStatistics.getStatsObj());
 
     PartitionsAndStatistics partitionsAndStatistics = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Arrays.asList(modifiedPartition, newPartition), partitionStatsMap);
 
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
 
-    replica.updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, mockSourceLocationManager, DB_NAME,
-        TABLE_NAME, mockReplicaLocationManager);
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, DB_NAME, TABLE_NAME,
+            mockReplicaLocationManager);
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);

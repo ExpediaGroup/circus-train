@@ -117,7 +117,6 @@ public class Replica extends HiveEndpoint {
       String eventId,
       TableAndStatistics sourceTableAndStatistics,
       PartitionsAndStatistics sourcePartitionsAndStatistics,
-      SourceLocationManager sourceLocationManager,
       String replicaDatabaseName,
       String replicaTableName,
       ReplicaLocationManager locationManager) {
