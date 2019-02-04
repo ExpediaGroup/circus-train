@@ -80,7 +80,7 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
 
       // We expect all partitions to be under the table base path
       SourceLocationManager sourceLocationManager = source
-          .getLocationManager(sourceTable, sourcePartitions, eventId, Collections.<String, Object> emptyMap());
+          .getLocationManager(sourceTable, sourcePartitions, eventId, Collections.<String, Object>emptyMap());
       ReplicaLocationManager replicaLocationManager = new MetadataMirrorReplicaLocationManager(sourceLocationManager,
           TableType.PARTITIONED);
       sourceLocationManager.cleanUpLocations();
@@ -95,8 +95,8 @@ class PartitionedTableMetadataMirrorReplication implements Replication {
                 database, table, partitionPredicate);
       } else {
         replica
-            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-                replicaDatabaseName, replicaTableName, replicaLocationManager);
+            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, replicaDatabaseName,
+                replicaTableName, replicaLocationManager);
         int partitionsCopied = sourcePartitions.size();
         LOG
             .info("Metadata mirrored for {} partitions of table {}.{} (no data copied).", partitionsCopied, database,

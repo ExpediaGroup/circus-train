@@ -129,8 +129,8 @@ class PartitionedTableReplication implements Replication {
         sourceLocationManager.cleanUpLocations();
 
         replica
-            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, sourceLocationManager,
-                replicaDatabaseName, replicaTableName, replicaLocationManager);
+            .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, replicaDatabaseName,
+                replicaTableName, replicaLocationManager);
         replicaLocationManager.cleanUpLocations();
 
         int partitionsCopied = sourcePartitions.size();
