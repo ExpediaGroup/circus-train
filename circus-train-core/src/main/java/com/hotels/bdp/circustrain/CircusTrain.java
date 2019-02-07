@@ -102,7 +102,7 @@ public class CircusTrain {
     try {
       String defaultModules = Joiner.on(",").join(Modules.REPLICATION, Modules.HOUSEKEEPING);
 
-      SpringApplication springApplication = new SpringApplicationBuilder(CircusTrain.class)
+      ConfigurableApplicationContext run = new SpringApplicationBuilder(CircusTrain.class)
           .properties("spring.config.location:${config:null}")
           .properties("spring.profiles.active:${modules:" + defaultModules + "}")
           .properties("instance.home:${user.home}")
@@ -112,9 +112,8 @@ public class CircusTrain {
           .registerShutdownHook(true)
           .initializers(new ExtensionInitializer())
           .listeners(new ConfigFileValidationApplicationListener())
-          .build();
-
-      ConfigurableApplicationContext run = springApplication.run(args);
+          .build()
+          .run(args);
 
       exitCode = SpringApplication.exit(run);
 

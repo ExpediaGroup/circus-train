@@ -15,8 +15,6 @@
  */
 package com.hotels.bdp.circustrain.housekeeping;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +35,6 @@ import com.hotels.housekeeping.service.impl.FileSystemHousekeepingService;
 @EnableJpaRepositories(basePackages = { CircusTrainHousekeepingConfiguration.HOUSEKEEPING_PACKAGE })
 public class CircusTrainHousekeepingConfiguration {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CircusTrainHousekeepingConfiguration.class);
   final static String HOUSEKEEPING_PACKAGE = "com.hotels.housekeeping";
 
   @Bean
@@ -45,9 +42,6 @@ public class CircusTrainHousekeepingConfiguration {
       LegacyReplicaPathRepository legacyReplicaPathRepository,
       @Qualifier("baseConf") org.apache.hadoop.conf.Configuration baseConf,
       Housekeeping housekeeping) {
-    // doesn't reach here?
-    LOG.info("----------- baseconf tostring = {} -----------", baseConf.toString());
-    LOG.info("----------- HouskeepingService gets executed -----------");
     return new FileSystemHousekeepingService(legacyReplicaPathRepository, baseConf,
         housekeeping.getFetchLegacyReplicaPathPageSize());
   }
