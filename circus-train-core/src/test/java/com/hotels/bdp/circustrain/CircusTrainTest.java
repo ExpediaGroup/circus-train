@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,8 +91,48 @@ public class CircusTrainTest {
     exit.expectSystemExitWithStatus(0);
     File ymlFile = temp.newFile("test-application.yml");
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
+        .add("source-catalog:")
+        .add("  name: source")
+        .add("  configuration-properties:")
+        .add("    " + ConfVars.METASTOREURIS.varname + ": " + hive.getThriftConnectionUri())
+        .add("replica-catalog:")
+        .add("  name: replica")
+        .add("  hive-metastore-uris: " + hive.getThriftConnectionUri())
+        .add("table-replications:")
+        .add("  -")
+        .add("    source-table:")
+        .add("      database-name: " + DATABASE)
+        .add("      table-name: source_" + TABLE)
+        .add("    replica-table:")
+        .add("      table-name: replica_" + TABLE)
+        .add("      table-location: " + temp.newFolder("replica"))
+        .build();
+    Files.asCharSink(ymlFile, UTF_8).writeLines(lines);
+
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertTrue(hive.client().tableExists(DATABASE, "replica_" + TABLE));
+      }
+    });
+
+    CircusTrain.main(new String[] { "--config=" + ymlFile.getAbsolutePath() });
+  }
+
+  @Test
+  public void singleYmlFileWithHousekeeping() throws Exception {
+    exit.expectSystemExitWithStatus(0);
+    File ymlFile = temp.newFile("test-application.yml");
+    List<String> lines = ImmutableList
+        .<String>builder()
+        .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
+        .add("housekeeping:")
+        .add("  schema-name: custom_schema")
+        .add("  data-source:")
+        .add("    driver-class-name: com.mysql.cj.jdbc.Driver")
+        .add("    url: jdbc:mysql://localhost:3306/${housekeeping.schema-name}")
         .add("source-catalog:")
         .add("  name: source")
         .add("  configuration-properties:")
@@ -127,7 +167,7 @@ public class CircusTrainTest {
     exit.expectSystemExitWithStatus(0);
     File ymlFile = temp.newFile("test-application.yml");
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("source-catalog:")
         .add("  name: source")
         .add("  configuration-properties:")
@@ -143,8 +183,7 @@ public class CircusTrainTest {
         .add("    replica-table:")
         .add("      table-name: replica_" + TABLE)
         .add("      table-location: " + temp.newFolder("replica"))
-        .add("extension-packages: com.hotels.test.extension, "
-            + TestCopierFactory.class.getPackage().getName())
+        .add("extension-packages: com.hotels.test.extension, " + TestCopierFactory.class.getPackage().getName())
         .add("testExtensionConfig: foo")
         .build();
     Files.asCharSink(ymlFile, UTF_8).writeLines(lines);
@@ -165,7 +204,7 @@ public class CircusTrainTest {
     File ymlFile2 = temp.newFile("test-application2.yml");
 
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
         .add("source-catalog:")
         .add("  name: source")
@@ -178,7 +217,7 @@ public class CircusTrainTest {
     Files.asCharSink(ymlFile1, UTF_8).writeLines(lines);
 
     lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("table-replications:")
         .add("  -")
         .add("    source-table:")
@@ -231,7 +270,7 @@ public class CircusTrainTest {
         Path sourceBaseLocation,
         Path replicaLocation,
         Map<String, Object> copierOptions) {
-      return newInstance(eventId, sourceBaseLocation, Collections.<Path> emptyList(), replicaLocation, copierOptions);
+      return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
     }
 
   }
