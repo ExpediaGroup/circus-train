@@ -122,46 +122,6 @@ public class CircusTrainTest {
   }
 
   @Test
-  public void singleYmlFileWithHousekeeping() throws Exception {
-    exit.expectSystemExitWithStatus(0);
-    File ymlFile = temp.newFile("test-application.yml");
-    List<String> lines = ImmutableList
-        .<String>builder()
-        .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
-        .add("housekeeping:")
-        .add("  schema-name: custom_schema")
-        .add("  data-source:")
-        .add("    driver-class-name: com.mysql.cj.jdbc.Driver")
-        .add("    url: jdbc:mysql://localhost:3306/${housekeeping.schema-name}")
-        .add("source-catalog:")
-        .add("  name: source")
-        .add("  configuration-properties:")
-        .add("    " + ConfVars.METASTOREURIS.varname + ": " + hive.getThriftConnectionUri())
-        .add("replica-catalog:")
-        .add("  name: replica")
-        .add("  hive-metastore-uris: " + hive.getThriftConnectionUri())
-        .add("table-replications:")
-        .add("  -")
-        .add("    source-table:")
-        .add("      database-name: " + DATABASE)
-        .add("      table-name: source_" + TABLE)
-        .add("    replica-table:")
-        .add("      table-name: replica_" + TABLE)
-        .add("      table-location: " + temp.newFolder("replica"))
-        .build();
-    Files.asCharSink(ymlFile, UTF_8).writeLines(lines);
-
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        assertTrue(hive.client().tableExists(DATABASE, "replica_" + TABLE));
-      }
-    });
-
-    CircusTrain.main(new String[] { "--config=" + ymlFile.getAbsolutePath() });
-  }
-
-  @Test
   public void singleYmlFileWithMultipleExtensions() throws Exception {
     TestLocomotiveListener.testBean = null;
     exit.expectSystemExitWithStatus(0);
