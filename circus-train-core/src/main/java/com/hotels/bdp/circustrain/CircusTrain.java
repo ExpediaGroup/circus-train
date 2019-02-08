@@ -29,7 +29,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
@@ -101,22 +100,19 @@ public class CircusTrain {
     int exitCode = -1;
     try {
       String defaultModules = Joiner.on(",").join(Modules.REPLICATION, Modules.HOUSEKEEPING);
-
-      ConfigurableApplicationContext run = new SpringApplicationBuilder(CircusTrain.class)
-          .properties("spring.config.location:${config:null}")
-          .properties("spring.profiles.active:${modules:" + defaultModules + "}")
-          .properties("instance.home:${user.home}")
-          .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
-          .properties("jasypt.encryptor.password:${password:null}")
-          .properties("housekeeping.schema-name:circus_train")
-          .registerShutdownHook(true)
-          .initializers(new ExtensionInitializer())
-          .listeners(new ConfigFileValidationApplicationListener())
-          .build()
-          .run(args);
-
-      exitCode = SpringApplication.exit(run);
-
+      exitCode = SpringApplication
+          .exit(new SpringApplicationBuilder(CircusTrain.class)
+              .properties("spring.config.location:${config:null}")
+              .properties("spring.profiles.active:${modules:" + defaultModules + "}")
+              .properties("instance.home:${user.home}")
+              .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
+              .properties("jasypt.encryptor.password:${password:null}")
+              .properties("housekeeping.schema-name:circus_train")
+              .registerShutdownHook(true)
+              .initializers(new ExtensionInitializer())
+              .listeners(new ConfigFileValidationApplicationListener())
+              .build()
+              .run(args));
     } catch (ConfigFileValidationException e) {
       LOG.error(e.getMessage(), e);
       printCircusTrainHelp(e.getErrors());
