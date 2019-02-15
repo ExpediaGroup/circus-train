@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +53,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
@@ -240,6 +242,65 @@ public class S3S3CopierTest {
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
     s3s3Copier.copy();
     verify(mockedTransferManager).shutdownNow();
+  }
+
+  @Test
+  public void copyRetryWhenS3ThrowsException() throws Exception {
+    client.putObject("source", "data", inputData);
+    Path sourceBaseLocation = new Path("s3://source/");
+    Path replicaLocation = new Path("s3://target/");
+    List<Path> sourceSubLocations = new ArrayList<>();
+
+    TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
+    TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
+    when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
+        .thenReturn(mockedTransferManager);
+    Copy copy = Mockito.mock(Copy.class);
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+        any(TransferStateChangeListener.class))).thenThrow(new AmazonS3Exception("S3 error"))
+                                                .thenReturn(copy);
+    TransferProgress transferProgress = new TransferProgress();
+    when(copy.getProgress()).thenReturn(transferProgress);
+    S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
+        mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
+    try {
+      s3s3Copier.copy();
+    } catch (Exception e) {
+      fail("Should not have thrown exception");
+    }
+    verify(mockedTransferManager, times(2)).copy(any(CopyObjectRequest.class),
+        any(AmazonS3.class), any(TransferStateChangeListener.class));
+  }
+
+  @Test
+  public void copySafelyShutDownTransferWhenRetryFails() throws Exception {
+    client.putObject("source", "data", inputData);
+    Path sourceBaseLocation = new Path("s3://source/");
+    Path replicaLocation = new Path("s3://target/");
+    List<Path> sourceSubLocations = new ArrayList<>();
+
+    TransferManagerFactory mockedTransferManagerFactory = Mockito.mock(TransferManagerFactory.class);
+    TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
+    when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
+        .thenReturn(mockedTransferManager);
+    Copy copy = Mockito.mock(Copy.class);
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+        any(TransferStateChangeListener.class))).thenThrow(new AmazonS3Exception("S3 error"))
+        .thenThrow(new AmazonS3Exception("S3 error"));
+    TransferProgress transferProgress = new TransferProgress();
+    when(copy.getProgress()).thenReturn(transferProgress);
+    S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
+        mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
+    try {
+      s3s3Copier.copy();
+      fail("Exception should have been thrown");
+    } catch (CircusTrainException e) {
+      verify(mockedTransferManager, times(2)).copy(any(CopyObjectRequest.class),
+          any(AmazonS3.class), any(TransferStateChangeListener.class));
+      verify(mockedTransferManager).shutdownNow();
+      assertThat(e.getMessage(), is("Error in S3S3Copier:"));
+      assertThat(e.getCause().getMessage(), startsWith("S3 error"));
+    }
   }
 
   @Test

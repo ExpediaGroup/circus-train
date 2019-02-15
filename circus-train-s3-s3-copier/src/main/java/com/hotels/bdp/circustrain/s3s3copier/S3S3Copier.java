@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -53,7 +54,8 @@ import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
 public class S3S3Copier implements Copier {
 
-  private final static Logger LOG = LoggerFactory.getLogger(S3S3Copier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(S3S3Copier.class);
+  private static final int MAX_COPY_ATTEMPTS = 2;
 
   private static class BytesTransferStateChangeListener implements TransferStateChangeListener {
 
@@ -211,7 +213,7 @@ public class S3S3Copier implements Copier {
 
       TransferStateChangeListener stateChangeListener = new BytesTransferStateChangeListener(s3ObjectSummary,
           targetS3Uri, targetKey);
-      Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
+      Copy copy = copyWithRetry(copyObjectRequest, stateChangeListener);
       totalBytesToReplicate += copy.getProgress().getTotalBytesToTransfer();
       copyJobs.add(copy);
     }
@@ -223,6 +225,23 @@ public class S3S3Copier implements Copier {
       objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
       copyObjectRequest.setNewObjectMetadata(objectMetadata);
     }
+  }
+
+  private Copy copyWithRetry(CopyObjectRequest copyObjectRequest, TransferStateChangeListener stateChangeListener) {
+    int copyAttempt = 1;
+    Copy copy = null;
+    while(copyAttempt <= MAX_COPY_ATTEMPTS) {
+      try {
+        copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
+        break;
+      } catch (AmazonS3Exception e) {
+        if (++copyAttempt > MAX_COPY_ATTEMPTS) {
+          throw e;
+        }
+        LOG.error("S3 failed to copy object on attempt {}", copyAttempt, e);
+      }
+    }
+    return copy;
   }
 
   private Metrics gatherAllCopyResults() {
