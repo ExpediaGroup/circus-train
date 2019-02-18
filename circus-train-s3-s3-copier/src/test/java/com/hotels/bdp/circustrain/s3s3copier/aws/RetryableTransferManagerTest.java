@@ -48,14 +48,14 @@ import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 public class RetryableTransferManagerTest {
 
   @Autowired
-  private TransferManager transferManager;
+  private TransferManager mockedTransferManager;
 
   @Autowired
   private RetryableTransferManager retryableTransferManager;
 
   @Before
   public void setup() {
-    Mockito.reset(transferManager);
+    Mockito.reset(mockedTransferManager);
   }
 
   @Test
@@ -63,7 +63,7 @@ public class RetryableTransferManagerTest {
     CopyObjectRequest copyObjectRequest = Mockito.mock(CopyObjectRequest.class);
     TransferStateChangeListener stateChangeListener = Mockito.mock(TransferStateChangeListener.class);
     Copy copy = Mockito.mock(Copy.class);
-    when(transferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenThrow(new AmazonS3Exception("S3 error"))
         .thenThrow(new AmazonS3Exception("S3 error"))
         .thenReturn(copy);
@@ -73,7 +73,7 @@ public class RetryableTransferManagerTest {
     } catch (Exception e) {
       fail("Should not have thrown exception");
     }
-    verify(transferManager, times(3)).copy(any(CopyObjectRequest.class),
+    verify(mockedTransferManager, times(3)).copy(any(CopyObjectRequest.class),
         any(AmazonS3.class), any(TransferStateChangeListener.class));
   }
 
@@ -81,7 +81,7 @@ public class RetryableTransferManagerTest {
   public void copyThrowExceptionWhenS3ThrowsExceptionThreeTimes() throws Exception {
     CopyObjectRequest copyObjectRequest = Mockito.mock(CopyObjectRequest.class);
     TransferStateChangeListener stateChangeListener = Mockito.mock(TransferStateChangeListener.class);
-    when(transferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenThrow(new AmazonS3Exception("S3 error"))
         .thenThrow(new AmazonS3Exception("S3 error"))
         .thenThrow(new AmazonS3Exception("S3 error"));
@@ -89,7 +89,7 @@ public class RetryableTransferManagerTest {
       retryableTransferManager.copy(copyObjectRequest, stateChangeListener);
       fail("Exception should have been thrown");
     } catch (Exception e) {
-      verify(transferManager, times(3)).copy(any(CopyObjectRequest.class),
+      verify(mockedTransferManager, times(3)).copy(any(CopyObjectRequest.class),
           any(AmazonS3.class), any(TransferStateChangeListener.class));
       assertThat(e.getMessage(), startsWith("S3 error"));
     }

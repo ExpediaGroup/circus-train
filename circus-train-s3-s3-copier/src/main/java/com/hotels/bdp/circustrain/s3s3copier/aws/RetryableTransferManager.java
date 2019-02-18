@@ -31,6 +31,7 @@ public class RetryableTransferManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(RetryableTransferManager.class);
   private static final int BACKOFF_DELAY_MS = 500;
+  private static final int MAX_RETRY_ATTEMPTS = 3;
   private TransferManager transferManager;
   private AmazonS3 srcClient;
   private int retryAttempt = 0;
@@ -41,11 +42,14 @@ public class RetryableTransferManager {
   }
 
   @Retryable(value = { AmazonS3Exception.class },
+      maxAttempts = MAX_RETRY_ATTEMPTS,
       backoff = @Backoff(delay = BACKOFF_DELAY_MS, multiplier = 2))
   public Copy copy(CopyObjectRequest copyObjectRequest, TransferStateChangeListener stateChangeListener) {
     retryAttempt++;
     LOG.info("copying attempt {}/3", retryAttempt);
-    return transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
+    Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
+    retryAttempt = 0;
+    return copy;
   }
 
   public void shutdownNow() {
