@@ -46,7 +46,7 @@ public class RetryableTransferManager {
       backoff = @Backoff(delay = BACKOFF_DELAY_MS, multiplier = 2))
   public Copy copy(CopyObjectRequest copyObjectRequest, TransferStateChangeListener stateChangeListener) {
     retryAttempt++;
-    LOG.info("copying attempt {}/3", retryAttempt);
+    LOG.info("copying attempt {}/{}", retryAttempt, MAX_ATTEMPTS);
     Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
     retryAttempt = 0;
     return copy;
