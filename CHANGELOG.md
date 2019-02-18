@@ -1,7 +1,12 @@
 ## TBD
+### Changed
+* Updated `housekeeping` version to 3.0.6 (was 3.0.5).
+* Updated `hotels-oss-parent` version to 3.0.0 (was 2.3.5).
+
 ### Fixed
 * Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
 * Fixed issue where in certain cases the table location of a partitioned table would be scheduled for housekeeping.
+* Removed default script for creating a housekeeping schema to allow the use of schemas that are already created. See [#111](https://github.com/HotelsDotCom/circus-train/issues/111).
 
 ## 13.2.1 - 2019-01-24
 ### Changed
