@@ -32,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 
@@ -77,6 +78,7 @@ import com.hotels.bdp.circustrain.manifest.ManifestAttributes;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @SpringBootApplication
+@EnableRetry
 @EnableConfigurationProperties
 @ComponentScan(basePackages = {
     "com.hotels.bdp.circustrain.avro",

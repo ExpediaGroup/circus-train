@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,16 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Component
-public class TransferManagerFactory {
+public class RetryableTransferManagerFactory {
 
-  public TransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions) {
-    return TransferManagerBuilder
+  public RetryableTransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions, AmazonS3 srcClient) {
+    TransferManager transferManager = TransferManagerBuilder
         .standard()
         .withMultipartCopyThreshold(s3s3CopierOptions.getMultipartCopyThreshold())
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
         .withS3Client(targetS3Client)
         .build();
+    return new RetryableTransferManager(transferManager, srcClient);
   }
 
 }

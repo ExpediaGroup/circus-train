@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,21 +36,21 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
-import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.RetryableTransferManagerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class S3S3CopierFactoryTest {
 
   private @Mock AmazonS3ClientFactory clientFactory;
   private @Mock ListObjectsRequestFactory listObjectsRequestFactory;
-  private @Mock TransferManagerFactory transferManagerFactory;
+  private @Mock RetryableTransferManagerFactory retryableTransferManagerFactory;
   private @Mock MetricRegistry metricsRegistry;
 
   private S3S3CopierFactory factory;
 
   @Before
   public void setUp() {
-    factory = new S3S3CopierFactory(clientFactory, listObjectsRequestFactory, transferManagerFactory, metricsRegistry);
+    factory = new S3S3CopierFactory(clientFactory, listObjectsRequestFactory, retryableTransferManagerFactory, metricsRegistry);
   }
 
   @Test
