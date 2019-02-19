@@ -15,10 +15,16 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier.aws;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -30,29 +36,52 @@ import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 public class RetryableTransferManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(RetryableTransferManager.class);
-  private static final int BACKOFF_DELAY_MS = 500;
-  private static final int MAX_ATTEMPTS = 3;
+  private static final int INITIAL_RETRY_INTERVAL_MS = 500;
+  private static final int MAX_RETRY_INTERVAL_MS = 1000;
+
+  private RetryTemplate retryTemplate;
   private TransferManager transferManager;
   private AmazonS3 srcClient;
-  private int retryAttempt = 0;
+  private int maxAttempts;
 
-  public RetryableTransferManager(TransferManager transferManager, AmazonS3 srcClient) {
+  public RetryableTransferManager(TransferManager transferManager, AmazonS3 srcClient, int maxAttempts) {
     this.transferManager = transferManager;
     this.srcClient = srcClient;
+    this.maxAttempts = maxAttempts;
+    this.retryTemplate = setUpRetryTemplate();
   }
 
-  @Retryable(value = { AmazonS3Exception.class },
-      maxAttempts = MAX_ATTEMPTS,
-      backoff = @Backoff(delay = BACKOFF_DELAY_MS, multiplier = 2))
-  public Copy copy(CopyObjectRequest copyObjectRequest, TransferStateChangeListener stateChangeListener) {
-    retryAttempt++;
-    LOG.info("copying attempt {}/{}", retryAttempt, MAX_ATTEMPTS);
-    Copy copy = transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
-    retryAttempt = 0;
-    return copy;
+  public Copy copy(final CopyObjectRequest copyObjectRequest, final TransferStateChangeListener stateChangeListener) {
+    try {
+      return retryTemplate.execute(new RetryCallback<Copy, Throwable>() {
+        public Copy doWithRetry(RetryContext context) {
+          LOG.info("copying attempt {}/{}", context.getRetryCount()+1, maxAttempts);
+          return transferManager.copy(copyObjectRequest, srcClient, stateChangeListener);
+        }
+      });
+    } catch (Throwable throwable) {
+      throw new AmazonS3Exception(throwable.getMessage());
+    }
   }
 
   public void shutdownNow() {
     transferManager.shutdownNow();
+  }
+
+  private RetryTemplate setUpRetryTemplate() {
+    Map<Class<? extends Throwable>, Boolean> exceptions = new HashMap<>();
+    exceptions.put(AmazonS3Exception.class, true);
+
+    SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxAttempts, exceptions);
+
+    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+    backOffPolicy.setInitialInterval(INITIAL_RETRY_INTERVAL_MS);
+    backOffPolicy.setMaxInterval(MAX_RETRY_INTERVAL_MS);
+
+    RetryTemplate retryTemplate = new RetryTemplate();
+    retryTemplate.setRetryPolicy(retryPolicy);
+    retryTemplate.setBackOffPolicy(backOffPolicy);
+
+    return retryTemplate;
   }
 }

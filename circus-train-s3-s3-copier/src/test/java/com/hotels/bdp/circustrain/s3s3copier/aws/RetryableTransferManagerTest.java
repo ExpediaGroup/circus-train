@@ -44,8 +44,10 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = RetryableTransferManagerTest.ContextConfiguration.class)
 public class RetryableTransferManagerTest {
+
+  private static int MAX_COPY_ATTEMPTS = 3;
 
   @Autowired
   private TransferManager mockedTransferManager;
@@ -107,7 +109,7 @@ public class RetryableTransferManagerTest {
     @Bean
     public RetryableTransferManager retriableTransferManager(TransferManager transferManager) {
       AmazonS3 srcClient = Mockito.mock(AmazonS3.class);
-      return new RetryableTransferManager(transferManager, srcClient);
+      return new RetryableTransferManager(transferManager, srcClient, MAX_COPY_ATTEMPTS);
     }
   }
 }

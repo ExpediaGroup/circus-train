@@ -33,7 +33,7 @@ public class RetryableTransferManagerFactory {
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
         .withS3Client(targetS3Client)
         .build();
-    return new RetryableTransferManager(transferManager, srcClient);
+    return new RetryableTransferManager(transferManager, srcClient, s3s3CopierOptions.getMaxCopyAttempts());
   }
 
 }
