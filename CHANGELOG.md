@@ -1,7 +1,6 @@
 ## 13.2.2 - 2019-02-20
-### Changed
-* Added a retry mechanism to handle AWS S3 copying bug
-* Added a configuration parameter to support a configurable number of maximum attempts at copying
+### Added
+* Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
 
 ## TBD
 ### Fixed

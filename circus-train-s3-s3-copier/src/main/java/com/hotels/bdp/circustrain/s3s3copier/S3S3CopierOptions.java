@@ -124,6 +124,6 @@ public class S3S3CopierOptions {
 
   public int getMaxCopyAttempts() {
     Integer maxCopyAttempts = MapUtils.getInteger(copierOptions, Keys.MAX_COPY_ATTEMPTS.keyName(), 3);
-    return maxCopyAttempts < 1 ? 1 : maxCopyAttempts;
+    return maxCopyAttempts < 1 ? 3 : maxCopyAttempts;
   }
 }

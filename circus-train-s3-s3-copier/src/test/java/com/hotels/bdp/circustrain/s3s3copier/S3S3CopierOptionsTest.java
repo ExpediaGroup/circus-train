@@ -104,16 +104,16 @@ public class S3S3CopierOptionsTest {
   }
 
   @Test
-  public void getMaxCopyAttemptsDefaultIsOne() throws Exception {
+  public void getMaxCopyAttemptsDefaultIsThree() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertThat(options.getMaxCopyAttempts(), is(3));
   }
 
   @Test
-  public void getMaxCopyAttemptsDefaultIsOneIfLessThanOne() throws Exception {
+  public void getMaxCopyAttemptsDefaultIfLessThanOne() throws Exception {
     copierOptions.put(S3S3CopierOptions.Keys.MAX_COPY_ATTEMPTS.keyName(), -1);
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
-    assertThat(options.getMaxCopyAttempts(), is(1));
+    assertThat(options.getMaxCopyAttempts(), is(3));
   }
 
 }
