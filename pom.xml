@@ -44,7 +44,7 @@
   </modules>
 
   <properties>
-	<jdk.version>1.7</jdk.version>
+    <jdk.version>1.7</jdk.version>
     <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
