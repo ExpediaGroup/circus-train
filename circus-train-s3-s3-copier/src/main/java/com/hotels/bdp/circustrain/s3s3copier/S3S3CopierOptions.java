@@ -56,7 +56,7 @@ public class S3S3CopierOptions {
      */
     CANNED_ACL("canned-acl"),
     /**
-     * Number of copy attempts to allow when copying from S3 to S3. Default value is 1.
+     * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
     MAX_COPY_ATTEMPTS("s3s3copier-retry-maxattempts");
 
