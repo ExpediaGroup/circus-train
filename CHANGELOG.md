@@ -1,7 +1,7 @@
 ## TBD
 ### Changed
 * Updated `housekeeping` version to 3.0.6 (was 3.0.5).
-* Updated `hotels-oss-parent` version to 3.0.0 (was 2.3.5).
+* Updated `hotels-oss-parent` version to 4.0.0 (was 2.3.5).
 
 ### Fixed
 * Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
