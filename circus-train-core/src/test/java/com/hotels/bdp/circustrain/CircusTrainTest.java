@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class CircusTrainTest {
     exit.expectSystemExitWithStatus(0);
     File ymlFile = temp.newFile("test-application.yml");
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
         .add("source-catalog:")
         .add("  name: source")
@@ -127,7 +127,7 @@ public class CircusTrainTest {
     exit.expectSystemExitWithStatus(0);
     File ymlFile = temp.newFile("test-application.yml");
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("source-catalog:")
         .add("  name: source")
         .add("  configuration-properties:")
@@ -143,8 +143,7 @@ public class CircusTrainTest {
         .add("    replica-table:")
         .add("      table-name: replica_" + TABLE)
         .add("      table-location: " + temp.newFolder("replica"))
-        .add("extension-packages: com.hotels.test.extension, "
-            + TestCopierFactory.class.getPackage().getName())
+        .add("extension-packages: com.hotels.test.extension, " + TestCopierFactory.class.getPackage().getName())
         .add("testExtensionConfig: foo")
         .build();
     Files.asCharSink(ymlFile, UTF_8).writeLines(lines);
@@ -165,7 +164,7 @@ public class CircusTrainTest {
     File ymlFile2 = temp.newFile("test-application2.yml");
 
     List<String> lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("extension-packages: " + TestCopierFactory.class.getPackage().getName())
         .add("source-catalog:")
         .add("  name: source")
@@ -178,7 +177,7 @@ public class CircusTrainTest {
     Files.asCharSink(ymlFile1, UTF_8).writeLines(lines);
 
     lines = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .add("table-replications:")
         .add("  -")
         .add("    source-table:")
@@ -231,7 +230,7 @@ public class CircusTrainTest {
         Path sourceBaseLocation,
         Path replicaLocation,
         Map<String, Object> copierOptions) {
-      return newInstance(eventId, sourceBaseLocation, Collections.<Path> emptyList(), replicaLocation, copierOptions);
+      return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
     }
 
   }

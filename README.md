@@ -459,6 +459,7 @@ Housekeeping is the process that removes expired and orphaned data on the replic
 
         housekeeping:
           expired-path-duration: P3D
+          db-init-script: classpath:/schema.sql
           data-source:
             driver-class-name: org.h2.Driver 
             url: jdbc:h2:${housekeeping.h2.database};AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
@@ -467,8 +468,9 @@ Housekeeping is the process that removes expired and orphaned data on the replic
 
 |Property|Required|Description|
 |----|----|----|
-|`housekeeping.h2.database`|No|The location of the h2 housekeeping database. Defaults to `${instance.home}/data/${instance.name}/housekeeping`. Refer to the [Instance Globals](#instance-globals) section for more details.|
+|`housekeeping.h2.database`|No|The location of the h2 housekeeping database. Defaults to `${instance.home}/data/${instance.name}/${housekeeping.schema-name}`. Refer to the [Instance Globals](#instance-globals) section for more details.|
 |`housekeeping.schema-name`|No|Database schema name to use. Circus Train default: 'circus_train'|
+|`housekeeping.db-init-script`|No|Database init script to use. Circus Train comes with `schema.sql` on the classpath by default to create a `circus_train` schema, but to use it, it needs to be specified for this parameter.|
 
 For more details on Housekeeping configuration, including examples on how to override the H2 default database with something a bit more robust, please consult the [Housekeeping documentation](https://github.com/HotelsDotCom/housekeeping).
 
@@ -813,4 +815,4 @@ The Circus Train logo uses the [Ewert font](http://www.1001fonts.com/ewert-font.
 # Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-Copyright 2016-2019 Expedia Inc.
+Copyright 2016-2019 Expedia Group
