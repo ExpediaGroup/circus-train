@@ -106,7 +106,7 @@ public class S3S3CopierOptionsTest {
   @Test
   public void getMaxCopyAttemptsDefaultIsOne() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
-    assertThat(options.getMaxCopyAttempts(), is(1));
+    assertThat(options.getMaxCopyAttempts(), is(3));
   }
 
   @Test

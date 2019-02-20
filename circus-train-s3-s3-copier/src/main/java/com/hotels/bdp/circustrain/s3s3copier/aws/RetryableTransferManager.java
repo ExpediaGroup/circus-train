@@ -26,6 +26,7 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -60,7 +61,7 @@ public class RetryableTransferManager {
         }
       });
     } catch (Throwable throwable) {
-      throw new AmazonS3Exception(throwable.getMessage());
+      throw new AmazonClientException(throwable);
     }
   }
 

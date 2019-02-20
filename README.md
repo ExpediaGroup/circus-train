@@ -333,6 +333,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3-server-side-encryption`|No|Whether to enable server side encryption. Defaults to `false`.|
 |`copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3S3Copier` will not specify any canned ACL.|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+|`copier-options.s3s3copier-retry-maxattempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
 
 ### S3 Secret Configuration
 When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. To protect these from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.

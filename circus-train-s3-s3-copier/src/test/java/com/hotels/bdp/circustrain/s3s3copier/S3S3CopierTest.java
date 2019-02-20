@@ -409,7 +409,7 @@ public class S3S3CopierTest {
         .thenReturn(mockedRetryableTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(mockedRetryableTransferManager.copy(any(CopyObjectRequest.class),
-        any(TransferStateChangeListener.class))).thenThrow(new AmazonS3Exception("S3 error"));
+        any(TransferStateChangeListener.class))).thenThrow(new AmazonClientException("S3 error"));
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,

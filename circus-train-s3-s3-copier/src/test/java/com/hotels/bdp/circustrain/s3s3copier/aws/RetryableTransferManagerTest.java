@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier.aws;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -27,15 +28,11 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -43,21 +40,18 @@ import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = RetryableTransferManagerTest.ContextConfiguration.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RetryableTransferManagerTest {
 
-  private static int MAX_COPY_ATTEMPTS = 3;
+  private static final int MAX_COPY_ATTEMPTS = 3;
 
-  @Autowired
-  private TransferManager mockedTransferManager;
-
-  @Autowired
+  private @Mock TransferManager mockedTransferManager;
   private RetryableTransferManager retryableTransferManager;
 
   @Before
   public void setup() {
     Mockito.reset(mockedTransferManager);
+    retryableTransferManager = new RetryableTransferManager(mockedTransferManager, Mockito.mock(AmazonS3.class), MAX_COPY_ATTEMPTS);
   }
 
   @Test
@@ -93,23 +87,8 @@ public class RetryableTransferManagerTest {
     } catch (Exception e) {
       verify(mockedTransferManager, times(3)).copy(any(CopyObjectRequest.class),
           any(AmazonS3.class), any(TransferStateChangeListener.class));
-      assertThat(e.getMessage(), startsWith("S3 error"));
-    }
-  }
-
-  @Configuration
-  @EnableRetry
-  @EnableAspectJAutoProxy(proxyTargetClass=true)
-  public static class ContextConfiguration {
-    @Bean
-    public TransferManager transferManager() {
-      return Mockito.mock(TransferManager.class);
-    }
-
-    @Bean
-    public RetryableTransferManager retriableTransferManager(TransferManager transferManager) {
-      AmazonS3 srcClient = Mockito.mock(AmazonS3.class);
-      return new RetryableTransferManager(transferManager, srcClient, MAX_COPY_ATTEMPTS);
+      assertThat(e.getCause(), instanceOf(AmazonClientException.class));
+      assertThat(e.getCause().getMessage(), startsWith("S3 error"));
     }
   }
 }

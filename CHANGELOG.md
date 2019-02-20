@@ -1,3 +1,8 @@
+## 13.2.2 - 2019-02-20
+### Changed
+* Added a retry mechanism to handle AWS S3 copying bug
+* Added a configuration parameter to support a configurable number of maximum attempts at copying
+
 ## TBD
 ### Fixed
 * Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
