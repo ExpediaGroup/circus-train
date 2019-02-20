@@ -54,7 +54,11 @@ public class S3S3CopierOptions {
      * {@link com.amazonaws.services.s3.model.CannedAccessControlList}
      * Optional AWS Canned ACL
      */
-    CANNED_ACL("canned-acl");
+    CANNED_ACL("canned-acl"),
+    /**
+     * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
+     */
+    MAX_COPY_ATTEMPTS("s3s3copier-retry-maxattempts");
 
     private final String keyName;
 
@@ -118,4 +122,8 @@ public class S3S3CopierOptions {
      return null;
   }
 
+  public int getMaxCopyAttempts() {
+    Integer maxCopyAttempts = MapUtils.getInteger(copierOptions, Keys.MAX_COPY_ATTEMPTS.keyName(), 3);
+    return maxCopyAttempts < 1 ? 3 : maxCopyAttempts;
+  }
 }
