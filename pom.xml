@@ -50,7 +50,7 @@
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
     <spring-platform.version>2.0.8.RELEASE</spring-platform.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
-    <aws-jdk.version>1.11.431</aws-jdk.version>
+    <aws-jdk.version>1.11.503</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.5</httpcomponents.httpclient.version>
     <jackson.version>2.9.8</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
