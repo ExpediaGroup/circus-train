@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.sns.AmazonSNSAsyncClient;
+import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,7 +63,7 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   /** http://docs.aws.amazon.com/sns/latest/dg/large-payload-raw-message.html */
   private static final int SNS_MESSAGE_SIZE_LIMIT = 256 * 1024;
 
-  private final AmazonSNSAsyncClient sns;
+  private final AmazonSNSAsync sns;
   private final ListenerConfig config;
   private final ObjectWriter startWriter;
   private final Clock clock;
@@ -78,11 +77,11 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   private LinkedHashMap<String, String> partitionKeyTypes;
 
   @Autowired
-  public SnsListener(AmazonSNSAsyncClient sns, ListenerConfig config) {
+  public SnsListener(AmazonSNSAsync sns, ListenerConfig config) {
     this(sns, config, Clock.DEFAULT);
   }
 
-  SnsListener(AmazonSNSAsyncClient sns, ListenerConfig config, Clock clock) {
+  SnsListener(AmazonSNSAsync sns, ListenerConfig config, Clock clock) {
     this.clock = clock;
     LOG
         .info("Starting listener, topics: start={}, success={}, fail={}", config.getStartTopic(),
@@ -233,8 +232,6 @@ public class SnsListener implements LocomotiveListener, SourceCatalogListener, R
   @PreDestroy
   public void flush() throws InterruptedException {
     LOG.debug("Terminating...");
-    sns.getExecutorService().shutdown();
-    sns.getExecutorService().awaitTermination(60, TimeUnit.SECONDS);
     sns.shutdown();
     LOG.debug("Terminated.");
   }
