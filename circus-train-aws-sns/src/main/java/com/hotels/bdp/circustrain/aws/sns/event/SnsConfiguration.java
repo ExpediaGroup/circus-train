@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,28 @@ import static java.lang.String.format;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.retry.PredefinedRetryPolicies;
+import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.AmazonSNSAsyncClient;
 
 @Configuration
 public class SnsConfiguration {
 
   @Bean
-  AmazonSNSAsyncClient amazonSNS(ListenerConfig config, AWSCredentialsProvider awsCredentialsProvider) {
-    AmazonSNSAsyncClient client = new AmazonSNSAsyncClient(awsCredentialsProvider,
-        new ClientConfiguration().withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicy()),
-        Executors.newSingleThreadScheduledExecutor());
-    client.setRegion(Region.getRegion(Regions.fromName(config.getRegion())));
-    return client;
+  AmazonSNSAsync amazonSNS(ListenerConfig config, AWSCredentialsProvider awsCredentialsProvider) {
+    return AmazonSNSAsyncClient.asyncBuilder()
+        .withCredentials(awsCredentialsProvider)
+        .withRegion(config.getRegion())
+        .build();
   }
 
   @Bean

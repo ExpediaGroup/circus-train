@@ -1,7 +1,3 @@
-## 13.2.2 - 2019-02-20
-### Added
-* Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
-
 ## TBD
 ### Changed
 * Updated `housekeeping` version to 3.0.6 (was 3.0.5).
@@ -11,6 +7,10 @@
 * Clear partitioned state correctly for `SnsListener`. See [#104](https://github.com/HotelsDotCom/circus-train/issues/104).
 * Fixed issue where in certain cases the table location of a partitioned table would be scheduled for housekeeping.
 * Removed default script for creating a housekeeping schema to allow the use of schemas that are already created. See [#111](https://github.com/HotelsDotCom/circus-train/issues/111).
+* Upgraded AWS SDK to remove deprecation warning. See [#102](https://github.com/HotelsDotCom/circus-train/issues/102).
+
+### Added
+* Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
 
 ## 13.2.1 - 2019-01-24
 ### Changed
