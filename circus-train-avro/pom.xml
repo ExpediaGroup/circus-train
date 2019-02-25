@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>13.3.0-SNAPSHOT</version>
+    <version>14.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-avro</artifactId>
