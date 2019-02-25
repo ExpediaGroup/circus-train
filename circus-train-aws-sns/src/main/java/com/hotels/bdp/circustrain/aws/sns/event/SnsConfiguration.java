@@ -20,21 +20,16 @@ import static java.lang.String.format;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.client.builder.ExecutorFactory;
-import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.AmazonSNSAsyncClient;
 
@@ -43,19 +38,9 @@ public class SnsConfiguration {
 
   @Bean
   AmazonSNSAsync amazonSNS(ListenerConfig config, AWSCredentialsProvider awsCredentialsProvider) {
-    ClientConfiguration clientConfiguration = new ClientConfiguration().withRetryPolicy(
-        PredefinedRetryPolicies.getDefaultRetryPolicy());
-    ExecutorFactory executorFactory = new ExecutorFactory() {
-      @Override
-      public ExecutorService newExecutor() {
-        return Executors.newSingleThreadScheduledExecutor();
-      }
-    };
     return AmazonSNSAsyncClient.asyncBuilder()
-        .withClientConfiguration(clientConfiguration)
         .withCredentials(awsCredentialsProvider)
         .withRegion(config.getRegion())
-        .withExecutorFactory(executorFactory)
         .build();
   }
 
