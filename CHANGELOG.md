@@ -1,3 +1,7 @@
+## 13.2.2 - 2019-02-25
+### Fixed
+* Upgraded aws sdk to remove deprecation warning. See [#102](https://github.com/HotelsDotCom/circus-train/issues/102).
+
 ## 13.2.2 - 2019-02-20
 ### Added
 * Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
