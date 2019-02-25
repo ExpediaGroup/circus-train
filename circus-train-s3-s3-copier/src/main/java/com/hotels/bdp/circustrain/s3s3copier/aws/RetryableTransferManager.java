@@ -37,8 +37,8 @@ import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 public class RetryableTransferManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(RetryableTransferManager.class);
-  private static final int INITIAL_RETRY_INTERVAL_MS = 500;
-  private static final int MAX_RETRY_INTERVAL_MS = 1000;
+  private static final int INITIAL_RETRY_INTERVAL_MS = 2000;
+  private static final int MAX_RETRY_INTERVAL_MS = 6000;
 
   private RetryTemplate retryTemplate;
   private TransferManager transferManager;
