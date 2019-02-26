@@ -237,7 +237,7 @@ public class S3S3Copier implements Copier {
               .info("Replicating...': {}% complete",
                   String.format("%.0f", (alreadyReplicated / (double) totalBytesToReplicate) * 100.0));
         }
-      } catch (InterruptedException e) {
+      } catch (InterruptedException | AmazonClientException e) {
         throw new CircusTrainException(e);
       }
     }

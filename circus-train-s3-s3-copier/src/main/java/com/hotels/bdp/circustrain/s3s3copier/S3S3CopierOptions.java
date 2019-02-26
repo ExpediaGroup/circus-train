@@ -58,7 +58,7 @@ public class S3S3CopierOptions {
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
-    MAX_COPY_ATTEMPTS("s3s3copier-retry-maxattempts");
+    MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts");
 
     private final String keyName;
 

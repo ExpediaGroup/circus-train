@@ -8,4 +8,4 @@ table-replications:
 security:
   credential-provider: jceks://file/${config-location}/aws.jceks
 copier-options:
-  s3s3copier-retry-maxattempts: 3
+  s3s3-retry-max-copy-attempts: 3
