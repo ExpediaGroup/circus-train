@@ -182,7 +182,7 @@ Partition filters can be specified using the syntax described in [HIVE-1609](htt
 
 > The filter supports "=", "!=", ">", "<", ">=", "<=" and "LIKE" operations on partition keys of type string. "AND" and "OR" logical operations are supported in the filter. So for example, for a table having partition keys country and state, the filter can be 'country = "USA" AND (state = "CA" OR state = "AZ")'
 
-In particular notice that it is possible to nest sub-expressions within parentheses.
+In particular notice that it is possible to nest sub-expressions within parentheses. Wild cards are a allowed in the form of `.*`, example: `year like '201.*'`. Full regular expressions doesn't seem to be supported by Hive. 
 
 Encoding a constant literal expression into a replication configuration is not especially useful unless you always want to copy the same partitions each time. Therefore it is possible to introduce dynamically evaluated elements using Spring SpELs. We refer you to the [SpEL documentation](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#expressions) for the specific syntax and rules, however they quite simply allow you to embed Java language fragments into the filter which are dynamically evaluated to a string value. As most partition filters are date based, Circus Train includes the [Joda Time API](http://www.joda.org/joda-time/) on its classpath and we've also statically imported some convenience methods into the SpEL root context:
 
