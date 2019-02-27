@@ -8,6 +8,7 @@
 * Fixed issue where in certain cases the table location of a partitioned table would be scheduled for housekeeping.
 * Removed default script for creating a housekeeping schema to allow the use of schemas that are already created. See [#111](https://github.com/HotelsDotCom/circus-train/issues/111).
 * Upgraded AWS SDK to remove deprecation warning. See [#102](https://github.com/HotelsDotCom/circus-train/issues/102).
+* Upgraded hcommon-hive-metastore version to fix thrift compatibility bug. See [#115](https://github.com/HotelsDotCom/circus-train/issues/115).
 
 ### Added
 * Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
