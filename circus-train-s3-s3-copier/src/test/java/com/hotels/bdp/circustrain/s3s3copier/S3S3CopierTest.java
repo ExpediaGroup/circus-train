@@ -233,7 +233,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
@@ -271,7 +271,7 @@ public class S3S3CopierTest {
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenThrow(new AmazonServiceException("MyCause"));
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
@@ -297,7 +297,7 @@ public class S3S3CopierTest {
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
     when(copy.getProgress()).thenReturn(new TransferProgress());
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     doThrow(new AmazonClientException("cause")).when(copy).waitForCompletion();
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
@@ -323,7 +323,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
@@ -332,7 +332,7 @@ public class S3S3CopierTest {
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
     s3s3Copier.copy();
     ArgumentCaptor<CopyObjectRequest> argument = ArgumentCaptor.forClass(CopyObjectRequest.class);
-    verify(mockedTransferManager).copy(argument.capture(), any(TransferStateChangeListener.class));
+    verify(mockedTransferManager).copy(argument.capture(), any(AmazonS3.class), any(TransferStateChangeListener.class));
     CopyObjectRequest copyObjectRequest = argument.getValue();
     assertNull(copyObjectRequest.getNewObjectMetadata());
   }
@@ -352,7 +352,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(customOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
@@ -361,7 +361,7 @@ public class S3S3CopierTest {
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, customOptions);
     s3s3Copier.copy();
     ArgumentCaptor<CopyObjectRequest> argument = ArgumentCaptor.forClass(CopyObjectRequest.class);
-    verify(mockedTransferManager).copy(argument.capture(), any(TransferStateChangeListener.class));
+    verify(mockedTransferManager).copy(argument.capture(), any(AmazonS3.class), any(TransferStateChangeListener.class));
     CopyObjectRequest copyObjectRequest = argument.getValue();
     assertThat(copyObjectRequest.getNewObjectMetadata().getSSEAlgorithm(),
         is(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION));
@@ -383,7 +383,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(customOptions)))
             .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
             any(TransferStateChangeListener.class))).thenReturn(copy);
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
@@ -392,7 +392,7 @@ public class S3S3CopierTest {
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, customOptions);
     s3s3Copier.copy();
     ArgumentCaptor<CopyObjectRequest> argument = ArgumentCaptor.forClass(CopyObjectRequest.class);
-    verify(mockedTransferManager).copy(argument.capture(), any(TransferStateChangeListener.class));
+    verify(mockedTransferManager).copy(argument.capture(), any(AmazonS3.class), any(TransferStateChangeListener.class));
     CopyObjectRequest copyObjectRequest = argument.getValue();
     assertThat(copyObjectRequest.getCannedAccessControlList(), is(CannedAccessControlList.BucketOwnerFullControl));
   }
@@ -410,7 +410,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenThrow(new AmazonClientException("S3 error"));
     TransferProgress transferProgress = new TransferProgress();
     when(copy.getProgress()).thenReturn(transferProgress);
@@ -442,7 +442,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     when(copy.getProgress()).thenReturn(new TransferProgress());
     doThrow(new AmazonClientException("cause"))
@@ -452,7 +452,7 @@ public class S3S3CopierTest {
     try {
       s3s3Copier.copy();
       ArgumentCaptor<CopyObjectRequest> captor = ArgumentCaptor.forClass(CopyObjectRequest.class);
-      verify(mockedTransferManager, Mockito.times(3)).copy(captor.capture(), any(TransferStateChangeListener.class));
+      verify(mockedTransferManager, Mockito.times(3)).copy(captor.capture(), any(AmazonS3.class), any(TransferStateChangeListener.class));
       List<CopyObjectRequest> capturedCopyRequests = captor.getAllValues();
       assertThat(capturedCopyRequests.get(0).getSourceKey(), is(sourceKey1));
       assertThat(capturedCopyRequests.get(1).getSourceKey(), is(sourceKey2));
@@ -480,7 +480,7 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(mockedTransferManager.copy(any(CopyObjectRequest.class),
+    when(mockedTransferManager.copy(any(CopyObjectRequest.class), any(AmazonS3.class),
         any(TransferStateChangeListener.class))).thenReturn(copy);
     TransferProgress transferProgress = new TransferProgress();
     transferProgress.setTotalBytesToTransfer(7);

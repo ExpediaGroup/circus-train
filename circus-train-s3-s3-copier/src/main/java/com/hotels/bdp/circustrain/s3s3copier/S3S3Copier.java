@@ -264,7 +264,7 @@ public class S3S3Copier implements Copier {
     LOG
         .info("Copying object from '{}/{}' to '{}/{}'", copyObjectRequest.getSourceBucketName(), copyObjectRequest.getSourceKey(),
             copyObjectRequest.getDestinationBucketName(), copyObjectRequest.getDestinationKey());
-    return transferManager.copy(copyObjectRequest, copyJob.getTransferStateChangeListener());
+    return transferManager.copy(copyObjectRequest, srcClient, copyJob.getTransferStateChangeListener());
   }
 
   private List<CopyJob> gatherCopyJobs(List<CopyJob> copyJobs) {
