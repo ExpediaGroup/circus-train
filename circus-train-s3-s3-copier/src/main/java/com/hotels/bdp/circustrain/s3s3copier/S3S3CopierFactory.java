@@ -34,7 +34,7 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.aws.S3Schemes;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
-import com.hotels.bdp.circustrain.s3s3copier.aws.RetryableTransferManagerFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
 @Profile({ Modules.REPLICATION })
 @Component
@@ -43,18 +43,18 @@ public class S3S3CopierFactory implements CopierFactory {
 
   private final AmazonS3ClientFactory clientFactory;
   private final ListObjectsRequestFactory listObjectsRequestFactory;
-  private final RetryableTransferManagerFactory retryableTransferManagerFactory;
+  private final TransferManagerFactory transferManagerFactory;
   private final MetricRegistry runningMetricsRegistry;
 
   @Autowired
   public S3S3CopierFactory(
       AmazonS3ClientFactory clientFactory,
       ListObjectsRequestFactory listObjectsRequestFactory,
-      RetryableTransferManagerFactory retryableTransferManagerFactory,
+      TransferManagerFactory transferManagerFactory,
       MetricRegistry runningMetricsRegistry) {
     this.clientFactory = clientFactory;
     this.listObjectsRequestFactory = listObjectsRequestFactory;
-    this.retryableTransferManagerFactory = retryableTransferManagerFactory;
+    this.transferManagerFactory = transferManagerFactory;
     this.runningMetricsRegistry = runningMetricsRegistry;
   }
 
@@ -71,7 +71,7 @@ public class S3S3CopierFactory implements CopierFactory {
       Path replicaLocation,
       Map<String, Object> copierOptions) {
     return new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, clientFactory,
-        retryableTransferManagerFactory, listObjectsRequestFactory, runningMetricsRegistry,
+        transferManagerFactory, listObjectsRequestFactory, runningMetricsRegistry,
         new S3S3CopierOptions(copierOptions));
   }
 

@@ -37,6 +37,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.Transfer;
 import com.amazonaws.services.s3.transfer.Transfer.TransferState;
+import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
@@ -48,8 +49,7 @@ import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
-import com.hotels.bdp.circustrain.s3s3copier.aws.RetryableTransferManager;
-import com.hotels.bdp.circustrain.s3s3copier.aws.RetryableTransferManagerFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
 public class S3S3Copier implements Copier {
 
@@ -104,10 +104,10 @@ public class S3S3Copier implements Copier {
   private final ListObjectsRequestFactory listObjectsRequestFactory;
   private final MetricRegistry registry;
   private final AmazonS3ClientFactory s3ClientFactory;
-  private final RetryableTransferManagerFactory retryableTransferManagerFactory;
+  private final TransferManagerFactory transferManagerFactory;
   private final S3S3CopierOptions s3s3CopierOptions;
 
-  private RetryableTransferManager retryableTransferManager;
+  private TransferManager transferManager;
   private final List<Copy> copyJobs = new ArrayList<>();
 
   private long totalBytesToReplicate = 0;
@@ -120,7 +120,7 @@ public class S3S3Copier implements Copier {
       List<Path> sourceSubLocations,
       Path replicaLocation,
       AmazonS3ClientFactory s3ClientFactory,
-      RetryableTransferManagerFactory retryableTransferManagerFactory,
+      TransferManagerFactory transferManagerFactory,
       ListObjectsRequestFactory listObjectsRequestFactory,
       MetricRegistry registry,
       S3S3CopierOptions s3s3CopierOptions) {
@@ -128,7 +128,7 @@ public class S3S3Copier implements Copier {
     this.sourceSubLocations = sourceSubLocations;
     this.replicaLocation = replicaLocation;
     this.s3ClientFactory = s3ClientFactory;
-    this.retryableTransferManagerFactory = retryableTransferManagerFactory;
+    this.transferManagerFactory = transferManagerFactory;
     this.listObjectsRequestFactory = listObjectsRequestFactory;
     this.registry = registry;
     this.s3s3CopierOptions = s3s3CopierOptions;
@@ -145,8 +145,8 @@ public class S3S3Copier implements Copier {
       }
     } finally {
       // cancel any running tasks
-      if (retryableTransferManager != null) {
-        retryableTransferManager.shutdownNow();
+      if (transferManager != null) {
+        transferManager.shutdownNow();
       }
     }
   }
@@ -156,7 +156,7 @@ public class S3S3Copier implements Copier {
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
-    retryableTransferManager = retryableTransferManagerFactory.newInstance(targetClient, s3s3CopierOptions, srcClient);
+    transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
       copy(sourceBase, targetBase);
     } else {
@@ -211,7 +211,7 @@ public class S3S3Copier implements Copier {
 
       TransferStateChangeListener stateChangeListener = new BytesTransferStateChangeListener(s3ObjectSummary,
           targetS3Uri, targetKey);
-      Copy copy = retryableTransferManager.copy(copyObjectRequest, stateChangeListener);
+      Copy copy = transferManager.copy(copyObjectRequest, stateChangeListener);
       totalBytesToReplicate += copy.getProgress().getTotalBytesToTransfer();
       copyJobs.add(copy);
     }

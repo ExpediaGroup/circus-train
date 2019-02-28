@@ -24,16 +24,14 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Component
-public class RetryableTransferManagerFactory {
+public class TransferManagerFactory {
 
-  public RetryableTransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions, AmazonS3 srcClient) {
-    TransferManager transferManager = TransferManagerBuilder
+  public TransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions) {
+    return TransferManagerBuilder
         .standard()
         .withMultipartCopyThreshold(s3s3CopierOptions.getMultipartCopyThreshold())
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
         .withS3Client(targetS3Client)
         .build();
-    return new RetryableTransferManager(transferManager, srcClient, s3s3CopierOptions.getMaxCopyAttempts());
   }
-
 }
