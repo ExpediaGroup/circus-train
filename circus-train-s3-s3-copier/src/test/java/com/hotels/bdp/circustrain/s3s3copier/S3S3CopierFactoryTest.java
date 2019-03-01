@@ -36,21 +36,21 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
-import com.hotels.bdp.circustrain.s3s3copier.aws.RetryableTransferManagerFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class S3S3CopierFactoryTest {
 
   private @Mock AmazonS3ClientFactory clientFactory;
   private @Mock ListObjectsRequestFactory listObjectsRequestFactory;
-  private @Mock RetryableTransferManagerFactory retryableTransferManagerFactory;
+  private @Mock TransferManagerFactory transferManagerFactory;
   private @Mock MetricRegistry metricsRegistry;
 
   private S3S3CopierFactory factory;
 
   @Before
   public void setUp() {
-    factory = new S3S3CopierFactory(clientFactory, listObjectsRequestFactory, retryableTransferManagerFactory, metricsRegistry);
+    factory = new S3S3CopierFactory(clientFactory, listObjectsRequestFactory, transferManagerFactory, metricsRegistry);
   }
 
   @Test
