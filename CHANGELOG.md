@@ -1,4 +1,4 @@
-## TBD
+## [14.0.0] - 2019-03-04
 ### Changed
 * Updated `housekeeping` version to 3.0.6 (was 3.0.5). This change modifies the default script for creating a housekeeping schema (from `classpath:/schema.sql` to empty string) and can cause errors for users that use the schema provided by default. To fix the errors, the property `housekeeping.db-init-schema` can be updated to `classpath:/schema.sql` which uses a file provided by default by Circus Train.
 * Updated `hotels-oss-parent` version to 4.0.0 (was 2.3.5).
@@ -13,7 +13,7 @@
 ### Added
 * Configurable retry mechanism to handle flaky AWS S3 to S3 copying. See [#56](https://github.com/HotelsDotCom/circus-train/issues/56).
 
-## 13.2.1 - 2019-01-24
+## [13.2.1] - 2019-01-24
 ### Changed
 * Refactored project to remove checkstyle and findbugs warnings.
 * Upgraded `hotels-oss-parent` version to 2.3.5 (was 2.3.3).
@@ -23,7 +23,7 @@
 ### Added
 * Support for getting AWS Credentials within a FARGATE instance in ECS. See [#109](https://github.com/HotelsDotCom/circus-train/issues/109).
 
-## 13.2.0 - 2019-01-11
+## [13.2.0] - 2019-01-11
 ### Added
 * Added replication-strategy configuration that can be used to support propagating deletes (drop table/partition operations). See [README.md](https://github.com/HotelsDotCom/circus-train#replication-strategy) for more details.
 * Ability to specify an S3 canned ACL via `copier-options.canned-acl`. See [#99](https://github.com/HotelsDotCom/circus-train/issues/99).
@@ -31,14 +31,14 @@
 ### Fixed
 * Increased version (1.2.4) of hcommon-hive-metastore to fix an issue where the wrong exception was being propagated in the compatibility layer.
 
-## 13.1.0 - 2018-12-20
+## [13.1.0] - 2018-12-20
 ### Changed
 * Housekeeping can be configured to control query batch size, this controls memory usage. See [#40](https://github.com/HotelsDotCom/housekeeping/issues/40).
 * Housekeeping readme moved to Housekeeping project. See [#31](https://github.com/HotelsDotCom/housekeeping/issues/31).
 * Upgraded Housekeeping library to also store replica database and table name in Housekeeping database. See [#30](https://github.com/HotelsDotCom/housekeeping/issues/30).
 * Upgraded `hotels-oss-parent` pom to 2.3.3 (was 2.0.6). See [#97](https://github.com/HotelsDotCom/circus-train/issues/97).
 
-## 13.0.0 - 2018-10-15
+## [13.0.0] - 2018-10-15
 ### Changed
 * Narrowed component scanning to be internal base packages instead of `com.hotels.bdp.circustrain`. See [#95](https://github.com/HotelsDotCom/circus-train/issues/95). Note this change is _not_ backwards compatible for any Circus Train extensions that are in the `com.hotels.bdp.circustrain` package - these were in effect being 
 implicitly scanned and loaded but won't be now. Instead these extensions will now need to be added using Circus Train's [standard extension loading mechanism](https://github.com/HotelsDotCom/circus-train#loading-extensions).
@@ -46,28 +46,28 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 * Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
 * Refactored the remaining code in `core.metastore` from `circus-train-core` to leverage hcommon-hive-metastore libraries.
 
-## 12.1.0 - 2018-08-08
+## [12.1.0] - 2018-08-08
 ### Changed
 * circus-train-gcp: avoid temporary copy of key file to `user.dir` when using absolute path to Google Cloud credentials file by transforming it into relative path.
 * circus-train-gcp: relative path can now be provided in the configuration for the Google Cloud credentials file.
 
-## 12.0.0 - 2018-07-13
+## [12.0.0] - 2018-07-13
 ### Changed
 * circus-train-vacuum-tool moved into [Housekeeping](https://github.com/HotelsDotCom/housekeeping) project under the module housekeeping-vacuum-tool.
 * Configuration classes moved from Core to API sub-project. See [#78](https://github.com/HotelsDotCom/circus-train/issues/78).
 
-## 11.5.2 - 2018-06-15
+## [11.5.2] - 2018-06-15
 ### Changed
 * Refactored general purpose Hive metastore code to leverage hcommon-hive-metastore libraries. See [#72](https://github.com/HotelsDotCom/circus-train/issues/72).
 
 ### Fixed
 * Avro schemas were not being replicated when a avro.schema.url without a scheme was specified. See [#74](https://github.com/HotelsDotCom/circus-train/issues/74)
 
-# 11.5.1 - 2018-05-24
+## [11.5.1] - 2018-05-24
 ### Fixed
 * Avro schemas were not being replicated when a HA NameNode is configured and the Avro replication feature is used. See [#69](https://github.com/HotelsDotCom/circus-train/issues/69).
 
-# 11.5.0 - 2018-05-24
+## [11.5.0] - 2018-05-24
 ### Added
 * Add SSH timeout and SSH strict host key checking capabilities. [#64](https://github.com/HotelsDotCom/circus-train/issues/64).
 
@@ -78,17 +78,17 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ### Fixed
 * Housekeeping was failing when attempting to delete a path which no longer exists on the replica filesystem. Upgraded Circus Train's Housekeeping dependency to a version which fixes this bug. See [#61](https://github.com/HotelsDotCom/circus-train/issues/61).
 
-# 11.4.0 - 2018-04-11
+## [11.4.0] - 2018-04-11
 ### Added
 * Ability to select Copier via configuration. See [#55](https://github.com/HotelsDotCom/circus-train/issues/55).
 
-# 11.3.1 - 2018-03-21
+## [11.3.1] - 2018-03-21
 ### Changed
 * Clearer replica-check exception message. See [#47](https://github.com/HotelsDotCom/circus-train/issues/47).
 ### Fixed
 * S3-S3 Hive Diff calculating incorrect checksum on folders. See [#49](https://github.com/HotelsDotCom/circus-train/issues/49).
 
-# 11.3.0 - 2018-02-27
+## [11.3.0] - 2018-02-27
 ### Changed
 * SNS message now indicates if message was truncated. See [#41](https://github.com/HotelsDotCom/circus-train/issues/41).
 * Exclude Guava 17.0 in favour of Guava 20.0 for Google Cloud library compatibility.
@@ -97,21 +97,21 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ### Fixed
 * Backwards compatibility with Hive 1.2.x.
 
-# 11.2.0 - 2018-02-16
+## [11.2.0] - 2018-02-16
 ### Added
 * Added ability to configure AWS Server Side Encryption for `S3S3Copier` via `copier-options.s3-server-side-encryption` configuration property.
 
 ### Changed
 * Upgrade housekeeping to version 1.0.2.
 
-# 11.1.1 - 2018-02-15
+## [11.1.1] - 2018-02-15
 ### Fixed
 * Google FileSystem classes not being placed onto the mapreduce.application.classpath in S3MapReduceCp and DistCp mapreduce jobs.
 
 ### Changed
 * Google FileSystem and S3 FileSystems added to mapreduce.application.classpath in circus-train-gcp and circus-train-aws respectively.
 
-# 11.1.0 - 2018-02-05
+## [11.1.0] - 2018-02-05
 ### Fixed
 * https://github.com/HotelsDotCom/circus-train/issues/23 - Housekeeping failing due to missing credentials.
 
@@ -123,7 +123,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 * Updated documentation for circus-train-aws-sns module (full reference of SNS message format, more examples).
 * Fixed references to README.md in command line runner help messages to point to correct GitHub locations.
 
-# 11.0.0 - 2018-01-16
+## [11.0.0] - 2018-01-16
 ### Changed
 * Upgraded Hive version from 1.2.1 to 2.3.2 (changes are backwards compatible).
 * Upgraded Spring Platform version from 2.0.3.RELEASE to 2.0.8.RELEASE.
@@ -131,14 +131,14 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 * Replicating a partitioned table containing no partitions will now succeed instead of silently not replicating the table metadata.
 * Most functionality from Housekeeping module moved to https://github.com/HotelsDotCom/housekeeping.
 
-# 10.0.0 - 2017-11-21
+## [10.0.0] - 2017-11-21
 ### Changed
 * Maven group ID changed to _com.hotels_.
 * Exclude logback in parent POM.
 * First open source release.
 * Various small code cleanups.
 
-# 9.2.0 - 2017-11-20
+## [9.2.0] - 2017-11-20
 ### Fixed
 * `S3S3Copier` captures cross region replications from US-Standard AWS regions.
 
@@ -146,31 +146,31 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 * Mock S3 end-point for HDFS-S3 and S3-S3 replications.
 * New `S3MapreduceCp` properties to control the size of the buffer used by the S3 `TransferManager` and to control the upload retries of the S3 client. Refer to _[README.md](README.md)_ for details.
 
-# 9.1.1 - 2017-10-17
+## [9.1.1] - 2017-10-17
 ### Fixed
 * `EventIdExtractor` RegEx changed so that it captures new event ID's and legacy event ID's.
 * Add read limit to prevent AWS library from trying to read more data than the size of the buffer provided by the Hadoop `FileSystem`.
 
 
-# 9.1.0 - 2017-10-03
+## [9.1.0] - 2017-10-03
 ### Added 
 * _circus-train-housekeeping_ support for storing housekeeping data in JDBC compliant SQL databases.
 
 ### Changed
 * _circus-train-parent_ updated to inherit from _hww-parent_ version 12.1.3.
 
-# 9.0.2 - 2017-09-20
+## [9.0.2] - 2017-09-20
 ### Added
 * Support for replication of Hive views.
 
 ### Changed
 * Removed _circus-train-aws_ dependency on internal patched _hadoop-aws_.
 
-# 9.0.1 - 2017-09-14
+## [9.0.1] - 2017-09-14
 ### Fixed 
 * Fixed error when replicating partitioned tables with empty partitions.
 
-# 9.0.0 - 2017-09-05
+## [9.0.0] - 2017-09-05
 ### Changed
 * Removed _circus-train-aws_ dependency from circus-train-core.
 * Circus Train Tools to be packaged as TGZ.
@@ -182,7 +182,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ### Fixed
 * Fixed broken Circus Train Tool Scripts.
 
-# 8.0.0 - 2017-07-28
+## [8.0.0] - 2017-07-28
 ### Added
 * S3/HDFS to GS Hive replication.
 * Support for users to be able to specify a list of `extension-packages` in their YAML configuration. This adds the specified packages to Spring's component scan, thereby allowing the loading of extensions via standard Spring annotations, such as `@Component` and `@Configuration`.
@@ -194,7 +194,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ### Removed
 * RPM module has been pulled out to a top-level project.
 
-# 7.0.0
+## [7.0.0]
 ### Added
 * New and improved HDFS-to-S3 copier.
 
