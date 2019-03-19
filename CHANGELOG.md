@@ -1,6 +1,6 @@
 ## [14.0.0] - 2019-03-04
 ### Changed
-* Updated `housekeeping` version to 3.0.6 (was 3.0.5). This change modifies the default script for creating a housekeeping schema (from `classpath:/schema.sql` to empty string) and can cause errors for users that use the schema provided by default. To fix the errors, the property `housekeeping.db-init-schema` can be updated to `classpath:/schema.sql` which uses a file provided by default by Circus Train.
+* Updated `housekeeping` version to 3.0.6 (was 3.0.5). This change modifies the default script for creating a housekeeping schema (from `classpath:/schema.sql` to empty string) and can cause errors for users that use the schema provided by default. To fix the errors, the property `housekeeping.db-init-script` can be updated to `classpath:/schema.sql` which uses a file provided by default by Circus Train.
 * Updated `hotels-oss-parent` version to 4.0.0 (was 2.3.5).
 
 ### Fixed
