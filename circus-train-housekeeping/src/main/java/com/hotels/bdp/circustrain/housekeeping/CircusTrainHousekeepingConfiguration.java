@@ -43,7 +43,7 @@ public class CircusTrainHousekeepingConfiguration {
       @Qualifier("baseConf") org.apache.hadoop.conf.Configuration baseConf,
       Housekeeping housekeeping) {
     return new FileSystemHousekeepingService(legacyReplicaPathRepository, baseConf,
-        housekeeping.getFetchLegacyReplicaPathPageSize());
+        housekeeping.getFetchLegacyReplicaPathPageSize(), housekeeping.getCleanupThreads());
   }
 
   @Bean
