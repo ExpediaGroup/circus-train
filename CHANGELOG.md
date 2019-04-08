@@ -1,7 +1,7 @@
 ## TBD
 
 ### Changed
-* Updated `housekeeping` version to 3.0.7 (was 3.0.6). Contains various housekeeping fixes.
+* Updated `housekeeping` version to 3.1.0 (was 3.0.6). Contains various housekeeping fixes.
 
 ## [14.0.0] - 2019-03-04
 ### Changed
