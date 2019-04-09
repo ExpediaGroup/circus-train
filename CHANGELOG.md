@@ -1,4 +1,4 @@
-## TBD
+## [14.0.1] - 2019-04-09
 
 ### Changed
 * Updated `housekeeping` version to 3.1.0 (was 3.0.6). Contains various housekeeping fixes.
