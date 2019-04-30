@@ -6,18 +6,18 @@ You can obtain Circus Train from Maven Central:
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) [![Build Status](https://travis-ci.org/HotelsDotCom/circus-train.svg?branch=master)](https://travis-ci.org/HotelsDotCom/circus-train) [![Coverage Status](https://coveralls.io/repos/github/HotelsDotCom/circus-train/badge.svg?branch=master)](https://coveralls.io/github/HotelsDotCom/circus-train?branch=master) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/circus-train.svg)
 
 ## Overview
-Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. 
+Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2). 
 
 Other features include:
 * Replication of any of the following:
 
    * an entire table and all its data on each run.
    * a sub-set of the data represented by a filter query (e.g. for a data set partitioned by load date you could run Circus Train once a day and replicate only the previous day's data).
-   * a sub-set of the data detected by looking for any changes in the data (this is a more costly operation and involves inspecting the table DDL and possibly the data on HDFS but can be useful for very large data sets where it's not feasible to replicate the entire data set on each run and the data isn't partitioned using a scheme that can be represented by a filter query).
-   * views
+   * a sub-set of the data detected by looking for any changes in the data.
+   * views.
    * table metadata (i.e. automatically replicates any DDL changes).
    
-* Replications between any Hadoop compatible file systems (HDFS, S3, GCS).CS).
+* Replications between any Hadoop compatible file systems (HDFS, S3, GCS).
 * A snapshot can be taken of the source data so any changes to it while replication occurs don't result in errors or incomplete data being copied.
 * Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data is handled by a configurable "house keeping" process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
 * Hive database and tables can optionally be renamed to have different names in the destination.
@@ -29,18 +29,16 @@ Other features include:
 * Connectivity with private networks through a bastion host and direct connections.
 * Table, partition, and column statistics are also copied to preserve performance at the replica.
 * Metrics about replication (success/failure, bandwidth, bytes copied etc.) can be sent to Graphite for building dashboards, alerting etc.
-* Pluggable replication event listeners so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A sample listener that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
-* Pluggable transformations so users can implement their own functionality to transform table, partition and column statistics metadata during a replication (this example shows how this could be used to modify the SerDe used for a table so that it's different in the destination table).
+* Pluggable replication event listeners so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A [sample listener](https://github.com/HotelsDotCom/circus-train/tree/master/circus-train-aws-sns) that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
+* Pluggable transformations so users can implement their own functionality to transform table, partition and column statistics metadata during a replication.
 * Configuration can be provided using YAML, property files, environment variables and command line arguments.
-
-A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2).
 
 ## Related projects
 
 Circus Train has been architected in a modular fashion to allow it to be more easily integrated with existing systems and to have additional functionality added to it. Here are some projects which are outside of the core Circus Train but provide useful additional features:
 * [Circus Train Big Query](https://github.com/HotelsDotCom/circus-train-bigquery) - replicates tables from Google's [BigQuery](https://cloud.google.com/bigquery/) to Hive.
-* [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) - a Circus Train copier implementation which also compacts small files into larger ones using [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze).
-* [Shunting Yard](https://github.com/HotelsDotCom/shunting-yard) - use Circus Train to perform event-based (i.e. as opposed to scheduled) replication.
+* [Circus Train DataSqueeze Copier](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) - a Circus Train copier implementation which also compacts small files into larger ones using [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze).
+* [Shunting Yard](https://github.com/HotelsDotCom/shunting-yard) - uses Circus Train to perform event-based (i.e. as opposed to scheduled) replication.
 
 ## General operation
 Below is a high level summary of the steps that Circus Train performs during the course of a typical run (different configuration might change this).
@@ -65,7 +63,7 @@ Below is a high level summary of the steps that Circus Train performs during the
 
 Although it's not necessary, we recommend exporting the environment variable `CIRCUS_TRAIN_HOME` by setting its value to wherever you extracted it to:
 
-    export CIRCUS_TRAIN_HOME=/<foo>/<bar>/waggle-dance-<version>
+    export CIRCUS_TRAIN_HOME=/<foo>/<bar>/circus-train-<version>
     
 Refer to the [configuration](#configuration) section below on what is needed to customise the configuration files before continuing.
 
