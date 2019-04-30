@@ -11,8 +11,8 @@ Circus Train replicates Hive tables between clusters on request. It replicates b
 Other features include:
 * Replication of any of the following:
    * an entire table and all its data on each run.
-   * a sub-set of the data represented by a filter query (e.g. for a data set partitioned by load date you could run Circus Train once a day and replicate only the previous day's data).
-   * a sub-set of the data detected by looking for any changes in the data.
+   * a subset of the data represented by a filter query (e.g. for a data set partitioned by load date you could run Circus Train once a day and replicate only the previous day's data).
+   * a subset of the data detected by looking for any changes in the data.
    * views.
    * table metadata (i.e. automatically replicates any DDL changes).
 * Replications between any Hadoop compatible file systems (HDFS, S3, GCS).
