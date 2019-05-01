@@ -11,24 +11,24 @@ Circus Train replicates Hive tables between clusters on request. It replicates b
 Other features include:
 * Replication of any of the following:
    * an entire table and all its data on each run.
-   * a subset of the data represented by a filter query (e.g. for a data set partitioned by load date you could run Circus Train once a day and replicate only the previous day's data).
-   * a subset of the data detected by looking for any changes in the data.
-   * views.
+   * a subset of the data represented by a [filter query](#partition-filters) (e.g. for a data set partitioned by load date you could run Circus Train once a day and replicate only the previous day's data).
+   * a subset of the data detected by looking for any [changes in the data](#partition-filter-generation).
+   * [views](#replicate-a-view).
    * table metadata (i.e. automatically replicates any DDL changes).
 * Replications between any Hadoop compatible file systems (HDFS, S3, GCS).
 * A snapshot can be taken of the source data so any changes to it while replication occurs don't result in errors or incomplete data being copied.
-* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data is handled by a configurable "house keeping" process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
+* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data is handled by a configurable [housekeeping](#configuring-housekeeping) process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
 * Hive database and tables can optionally be renamed to have different names in the destination.
 * Control of how the data is copied - what file attributes are copied, bandwidth throttling etc.
 * Data consistency checking is performed as part of the replication.
 * Numerous retry mechanisms are used in order to handle the many connectivity and reliability issues that can occur when replicating across locations.
 * Transport encryption for both metadata and data.
-* Use of a Java Keystore Hadoop Credentials Provider to keep authentication keys secure.
-* Connectivity with private networks through a bastion host and direct connections.
+* Use of a Java Keystore Hadoop Credentials Provider to keep [authentication keys secure](#s3-secret-configuration).
+* Connectivity with private networks through a [bastion host](#configuring-a-ssh-tunnel) and direct connections.
 * Table, partition, and column statistics are also copied to preserve performance at the replica.
-* Metrics about replication (success/failure, bandwidth, bytes copied etc.) can be sent to Graphite for building dashboards, alerting etc.
-* Pluggable replication event listeners so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A [sample listener](https://github.com/HotelsDotCom/circus-train/tree/master/circus-train-aws-sns) that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
-* Pluggable transformations so users can implement their own functionality to transform table, partition and column statistics metadata during a replication.
+* [Metrics](#metric-reporting) about replication (success/failure, bandwidth, bytes copied etc.) can be sent to Graphite for building dashboards, alerting etc.
+* Pluggable [replication event listeners](#developing-a-replicationeventlistener) so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A [sample listener](https://github.com/HotelsDotCom/circus-train/tree/master/circus-train-aws-sns) that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
+* Pluggable [transformations](#metadata-transformations) so users can implement their own functionality to transform table, partition and column statistics metadata during a replication.
 * Configuration can be provided using YAML, property files, environment variables and command line arguments.
 
 ## Related projects
