@@ -45,6 +45,15 @@
       <artifactId>hcommon-hive-metastore</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>javax.el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>com.hotels</groupId>
