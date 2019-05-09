@@ -23,6 +23,13 @@
       <artifactId>circus-train-tool-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.3.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
