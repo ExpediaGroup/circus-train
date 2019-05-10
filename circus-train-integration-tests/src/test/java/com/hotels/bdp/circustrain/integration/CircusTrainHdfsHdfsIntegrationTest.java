@@ -249,78 +249,78 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     runner.run(config.getAbsolutePath());
   }
 
-  @Test
-  public void partitionedTableHousekeepingEnabledWithAudit() throws Exception {
-    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+//  @Test
+//  public void partitionedTableHousekeepingEnabledWithAudit() throws Exception {
+//    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+//    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+//
+//    exit.expectSystemExitWithStatus(0);
+//    File config = dataFolder.getFile("partitioned-single-table-with-housekeeping.yml");
+//    CircusTrainRunner runner = CircusTrainRunner
+//        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+//        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+//            sourceCatalog.driverClassName())
+//        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+//        .build();
+//
+//    exit.checkAssertionAfterwards(new Assertion() {
+//      @Override
+//      public void checkAssertion() throws Exception {
+//        // Assert deleted path
+//        String jdbcUrl = housekeepingDbJdbcUrl();
+//        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+//          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+//              "SELECT * FROM circus_train.legacy_replica_path");
+//          assertThat(cleanUpPaths.size(), is(0));
+//          List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
+//              "SELECT * FROM circus_train.legacy_replica_path_aud");
+//          assertThat(cleanUpPathsAudit.size(), is(1));
+//          assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
+//          assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
+//          assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
+//          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
+//          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
+//        }
+//      }
+//    });
+//    runner.run(config.getAbsolutePath());
+//  }
 
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("partitioned-single-table-with-housekeeping.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .build();
-
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        // Assert deleted path
-        String jdbcUrl = housekeepingDbJdbcUrl();
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
-          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path");
-          assertThat(cleanUpPaths.size(), is(0));
-          List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path_aud");
-          assertThat(cleanUpPathsAudit.size(), is(1));
-          assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
-          assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
-          assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
-          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
-          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
-        }
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
-
-  @Test
-  public void unpartitionedTableHousekeepingEnabledWithAudit() throws Exception {
-    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
-
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("unpartitioned-single-table-with-housekeeping.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .build();
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        // Assert deleted path
-        String jdbcUrl = housekeepingDbJdbcUrl();
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
-          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path");
-          assertThat(cleanUpPaths.size(), is(0));
-          List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
-              "SELECT * FROM circus_train.legacy_replica_path_aud");
-          assertThat(cleanUpPathsAudit.size(), is(1));
-          assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
-          assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
-          assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
-          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
-          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
-        }
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
+//  @Test
+//  public void unpartitionedTableHousekeepingEnabledWithAudit() throws Exception {
+//    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+//    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
+//
+//    exit.expectSystemExitWithStatus(0);
+//    File config = dataFolder.getFile("unpartitioned-single-table-with-housekeeping.yml");
+//    CircusTrainRunner runner = CircusTrainRunner
+//        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+//        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+//            sourceCatalog.driverClassName())
+//        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+//        .build();
+//    exit.checkAssertionAfterwards(new Assertion() {
+//      @Override
+//      public void checkAssertion() throws Exception {
+//        // Assert deleted path
+//        String jdbcUrl = housekeepingDbJdbcUrl();
+//        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+//          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+//              "SELECT * FROM circus_train.legacy_replica_path");
+//          assertThat(cleanUpPaths.size(), is(0));
+//          List<LegacyReplicaPath> cleanUpPathsAudit = getCleanUpPaths(conn,
+//              "SELECT * FROM circus_train.legacy_replica_path_aud");
+//          assertThat(cleanUpPathsAudit.size(), is(1));
+//          assertThat(cleanUpPathsAudit.get(0).getEventId(), is("event-124"));
+//          assertThat(cleanUpPathsAudit.get(0).getPathEventId(), is("event-123"));
+//          assertThat(cleanUpPathsAudit.get(0).getPath(), is("file:/foo/bar/event-123/deleteme"));
+//          assertThat(cleanUpPathsAudit.get(0).getMetastoreDatabaseName(), is("my_db"));
+//          assertThat(cleanUpPathsAudit.get(0).getMetastoreTableName(), is("my_table"));
+//        }
+//      }
+//    });
+//    runner.run(config.getAbsolutePath());
+//  }
 
   @Test
   public void unpartitionedTableHousekeepingEnabledNoAudit() throws Exception {
