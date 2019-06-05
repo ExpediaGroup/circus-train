@@ -78,6 +78,15 @@ If you are planning to run Circus Train on EMR you will need to set up the EMR c
 
 Note that the paths above are correct as of when this document was last updated but may differ across EMR versions, refer to the [EMR release guide](http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-release-components.html) for more up to date information if necessary.
 
+*Note*: When replicating data to a Hadoop cluster you can set the replication factor. Circus Train uses the `dfs.replication` setting from the cluster that is running Circus Train. On EMR this replication factor is set to 1 by AWS defaults. The setting can be overridden by changing the `dfs.replication` value on the cluster that you run on. The setting can be found in `/etc/hadoop/conf/hdfs-site.xml`. Alternatively it can be set in the Circus Train configuration file like so:
+
+```
+source-catalog:
+  configuration-properties:
+    dfs.replication: 3
+```
+So if you are running on EMR and replicating into an on-premises cluster this is something you want to set.
+
 ### Exit codes
 Circus Train returns the following exit codes:
 
@@ -677,15 +686,6 @@ By default Circus Train uses an [H2](http://www.h2database.com) file-based datab
 
 ## Configuration Examples
 Below are a number of configuration fragments which can be used as a starting point for creating your own configuration files. These are for reference and will obviously need host names and various other values changed to suit your setup. Also keep in mind that database and table locations in Hive are fully qualified paths therefore if using AWS then EMR must be able to translate DNS names. If a DNS service is not available then each EMR node - master and slaves - must include an entry in _etc/hosts_ for each domain name in the Circus Train configuration file.
-
-*Note*: When replicating data to a Hadoop cluster you can set the replication factor. Circus Train uses the `dfs.replication` setting from the cluster that is running Circus Train. On EMR this replication factor is set to 1 by AWS defaults. The setting can be overridden by changing the `dfs.replication` value on the cluster that you run on. The setting can be found in `/etc/hadoop/conf/hdfs-site.xml`. Alternatively it can be set in the Circus Train configuration file like so:
-
-```
-source-catalog:
-  configuration-properties:
-    dfs.replication: 3
-```
-So if you are running on EMR and replicating into an on-premises cluster this is something you want to set.
 
 ### Circus Train running on on-premises cluster A synchronizing tables from on-premises cluster A to on-premises cluster B
 This configuration below shows how you could run Circus Train to replicate data between two on-premises clusters - for example you may want to replicate data between the on-premises `DEV` cluster (referred to as "cluster A") and the on-premises `QA` cluster (referred to as "cluster B"). Circus Train runs on `DEV` and it will push data to `QA`.
