@@ -78,6 +78,15 @@ If you are planning to run Circus Train on EMR you will need to set up the EMR c
 
 Note that the paths above are correct as of when this document was last updated but may differ across EMR versions, refer to the [EMR release guide](http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-release-components.html) for more up to date information if necessary.
 
+*Note*: When replicating data to a Hadoop cluster you can set the replication factor. Circus Train uses the `dfs.replication` setting from the cluster that is running Circus Train. On EMR this replication factor is set to 1 by AWS defaults. The setting can be overridden by changing the `dfs.replication` value on the cluster that you run on. The setting can be found in `/etc/hadoop/conf/hdfs-site.xml`. Alternatively it can be set in the Circus Train configuration file like so:
+
+```
+source-catalog:
+  configuration-properties:
+    dfs.replication: 3
+```
+So if you are running on EMR and replicating into an on-premises cluster this is something you want to set.
+
 ### Exit codes
 Circus Train returns the following exit codes:
 
