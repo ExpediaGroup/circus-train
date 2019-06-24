@@ -2,6 +2,9 @@
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
+###Changed
+* Updated `jackson` version to 2.9.9 (was 2.9.8).
+
 ## [14.0.1] - 2019-04-09
 ### Changed
 * Updated `housekeeping` version to 3.1.0 (was 3.0.6). Contains various housekeeping fixes.
