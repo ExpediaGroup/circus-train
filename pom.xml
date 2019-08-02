@@ -52,7 +52,7 @@
     <!-- BEGIN: AWS jdk version + dependencies -->
     <aws-jdk.version>1.11.505</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.5</httpcomponents.httpclient.version>
-    <jackson.version>2.9.9</jackson.version>
+    <jackson.version>2.10.0.pr1</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
     <hadoop.version>2.7.1</hadoop.version>
     <hive.version>2.3.2</hive.version>
