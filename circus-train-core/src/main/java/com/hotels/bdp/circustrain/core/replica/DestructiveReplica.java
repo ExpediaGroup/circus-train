@@ -51,13 +51,16 @@ public class DestructiveReplica {
   private final String databaseName;
   private final String tableName;
   private final CleanupLocationManager cleanupLocationManager;
+  private final EventBasedCleanup eventBasedCleanup;
 
   public DestructiveReplica(
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       CleanupLocationManager cleanupLocationManager,
+      EventBasedCleanup eventBasedCleanup,
       TableReplication tableReplication) {
     this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
     this.cleanupLocationManager = cleanupLocationManager;
+    this.eventBasedCleanup = eventBasedCleanup;
     this.tableReplication = tableReplication;
     databaseName = tableReplication.getReplicaDatabaseName();
     tableName = tableReplication.getReplicaTableName();
@@ -85,6 +88,8 @@ public class DestructiveReplica {
       if (!client.tableExists(databaseName, tableName)) {
         return;
       }
+      Table table = client.getTable(databaseName, tableName);
+      eventBasedCleanup.enableEventBasedCleanup(table);
       dropAndDeletePartitions(client, new Predicate<String>() {
         @Override
         public boolean apply(String partitionName) {
@@ -132,8 +137,9 @@ public class DestructiveReplica {
         if (!client.tableExists(databaseName, tableName)) {
           return;
         }
-        dropAndDeletePartitions(client, Predicates.<String> alwaysTrue());
         Table table = client.getTable(databaseName, tableName);
+        eventBasedCleanup.enableEventBasedCleanup(table);
+        dropAndDeletePartitions(client, Predicates.<String> alwaysTrue());
         log.info("Dropping replica table: " + databaseName + "." + tableName);
         client.dropTable(databaseName, tableName, DELETE_DATA, IGNORE_UNKNOWN);
         Path oldLocation = locationAsPath(table);

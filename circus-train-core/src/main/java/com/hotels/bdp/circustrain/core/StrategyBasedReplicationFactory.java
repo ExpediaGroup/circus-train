@@ -18,13 +18,17 @@ package com.hotels.bdp.circustrain.core;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Replication;
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataOptions;
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.ReplicationStrategy;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.core.replica.BeekeeperEventBasedCleanup;
 import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
+import com.hotels.bdp.circustrain.core.replica.EventBasedCleanup;
 import com.hotels.bdp.circustrain.core.replica.HousekeepingCleanupLocationManager;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
@@ -37,36 +41,50 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
   private final Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
+  private final OrphanedDataOptions orphanedDataOptions;
 
   public StrategyBasedReplicationFactory(
-      ReplicationFactoryImpl upsertReplicationFactory,
-      Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
-      Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
-      HousekeepingListener housekeepingListener,
-      ReplicaCatalogListener replicaCatalogListener) {
+    ReplicationFactoryImpl upsertReplicationFactory,
+    Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
+    Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+    HousekeepingListener housekeepingListener,
+    ReplicaCatalogListener replicaCatalogListener,
+    OrphanedDataOptions orphanedDataOptions) {
     this.upsertReplicationFactory = upsertReplicationFactory;
     this.sourceMetaStoreClientSupplier = sourceMetaStoreClientSupplier;
     this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
     this.housekeepingListener = housekeepingListener;
     this.replicaCatalogListener = replicaCatalogListener;
+    this.orphanedDataOptions = orphanedDataOptions;
   }
 
   @Override
   public Replication newInstance(TableReplication tableReplication) {
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
       String eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_DESTRUCTIVE.getPrefix());
+
+      CleanupLocationManager cleanupLocationManager;
+      EventBasedCleanup eventBasedCleanup;
+      if (tableReplication.getReplicationMode() == ReplicationMode.FULL) {
+        cleanupLocationManager = createCleanupLocationManager(eventId, tableReplication);
+        eventBasedCleanup = createEventBasedCleanup(tableReplication);
+      } else {
+        cleanupLocationManager = CleanupLocationManager.NULL_CLEANUP_LOCATION_MANAGER;
+        eventBasedCleanup = EventBasedCleanup.NULL_EVENT_BASED_CLEANUP;
+      }
+
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
           new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
           new DestructiveReplica(replicaMetaStoreClientSupplier,
-              createDestructiveCleanupLocationManager(eventId, tableReplication), tableReplication));
+            cleanupLocationManager, eventBasedCleanup, tableReplication));
     }
     return upsertReplicationFactory.newInstance(tableReplication);
   }
 
-  private CleanupLocationManager createDestructiveCleanupLocationManager(
+  private CleanupLocationManager createCleanupLocationManager(
       String eventId,
       TableReplication tableReplication) {
-    if (tableReplication.getReplicationMode() == ReplicationMode.FULL) {
+    if (tableReplication.getOrphanedDataStrategy() == OrphanedDataStrategy.HOUSEKEEPING) {
       return new HousekeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
           tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
     } else {
@@ -76,4 +94,11 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
     }
   }
 
+  private EventBasedCleanup createEventBasedCleanup(TableReplication tableReplication) {
+    if (tableReplication.getOrphanedDataStrategy() == OrphanedDataStrategy.BEEKEEPER) {
+      return new BeekeeperEventBasedCleanup(replicaMetaStoreClientSupplier, orphanedDataOptions);
+    } else {
+      return EventBasedCleanup.NULL_EVENT_BASED_CLEANUP;
+    }
+  }
 }

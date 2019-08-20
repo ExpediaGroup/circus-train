@@ -82,6 +82,7 @@ class PartitionedTableReplication implements Replication {
     eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_PARTITIONED_TABLE.getPrefix());
   }
 
+  //TODO event based cleanup here
   @Override
   public void replicate() throws CircusTrainException {
     try {

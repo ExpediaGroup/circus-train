@@ -66,6 +66,7 @@ public class DestructiveReplicaTest {
   private @Mock Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
   private @Mock CloseableMetaStoreClient client;
   private @Mock CleanupLocationManager cleanupLocationManager;
+  private @Mock EventBasedCleanup eventBasedCleanup;
 
   private final TableReplication tableReplication = new TableReplication();
   private DestructiveReplica replica;
@@ -83,7 +84,8 @@ public class DestructiveReplicaTest {
     replicaTable.setTableName(REPLICA_TABLE);
     tableReplication.setReplicaTable(replicaTable);
     when(replicaMetaStoreClientSupplier.get()).thenReturn(client);
-    replica = new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, tableReplication);
+    replica = new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, eventBasedCleanup,
+      tableReplication);
 
     table = new Table();
     table.setDbName(DATABASE);
@@ -151,6 +153,7 @@ public class DestructiveReplicaTest {
     // No sourcePartitionsNames so dropping all replica partitions
     List<String> sourcePartitionNames = Lists.newArrayList();
     replica.dropDeletedPartitions(sourcePartitionNames);
+    verify(eventBasedCleanup).enableEventBasedCleanup(table);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value2", false);
     verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, location1);
@@ -164,6 +167,7 @@ public class DestructiveReplicaTest {
     when(client.tableExists(DATABASE, REPLICA_TABLE)).thenReturn(false);
 
     replica.dropDeletedPartitions(Lists.<String> newArrayList());
+    verify(eventBasedCleanup, never()).enableEventBasedCleanup(table);
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
     verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
@@ -183,6 +187,7 @@ public class DestructiveReplicaTest {
     // deleted on target
     List<String> sourcePartitionNames = Lists.newArrayList("part1=value1");
     replica.dropDeletedPartitions(sourcePartitionNames);
+    verify(eventBasedCleanup, never()).enableEventBasedCleanup(table);
     verify(client, never()).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
     verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
@@ -196,6 +201,7 @@ public class DestructiveReplicaTest {
 
     List<String> sourcePartitionNames = Lists.newArrayList();
     replica.dropDeletedPartitions(sourcePartitionNames);
+    verify(eventBasedCleanup, never()).enableEventBasedCleanup(table);
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), eq(false));
     verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
     verify(client).close();
@@ -215,6 +221,7 @@ public class DestructiveReplicaTest {
     mockPartitionIterator(replicaPartitions);
 
     replica.dropTable();
+    verify(eventBasedCleanup).enableEventBasedCleanup(table);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value1", false);
     verify(client).dropPartition(DATABASE, REPLICA_TABLE, "part1=value2", false);
     verify(client).dropTable(DATABASE, REPLICA_TABLE, false, true);
@@ -232,6 +239,7 @@ public class DestructiveReplicaTest {
     mockPartitionIterator(replicaPartitions);
 
     replica.dropTable();
+    verify(eventBasedCleanup, never()).enableEventBasedCleanup(table);
     verify(client, never()).dropPartition(eq(DATABASE), eq(REPLICA_TABLE), anyString(), anyBoolean());
     verify(client, never()).dropTable(eq(DATABASE), eq(REPLICA_TABLE), anyBoolean(), anyBoolean());
     verify(cleanupLocationManager, never()).addCleanupLocation(anyString(), any(Path.class));
@@ -246,6 +254,7 @@ public class DestructiveReplicaTest {
     when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 
     replica.dropTable();
+    verify(eventBasedCleanup).enableEventBasedCleanup(table);
     verify(client).dropTable(DATABASE, REPLICA_TABLE, false, true);
     verify(cleanupLocationManager).addCleanupLocation(EVENT_ID, tableLocation);
     verify(client).close();

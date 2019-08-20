@@ -89,6 +89,7 @@ public class Replica extends HiveEndpoint {
     this.replicationMode = replicationMode;
   }
 
+  //TODO add event based cleanup here
   public void updateMetadata(
       String eventId,
       TableAndStatistics sourceTable,
@@ -113,6 +114,7 @@ public class Replica extends HiveEndpoint {
     return table.getPartitionKeysSize() == 0;
   }
 
+  //TODO add event based cleanup here
   public void updateMetadata(
       String eventId,
       TableAndStatistics sourceTableAndStatistics,

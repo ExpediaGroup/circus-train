@@ -35,6 +35,7 @@ public class TableReplication {
   private short partitionFetcherBufferSize = (short) 1000;
   private @NotNull ReplicationMode replicationMode = ReplicationMode.FULL;
   private @NotNull ReplicationStrategy replicationStrategy = ReplicationStrategy.UPSERT;
+  private @NotNull OrphanedDataStrategy orphanedDataStrategy = OrphanedDataStrategy.HOUSEKEEPING;
   // Only relevant to view replications
   private Map<String, String> tableMappings;
 
@@ -128,5 +129,13 @@ public class TableReplication {
 
   public void setReplicationStrategy(ReplicationStrategy replicationStrategy) {
     this.replicationStrategy = replicationStrategy;
+  }
+
+  public OrphanedDataStrategy getOrphanedDataStrategy() {
+    return orphanedDataStrategy;
+  }
+
+  public void setOrphanedDataStrategy(OrphanedDataStrategy orphanedDataStrategy) {
+    this.orphanedDataStrategy = orphanedDataStrategy;
   }
 }
