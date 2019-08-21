@@ -73,6 +73,7 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
     return upsertReplicationFactory.newInstance(tableReplication);
   }
 
+  //TODO refactor for a HousekeepingCleanupLocationManagerFactory
   private CleanupLocationManager createCleanupLocationManager(String eventId, TableReplication tableReplication) {
     if (tableReplication.getReplicationMode() == ReplicationMode.FULL &&
       tableReplication.getOrphanedDataStrategy() == OrphanedDataStrategy.HOUSEKEEPING) {

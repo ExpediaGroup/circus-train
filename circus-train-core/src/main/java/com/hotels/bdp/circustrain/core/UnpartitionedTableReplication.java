@@ -78,7 +78,6 @@ class UnpartitionedTableReplication implements Replication {
     eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_UNPARTITIONED_TABLE.getPrefix());
   }
 
-  //TODO event based cleanup here
   @Override
   public void replicate() throws CircusTrainException {
     try {

@@ -367,6 +367,7 @@ public class Replica extends HiveEndpoint {
     }
   }
 
+  //TODO refactor for a HousekeepingCleanupLocationManagerFactory
   public ReplicaLocationManager getLocationManager(
       TableType tableType,
       String targetTableLocation,
