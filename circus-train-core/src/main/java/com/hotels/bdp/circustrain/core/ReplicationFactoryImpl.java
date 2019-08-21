@@ -64,7 +64,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
 
   /*
    * (non-Javadoc)
-   * @see com.hotels.bdp.circustrain.core.ReplicationFactory#hiveTableAnnotator(com.hotels.bdp.circustrain.core.conf.
+   * @see com.hotels.bdp.circustrain.core.ReplicationFactory#newInstance(com.hotels.bdp.circustrain.core.conf.
    * TableReplication)
    */
   @Override
