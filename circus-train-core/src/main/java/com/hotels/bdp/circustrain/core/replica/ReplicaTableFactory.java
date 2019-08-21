@@ -22,6 +22,7 @@ import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_LO
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_METASTORE;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_TABLE;
 
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.hadoop.fs.Path;
@@ -38,11 +39,14 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.annotation.TableAnnotator;
+import com.hotels.bdp.circustrain.core.annotation.TableAnnotatorFactory;
 
 public class ReplicaTableFactory {
 
@@ -97,7 +101,9 @@ public class ReplicaTableFactory {
       String replicaDatabaseName,
       String replicaTableName,
       Path replicaDataDestination,
-      ReplicationMode replicationMode) {
+      ReplicationMode replicationMode,
+      OrphanedDataStrategy orphanedDataStrategy,
+      Map<String, String> orphanedDataOptions) {
     Table sourceTable = sourceTableAndStatistics.getTable();
     Table replica = tableTransformation.transform(new Table(sourceTable));
     replica.setDbName(replicaDatabaseName);
@@ -118,6 +124,9 @@ public class ReplicaTableFactory {
     replica.putToParameters(SOURCE_TABLE.parameterName(), Warehouse.getQualifiedName(sourceTable));
     replica.putToParameters(SOURCE_METASTORE.parameterName(), sourceMetaStoreUris);
     replica.putToParameters(REPLICATION_MODE.parameterName(), replicationMode.name());
+
+    TableAnnotator tableAnnotator = TableAnnotatorFactory.newInstance(replicationMode, orphanedDataStrategy);
+    tableAnnotator.annotateTable(replica, orphanedDataOptions);
 
     // Create some replica stats
     ColumnStatistics replicaColumnStats = null;

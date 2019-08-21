@@ -63,8 +63,7 @@ public class StrategyBasedReplicationFactoryTest {
   @Test
   public void newInstance() throws Exception {
     StrategyBasedReplicationFactory factory = new StrategyBasedReplicationFactory(upsertReplicationFactory,
-        sourceMetaStoreClientSupplier, replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener,
-      orphanedDataOptions);
+        sourceMetaStoreClientSupplier, replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
     tableReplication.setReplicationStrategy(ReplicationStrategy.PROPAGATE_DELETES);
     Replication replication = factory.newInstance(tableReplication);
     assertThat(replication, instanceOf(DestructiveReplication.class));
@@ -73,8 +72,7 @@ public class StrategyBasedReplicationFactoryTest {
   @Test
   public void newInstanceUpsert() throws Exception {
     StrategyBasedReplicationFactory factory = new StrategyBasedReplicationFactory(upsertReplicationFactory,
-        sourceMetaStoreClientSupplier, replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener,
-      orphanedDataOptions);
+        sourceMetaStoreClientSupplier, replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
     tableReplication.setReplicationStrategy(ReplicationStrategy.UPSERT);
     factory.newInstance(tableReplication);
     verify(upsertReplicationFactory).newInstance(tableReplication);

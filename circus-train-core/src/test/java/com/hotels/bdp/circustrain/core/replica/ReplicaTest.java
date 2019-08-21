@@ -72,6 +72,7 @@ import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -173,7 +174,7 @@ public class ReplicaTest {
 
   private Replica newReplica(ReplicationMode replicationMode) {
     return new Replica(replicaCatalog, hiveConf, metaStoreClientSupplier, tableFactory, houseKeepingListener,
-        replicaCatalogListener, replicationMode);
+        replicaCatalogListener, replicationMode, OrphanedDataStrategy.HOUSEKEEPING, new HashMap<String, String>());
   }
 
   @Test

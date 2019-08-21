@@ -36,6 +36,7 @@ public class TableReplication {
   private @NotNull ReplicationMode replicationMode = ReplicationMode.FULL;
   private @NotNull ReplicationStrategy replicationStrategy = ReplicationStrategy.UPSERT;
   private @NotNull OrphanedDataStrategy orphanedDataStrategy = OrphanedDataStrategy.HOUSEKEEPING;
+  private Map<String, String> orphanedDataOptions = new HashMap<>();
   // Only relevant to view replications
   private Map<String, String> tableMappings;
 
@@ -137,5 +138,13 @@ public class TableReplication {
 
   public void setOrphanedDataStrategy(OrphanedDataStrategy orphanedDataStrategy) {
     this.orphanedDataStrategy = orphanedDataStrategy;
+  }
+
+  public Map<String, String> getOrphanedDataOptions() {
+    return orphanedDataOptions;
+  }
+
+  public void setOrphanedDataOptions(Map<String, String> orphanedDataOptions) {
+    this.orphanedDataOptions = orphanedDataOptions;
   }
 }

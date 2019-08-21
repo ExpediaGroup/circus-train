@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.replica;
+package com.hotels.bdp.circustrain.core.annotation;
+
+import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
+public class DefaultTableAnnotator implements TableAnnotator {
 
-public interface EventBasedCleanup {
-
-  EventBasedCleanup NULL_EVENT_BASED_CLEANUP = new EventBasedCleanup() {
-
-    @Override
-    public void enableEventBasedCleanup(Table table) throws CircusTrainException {
-      // do nothing
+  @Override
+  public void annotateTable(Table table, Map<String, String> orphanedDataOptions) {
+    for (Map.Entry<String, String> entry : orphanedDataOptions.entrySet()) {
+      table.putToParameters(entry.getKey(), entry.getValue());
     }
+  }
 
-    @Override
-    public void disableEventBasedCleanup(Table table) {
-      // do nothing
-    }
-  };
-
-  void enableEventBasedCleanup(Table table) throws CircusTrainException;
-
-  void disableEventBasedCleanup(Table table);
 }

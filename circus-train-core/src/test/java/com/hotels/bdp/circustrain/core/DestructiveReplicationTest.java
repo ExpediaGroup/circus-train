@@ -17,10 +17,12 @@ package com.hotels.bdp.circustrain.core;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.thrift.TException;
@@ -37,6 +39,7 @@ import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
+import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,6 +54,7 @@ public class DestructiveReplicationTest {
   private @Mock DestructiveSource destructiveSource;
   private @Mock DestructiveReplica destructiveReplica;
   private @Mock Replication normalReplication;
+  private @Mock HiveTableAnnotator hiveTableAnnotator;
   private final List<String> sourcePartitionNames = Lists.newArrayList("a=b");
   private DestructiveReplication replication;
 
@@ -61,7 +65,7 @@ public class DestructiveReplicationTest {
     replicaTable.setTableName(REPLICA_TABLE);
     tableReplication.setReplicaTable(replicaTable);
     replication = new DestructiveReplication(upsertReplicationFactory, tableReplication, EVENT_ID, destructiveSource,
-        destructiveReplica);
+        destructiveReplica, hiveTableAnnotator);
   }
 
   @Test
@@ -74,6 +78,7 @@ public class DestructiveReplicationTest {
     replication.replicate();
     verify(destructiveReplica).dropDeletedPartitions(sourcePartitionNames);
     verify(normalReplication).replicate();
+    verify(hiveTableAnnotator).annotateTable(DATABASE, REPLICA_TABLE, new HashMap<String, String>());
   }
 
   @Test
@@ -103,14 +108,14 @@ public class DestructiveReplicationTest {
   @Test
   public void name() throws Exception {
     DestructiveReplication replication = new DestructiveReplication(upsertReplicationFactory, tableReplication,
-        EVENT_ID, destructiveSource, destructiveReplica);
+        EVENT_ID, destructiveSource, destructiveReplica, hiveTableAnnotator);
     assertThat(replication.name(), is("destructive-db.table2"));
   }
 
   @Test
   public void getEventId() throws Exception {
     DestructiveReplication replication = new DestructiveReplication(upsertReplicationFactory, tableReplication,
-        EVENT_ID, destructiveSource, destructiveReplica);
+        EVENT_ID, destructiveSource, destructiveReplica, hiveTableAnnotator);
     assertThat(replication.getEventId(), is(EVENT_ID));
   }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.conf;
+package com.hotels.bdp.circustrain.core.annotation;
 
 import java.util.Map;
 
-public class OrphanedDataOptions {
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 
-  private Map<String, String> orphanedDataOptions;
+public interface HiveTableAnnotator {
 
-  public Map<String, String> getOrphanedDataOptions() {
-    return orphanedDataOptions;
-  }
+  HiveTableAnnotator NULL_HIVE_TABLE_ANNOTATOR = new HiveTableAnnotator() {
+    @Override
+    public void annotateTable(String databaseName, String tableName, Map<String, String> properties)
+      throws CircusTrainException {
+      //do nothing
+    }
+  };
 
-  public void setOrphanedDataOptions(Map<String, String> orphanedDataOptions) {
-    this.orphanedDataOptions = orphanedDataOptions;
-  }
+  void annotateTable(String databaseName, String tableName, Map<String, String> properties) throws CircusTrainException;
 
 }

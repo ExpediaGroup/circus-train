@@ -49,6 +49,7 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
@@ -70,6 +71,8 @@ public class Replica extends HiveEndpoint {
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
+  private final OrphanedDataStrategy orphanedDataStrategy;
+  private final Map<String, String> orphanedDataOptions;
 
   /**
    * Use {@link ReplicaFactory}
@@ -81,15 +84,17 @@ public class Replica extends HiveEndpoint {
       ReplicaTableFactory replicaTableFactory,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      ReplicationMode replicationMode) {
+      ReplicationMode replicationMode, OrphanedDataStrategy orphanedDataStrategy,
+      Map<String, String> orphanedDataOptions) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
     this.replicationMode = replicationMode;
+    this.orphanedDataStrategy = orphanedDataStrategy;
+    this.orphanedDataOptions = orphanedDataOptions;
   }
 
-  //TODO add event based cleanup here
   public void updateMetadata(
       String eventId,
       TableAndStatistics sourceTable,
@@ -114,7 +119,6 @@ public class Replica extends HiveEndpoint {
     return table.getPartitionKeysSize() == 0;
   }
 
-  //TODO add event based cleanup here
   public void updateMetadata(
       String eventId,
       TableAndStatistics sourceTableAndStatistics,
@@ -253,7 +257,8 @@ public class Replica extends HiveEndpoint {
       ReplicationMode replicationMode) {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
-        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
+        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode,
+          orphanedDataStrategy, orphanedDataOptions);
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");

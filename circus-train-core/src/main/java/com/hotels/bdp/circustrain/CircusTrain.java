@@ -248,7 +248,7 @@ public class CircusTrain {
     ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
         copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions);
     return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
-        replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener, orphanedDataOptions);
+        replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
   }
 
   @Profile({ Modules.REPLICATION })

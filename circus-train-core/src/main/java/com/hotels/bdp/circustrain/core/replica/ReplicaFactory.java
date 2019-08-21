@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -63,6 +64,7 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,
-        housekeepingListener, replicaCatalogListener, tableReplication.getReplicationMode());
+        housekeepingListener, replicaCatalogListener, tableReplication.getReplicationMode(),
+        tableReplication.getOrphanedDataStrategy(), tableReplication.getOrphanedDataOptions());
   }
 }
