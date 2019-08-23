@@ -16,19 +16,37 @@
 package com.hotels.bdp.circustrain.core.annotation;
 
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.thrift.TException;
+
+import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
-public interface HiveTableAnnotator {
+public class HiveTableAnnotator {
 
-  HiveTableAnnotator NULL_HIVE_TABLE_ANNOTATOR = new HiveTableAnnotator() {
-    @Override
-    public void annotateTable(String databaseName, String tableName, Map<String, String> properties)
-      throws CircusTrainException {
-      //do nothing
+  private Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
+
+  public HiveTableAnnotator(Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier) {
+    this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
+  }
+
+  public void annotateTable(String databaseName, String tableName, Map<String, String> parameters)
+    throws CircusTrainException {
+    if (parameters.isEmpty()) {
+      return;
     }
-  };
-
-  void annotateTable(String databaseName, String tableName, Map<String, String> properties) throws CircusTrainException;
-
+    try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
+      Table table = client.getTable(databaseName, tableName);
+      Map<String, String> tableParameters = table.getParameters();
+      tableParameters.putAll(parameters);
+      table.setParameters(tableParameters);
+      client.alter_table(databaseName, tableName, table);
+    } catch (TException e) {
+      throw new CircusTrainException(String.format("Unable to add parameters to table"), e);
+    }
+  }
 }

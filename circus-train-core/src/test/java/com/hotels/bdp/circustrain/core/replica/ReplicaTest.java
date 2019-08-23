@@ -73,6 +73,7 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -140,8 +141,10 @@ public class ReplicaTest {
     hiveConf.setVar(ConfVars.METASTOREURIS, REPLICA_META_STORE_URIS);
     TableReplication tableReplication = new TableReplication();
     tableReplication.setReplicationMode(ReplicationMode.FULL);
-    replicaTableProperties.put("property1", "value1");
-    tableReplication.setOrphanedDataOptions(replicaTableProperties);
+    replicaTableProperties.put("property", "value");
+    ReplicaTable replicaTable = new ReplicaTable();
+    replicaTable.setAnnotations(replicaTableProperties);
+    tableReplication.setReplicaTable(replicaTable);
     replica = newReplica(tableReplication);
     tableLocation = temporaryFolder.newFolder("table_location").toURI().toString();
 

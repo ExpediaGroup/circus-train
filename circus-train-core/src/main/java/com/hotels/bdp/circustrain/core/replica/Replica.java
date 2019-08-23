@@ -264,7 +264,7 @@ public class Replica extends HiveEndpoint {
         client.createTable(replicaTable.getTable());
         updateTableColumnStatistics(client, replicaTable);
         hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
-          tableReplication.getOrphanedDataOptions());
+          tableReplication.getReplicaTable().getAnnotations());
       } catch (TException e) {
         throw new MetaStoreClientException(
             "Unable to create replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
@@ -273,9 +273,9 @@ public class Replica extends HiveEndpoint {
       makeSureCanReplicate(oldReplicaTable.get(), replicaTable.getTable());
       LOG.debug("Existing replica table found, altering.");
       try {
-        hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
-          tableReplication.getOrphanedDataOptions());
         client.alter_table(replicaDatabaseName, replicaTableName, replicaTable.getTable());
+        hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
+          tableReplication.getReplicaTable().getAnnotations());
         updateTableColumnStatistics(client, replicaTable);
       } catch (TException e) {
         throw new MetaStoreClientException(

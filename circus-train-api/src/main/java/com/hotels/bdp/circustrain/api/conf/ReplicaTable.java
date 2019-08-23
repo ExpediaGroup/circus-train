@@ -15,11 +15,15 @@
  */
 package com.hotels.bdp.circustrain.api.conf;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ReplicaTable {
 
   private String databaseName;
   private String tableName;
   private String tableLocation;
+  private Map<String, String> annotations = new HashMap<>();
 
   public String getDatabaseName() {
     return databaseName;
@@ -43,6 +47,14 @@ public class ReplicaTable {
 
   public void setTableLocation(String tableLocation) {
     this.tableLocation = tableLocation;
+  }
+
+  public Map<String, String> getAnnotations() {
+    return annotations;
+  }
+
+  public void setAnnotations(Map<String, String> annotations) {
+    this.annotations = annotations;
   }
 
 }

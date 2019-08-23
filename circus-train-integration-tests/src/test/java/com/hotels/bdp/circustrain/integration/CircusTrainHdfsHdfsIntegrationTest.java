@@ -52,6 +52,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -250,6 +252,41 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
+  public void partitionedTableHousekeepingEnabledNoAuditTableAnnotations() throws Exception {
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-table-annotations.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+            .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+          try {
+            getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path_aud");
+          } catch (SQLException e) {
+            assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
+          }
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
+        assertThat(parameters.get("table.parameter.first"), is("first"));
+        assertThat(parameters.get("table.parameter.second"), is("second"));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
   public void partitionedTableHousekeepingEnabledWithAudit() throws Exception {
     helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
@@ -387,6 +424,48 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           assertThat(cleanUpPaths.size(), is(1));
           assertThat(cleanUpPaths.get(0).getPath(), is(replicaPath));
         }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableDestructiveNoHousekeepingTableAnnotations() throws Exception {
+    helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    LOG.info(">>>> Created Source Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
+
+    // create table in replica metastore
+    replicaHelper.createUnpartitionedTable(toUri(replicaWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, UNPARTITIONED_TABLE);
+    LOG.info(">>>> Created Replica Table {} ", table);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("destructive-unpartitioned-single-table-no-housekeeping-with-annotations.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        // table still exist (new data is replicated)
+        assertThat(replicaCatalog.client().tableExists(DATABASE, UNPARTITIONED_TABLE), is(true));
+        // Assert deleted path
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = getCleanUpPaths(conn,
+            "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE).getParameters();
+        Set<Map.Entry<String, String>> entries = parameters.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+          System.out.println("Table param: " + entry.getKey() + " - " + entry.getValue());
+        }
+        assertThat(parameters.get("table.parameter.first"), is("first"));
+        assertThat(parameters.get("table.parameter.second"), is("second"));
       }
     });
     runner.run(config.getAbsolutePath());

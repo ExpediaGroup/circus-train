@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.conf;
+package com.hotels.bdp.circustrain.core.conf;
 
-import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-public class OrphanedDataOptions {
+import com.hotels.bdp.circustrain.api.conf.ReplicaTableParameters;
 
-  private Map<String, String> orphanedDataOptions;
-
-  public Map<String, String> getOrphanedDataOptions() {
-    return orphanedDataOptions;
-  }
-
-  public void setOrphanedDataOptions(Map<String, String> orphanedDataOptions) {
-    this.orphanedDataOptions = orphanedDataOptions;
-  }
-
-}
+@Configuration("orphanedDataOptions")
+@ConfigurationProperties(prefix = "orphaned-data-options")
+public class CircusTrainReplicaTableParameters extends ReplicaTableParameters {}

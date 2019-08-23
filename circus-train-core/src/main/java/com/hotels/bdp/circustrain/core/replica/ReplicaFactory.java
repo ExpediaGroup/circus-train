@@ -31,7 +31,6 @@ import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
 import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
-import com.hotels.bdp.circustrain.core.annotation.EventBasedCleanupFactory;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
@@ -64,8 +63,7 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
   @Override
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
-    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(tableReplication.getReplicationMode(),
-      tableReplication.getOrphanedDataStrategy(), replicaMetaStoreClientSupplier);
+    HiveTableAnnotator hiveTableAnnotator = new HiveTableAnnotator(replicaMetaStoreClientSupplier);
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,
         housekeepingListener, replicaCatalogListener, tableReplication, hiveTableAnnotator);
   }

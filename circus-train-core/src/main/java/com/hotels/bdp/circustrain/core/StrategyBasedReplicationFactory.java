@@ -23,7 +23,6 @@ import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
-import com.hotels.bdp.circustrain.core.annotation.EventBasedCleanupFactory;
 import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
 import com.hotels.bdp.circustrain.core.replica.CleanupLocationManagerFactory;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
@@ -56,12 +55,9 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
   public Replication newInstance(TableReplication tableReplication) {
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
       String eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_DESTRUCTIVE.getPrefix());
-
       CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
         housekeepingListener, replicaCatalogListener, tableReplication);
-      HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(
-        tableReplication.getReplicationMode(), tableReplication.getOrphanedDataStrategy(),
-        replicaMetaStoreClientSupplier);
+      HiveTableAnnotator hiveTableAnnotator = new HiveTableAnnotator(replicaMetaStoreClientSupplier);
 
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
         new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),

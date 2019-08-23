@@ -43,7 +43,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataOptions;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
@@ -240,7 +239,6 @@ public class CircusTrain {
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
       CopierOptions copierOptions,
-      OrphanedDataOptions orphanedDataOptions,
       Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,

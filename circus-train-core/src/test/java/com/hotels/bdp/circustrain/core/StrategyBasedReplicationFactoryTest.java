@@ -28,7 +28,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataOptions;
 import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
 import com.hotels.bdp.circustrain.api.conf.ReplicationStrategy;
 import com.hotels.bdp.circustrain.api.conf.SourceTable;
@@ -45,7 +44,6 @@ public class StrategyBasedReplicationFactoryTest {
   private @Mock Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
   private @Mock HousekeepingListener housekeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
-  private @Mock OrphanedDataOptions orphanedDataOptions;
   private final TableReplication tableReplication = new TableReplication();
 
   @Before

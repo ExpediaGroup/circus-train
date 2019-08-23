@@ -20,8 +20,8 @@ import org.apache.thrift.TException;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
 import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
+import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 
 public class DestructiveReplication implements Replication {
@@ -58,7 +58,7 @@ public class DestructiveReplication implements Replication {
       }
 
       hiveTableAnnotator.annotateTable(tableReplication.getReplicaDatabaseName(),
-        tableReplication.getReplicaTableName(), tableReplication.getOrphanedDataOptions());
+        tableReplication.getReplicaTableName(), tableReplication.getReplicaTable().getAnnotations());
 
       if (destructiveSource.tableExists()) {
         destructiveReplica.dropDeletedPartitions(destructiveSource.getPartitionNames());
