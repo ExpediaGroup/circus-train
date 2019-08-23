@@ -39,11 +39,11 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
   private final ReplicaCatalogListener replicaCatalogListener;
 
   public StrategyBasedReplicationFactory(
-    ReplicationFactoryImpl upsertReplicationFactory,
-    Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
-    Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
-    HousekeepingListener housekeepingListener,
-    ReplicaCatalogListener replicaCatalogListener) {
+      ReplicationFactoryImpl upsertReplicationFactory,
+      Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
+      Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+      HousekeepingListener housekeepingListener,
+      ReplicaCatalogListener replicaCatalogListener) {
     this.upsertReplicationFactory = upsertReplicationFactory;
     this.sourceMetaStoreClientSupplier = sourceMetaStoreClientSupplier;
     this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
@@ -60,9 +60,9 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
       HiveTableAnnotator hiveTableAnnotator = new HiveTableAnnotator(replicaMetaStoreClientSupplier);
 
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
-        new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
-        new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, tableReplication),
-        hiveTableAnnotator);
+          new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
+          new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, tableReplication),
+          hiveTableAnnotator);
     }
     return upsertReplicationFactory.newInstance(tableReplication);
   }

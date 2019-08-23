@@ -93,13 +93,13 @@ public class ReplicaTableFactory {
   }
 
   TableAndStatistics newReplicaTable(
-    String eventId,
-    TableAndStatistics sourceTableAndStatistics,
-    String replicaDatabaseName,
-    String replicaTableName,
-    Path replicaDataDestination,
-    ReplicationMode replicationMode,
-    Map<String, String> parameters) {
+      String eventId,
+      TableAndStatistics sourceTableAndStatistics,
+      String replicaDatabaseName,
+      String replicaTableName,
+      Path replicaDataDestination,
+      ReplicationMode replicationMode,
+      Map<String, String> parameters) {
     Table sourceTable = sourceTableAndStatistics.getTable();
     Table replica = tableTransformation.transform(new Table(sourceTable));
     replica.setDbName(replicaDatabaseName);
