@@ -106,9 +106,8 @@ public class PartitionedTableReplicationTest {
 
   @Test
   public void noMatchingPartitions() throws Exception {
-    when(replica
-        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
-            TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
     PartitionsAndStatistics emptyPartitionsAndStats = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
         Collections.<Partition>emptyList(), Collections.<String, List<ColumnStatisticsObj>>emptyMap());
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(emptyPartitionsAndStats);
@@ -130,9 +129,8 @@ public class PartitionedTableReplicationTest {
 
   @Test
   public void typical() throws Exception {
-    when(replica
-        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
-            TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
@@ -162,9 +160,8 @@ public class PartitionedTableReplicationTest {
 
   @Test
   public void mappedNames() throws Exception {
-    when(replica
-        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager,
-            MAPPED_DATABASE, MAPPED_TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
@@ -192,9 +189,8 @@ public class PartitionedTableReplicationTest {
 
   @Test
   public void copierListenerCalledWhenException() throws Exception {
-    when(replica
-        .getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager, DATABASE,
-            TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 

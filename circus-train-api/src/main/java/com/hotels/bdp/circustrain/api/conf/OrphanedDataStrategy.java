@@ -17,8 +17,7 @@ package com.hotels.bdp.circustrain.api.conf;
 
 public enum OrphanedDataStrategy {
 
-  BEEKEEPER,
-  CUSTOM,
+  HIVE_HOOK,
   HOUSEKEEPING,
   NONE;
 

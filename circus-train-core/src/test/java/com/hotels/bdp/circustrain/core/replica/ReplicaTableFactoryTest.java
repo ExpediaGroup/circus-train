@@ -44,7 +44,6 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
 import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
@@ -128,7 +127,7 @@ public class ReplicaTableFactoryTest {
   @Test
   public void newTable() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));
@@ -150,7 +149,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getTableType(), is(TableType.EXTERNAL_TABLE.name()));
     assertThat(replica.getParameters().get("EXTERNAL"), is("TRUE"));
     assertTrue(MetaStoreUtils.isExternalTable(replica));
-    assertThat(replica.getParameters().get("beekeeper.remove.unreferenced.data"), is("true"));
 
     assertThat(replicaAndStats.getStatistics(), is(nullValue()));
   }
@@ -161,7 +159,7 @@ public class ReplicaTableFactoryTest {
         PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));
@@ -179,7 +177,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
-    assertThat(replica.getParameters().get("beekeeper.remove.unreferenced.data"), is("true"));
 
     assertThat(replicaAndStats.getStatistics(), is(nullValue()));
   }
@@ -187,7 +184,7 @@ public class ReplicaTableFactoryTest {
   @Test
   public void newTableEncodedLocation() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        new Path(REPLICA_DATA_DESTINATION, "%25"), FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        new Path(REPLICA_DATA_DESTINATION, "%25"), FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getSd().getLocation(), is("hdfs://someserver/replicaDataDestination/%25"));
@@ -256,7 +253,7 @@ public class ReplicaTableFactoryTest {
   @Test
   public void newTableWithNameMappings() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, MAPPED_DB_NAME,
-        MAPPED_TABLE_NAME, REPLICA_DATA_DESTINATION, FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        MAPPED_TABLE_NAME, REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(MAPPED_DB_NAME));
@@ -273,7 +270,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
-    assertThat(replica.getParameters().get("beekeeper.remove.unreferenced.data"), is("true"));
   }
 
   @Test
@@ -309,7 +305,7 @@ public class ReplicaTableFactoryTest {
         new ColumnStatistics(new ColumnStatisticsDesc(true, DB_NAME, TABLE_NAME), columnStatisticsObjs));
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, source, MAPPED_DB_NAME, MAPPED_TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
     ColumnStatistics replicaStatistics = replicaAndStats.getStatistics();
 
@@ -333,7 +329,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replicaStatistics.getStatsObj().size(), is(2));
     assertThat(replicaStatistics.getStatsObj().get(0), is(columnStatisticsObj1));
     assertThat(replicaStatistics.getStatsObj().get(1), is(columnStatisticsObj2));
-    assertThat(replica.getParameters().get("beekeeper.remove.unreferenced.data"), is("true"));
   }
 
   @Test
@@ -409,7 +404,7 @@ public class ReplicaTableFactoryTest {
     sourceTableAndStats.getTable().getSd().setLocation(null);
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        null, FULL, OrphanedDataStrategy.BEEKEEPER, new HashMap<String, String>());
+        null, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));

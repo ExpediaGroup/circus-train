@@ -97,9 +97,8 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void typical() throws Exception {
-    when(replica
-        .getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager, DATABASE,
-            TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener);
     replication.replicate();
@@ -125,9 +124,8 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void mappedNames() throws Exception {
-    when(replica
-        .getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager,
-            MAPPED_DATABASE, MAPPED_TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
 
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, MAPPED_DATABASE, MAPPED_TABLE, copierOptions,
@@ -153,9 +151,8 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void copierListenerCalledWhenException() throws Exception {
-    when(replica
-        .getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager, DATABASE,
-            TABLE)).thenReturn(replicaLocationManager);
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager)).
+        thenReturn(replicaLocationManager);
 
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
 

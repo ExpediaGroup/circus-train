@@ -19,8 +19,6 @@ import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Supplier;
 
@@ -28,7 +26,6 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class DefaultHiveTableAnnotator implements HiveTableAnnotator {
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultHiveTableAnnotator.class);
 
   private Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier;
 

@@ -25,12 +25,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
+import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
+import com.hotels.bdp.circustrain.core.annotation.EventBasedCleanupFactory;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
@@ -63,8 +64,9 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
   @Override
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
+    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(tableReplication.getReplicationMode(),
+      tableReplication.getOrphanedDataStrategy(), replicaMetaStoreClientSupplier);
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,
-        housekeepingListener, replicaCatalogListener, tableReplication.getReplicationMode(),
-        tableReplication.getOrphanedDataStrategy(), tableReplication.getOrphanedDataOptions());
+        housekeepingListener, replicaCatalogListener, tableReplication, hiveTableAnnotator);
   }
 }

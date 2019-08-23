@@ -18,18 +18,15 @@ package com.hotels.bdp.circustrain.core;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
-import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.ReplicationStrategy;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotatorFactory;
-import com.hotels.bdp.circustrain.core.annotation.TableAnnotatorFactory;
-import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
-import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
-import com.hotels.bdp.circustrain.core.replica.HousekeepingCleanupLocationManager;
 import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
+import com.hotels.bdp.circustrain.core.annotation.EventBasedCleanupFactory;
+import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
+import com.hotels.bdp.circustrain.core.replica.CleanupLocationManagerFactory;
+import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
@@ -60,27 +57,17 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
       String eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_DESTRUCTIVE.getPrefix());
 
-      CleanupLocationManager cleanupLocationManager = createCleanupLocationManager(eventId, tableReplication);
-      HiveTableAnnotator eventBasedCleanupService =
-        HiveTableAnnotatorFactory.newInstance(tableReplication.getReplicationMode(),
-          tableReplication.getOrphanedDataStrategy(), replicaMetaStoreClientSupplier);
+      CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
+        housekeepingListener, replicaCatalogListener, tableReplication);
+      HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(
+        tableReplication.getReplicationMode(), tableReplication.getOrphanedDataStrategy(),
+        replicaMetaStoreClientSupplier);
 
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
         new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
         new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, tableReplication),
-        eventBasedCleanupService);
+        hiveTableAnnotator);
     }
     return upsertReplicationFactory.newInstance(tableReplication);
-  }
-
-  //TODO refactor for a HousekeepingCleanupLocationManagerFactory
-  private CleanupLocationManager createCleanupLocationManager(String eventId, TableReplication tableReplication) {
-    if (tableReplication.getReplicationMode() == ReplicationMode.FULL &&
-      tableReplication.getOrphanedDataStrategy() == OrphanedDataStrategy.HOUSEKEEPING) {
-      return new HousekeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
-        tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
-    } else {
-      return CleanupLocationManager.NULL_CLEANUP_LOCATION_MANAGER;
-    }
   }
 }

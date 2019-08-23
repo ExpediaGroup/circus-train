@@ -72,9 +72,9 @@ import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
-import com.hotels.bdp.circustrain.api.conf.OrphanedDataStrategy;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
@@ -82,6 +82,7 @@ import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,6 +116,7 @@ public class ReplicaTest {
   private @Captor ArgumentCaptor<SetPartitionsStatsRequest> setStatsRequestCaptor;
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
+  private @Mock HiveTableAnnotator mockHiveTableAnnotator;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
       TableTransformation.IDENTITY, PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
@@ -127,6 +129,7 @@ public class ReplicaTest {
   private String tableLocation;
   private Partition existingPartition;
   private HiveConf hiveConf;
+  private Map<String, String> replicaTableProperties = new HashMap<>();
 
   @Before
   public void prepare() throws Exception {
@@ -135,7 +138,11 @@ public class ReplicaTest {
 
     hiveConf = new HiveConf();
     hiveConf.setVar(ConfVars.METASTOREURIS, REPLICA_META_STORE_URIS);
-    replica = newReplica(ReplicationMode.FULL);
+    TableReplication tableReplication = new TableReplication();
+    tableReplication.setReplicationMode(ReplicationMode.FULL);
+    replicaTableProperties.put("property1", "value1");
+    tableReplication.setOrphanedDataOptions(replicaTableProperties);
+    replica = newReplica(tableReplication);
     tableLocation = temporaryFolder.newFolder("table_location").toURI().toString();
 
     sourceTable = newTable();
@@ -172,9 +179,9 @@ public class ReplicaTest {
     existingPartition.getSd().setLocation(null);
   }
 
-  private Replica newReplica(ReplicationMode replicationMode) {
+  private Replica newReplica(TableReplication tableReplication) {
     return new Replica(replicaCatalog, hiveConf, metaStoreClientSupplier, tableFactory, houseKeepingListener,
-        replicaCatalogListener, replicationMode, OrphanedDataStrategy.HOUSEKEEPING, new HashMap<String, String>());
+        replicaCatalogListener, tableReplication, mockHiveTableAnnotator);
   }
 
   @Test
@@ -183,6 +190,8 @@ public class ReplicaTest {
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   @Test
@@ -192,6 +201,8 @@ public class ReplicaTest {
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient, never()).updateTableColumnStatistics(any(ColumnStatistics.class));
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   @Test
@@ -202,6 +213,7 @@ public class ReplicaTest {
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   @Test(expected = CircusTrainException.class)
@@ -251,7 +263,9 @@ public class ReplicaTest {
     try {
       existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
       existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), ReplicationMode.METADATA_MIRROR.name());
-      replica = newReplica(ReplicationMode.METADATA_UPDATE);
+      TableReplication tableReplication = new TableReplication();
+      tableReplication.setReplicationMode(ReplicationMode.METADATA_UPDATE);
+      replica = newReplica(tableReplication);
       replica.validateReplicaTable(DB_NAME, TABLE_NAME);
       fail("Should have thrown InvalidReplicationModeException");
     } catch (InvalidReplicationModeException e) {
@@ -268,7 +282,9 @@ public class ReplicaTest {
     try {
       existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
       // no replicationMode set in existing table
-      replica = newReplica(ReplicationMode.METADATA_MIRROR);
+      TableReplication tableReplication = new TableReplication();
+      tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);
+      replica = newReplica(tableReplication);
       replica.validateReplicaTable(DB_NAME, TABLE_NAME);
       fail("Should have thrown InvalidReplicationModeException");
     } catch (InvalidReplicationModeException e) {
@@ -284,7 +300,9 @@ public class ReplicaTest {
     try {
       existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
       existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), ReplicationMode.FULL.name());
-      replica = newReplica(ReplicationMode.METADATA_MIRROR);
+      TableReplication tableReplication = new TableReplication();
+      tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);
+      replica = newReplica(tableReplication);
       replica.validateReplicaTable(DB_NAME, TABLE_NAME);
       fail("Should have thrown InvalidReplicationModeException");
     } catch (InvalidReplicationModeException e) {
@@ -300,7 +318,9 @@ public class ReplicaTest {
     try {
       existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
       existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), ReplicationMode.METADATA_UPDATE.name());
-      replica = newReplica(ReplicationMode.METADATA_MIRROR);
+      TableReplication tableReplication = new TableReplication();
+      tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);
+      replica = newReplica(tableReplication);
       replica.validateReplicaTable(DB_NAME, TABLE_NAME);
       fail("Should have thrown InvalidReplicationModeException");
     } catch (InvalidReplicationModeException e) {
@@ -324,6 +344,8 @@ public class ReplicaTest {
             DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   @Test
@@ -341,6 +363,7 @@ public class ReplicaTest {
             DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   @Test(expected = CircusTrainException.class)
@@ -415,6 +438,8 @@ public class ReplicaTest {
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
     verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
 
@@ -485,6 +510,7 @@ public class ReplicaTest {
     verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
 
     assertThat(alterPartitionCaptor.getValue().size(), is(1));
     assertThat(addPartitionCaptor.getValue().size(), is(1));
@@ -526,6 +552,7 @@ public class ReplicaTest {
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockHiveTableAnnotator).annotateTable(DB_NAME, TABLE_NAME, replicaTableProperties);
   }
 
   private Table newTable() {

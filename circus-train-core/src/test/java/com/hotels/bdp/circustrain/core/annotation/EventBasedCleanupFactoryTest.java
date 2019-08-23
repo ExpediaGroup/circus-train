@@ -15,55 +15,38 @@ import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HiveTableAnnotatorFactoryTest {
+public class EventBasedCleanupFactoryTest {
 
   private @Mock Supplier<CloseableMetaStoreClient> clientSupplier;
 
   @Test
-  public void fullReplicationBeekeeperHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(ReplicationMode.FULL,
-      OrphanedDataStrategy.BEEKEEPER,
-      clientSupplier);
-    assertThat(hiveTableAnnotator, instanceOf(BeekeeperHiveTableAnnotator.class));
-  }
-
-  @Test
   public void fullReplicationCustomHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(ReplicationMode.FULL,
-      OrphanedDataStrategy.CUSTOM,
+    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(ReplicationMode.FULL,
+      OrphanedDataStrategy.HIVE_HOOK,
       clientSupplier);
     assertThat(hiveTableAnnotator, instanceOf(DefaultHiveTableAnnotator.class));
   }
 
   @Test
   public void fullReplicationNoneHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(ReplicationMode.FULL,
+    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(ReplicationMode.FULL,
       OrphanedDataStrategy.NONE,
       clientSupplier);
     assertThat(hiveTableAnnotator, instanceOf(HiveTableAnnotator.NULL_HIVE_TABLE_ANNOTATOR.getClass()));
   }
 
   @Test
-  public void notFullReplicationBeekeeperHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(
-      ReplicationMode.METADATA_MIRROR,
-      OrphanedDataStrategy.BEEKEEPER,
-      clientSupplier);
-    assertThat(hiveTableAnnotator, instanceOf(HiveTableAnnotator.NULL_HIVE_TABLE_ANNOTATOR.getClass()));
-  }
-
-  @Test
   public void notFullReplicationCustomHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(
+    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(
       ReplicationMode.METADATA_MIRROR,
-      OrphanedDataStrategy.CUSTOM,
+      OrphanedDataStrategy.HIVE_HOOK,
       clientSupplier);
     assertThat(hiveTableAnnotator, instanceOf(HiveTableAnnotator.NULL_HIVE_TABLE_ANNOTATOR.getClass()));
   }
 
   @Test
   public void notFullReplicationNoneHiveTableAnnotator() {
-    HiveTableAnnotator hiveTableAnnotator = HiveTableAnnotatorFactory.newInstance(
+    HiveTableAnnotator hiveTableAnnotator = EventBasedCleanupFactory.newInstance(
       ReplicationMode.METADATA_MIRROR,
       OrphanedDataStrategy.NONE,
       clientSupplier);
