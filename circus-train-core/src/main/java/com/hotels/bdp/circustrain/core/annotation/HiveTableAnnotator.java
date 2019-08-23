@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.core.annotation;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;

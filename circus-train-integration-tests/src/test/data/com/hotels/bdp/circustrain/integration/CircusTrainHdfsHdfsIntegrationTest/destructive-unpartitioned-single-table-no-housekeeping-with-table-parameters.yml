@@ -4,7 +4,7 @@ table-replications:
       table-name: ct_table_u
     replica-table:
       table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_u
-      annotations:
+      parameters:
         table.parameter.first: first
         table.parameter.second: second
     orphaned-data-strategy: NONE

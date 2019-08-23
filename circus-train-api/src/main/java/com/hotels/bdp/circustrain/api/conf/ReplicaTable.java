@@ -23,7 +23,7 @@ public class ReplicaTable {
   private String databaseName;
   private String tableName;
   private String tableLocation;
-  private Map<String, String> annotations = new HashMap<>();
+  private Map<String, String> parameters = new HashMap<>();
 
   public String getDatabaseName() {
     return databaseName;
@@ -49,12 +49,12 @@ public class ReplicaTable {
     this.tableLocation = tableLocation;
   }
 
-  public Map<String, String> getAnnotations() {
-    return annotations;
+  public Map<String, String> getParameters() {
+    return parameters;
   }
 
-  public void setAnnotations(Map<String, String> annotations) {
-    this.annotations = annotations;
+  public void setParameters(Map<String, String> parameters) {
+    this.parameters = parameters;
   }
 
 }

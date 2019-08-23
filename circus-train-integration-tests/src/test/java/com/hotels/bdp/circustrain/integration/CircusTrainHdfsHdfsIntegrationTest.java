@@ -252,12 +252,12 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void partitionedTableHousekeepingEnabledNoAuditTableAnnotations() throws Exception {
+  public void partitionedTableHousekeepingEnabledNoAuditWithTableParameters() throws Exception {
     helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-table-annotations.yml");
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-table-parameters.yml");
     CircusTrainRunner runner = CircusTrainRunner
       .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
       .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
@@ -430,7 +430,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void unpartitionedTableDestructiveNoHousekeepingTableAnnotations() throws Exception {
+  public void unpartitionedTableDestructiveNoHousekeepingWithTableParameters() throws Exception {
     helper.createUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE));
     LOG.info(">>>> Created Source Table {} ", sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE));
 
@@ -440,7 +440,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     LOG.info(">>>> Created Replica Table {} ", table);
 
     exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("destructive-unpartitioned-single-table-no-housekeeping-with-annotations.yml");
+    File config = dataFolder.getFile("destructive-unpartitioned-single-table-no-housekeeping-with-table-parameters"
+      + ".yml");
     CircusTrainRunner runner = CircusTrainRunner
       .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
       .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),

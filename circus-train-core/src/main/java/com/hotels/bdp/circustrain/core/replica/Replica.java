@@ -71,7 +71,6 @@ public class Replica extends HiveEndpoint {
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final TableReplication tableReplication;
-  private final HiveTableAnnotator hiveTableAnnotator;
 
   /**
    * Use {@link ReplicaFactory}
@@ -83,14 +82,12 @@ public class Replica extends HiveEndpoint {
       ReplicaTableFactory replicaTableFactory,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      TableReplication tableReplication,
-      HiveTableAnnotator hiveTableAnnotator) {
+      TableReplication tableReplication) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
     this.tableReplication = tableReplication;
-    this.hiveTableAnnotator = hiveTableAnnotator;
   }
 
   public void updateMetadata(
@@ -108,7 +105,6 @@ public class Replica extends HiveEndpoint {
 
         Path oldLocation = locationAsPath(oldReplicaTable.get());
         String oldEventId = oldReplicaTable.get().getParameters().get(REPLICATION_EVENT.parameterName());
-        //TODO how to add to Hive event hook for oldReplicaTable here?
         locationManager.addCleanUpLocation(oldEventId, oldLocation);
       }
     }
@@ -254,8 +250,10 @@ public class Replica extends HiveEndpoint {
       Path tableLocation,
       ReplicationMode replicationMode) {
     LOG.info("Updating replica table metadata.");
+    System.out.println("Adding parameters1");
     TableAndStatistics replicaTable = tableFactory
-        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
+        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode,
+          tableReplication.getReplicaTable().getParameters());
 
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
@@ -263,8 +261,6 @@ public class Replica extends HiveEndpoint {
       try {
         client.createTable(replicaTable.getTable());
         updateTableColumnStatistics(client, replicaTable);
-        hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
-          tableReplication.getReplicaTable().getAnnotations());
       } catch (TException e) {
         throw new MetaStoreClientException(
             "Unable to create replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
@@ -274,8 +270,6 @@ public class Replica extends HiveEndpoint {
       LOG.debug("Existing replica table found, altering.");
       try {
         client.alter_table(replicaDatabaseName, replicaTableName, replicaTable.getTable());
-        hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
-          tableReplication.getReplicaTable().getAnnotations());
         updateTableColumnStatistics(client, replicaTable);
       } catch (TException e) {
         throw new MetaStoreClientException(

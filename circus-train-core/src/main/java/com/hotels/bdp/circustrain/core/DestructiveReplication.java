@@ -58,7 +58,7 @@ public class DestructiveReplication implements Replication {
       }
 
       hiveTableAnnotator.annotateTable(tableReplication.getReplicaDatabaseName(),
-        tableReplication.getReplicaTableName(), tableReplication.getReplicaTable().getAnnotations());
+        tableReplication.getReplicaTableName(), tableReplication.getReplicaTable().getParameters());
 
       if (destructiveSource.tableExists()) {
         destructiveReplica.dropDeletedPartitions(destructiveSource.getPartitionNames());
