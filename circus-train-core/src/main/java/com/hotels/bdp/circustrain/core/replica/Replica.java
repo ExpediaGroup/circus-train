@@ -250,7 +250,6 @@ public class Replica extends HiveEndpoint {
       Path tableLocation,
       ReplicationMode replicationMode) {
     LOG.info("Updating replica table metadata.");
-    System.out.println("Adding parameters1");
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode,
           tableReplication.getReplicaTable().getParameters());
