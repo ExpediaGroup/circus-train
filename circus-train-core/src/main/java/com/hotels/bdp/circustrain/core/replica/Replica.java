@@ -57,7 +57,6 @@ import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
@@ -70,6 +69,7 @@ public class Replica extends HiveEndpoint {
   private final ReplicaTableFactory tableFactory;
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
+  private final ReplicationMode replicationMode;
   private final TableReplication tableReplication;
 
   /**
@@ -87,6 +87,7 @@ public class Replica extends HiveEndpoint {
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
+    replicationMode = tableReplication.getReplicationMode();
     this.tableReplication = tableReplication;
   }
 
@@ -98,7 +99,7 @@ public class Replica extends HiveEndpoint {
       ReplicaLocationManager locationManager) {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
       Optional<Table> oldReplicaTable = updateTableMetadata(client, eventId, sourceTable, replicaDatabaseName,
-          replicaTableName, locationManager.getTableLocation(), tableReplication.getReplicationMode());
+          replicaTableName, locationManager.getTableLocation(), replicationMode);
       if (oldReplicaTable.isPresent()
           && LocationUtils.hasLocation(oldReplicaTable.get())
           && isUnpartitioned(oldReplicaTable.get())) {
@@ -123,10 +124,10 @@ public class Replica extends HiveEndpoint {
       ReplicaLocationManager locationManager) {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
       updateTableMetadata(client, eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
-          locationManager.getTableLocation(), tableReplication.getReplicationMode());
+          locationManager.getTableLocation(), replicationMode);
 
       List<Partition> oldPartitions = getOldPartitions(sourcePartitionsAndStatistics, replicaDatabaseName,
-        replicaTableName, client);
+          replicaTableName, client);
       LOG.debug("Found {} existing partitions that may match.", oldPartitions.size());
 
       replicaCatalogListener
@@ -144,7 +145,7 @@ public class Replica extends HiveEndpoint {
 
         Partition replicaPartition = tableFactory
             .newReplicaPartition(eventId, sourceTableAndStatistics.getTable(), sourcePartition, replicaDatabaseName,
-                replicaTableName, replicaPartitionLocation, tableReplication.getReplicationMode());
+                replicaTableName, replicaPartitionLocation, replicationMode);
         Partition oldPartition = oldPartitionsByKey.get(sourcePartition.getValues());
         if (oldPartition == null) {
           partitionsToCreate.add(replicaPartition);
@@ -298,7 +299,7 @@ public class Replica extends HiveEndpoint {
       Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
       if (oldReplicaTable.isPresent()) {
         LOG.debug("Existing table found, checking that it is a valid replica.");
-        determinValidityOfReplica(tableReplication.getReplicationMode(), oldReplicaTable.get());
+        determinValidityOfReplica(replicationMode, oldReplicaTable.get());
       }
     }
   }
@@ -368,10 +369,9 @@ public class Replica extends HiveEndpoint {
       String eventId,
       SourceLocationManager sourceLocationManager) {
     CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
-      housekeepingListener, replicaCatalogListener, tableReplication);
-    return new FullReplicationReplicaLocationManager(
-        sourceLocationManager, targetTableLocation, eventId, tableType, cleanupLocationManager,
-        replicaCatalogListener);
+        housekeepingListener, replicaCatalogListener, tableReplication);
+    return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
+        cleanupLocationManager, replicaCatalogListener);
   }
 
   @Override

@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.core.annotation;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -35,17 +36,27 @@ public class HiveTableAnnotator {
 
   public void annotateTable(String databaseName, String tableName, Map<String, String> parameters)
     throws CircusTrainException {
-    if (parameters.isEmpty()) {
+    if (parameters == null || parameters.isEmpty()) {
       return;
     }
     try (CloseableMetaStoreClient client = replicaMetaStoreClientSupplier.get()) {
       Table table = client.getTable(databaseName, tableName);
-      Map<String, String> tableParameters = table.getParameters();
-      tableParameters.putAll(parameters);
+      Map<String, String> tableParameters = createTableParameters(parameters, table);
       table.setParameters(tableParameters);
       client.alter_table(databaseName, tableName, table);
     } catch (TException e) {
       throw new CircusTrainException(String.format("Unable to add parameters to table"), e);
     }
+  }
+
+  private Map<String, String> createTableParameters(Map<String, String> parameters, Table table) {
+    Map<String, String> tableParameters;
+    if (table.getParameters() != null) {
+      tableParameters = new LinkedHashMap<>(table.getParameters());
+    } else {
+      tableParameters = new LinkedHashMap<>();
+    }
+    tableParameters.putAll(parameters);
+    return tableParameters;
   }
 }

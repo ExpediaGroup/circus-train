@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,15 +48,14 @@ public class HiveTableAnnotatorTest {
 
   private @Mock Supplier<CloseableMetaStoreClient> closeableMetaStoreClientSupplier;
   private @Mock CloseableMetaStoreClient client;
-  private @Mock Table table;
   private @Captor ArgumentCaptor<Table> tableArgumentCaptor;
+  private Table table = new Table();
   private HiveTableAnnotator hiveTableAnnotator;
 
   @Before
   public void init() throws TException {
     when(closeableMetaStoreClientSupplier.get()).thenReturn(client);
     when(client.getTable(anyString(), anyString())).thenReturn(table);
-    when(table.getParameters()).thenReturn(new HashMap<String, String>());
     hiveTableAnnotator = new HiveTableAnnotator(closeableMetaStoreClientSupplier);
   }
 
@@ -65,8 +65,28 @@ public class HiveTableAnnotatorTest {
     parameters.put("key", "value");
     hiveTableAnnotator.annotateTable("database", "table", parameters);
     verify(client).alter_table(anyString(), anyString(), tableArgumentCaptor.capture());
-    Map<String, String> tableParameters = tableArgumentCaptor.getValue()
-      .getParameters();
+    Map<String, String> tableParameters = tableArgumentCaptor.getValue().getParameters();
+    assertThat(tableParameters.get("key"), is("value"));
+  }
+
+  @Test
+  public void typicalNullTableParameters() throws TException {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("key", "value");
+    hiveTableAnnotator.annotateTable("database", "table", parameters);
+    verify(client).alter_table(anyString(), anyString(), tableArgumentCaptor.capture());
+    Map<String, String> tableParameters = tableArgumentCaptor.getValue().getParameters();
+    assertThat(tableParameters.get("key"), is("value"));
+  }
+
+  @Test
+  public void typicalImmutableTableParameters() throws TException {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("key", "value");
+    table.setParameters(Collections.EMPTY_MAP);
+    hiveTableAnnotator.annotateTable("database", "table", parameters);
+    verify(client).alter_table(anyString(), anyString(), tableArgumentCaptor.capture());
+    Map<String, String> tableParameters = tableArgumentCaptor.getValue().getParameters();
     assertThat(tableParameters.get("key"), is("value"));
   }
 
@@ -74,6 +94,13 @@ public class HiveTableAnnotatorTest {
   public void typicalEmptyParameters() throws TException {
     Map<String, String> parameters = new HashMap<>();
     hiveTableAnnotator.annotateTable("database", "table", parameters);
+    verify(client, never()).getTable(anyString(), anyString());
+    verify(client, never()).alter_table(anyString(), anyString(), any(Table.class));
+  }
+
+  @Test
+  public void typicalNullParameters() throws TException {
+    hiveTableAnnotator.annotateTable("database", "table", null);
     verify(client, never()).getTable(anyString(), anyString());
     verify(client, never()).alter_table(anyString(), anyString(), any(Table.class));
   }
