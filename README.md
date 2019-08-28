@@ -598,6 +598,8 @@ This will add `first.table.parameter` and `second.table.parameter` to the metada
              first.table.parameter: first
              second.parameter.parameter: second
 
+To add properties to your table with non-alphanumeric characters (other than -) in them, surround the key name with single quotes and brackets like so: '[...]'.
+
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
 * The replica database you are replicating into must already exist in the remote Hive metastore (i.e. Circus Train won't create this for you).
