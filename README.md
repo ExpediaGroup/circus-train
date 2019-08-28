@@ -582,8 +582,8 @@ To use this feature, add properties to your configuration:
            - ...
         transform-options:
           table-parameters:
-            first.table.parameter: value
-            second.parameter.parameter: value
+            first-parameter-override: value
+            second-parameter-override: value
 
 This will add `first.table.parameter` and `second.table.parameter` to the metadata of all tables in your replication. These options can be overridden for each table by adding configuration to a specific table replication:
 
@@ -591,12 +591,12 @@ This will add `first.table.parameter` and `second.table.parameter` to the metada
            - ...
            transform-options:
              table-parameters:
-               first.table.parameter.override: override
-               second.parameter.paramete.overrider: override
+               first-parameter-override: override
+               second-parameter-override: override
          transform-options:
            table-parameters:
-             first.table.parameter: first
-             second.parameter.parameter: second
+             first-parameter-override: value
+             second-parameter-override: value
 
 To add properties to your table with non-alphanumeric characters (other than -) in them, surround the key name with single quotes and brackets like so: '[...]'.
 
