@@ -57,7 +57,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testOneReplicationsOverride() throws Exception {
+  public void testOneReplicationsOverride() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
@@ -66,7 +66,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsOverride() throws Exception {
+  public void testMultipleReplicationsOverride() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
@@ -80,7 +80,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsSecondOverrideShouldUseDefault() throws Exception {
+  public void testMultipleReplicationsSecondOverrideShouldUseDefault() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
@@ -94,7 +94,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testOneReplicationsOverrideFailureLifecycle() throws Exception {
+  public void testOneReplicationsOverrideFailureLifecycle() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleFailure(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
@@ -103,7 +103,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsOverrideFailureLifecycle() throws Exception {
+  public void testMultipleReplicationsOverrideFailureLifecycle() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
@@ -117,7 +117,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsSecondOverrideShouldUseDefaultFailureLifecycle() throws Exception {
+  public void testMultipleReplicationsSecondOverrideShouldUseDefaultFailureLifecycle() {
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
