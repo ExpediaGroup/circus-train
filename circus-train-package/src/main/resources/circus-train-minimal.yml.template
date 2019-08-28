@@ -16,3 +16,4 @@ table-replications:
       table-name: <table>
     replica-table:
       table-location: s3://<company>-<team>-<database>-<table>/
+housekeeping.db-init-script: classpath:/schema.sql

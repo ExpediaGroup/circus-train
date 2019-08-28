@@ -5,6 +5,10 @@
 ### Fixed
 * Bug in `AbstractAvroSerDeTransformation` where the config state wasn't refreshed on every replication.
 
+### Changed
+* Updated `jackson` version to 2.9.9 (was 2.9.8).
+* Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
+
 ## [14.0.1] - 2019-04-09
 ### Changed
 * Updated `housekeeping` version to 3.1.0 (was 3.0.6). Contains various housekeeping fixes.
