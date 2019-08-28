@@ -44,7 +44,6 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   private static final String EVENT_ID = "eventId";
-
   private AbstractAvroSerDeTransformation transformation;
 
   @Before
@@ -52,7 +51,6 @@ public class AbstractAvroSerDeTransformationTest {
     AvroSerDeConfig defaultConfig = new AvroSerDeConfig();
     defaultConfig.setBaseUrl("default");
     transformation = new DummyAvroSerDeTransformation(defaultConfig);
-
   }
 
   @Test
