@@ -55,7 +55,7 @@ public class AbstractAvroSerDeTransformationTest {
 
   @Test
   public void testOneReplicationsOverride() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
@@ -64,12 +64,12 @@ public class AbstractAvroSerDeTransformationTest {
 
   @Test
   public void testMultipleReplicationsOverride() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
-    assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
-    assertThat(EVENT_ID, is(transformation.getEventId()));
-    assertThat("location", is(transformation.getTableLocation()));
-    EventTableReplication tableReplication2 = mockTableReplicaiton("overrideBaseUrl2");
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
+    assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableLocation(), is("location"));
+    EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleSuccess(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
@@ -77,13 +77,13 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsOverrideToNull() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+  public void testMultipleReplicationsSecondOverrideShouldUseDefault() throws Exception {
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
-    assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
-    assertThat(EVENT_ID, is(transformation.getEventId()));
-    assertThat("location", is(transformation.getTableLocation()));
-    EventTableReplication tableReplication2 = mockTableReplicaiton(null);
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
+    assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableLocation(), is("location"));
+    EventTableReplication tableReplication2 = mockTableReplication(null);
     runLifeCycleSuccess(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("default"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
@@ -91,8 +91,8 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testOneReplicationsOverrideFailure() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+  public void testOneReplicationsOverrideFailureLifecycle() throws Exception {
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleFailure(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
@@ -100,13 +100,13 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsOverrideFailure() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+  public void testMultipleReplicationsOverrideFailureLifecycle() throws Exception {
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
     assertThat(EVENT_ID, is(transformation.getEventId()));
     assertThat("location", is(transformation.getTableLocation()));
-    EventTableReplication tableReplication2 = mockTableReplicaiton("overrideBaseUrl2");
+    EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleFailure(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
@@ -114,20 +114,20 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testMultipleReplicationsOverrideToNullFailure() throws Exception {
-    EventTableReplication tableReplication = mockTableReplicaiton("overrideBaseUrl");
+  public void testMultipleReplicationsSecondOverrideShouldUseDefaultFailureLifecycle() throws Exception {
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
     assertThat(EVENT_ID, is(transformation.getEventId()));
     assertThat("location", is(transformation.getTableLocation()));
-    EventTableReplication tableReplication2 = mockTableReplicaiton(null);
+    EventTableReplication tableReplication2 = mockTableReplication(null);
     runLifeCycleFailure(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("default"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
     assertThat(transformation.getTableLocation(), is("location"));
   }
 
-  private EventTableReplication mockTableReplicaiton(String overrideBaseUrl) {
+  private EventTableReplication mockTableReplication(String overrideBaseUrl) {
     EventTableReplication result = Mockito.mock(EventTableReplication.class);
     Map<String, Object> transformOptions = new HashMap<>();
     if (overrideBaseUrl != null) {
