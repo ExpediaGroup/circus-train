@@ -35,6 +35,9 @@ import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractAvroSerDeTransformationTest {
 
+  private static final String DEFAULT_DESTINATION_FOLDER = "default";
+  private static final String TABLE_LOCATION = "location";
+
   private class DummyAvroSerDeTransformation extends AbstractAvroSerDeTransformation {
 
     protected DummyAvroSerDeTransformation(AvroSerDeConfig avroSerDeConfig) {
@@ -49,7 +52,7 @@ public class AbstractAvroSerDeTransformationTest {
   @Before
   public void setUp() {
     AvroSerDeConfig defaultConfig = new AvroSerDeConfig();
-    defaultConfig.setBaseUrl("default");
+    defaultConfig.setBaseUrl(DEFAULT_DESTINATION_FOLDER);
     transformation = new DummyAvroSerDeTransformation(defaultConfig);
   }
 
@@ -59,7 +62,7 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   @Test
@@ -68,12 +71,12 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
     EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleSuccess(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   @Test
@@ -82,12 +85,12 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
     EventTableReplication tableReplication2 = mockTableReplication(null);
     runLifeCycleSuccess(tableReplication2);
-    assertThat(transformation.getAvroSchemaDestinationFolder(), is("default"));
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is(DEFAULT_DESTINATION_FOLDER));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   @Test
@@ -96,7 +99,7 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleFailure(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   @Test
@@ -105,12 +108,12 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
     assertThat(EVENT_ID, is(transformation.getEventId()));
-    assertThat("location", is(transformation.getTableLocation()));
+    assertThat(TABLE_LOCATION, is(transformation.getTableLocation()));
     EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleFailure(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   @Test
@@ -119,12 +122,12 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
     assertThat(EVENT_ID, is(transformation.getEventId()));
-    assertThat("location", is(transformation.getTableLocation()));
+    assertThat(TABLE_LOCATION, is(transformation.getTableLocation()));
     EventTableReplication tableReplication2 = mockTableReplication(null);
     runLifeCycleFailure(tableReplication2);
-    assertThat(transformation.getAvroSchemaDestinationFolder(), is("default"));
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is(DEFAULT_DESTINATION_FOLDER));
     assertThat(transformation.getEventId(), is(EVENT_ID));
-    assertThat(transformation.getTableLocation(), is("location"));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
   private EventTableReplication mockTableReplication(String overrideBaseUrl) {
@@ -136,7 +139,7 @@ public class AbstractAvroSerDeTransformationTest {
       transformOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS, avroOverrideOptions);
     }
     when(result.getTransformOptions()).thenReturn(transformOptions);
-    EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
+    EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", TABLE_LOCATION);
     when(result.getReplicaTable()).thenReturn(eventReplicaTable);
     return result;
   }
