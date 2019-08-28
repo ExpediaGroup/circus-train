@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,11 @@
  */
 package com.hotels.bdp.circustrain.api.conf;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ReplicaTable {
 
   private String databaseName;
   private String tableName;
   private String tableLocation;
-  private Map<String, String> parameters = new HashMap<>();
 
   public String getDatabaseName() {
     return databaseName;
@@ -47,14 +43,6 @@ public class ReplicaTable {
 
   public void setTableLocation(String tableLocation) {
     this.tableLocation = tableLocation;
-  }
-
-  public Map<String, String> getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
   }
 
 }

@@ -113,12 +113,12 @@ If you want to schedule housekeeping as a separate process then you should use t
 
         $CIRCUS_TRAIN_HOME/bin/housekeeping.sh --config=/path/to/config/file.yml
         
-### Alternatives to housekeeping
+### Orphaned data strategy
 To switch off housekeeping completely, and not put any paths to dereferenced data in the housekeeping database, `orphaned-data-strategy` can be set to `NONE`. This property is set to `HOUSEKEEPING` by default. 
 
-Naturally, to substitute housekeeping, Circus Train now supports the addition of properties to newly created tables, so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore Events is the addition of Beekeeper specific properties to your replication config, and Beekeeper will handle the rest. 
+Naturally, to substitute housekeeping, Circus Train supports the addition of properties to newly created tables so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore's events is the addition of Beekeeper specific properties to your configuration (see [Metadata transformations](#metadata-transformations)), and Beekeeper will handle the rest. 
 
-If your table already exists, you will need to add these properties to your replica table manually and also to your Circus Train configuration.
+If your table already exists, you will need to add these properties to your replica table manually, as well as your Circus Train configuration.
 
 ## Configuration
 Circus Train uses [Spring Boot](http://projects.spring.io/spring-boot/) for configuration so you are free to use any of the [many configuration strategies](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) supported by this framework to configure your Circus Train instance.
@@ -211,8 +211,8 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replica-table.table-location`|Yes|The base path of the replica table (fully qualified URI).|
 |`table-replications[n].replica-table.database-name`|No|The name of the destination database in which to replicate the table. Defaults to source database name.|
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
-|`table-replications[n].replica-table.parameters.[x]`|No|The name "`x`" and value of a parameter to add to a newly created replica table.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
+|`table-replications[n].orphaned-data-strategy`|No|Orphaned data strategy for replication. See [Orphaned data strategy](#orphaned-data-strategy) for more information. Defaults to `HOUSEKEEPING`.|
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
 |`table-replications[n].replication-strategy`|No|Table replication strategy. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT`.|
 |`table-replications[n].transform-options`|No|Map of optional options that can be used to set configuration for a custom transformation per table replication.|
@@ -572,6 +572,31 @@ The configuration options for Graphite are:
 |`graphite.host`|No|`hostname`:`port`|The hostname and port of the Graphite server. By default this is picked up from the `config` if provided.|
 |`graphite.prefix`|No|e.g. `dev`|All metrics are prefixed with `prefix.namespace`. By default this is picked up from the `config` if provided.|
 | `graphite.namespace`|Yes|e.g. `com.company.team.circus-train.application`|All metrics are prefixed with `prefix.namespace`. Formatting of this is important for reporting from Graphite.|
+
+### Metadata transformations
+Circus Train can transform the metadata of a newly created replica table by adding table parameters before performing the replication. This is useful, for example, to ensure that events emitted by your Hive Metastore are tagged with specific properties.
+
+To use this feature, add properties to your configuration:
+
+        table-replications:
+           - ...
+        transform-options:
+          table-parameters:
+            first.table.parameter: value
+            second.parameter.parameter: value
+
+This will add `first.table.parameter` and `second.table.parameter` to the metadata of all tables in your replication. These options can be overridden for each table by adding configuration to a specific table replication:
+
+         table-replications:
+           - ...
+           transform-options:
+             table-parameters:
+               first.table.parameter.override: override
+               second.parameter.paramete.overrider: override
+         transform-options:
+           table-parameters:
+             first.table.parameter: first
+             second.parameter.parameter: second
 
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.

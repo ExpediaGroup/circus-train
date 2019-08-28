@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,24 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.hotels.bdp.circustrain.api.conf.ReplicaTableParameters;
+@Configuration
+@ConfigurationProperties(prefix = "table-parameters")
+public class TableParametersConfig {
 
-@Configuration("orphanedDataOptions")
-@ConfigurationProperties(prefix = "orphaned-data-options")
-public class CircusTrainReplicaTableParameters extends ReplicaTableParameters {}
+  public static final String TABLE_REPLICATION_OVERRIDE_TABLE_PARAMETERS = "table-parameters";
+
+  private Map<String, String> parameters;
+
+  public Map<String, String> getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(Map<String, String> parameters) {
+    this.parameters = parameters;
+  }
+}
