@@ -20,7 +20,6 @@ import org.apache.thrift.TException;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 
@@ -31,21 +30,18 @@ public class DestructiveReplication implements Replication {
   private final DestructiveSource destructiveSource;
   private final DestructiveReplica destructiveReplica;
   private final String eventId;
-  private final HiveTableAnnotator hiveTableAnnotator;
 
   public DestructiveReplication(
       ReplicationFactoryImpl upsertReplicationFactory,
       TableReplication tableReplication,
       String eventId,
       DestructiveSource destructiveSource,
-      DestructiveReplica destructiveReplica,
-      HiveTableAnnotator hiveTableAnnotator) {
+      DestructiveReplica destructiveReplica) {
     this.upsertReplicationFactory = upsertReplicationFactory;
     this.tableReplication = tableReplication;
     this.eventId = eventId;
     this.destructiveSource = destructiveSource;
     this.destructiveReplica = destructiveReplica;
-    this.hiveTableAnnotator = hiveTableAnnotator;
   }
 
   @Override
@@ -56,10 +52,6 @@ public class DestructiveReplication implements Replication {
             + tableReplication.getQualifiedReplicaName()
             + "' is not controlled by circus train aborting replication, check configuration for correct replica name");
       }
-
-      hiveTableAnnotator.annotateTable(tableReplication.getReplicaDatabaseName(),
-        tableReplication.getReplicaTableName(), tableReplication.getReplicaTable().getParameters());
-
       if (destructiveSource.tableExists()) {
         destructiveReplica.dropDeletedPartitions(destructiveSource.getPartitionNames());
         // do normal replication

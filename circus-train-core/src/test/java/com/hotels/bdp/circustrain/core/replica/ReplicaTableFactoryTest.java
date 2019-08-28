@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,6 @@ public class ReplicaTableFactoryTest {
   private Table sourceTable;
   private TableAndStatistics sourceTableAndStats;
   private Partition sourcePartition;
-  private Map<String, String> replicaTableParameters = new HashMap<>();
   private final ReplicaTableFactory factory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
       TableTransformation.IDENTITY, PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
 
@@ -123,14 +122,12 @@ public class ReplicaTableFactoryTest {
     sourcePartition.setSd(sd);
 
     sourcePartition.setParameters(new HashMap<>(parameters));
-
-    replicaTableParameters.put("key", "value");
   }
 
   @Test
   public void newTable() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, replicaTableParameters);
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));
@@ -162,7 +159,7 @@ public class ReplicaTableFactoryTest {
         PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, replicaTableParameters);
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));
@@ -179,7 +176,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
-    assertThat(replica.getParameters().get("key"), is("value"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
 
     assertThat(replicaAndStats.getStatistics(), is(nullValue()));
@@ -188,7 +184,7 @@ public class ReplicaTableFactoryTest {
   @Test
   public void newTableEncodedLocation() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        new Path(REPLICA_DATA_DESTINATION, "%25"), FULL, replicaTableParameters);
+        new Path(REPLICA_DATA_DESTINATION, "%25"), FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getSd().getLocation(), is("hdfs://someserver/replicaDataDestination/%25"));
@@ -257,7 +253,7 @@ public class ReplicaTableFactoryTest {
   @Test
   public void newTableWithNameMappings() {
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, MAPPED_DB_NAME,
-        MAPPED_TABLE_NAME, REPLICA_DATA_DESTINATION, FULL, replicaTableParameters);
+        MAPPED_TABLE_NAME, REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(MAPPED_DB_NAME));
@@ -274,7 +270,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
-    assertThat(replica.getParameters().get("key"), is("value"));
   }
 
   @Test
@@ -310,7 +305,7 @@ public class ReplicaTableFactoryTest {
         new ColumnStatistics(new ColumnStatisticsDesc(true, DB_NAME, TABLE_NAME), columnStatisticsObjs));
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, source, MAPPED_DB_NAME, MAPPED_TABLE_NAME,
-        REPLICA_DATA_DESTINATION, FULL, replicaTableParameters);
+        REPLICA_DATA_DESTINATION, FULL);
     Table replica = replicaAndStats.getTable();
     ColumnStatistics replicaStatistics = replicaAndStats.getStatistics();
 
@@ -328,7 +323,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("DO_NOT_UPDATE_STATS"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED_VIA_STATS_TASK"), is("true"));
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
-    assertThat(replica.getParameters().get("key"), is("value"));
 
     assertThat(replicaStatistics.getStatsDesc().getDbName(), is(MAPPED_DB_NAME));
     assertThat(replicaStatistics.getStatsDesc().getTableName(), is(MAPPED_TABLE_NAME));
@@ -410,7 +404,7 @@ public class ReplicaTableFactoryTest {
     sourceTableAndStats.getTable().getSd().setLocation(null);
 
     TableAndStatistics replicaAndStats = factory.newReplicaTable(EVENT_ID, sourceTableAndStats, DB_NAME, TABLE_NAME,
-        null, FULL, replicaTableParameters);
+        null, FULL);
     Table replica = replicaAndStats.getTable();
 
     assertThat(replica.getDbName(), is(sourceTable.getDbName()));
@@ -430,7 +424,6 @@ public class ReplicaTableFactoryTest {
     assertThat(replica.getParameters().get("STATS_GENERATED"), is("true"));
     assertThat(replica.getParameters().get(StatsSetupConst.ROW_COUNT), is("1"));
     assertThat(replica.getTableType(), is(TableType.VIRTUAL_VIEW.name()));
-    assertThat(replica.getParameters().get("key"), is("value"));
     assertTrue(MetaStoreUtils.isView(replica));
 
     assertThat(replicaAndStats.getStatistics(), is(nullValue()));

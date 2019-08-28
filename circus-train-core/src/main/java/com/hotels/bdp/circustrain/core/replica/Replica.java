@@ -57,6 +57,7 @@ import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.annotation.HiveTableAnnotator;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
@@ -71,6 +72,7 @@ public class Replica extends HiveEndpoint {
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
   private final TableReplication tableReplication;
+  private final HiveTableAnnotator hiveTableAnnotator;
 
   /**
    * Use {@link ReplicaFactory}
@@ -82,12 +84,14 @@ public class Replica extends HiveEndpoint {
       ReplicaTableFactory replicaTableFactory,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
+      HiveTableAnnotator hiveTableAnnotator,
       TableReplication tableReplication) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
     replicationMode = tableReplication.getReplicationMode();
+    this.hiveTableAnnotator = hiveTableAnnotator;
     this.tableReplication = tableReplication;
   }
 
@@ -252,14 +256,15 @@ public class Replica extends HiveEndpoint {
       ReplicationMode replicationMode) {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
-        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode,
-          tableReplication.getReplicaTable().getParameters());
+        .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
 
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
       try {
         client.createTable(replicaTable.getTable());
+        hiveTableAnnotator.annotateTable(replicaDatabaseName, replicaTableName,
+          tableReplication.getReplicaTable().getParameters());
         updateTableColumnStatistics(client, replicaTable);
       } catch (TException e) {
         throw new MetaStoreClientException(

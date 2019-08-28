@@ -17,7 +17,7 @@ Other features include:
    * table metadata (i.e. automatically replicates any DDL changes).
 * Replications between any Hadoop compatible file systems (HDFS, S3, GCS).
 * A snapshot can be taken of the source data so any changes to it while replication occurs don't result in errors or incomplete data being copied.
-* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data is handled by a configurable [housekeeping](#configuring-housekeeping) process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
+* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data can be handled by a configurable [housekeeping](#configuring-housekeeping) process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
 * Hive database and tables can optionally be renamed to have different names in the destination.
 * Control of how the data is copied - what file attributes are copied, bandwidth throttling etc.
 * Data consistency checking is performed as part of the replication.
@@ -112,6 +112,13 @@ The preferred way to execute the housekeeping process is by using the `housekeep
 If you want to schedule housekeeping as a separate process then you should use the following script:
 
         $CIRCUS_TRAIN_HOME/bin/housekeeping.sh --config=/path/to/config/file.yml
+        
+### Alternatives to housekeeping
+To switch off housekeeping completely, and not put any paths to dereferenced data in the housekeeping database, `orphaned-data-strategy` can be set to `NONE`. This property is set to `HOUSEKEEPING` by default. 
+
+Naturally, to substitute housekeeping, Circus Train now supports the addition of properties to newly created tables, so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore Events is the addition of Beekeeper specific properties to your replication config, and Beekeeper will handle the rest. 
+
+If your table already exists, you will need to add these properties to your replica table manually and also to your Circus Train configuration.
 
 ## Configuration
 Circus Train uses [Spring Boot](http://projects.spring.io/spring-boot/) for configuration so you are free to use any of the [many configuration strategies](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) supported by this framework to configure your Circus Train instance.
@@ -204,6 +211,7 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replica-table.table-location`|Yes|The base path of the replica table (fully qualified URI).|
 |`table-replications[n].replica-table.database-name`|No|The name of the destination database in which to replicate the table. Defaults to source database name.|
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
+|`table-replications[n].replica-table.parameters.[x]`|No|The name "`x`" and value of a parameter to add to a newly created replica table.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
 |`table-replications[n].replication-strategy`|No|Table replication strategy. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT`.|

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2018 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_LO
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_METASTORE;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.SOURCE_TABLE;
 
-import java.util.Map;
 import java.util.Objects;
 
 import org.apache.hadoop.fs.Path;
@@ -98,8 +97,7 @@ public class ReplicaTableFactory {
       String replicaDatabaseName,
       String replicaTableName,
       Path replicaDataDestination,
-      ReplicationMode replicationMode,
-      Map<String, String> parameters) {
+      ReplicationMode replicationMode) {
     Table sourceTable = sourceTableAndStatistics.getTable();
     Table replica = tableTransformation.transform(new Table(sourceTable));
     replica.setDbName(replicaDatabaseName);
@@ -120,10 +118,6 @@ public class ReplicaTableFactory {
     replica.putToParameters(SOURCE_TABLE.parameterName(), Warehouse.getQualifiedName(sourceTable));
     replica.putToParameters(SOURCE_METASTORE.parameterName(), sourceMetaStoreUris);
     replica.putToParameters(REPLICATION_MODE.parameterName(), replicationMode.name());
-
-    for(Map.Entry<String, String> entry : parameters.entrySet()) {
-      replica.putToParameters(entry.getKey(), entry.getValue());
-    }
 
     // Create some replica stats
     ColumnStatistics replicaColumnStats = null;
