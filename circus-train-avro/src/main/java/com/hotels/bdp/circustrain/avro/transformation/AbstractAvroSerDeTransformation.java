@@ -31,7 +31,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   private final AvroSerDeConfig avroSerDeConfig;
   private String eventId;
   private String tableLocation;
-  private Map<String, Object> avroSerdeConfigOverride = Collections.emptyMap();
+  private Map<String, Object> avroSerdeConfigOverride;
   static final String AVRO_SCHEMA_URL_PARAMETER = "avro.schema.url";
 
   protected AbstractAvroSerDeTransformation(AvroSerDeConfig avroSerDeConfig) {
@@ -63,6 +63,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     this.eventId = eventId;
     tableLocation = tableReplication.getReplicaTable().getTableLocation();
+    avroSerdeConfigOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
     Object avroSerDeOverride = transformOptions.get(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS);
     if (avroSerDeOverride != null && avroSerDeOverride instanceof Map) {
