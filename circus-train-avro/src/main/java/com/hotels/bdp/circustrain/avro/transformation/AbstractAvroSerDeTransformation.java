@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     this.eventId = eventId;
     tableLocation = tableReplication.getReplicaTable().getTableLocation();
+    avroSerdeConfigOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
     Object avroSerDeOverride = transformOptions.get(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS);
     if (avroSerDeOverride != null && avroSerDeOverride instanceof Map) {

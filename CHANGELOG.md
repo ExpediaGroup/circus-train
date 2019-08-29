@@ -2,6 +2,9 @@
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
+### Fixed
+* Bug in `AbstractAvroSerDeTransformation` where the config state wasn't refreshed on every replication.
+
 ### Changed
 * Updated `jackson` version to 2.9.9 (was 2.9.8).
 * Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
