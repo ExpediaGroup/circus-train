@@ -585,7 +585,7 @@ To use this feature, add properties to your configuration:
             first-parameter-override: value
             second-parameter-override: value
 
-This will add `first.table.parameter` and `second.table.parameter` to the metadata of all tables in your replication. These options can be overridden for each table by adding configuration to a specific table replication:
+This will add `first-table-parameter` and `second-table-parameter` to the metadata of all tables in your replication. These options can be overridden for each replication:
 
          table-replications:
            - ...
@@ -598,7 +598,7 @@ This will add `first.table.parameter` and `second.table.parameter` to the metada
              first-parameter-override: value
              second-parameter-override: value
 
-To add properties to your table with non-alphanumeric characters (other than -) in them, surround the key name with single quotes and brackets like so: '[...]'.
+To add properties to your table with non-alphanumeric characters (other than -), surround the key with single quotes and brackets like so: '[...]'.
 
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
