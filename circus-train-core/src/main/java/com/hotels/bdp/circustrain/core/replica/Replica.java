@@ -253,7 +253,6 @@ public class Replica extends HiveEndpoint {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
-
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");

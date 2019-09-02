@@ -57,6 +57,7 @@ public class TableParametersTransformationTest {
   public void typical() {
     Table transformedTable = transformation.transform(table);
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(KEY), is(VALUE));
   }
 
@@ -65,6 +66,7 @@ public class TableParametersTransformationTest {
     table.setParameters(Collections.EMPTY_MAP);
     Table transformedTable = transformation.transform(table);
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(KEY), is(VALUE));
   }
 
@@ -75,6 +77,7 @@ public class TableParametersTransformationTest {
     table.setParameters(parameters);
     Table transformedTable = transformation.transform(table);
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(2));
     assertThat(tableParameters.get("old_key"), is("old_value"));
     assertThat(tableParameters.get(KEY), is(VALUE));
   }
@@ -86,6 +89,7 @@ public class TableParametersTransformationTest {
     table.setParameters(parameters);
     Table transformedTable = transformation.transform(table);
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(KEY), is(VALUE));
   }
 
@@ -94,6 +98,7 @@ public class TableParametersTransformationTest {
     transformation.tableReplicationStart(createEventTableReplication(OVERRIDE_KEY, OVERRIDE_VALUE), EVENT_ID);
     Table transformedTable = transformation.transform(table);
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(OVERRIDE_KEY), is(OVERRIDE_VALUE));
   }
 
@@ -101,11 +106,13 @@ public class TableParametersTransformationTest {
   public void typicalTwoReplicationsBothOverride() {
     transformation.tableReplicationStart(createEventTableReplication(OVERRIDE_KEY, OVERRIDE_VALUE),EVENT_ID);
     transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
     assertThat(table.getParameters().get(OVERRIDE_KEY), is(OVERRIDE_VALUE));
     transformation.tableReplicationStart(createEventTableReplication(SECOND_OVERRIDE_KEY, SECOND_OVERRIDE_VALUE),
       EVENT_ID);
     Table transformedTable = transformation.transform(new Table());
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(SECOND_OVERRIDE_KEY), is(SECOND_OVERRIDE_VALUE));
   }
 
@@ -113,10 +120,12 @@ public class TableParametersTransformationTest {
   public void typicalTwoReplicationsFirstOverride() {
     transformation.tableReplicationStart(createEventTableReplication(OVERRIDE_KEY, OVERRIDE_VALUE),EVENT_ID);
     transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
     assertThat(table.getParameters().get(OVERRIDE_KEY), is(OVERRIDE_VALUE));
     transformation.tableReplicationStart(createEventTableReplication(Collections.EMPTY_MAP), EVENT_ID);
     Table transformedTable = transformation.transform(new Table());
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(KEY), is(VALUE));
   }
 
@@ -124,11 +133,13 @@ public class TableParametersTransformationTest {
   public void typicalTwoReplicationsSecondOverride() {
     transformation.tableReplicationStart(createEventTableReplication(Collections.EMPTY_MAP),EVENT_ID);
     transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
     assertThat(table.getParameters().get(KEY), is(VALUE));
     transformation.tableReplicationStart(createEventTableReplication(SECOND_OVERRIDE_KEY, SECOND_OVERRIDE_VALUE),
       EVENT_ID);
     Table transformedTable = transformation.transform(new Table());
     Map<String, String> tableParameters = transformedTable.getParameters();
+    assertThat(tableParameters.size(), is(1));
     assertThat(tableParameters.get(SECOND_OVERRIDE_KEY), is(SECOND_OVERRIDE_VALUE));
   }
 
@@ -136,7 +147,7 @@ public class TableParametersTransformationTest {
     Map<String, Object> transformOptions = new HashMap<>();
     Map<String, Object> tableParametersOptions = new HashMap<>();
     tableParametersOptions.put(overrideKey, overrideValue);
-    transformOptions.put(TableParametersConfig.TABLE_REPLICATION_OVERRIDE_TABLE_PARAMETERS, tableParametersOptions);
+    transformOptions.put(TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS, tableParametersOptions);
     return createEventTableReplication(transformOptions);
   }
 

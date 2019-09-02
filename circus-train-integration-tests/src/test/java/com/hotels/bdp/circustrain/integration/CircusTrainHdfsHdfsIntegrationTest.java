@@ -273,8 +273,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           assertThat(cleanUpPaths.size(), is(0));
         }
         Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
-        assertThat(parameters.get("table.parameter.first"), is("first"));
-        assertThat(parameters.get("table.parameter.second"), is("second"));
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
       }
     });
     runner.run(config.getAbsolutePath());
@@ -288,8 +288,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     // create table in replica metastore
     replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
     Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, PARTITIONED_TABLE);
-    table.putToParameters("table.parameter.first", "first");
-    table.putToParameters("table.parameter.second", "second");
+    table.putToParameters("table.property.first", "first");
+    table.putToParameters("table.property.second", "second");
     replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, table);
     LOG.info(">>>> Created Replica Table {} ", table);
 
@@ -311,8 +311,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
           assertThat(cleanUpPaths.size(), is(0));
         }
         Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
-        assertThat(parameters.containsKey("table.parameter.first"), is(false));
-        assertThat(parameters.containsKey("table.parameter.second"), is(false));
+        assertThat(parameters.containsKey("table.property.first"), is(false));
+        assertThat(parameters.containsKey("table.property.second"), is(false));
       }
     });
     runner.run(config.getAbsolutePath());

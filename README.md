@@ -574,31 +574,44 @@ The configuration options for Graphite are:
 | `graphite.namespace`|Yes|e.g. `com.company.team.circus-train.application`|All metrics are prefixed with `prefix.namespace`. Formatting of this is important for reporting from Graphite.|
 
 ### Metadata transformations
-Circus Train can transform the metadata of a newly created replica table by adding table parameters before performing the replication. This is useful, for example, to ensure that events emitted by your Hive Metastore are tagged with specific properties.
+Circus Train can transform the metadata of a newly created replica table by adding table parameters during the replication.
 
 To use this feature, add properties to your configuration:
 
         table-replications:
            - ...
         transform-options:
-          table-parameters:
-            first-parameter-override: value
-            second-parameter-override: value
+          table-properties:
+            my-custom-property: my-custom-value
+            my-custom-property2: my-custom-value2
 
-This will add `first-table-parameter` and `second-table-parameter` to the metadata of all tables in your replication. These options can be overridden for each replication:
+This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. Properties can also be overridden for each replication:
 
          table-replications:
-           - ...
-           transform-options:
-             table-parameters:
-               first-parameter-override: override
-               second-parameter-override: override
+           - source-table:
+               ...
+             replica-table:
+               ...
+             transform-options:
+               table-properties:
+                 my-custom-override: my-custom-value
+           - source-table:
+               ...
+             replica-table:
+               ...
          transform-options:
-           table-parameters:
-             first-parameter-override: value
-             second-parameter-override: value
+           table-properties:
+            my-custom-param: my-custom-value
+            my-custom-param2: my-custom-value2
 
-To add properties to your table with non-alphanumeric characters (other than -), surround the key with single quotes and brackets like so: '[...]'.
+In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than -), surround the key with single quotes and brackets like so:
+
+        transform-options:
+          table-properties:
+            '[my.custom.property2]': my-custom-value
+            '[my.custom.property2]': my-custom-value2
+            
+This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#metadata-transformations-extensions).
 
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
@@ -668,7 +681,7 @@ Example:
 
 In order not to clash with Circus Train's internal components we recommended you use your own package structure for these extensions (i.e. do not use `com.hotels.circustrain` or any sub-packages of this). The classes involved in implementing the extensions need to be made available on Circus Train's CLASSPATH. If your extension implementations require any existing Circus Train Beans then `CircusTrainContext` can be `@Autowired` in.
 
-### Metadata transformations
+### Metadata transformations {#metadata-transformations-extensions}
 The following transformation interfaces can be implemented to manipulate metadata during replication. Note that transformations are loaded by Spring - so they must be annotated with `@Component` - and only one transformation of each type is allowed on the classpath. In case multiple transformations are required you can compose them into a single transformation function.
 
 * `TableTransformation` is applied to the table metadata before the replica database is updated.

@@ -43,7 +43,7 @@ public abstract class AbstractTableParametersTransformation implements TableRepl
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     tableParametersConfigOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
-    Object tableParametersOverride = transformOptions.get(TableParametersConfig.TABLE_REPLICATION_OVERRIDE_TABLE_PARAMETERS);
+    Object tableParametersOverride = transformOptions.get(TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS);
     if (tableParametersOverride != null && tableParametersOverride instanceof Map) {
       tableParametersConfigOverride = (Map<String, String>) tableParametersOverride;
     }
