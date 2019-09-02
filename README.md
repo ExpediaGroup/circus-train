@@ -611,7 +611,7 @@ In this case, the first table replication will add just one property, `my-custom
             '[my.custom.property2]': my-custom-value
             '[my.custom.property2]': my-custom-value2
             
-This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#metadata-transformations-extensions).
+This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#metadata-transformations).
 
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
@@ -681,7 +681,7 @@ Example:
 
 In order not to clash with Circus Train's internal components we recommended you use your own package structure for these extensions (i.e. do not use `com.hotels.circustrain` or any sub-packages of this). The classes involved in implementing the extensions need to be made available on Circus Train's CLASSPATH. If your extension implementations require any existing Circus Train Beans then `CircusTrainContext` can be `@Autowired` in.
 
-### Metadata transformations {#metadata-transformations-extensions}
+### Metadata transformations
 The following transformation interfaces can be implemented to manipulate metadata during replication. Note that transformations are loaded by Spring - so they must be annotated with `@Component` - and only one transformation of each type is allowed on the classpath. In case multiple transformations are required you can compose them into a single transformation function.
 
 * `TableTransformation` is applied to the table metadata before the replica database is updated.
