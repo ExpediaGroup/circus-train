@@ -611,7 +611,7 @@ In this case, the first table replication will add just one property, `my-custom
             '[my.custom.property2]': my-custom-value
             '[my.custom.property2]': my-custom-value2
             
-This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#metadata-transformations).
+This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#metadata-transformations-1).
 
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
