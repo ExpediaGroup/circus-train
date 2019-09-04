@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,14 +102,26 @@ public class AvroSerDeTableTransformationTest {
   }
 
   @Test
+  public void transformNoTargetSchemaLocationSpecifiedUseDefault() throws Exception {
+    EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
+    when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
+    HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
+    when(schemaCopier.copy("avroSourceUrl", "location/eventId/.schema")).thenReturn(destinationPath);
+
+    transformation.tableReplicationStart(tableReplicationEvent, "eventId");
+    Table result = transformation.transform(table);
+    assertThat(result.getParameters().get(AVRO_SCHEMA_URL_PARAMETER), is(destinationPathString));
+  }
+
+  @Test
   public void transform() throws Exception {
     when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
-    transformation.tableReplicationStart(tableReplicationEvent, "eventId");
     HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
-
     when(schemaCopier.copy("avroSourceUrl", "schema/eventId/")).thenReturn(destinationPath);
+
+    transformation.tableReplicationStart(tableReplicationEvent, "eventId");
     Table result = transformation.transform(table);
     assertThat(result.getParameters().get(AVRO_SCHEMA_URL_PARAMETER), is(destinationPathString));
   }
