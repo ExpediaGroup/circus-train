@@ -88,8 +88,7 @@ class UnpartitionedTableReplication implements Replication {
       Path sourceLocation = sourceLocationManager.getTableLocation();
 
       ReplicaLocationManager replicaLocationManager = replica
-          .getLocationManager(TableType.UNPARTITIONED, targetTableLocation, eventId, sourceLocationManager,
-              replicaDatabaseName, replicaTableName);
+          .getLocationManager(TableType.UNPARTITIONED, targetTableLocation, eventId, sourceLocationManager);
       Path replicaLocation = replicaLocationManager.getTableLocation();
 
       CopierFactory copierFactory = copierFactoryManager

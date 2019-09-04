@@ -102,8 +102,7 @@ class PartitionedTableReplication implements Replication {
       List<Path> sourceSubLocations = sourceLocationManager.getPartitionLocations();
 
       ReplicaLocationManager replicaLocationManager = replica
-          .getLocationManager(TableType.PARTITIONED, targetTableLocation, eventId, sourceLocationManager,
-              replicaDatabaseName, replicaTableName);
+          .getLocationManager(TableType.PARTITIONED, targetTableLocation, eventId, sourceLocationManager);
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
       if (sourcePartitions.isEmpty()) {

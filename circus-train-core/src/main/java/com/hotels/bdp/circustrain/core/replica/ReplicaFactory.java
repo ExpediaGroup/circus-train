@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hotels.bdp.circustrain.core.replica;
 
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -63,6 +62,6 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,
-        housekeepingListener, replicaCatalogListener, tableReplication.getReplicationMode());
+        housekeepingListener, replicaCatalogListener, tableReplication);
   }
 }

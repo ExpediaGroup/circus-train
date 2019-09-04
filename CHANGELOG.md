@@ -1,4 +1,4 @@
-## TBD
+## [14.1.0] - TBD
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
@@ -8,6 +8,9 @@
 ### Changed
 * Updated `jackson` version to 2.9.9 (was 2.9.8).
 * Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
+
+### Added
+* Table transformation to add custom properties to tables during a replication.
 
 ## [14.0.1] - 2019-04-09
 ### Changed

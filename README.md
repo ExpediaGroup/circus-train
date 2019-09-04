@@ -17,7 +17,7 @@ Other features include:
    * table metadata (i.e. automatically replicates any DDL changes).
 * Replications between any Hadoop compatible file systems (HDFS, S3, GCS).
 * A snapshot can be taken of the source data so any changes to it while replication occurs don't result in errors or incomplete data being copied.
-* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data is handled by a configurable [housekeeping](#configuring-housekeeping) process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
+* Data is replicated to a unique location at the destination so any overwriting of existing data is transparent to anyone querying the data at the same time (i.e. end users won't see inconsistent or incomplete data or receive errors). Deletion of orphaned overwritten data can be handled by a configurable [housekeeping](#configuring-housekeeping) process which removes this data after an interval (to protect any "in flight" queries on the older data from errors).
 * Hive database and tables can optionally be renamed to have different names in the destination.
 * Control of how the data is copied - what file attributes are copied, bandwidth throttling etc.
 * Data consistency checking is performed as part of the replication.
@@ -112,6 +112,13 @@ The preferred way to execute the housekeeping process is by using the `housekeep
 If you want to schedule housekeeping as a separate process then you should use the following script:
 
         $CIRCUS_TRAIN_HOME/bin/housekeeping.sh --config=/path/to/config/file.yml
+        
+### Orphaned data strategy
+To switch off housekeeping completely, and not put any paths to dereferenced data in the housekeeping database, `orphaned-data-strategy` can be set to `NONE`. This property is set to `HOUSEKEEPING` by default. 
+
+Naturally, to substitute housekeeping, Circus Train supports the addition of properties to newly created tables so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore's events is the addition of Beekeeper-specific properties to your configuration (see [Metadata transformations](#metadata-transformations)), and Beekeeper will handle the rest. 
+
+If your table already exists, you will need to add these properties to your replica table manually, as well as your Circus Train configuration.
 
 ## Configuration
 Circus Train uses [Spring Boot](http://projects.spring.io/spring-boot/) for configuration so you are free to use any of the [many configuration strategies](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) supported by this framework to configure your Circus Train instance.
@@ -205,6 +212,7 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].replica-table.database-name`|No|The name of the destination database in which to replicate the table. Defaults to source database name.|
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
+|`table-replications[n].orphaned-data-strategy`|No|Orphaned data strategy for replication. See [Orphaned data strategy](#orphaned-data-strategy) for more information. Defaults to `HOUSEKEEPING`.|
 |`table-replications[n].replication-mode`|No|Table replication mode. See [Replication Mode](#replication-mode) for more information. Defaults to `FULL`.|
 |`table-replications[n].replication-strategy`|No|Table replication strategy. See [Replication Strategy](#replication-strategy) for more information. Defaults to `UPSERT`.|
 |`table-replications[n].transform-options`|No|Map of optional options that can be used to set configuration for a custom transformation per table replication.|
@@ -565,6 +573,46 @@ The configuration options for Graphite are:
 |`graphite.prefix`|No|e.g. `dev`|All metrics are prefixed with `prefix.namespace`. By default this is picked up from the `config` if provided.|
 | `graphite.namespace`|Yes|e.g. `com.company.team.circus-train.application`|All metrics are prefixed with `prefix.namespace`. Formatting of this is important for reporting from Graphite.|
 
+### Metadata transformations
+Circus Train can transform the metadata of a newly created replica table by adding table parameters during the replication.
+
+To use this feature, add properties to your configuration:
+
+        table-replications:
+           - ...
+        transform-options:
+          table-properties:
+            my-custom-property: my-custom-value
+            my-custom-property2: my-custom-value2
+
+This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. These default properties can also be overridden by individual replications:
+
+         table-replications:
+           - source-table:
+               ...
+             replica-table:
+               ...
+             transform-options:
+               table-properties:
+                 my-custom-override: my-custom-value
+           - source-table:
+               ...
+             replica-table:
+               ...
+         transform-options:
+           table-properties:
+            my-custom-param: my-custom-value
+            my-custom-param2: my-custom-value2
+
+In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than "-"), surround the key with single quotes and brackets like so:
+
+        transform-options:
+          table-properties:
+            '[my.custom.property]': my-custom-value
+            '[my.custom.property2]': my-custom-value2
+            
+This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#custom-metadata-transformations).
+
 ## Important Notes
 * By default, the source Hadoop and Hive configurations are loaded from the environment.
 * The replica database you are replicating into must already exist in the remote Hive metastore (i.e. Circus Train won't create this for you).
@@ -633,7 +681,7 @@ Example:
 
 In order not to clash with Circus Train's internal components we recommended you use your own package structure for these extensions (i.e. do not use `com.hotels.circustrain` or any sub-packages of this). The classes involved in implementing the extensions need to be made available on Circus Train's CLASSPATH. If your extension implementations require any existing Circus Train Beans then `CircusTrainContext` can be `@Autowired` in.
 
-### Metadata transformations
+### Custom metadata transformations
 The following transformation interfaces can be implemented to manipulate metadata during replication. Note that transformations are loaded by Spring - so they must be annotated with `@Component` - and only one transformation of each type is allowed on the classpath. In case multiple transformations are required you can compose them into a single transformation function.
 
 * `TableTransformation` is applied to the table metadata before the replica database is updated.
