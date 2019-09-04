@@ -1,4 +1,8 @@
 ## TBD
+
+### Added
+* If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. Fixes [#131](https://github.com/HotelsDotCom/circus-train/issues/131)
+
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
