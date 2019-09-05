@@ -47,15 +47,18 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   }
 
   protected boolean avroTransformationSpecified() {
-    return argsPresent(getAvroSchemaDestinationFolder(), getEventId());
+    return argsPresent(getEventId());
   }
 
   protected String getAvroSchemaDestinationFolder() {
     Object urlOverride = avroSerdeConfigOverride.get(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_BASE_URL);
     if (urlOverride != null && StringUtils.isNotBlank(urlOverride.toString())) {
       return urlOverride.toString();
+    } else if (avroSerDeConfig.getBaseUrl() != null && StringUtils.isNotBlank(avroSerDeConfig.getBaseUrl())) {
+      return avroSerDeConfig.getBaseUrl();
+    } else {
+      return tableLocation;
     }
-    return avroSerDeConfig.getBaseUrl();
   }
 
   @SuppressWarnings("unchecked")

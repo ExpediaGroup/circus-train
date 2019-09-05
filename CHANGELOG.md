@@ -1,4 +1,9 @@
 ## [14.1.0] - TBD
+
+### Added
+* Table transformation to add custom properties to tables during a replication.
+* If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. See [#131](https://github.com/HotelsDotCom/circus-train/issues/131).
+
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
@@ -8,9 +13,6 @@
 ### Changed
 * Updated `jackson` version to 2.9.9 (was 2.9.8).
 * Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
-
-### Added
-* Table transformation to add custom properties to tables during a replication.
 
 ## [14.0.1] - 2019-04-09
 ### Changed
