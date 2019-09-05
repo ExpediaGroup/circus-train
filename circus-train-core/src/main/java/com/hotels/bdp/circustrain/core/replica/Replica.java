@@ -70,6 +70,7 @@ public class Replica extends HiveEndpoint {
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
+  private final TableReplication tableReplication;
 
   /**
    * Use {@link ReplicaFactory}
@@ -81,12 +82,13 @@ public class Replica extends HiveEndpoint {
       ReplicaTableFactory replicaTableFactory,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      ReplicationMode replicationMode) {
+      TableReplication tableReplication) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
-    this.replicationMode = replicationMode;
+    replicationMode = tableReplication.getReplicationMode();
+    this.tableReplication = tableReplication;
   }
 
   public void updateMetadata(
@@ -124,8 +126,8 @@ public class Replica extends HiveEndpoint {
       updateTableMetadata(client, eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
           locationManager.getTableLocation(), replicationMode);
 
-      List<Partition> oldPartitions = getOldPartitions(sourceTableAndStatistics, sourcePartitionsAndStatistics,
-          replicaDatabaseName, replicaTableName, client);
+      List<Partition> oldPartitions = getOldPartitions(sourcePartitionsAndStatistics, replicaDatabaseName,
+          replicaTableName, client);
       LOG.debug("Found {} existing partitions that may match.", oldPartitions.size());
 
       replicaCatalogListener
@@ -214,7 +216,6 @@ public class Replica extends HiveEndpoint {
   }
 
   private List<Partition> getOldPartitions(
-      TableAndStatistics sourceTableAndStatistics,
       PartitionsAndStatistics sourcePartitionsAndStatistics,
       String replicaDatabaseName,
       String replicaTableName,
@@ -364,14 +365,11 @@ public class Replica extends HiveEndpoint {
       TableType tableType,
       String targetTableLocation,
       String eventId,
-      SourceLocationManager sourceLocationManager,
-      String replicaDatabaseName,
-      String replicaTableName)
-    throws TException {
-    return new FullReplicationReplicaLocationManager(
-        sourceLocationManager, targetTableLocation, eventId, tableType, new HousekeepingCleanupLocationManager(eventId,
-            housekeepingListener, replicaCatalogListener, replicaDatabaseName, replicaTableName),
-        replicaCatalogListener);
+      SourceLocationManager sourceLocationManager) {
+    CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
+        housekeepingListener, replicaCatalogListener, tableReplication);
+    return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
+        cleanupLocationManager, replicaCatalogListener);
   }
 
   @Override

@@ -29,13 +29,13 @@ import static org.junit.Assert.fail;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_ENCODED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_UNPARTITIONED_TABLE;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_PARTITIONED_VIEW;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_UNPARTITIONED_VIEW;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.HOUSEKEEPING_DB_PASSWD;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.HOUSEKEEPING_DB_USER;
@@ -52,6 +52,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
@@ -244,6 +245,74 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
         }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableNoHousekeepingWithTableParameters() throws Exception {
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-table-parameters.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+            .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableAlreadyExistsNoHousekeepingRemovesTableParameters() throws Exception {
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Created Source Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    // create table in replica metastore
+    replicaHelper.createPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    Table table = replicaHelper.alterTableSetCircusTrainParameter(DATABASE, PARTITIONED_TABLE);
+    table.putToParameters("table.property.first", "first");
+    table.putToParameters("table.property.second", "second");
+    replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, table);
+    LOG.info(">>>> Created Replica Table {} ", table);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+            .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
+        assertThat(parameters.containsKey("table.property.first"), is(false));
+        assertThat(parameters.containsKey("table.property.second"), is(false));
       }
     });
     runner.run(config.getAbsolutePath());

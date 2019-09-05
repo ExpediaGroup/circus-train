@@ -18,14 +18,13 @@ package com.hotels.bdp.circustrain.core;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Replication;
-import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.ReplicationStrategy;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.replica.CleanupLocationManager;
+import com.hotels.bdp.circustrain.core.replica.CleanupLocationManagerFactory;
 import com.hotels.bdp.circustrain.core.replica.DestructiveReplica;
-import com.hotels.bdp.circustrain.core.replica.HousekeepingCleanupLocationManager;
 import com.hotels.bdp.circustrain.core.source.DestructiveSource;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
@@ -55,25 +54,13 @@ public class StrategyBasedReplicationFactory implements ReplicationFactory {
   public Replication newInstance(TableReplication tableReplication) {
     if (tableReplication.getReplicationStrategy() == ReplicationStrategy.PROPAGATE_DELETES) {
       String eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_DESTRUCTIVE.getPrefix());
+      CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
+        housekeepingListener, replicaCatalogListener, tableReplication);
+
       return new DestructiveReplication(upsertReplicationFactory, tableReplication, eventId,
           new DestructiveSource(sourceMetaStoreClientSupplier, tableReplication),
-          new DestructiveReplica(replicaMetaStoreClientSupplier,
-              createDestructiveCleanupLocationManager(eventId, tableReplication), tableReplication));
+          new DestructiveReplica(replicaMetaStoreClientSupplier, cleanupLocationManager, tableReplication));
     }
     return upsertReplicationFactory.newInstance(tableReplication);
   }
-
-  private CleanupLocationManager createDestructiveCleanupLocationManager(
-      String eventId,
-      TableReplication tableReplication) {
-    if (tableReplication.getReplicationMode() == ReplicationMode.FULL) {
-      return new HousekeepingCleanupLocationManager(eventId, housekeepingListener, replicaCatalogListener,
-          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
-    } else {
-      // Metadata Mirror and Metadata Update should not delete files, so dummy CleanupLocationManager is created and
-      // used.
-      return CleanupLocationManager.NULL_CLEANUP_LOCATION_MANAGER;
-    }
-  }
-
 }
