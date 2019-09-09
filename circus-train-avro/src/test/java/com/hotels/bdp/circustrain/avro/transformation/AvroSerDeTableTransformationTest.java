@@ -90,6 +90,18 @@ public class AvroSerDeTableTransformationTest {
   }
 
   @Test
+  public void missingReplicaTableLocation() {
+    // This happens when replication mode is METADATA_UPDATE or METADATA_MIRROR
+    EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", null);
+    when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
+    transformation.tableReplicationStart(tableReplicationEvent, "eventId");
+
+    transformation.transform(table);
+    verifyZeroInteractions(schemaCopier);
+    assertThat(table, is(newTable()));
+  }
+
+  @Test
   public void transformNoSourceUrl() throws Exception {
     when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
