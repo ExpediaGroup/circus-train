@@ -47,7 +47,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   }
 
   protected boolean avroTransformationSpecified() {
-    return argsPresent(getEventId());
+    return argsPresent(getAvroSchemaDestinationFolder(), getEventId());
   }
 
   protected String getAvroSchemaDestinationFolder() {

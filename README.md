@@ -208,7 +208,7 @@ The table below describes all the available configuration values for Circus Trai
 |`table-replications[n].source-table.partition-filter`|No|A filter to select which partitions to replicate. Used for partitioned tables only. See [Partition filters](#partition-filters) for more information.|
 |`table-replications[n].source-table.generate-partition-filter`|No|Set to `true` to enable the "Hive Diff" feature. See [Partition filter generation](#partition-filter-generation) for details. Default is `false`. If `true` the `table-replications[n].source-table.partition-filter` will be ignored and instead a generated filter will be used.|
 |`table-replications[n].source-table.partition-limit`|No|A limit on the number of partitions that will be replicated. Used for partitioned tables only.|
-|`table-replications[n].replica-table.table-location`|Yes|The base path of the replica table (fully qualified URI).|
+|`table-replications[n].replica-table.table-location`|Yes|The base path of the replica table (fully qualified URI). Please note this is a required parameter only if the `replication-mode` is `FULL`|
 |`table-replications[n].replica-table.database-name`|No|The name of the destination database in which to replicate the table. Defaults to source database name.|
 |`table-replications[n].replica-table.table-name`|No|The name of the table at the destination. Defaults to source table name.|
 |`table-replications[n].copier-options`|No|Table specific `Copier` options which override any global options. See [Copier options](#copier-options) for details.|
