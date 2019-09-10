@@ -80,12 +80,6 @@
     <dependency>
       <groupId>com.hotels</groupId>
       <artifactId>beeju</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>pentaho-aggdesigner-algorithm</artifactId>
-          <groupId>org.pentaho</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
