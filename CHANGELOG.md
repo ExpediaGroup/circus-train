@@ -12,6 +12,7 @@
 
 ### Changed
 * Updated `jackson` version to 2.9.9 (was 2.9.8).
+* Updated `beeju` version to 2.0.0 (was 1.2.1).
 * Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
 
 ## [14.0.1] - 2019-04-09

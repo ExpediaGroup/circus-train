@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,8 +197,9 @@ public class FilterToolIntegrationTest {
       writeProperty(xmlWriter, METASTOREURIS, sourceCatalog.getThriftConnectionUri());
       writeProperty(xmlWriter, METASTORECONNECTURLKEY, sourceCatalog.connectionURL());
       writeProperty(xmlWriter, METASTORE_CONNECTION_DRIVER, sourceCatalog.driverClassName());
-      writeProperty(xmlWriter, METASTORE_CONNECTION_USER_NAME, ThriftHiveMetaStoreJUnitRule.METASTORE_DB_USER);
-      writeProperty(xmlWriter, METASTOREPWD, ThriftHiveMetaStoreJUnitRule.METASTORE_DB_PASSWORD);
+      writeProperty(xmlWriter, METASTORE_CONNECTION_USER_NAME, sourceCatalog.conf()
+        .getVar(METASTORE_CONNECTION_USER_NAME));
+      writeProperty(xmlWriter, METASTOREPWD, sourceCatalog.conf().getVar(METASTOREPWD));
       xmlWriter.endElement();
     }
   }
