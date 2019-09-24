@@ -900,11 +900,11 @@ Note that the Circus Train configuration only supports one set of AWS credential
 
 ### Circus Train DataSqueeze Copier
 This extension implements new Copiers for Circus Train which integrate DataSqueeze.
-url: https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze
+(https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze)
 
 ### circus-train-bigquery
 This Circus Train plugin enables the conversion of BigQuery tables to Hive.
-url: https://github.com/HotelsDotCom/circus-train-bigquery
+(https://github.com/HotelsDotCom/circus-train-bigquery)
 
 # Contact
 
