@@ -676,11 +676,13 @@ Circus Train can be extended in various ways. This is an advanced feature that t
 
 #### Circus Train DataSqueeze Copier
 This extension implements new Copiers for Circus Train which integrate DataSqueeze.
-(https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze)
+
+https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze
 
 #### circus-train-bigquery
 This Circus Train plugin enables the conversion of BigQuery tables to Hive.
-(https://github.com/HotelsDotCom/circus-train-bigquery)
+
+https://github.com/HotelsDotCom/circus-train-bigquery
 
 ### Loading Extensions
 Circus Train loads extensions using Spring's standard [ComponentScan](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ComponentScan.html) mechanism. Users can add their own packages to be scanned by declaring `extension-packages` as a comma separated list of package names to their YAML.
