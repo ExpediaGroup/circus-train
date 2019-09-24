@@ -896,6 +896,16 @@ Note that the Circus Train configuration only supports one set of AWS credential
           table-name: aws-a_table
           table-location: s3://<aws-a-data-bucket>/<pata-to-aws-a_db>/aws-a_table
 
+## Circus Train extensions
+
+### Circus Train DataSqueeze Copier
+This extension implements new Copiers for Circus Train which integrate DataSqueeze.
+url: https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze
+
+### circus-train-bigquery
+This Circus Train plugin enables the conversion of BigQuery tables to Hive.
+url: https://github.com/HotelsDotCom/circus-train-bigquery
+
 # Contact
 
 ## Mailing List
