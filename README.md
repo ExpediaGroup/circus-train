@@ -672,6 +672,14 @@ Circus Train can be extended in various ways. This is an advanced feature that t
 * `LocationManagers` look after the source and replica locations and are an ideal point to implement both snapshot isolation and retired data clean-up.
 * `CompositeCopierFactory` allows the provision of multiple copiers for the same table in order to add functionality to the copy process, e.g. introduce compaction, copy to multiple destinations, etc.
 
+### External Extensions
+
+#### Circus Train DataSqueeze Copier
+The [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) extension provides new Copiers for Circus Train which compact the data being replicated in various ways.
+
+#### Circus Train BigQuery To Hive Replication
+The [Circus Train BigQuery](https://github.com/HotelsDotCom/circus-train-bigquery) extension enables the conversion of Google BigQuery tables to Hive.
+
 ### Loading Extensions
 Circus Train loads extensions using Spring's standard [ComponentScan](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ComponentScan.html) mechanism. Users can add their own packages to be scanned by declaring `extension-packages` as a comma separated list of package names to their YAML.
 
