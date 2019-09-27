@@ -677,7 +677,7 @@ Circus Train can be extended in various ways. This is an advanced feature that t
 #### Circus Train DataSqueeze Copier
 The [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) extension provides new Copiers for Circus Train which compact the data being replicated in various ways.
 
-#### circus-train-bigquery
+#### Circus Train BigQuery To Hive Replication
 The [Circus Train BigQuery](https://github.com/HotelsDotCom/circus-train-bigquery) extension enables the conversion of Google BigQuery tables to Hive.
 
 ### Loading Extensions
