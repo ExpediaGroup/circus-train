@@ -16,6 +16,7 @@
 package com.hotels.bdp.circustrain.aws;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
@@ -42,7 +43,8 @@ public class HadoopAWSCredentialProviderChain extends AWSCredentialsProviderChai
   }
 
   public HadoopAWSCredentialProviderChain(Configuration conf) {
-    super(new JceksAWSCredentialProvider(conf), new EC2ContainerCredentialsProviderWrapper());
+    super(new JceksAWSCredentialProvider(conf), new TemporaryAWSCredentialsProvider(null, conf),
+        new EC2ContainerCredentialsProviderWrapper());
   }
 
 }
