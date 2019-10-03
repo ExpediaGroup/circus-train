@@ -24,11 +24,13 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.security.alias.CredentialProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.auth.AWSCredentials;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
@@ -131,11 +133,18 @@ public class S3MapReduceCpCopier implements Copier {
 
     S3MapReduceCpOptions s3MapReduceCpOptions = parseCopierOptions(copierOptions);
     LOG.debug("Invoking S3MapReduceCp with options: {}", s3MapReduceCpOptions);
-
     try {
       Enum<?> counter = Counter.BYTESCOPIED;
       Job job = executor.exec(conf, s3MapReduceCpOptions);
       registerRunningJobMetrics(job, counter);
+      try {
+        TemporaryAWSCredentialsProvider temporaryAWSCredentialsProvider = new TemporaryAWSCredentialsProvider(
+            job.getConfiguration());
+        AWSCredentials credentials = temporaryAWSCredentialsProvider.getCredentials();
+        LOG.info("Rogue: Got our credentials");
+      } catch (Throwable t) {
+        LOG.info("Rogue: Credentials error", t);
+      }
       if (!job.waitForCompletion(true)) {
         throw new IOException(
             "S3MapReduceCp failure: Job " + job.getJobID() + " has failed: " + job.getStatus().getFailureInfo());
