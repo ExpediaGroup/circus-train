@@ -86,8 +86,8 @@
                   <include>com.jcraft:*</include>
                   <include>com.pastdev:jsch-extension</include>
                   <include>io.dropwizard.metrics:*</include>
-                  <include>com.amazonaws:*</include>
-                  <include>org.apache.httpcomponents:*</include>
+<!--                   <include>com.amazonaws:*</include> -->
+<!--                   <include>org.apache.httpcomponents:*</include> -->
                   <include>com.fasterxml.jackson.*:*</include>
                   <include>com.github.ulisesbocchio:*</include>
                 </includes>
@@ -109,16 +109,16 @@
                   <pattern>com.codahale.metrics</pattern>
                   <shadedPattern>${shade.prefix}.com.codahale.metrics</shadedPattern>
                 </relocation>
-                <relocation>
-                  <pattern>com.amazonaws</pattern>
-                  <shadedPattern>${shade.prefix}.com.amazonaws</shadedPattern>
-                </relocation>
-                <relocation><!-- Note org.apache.httpcomponents groupId above in the includes but org.apache.http package, 
+<!--                 <relocation> -->
+<!--                   <pattern>com.amazonaws</pattern> -->
+<!--                   <shadedPattern>${shade.prefix}.com.amazonaws</shadedPattern> -->
+<!--                 </relocation> -->
+<!--                 <relocation>Note org.apache.httpcomponents groupId above in the includes but org.apache.http package, 
                     this is relocated due
                     to newer version used by com.amazonaws, older version is provided by /usr/lib/hive/ -->
-                  <pattern>org.apache.http</pattern>
-                  <shadedPattern>${shade.prefix}.org.apache.http</shadedPattern>
-                </relocation>
+<!--                   <pattern>org.apache.http</pattern> -->
+<!--                   <shadedPattern>${shade.prefix}.org.apache.http</shadedPattern> -->
+<!--                 </relocation> -->
                 <relocation>
                   <pattern>com.fasterxml.jackson</pattern>
                   <shadedPattern>${shade.prefix}.com.fasterxml.jackson</shadedPattern>
