@@ -59,6 +59,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(300L));
     assertThat(options.getUploadBufferSize(), is(0));
     assertThat(options.getCannedAcl(), is(nullValue()));
+    assertThat(options.getAssumeRole(), is(nullValue()));
   }
 
   @Test
@@ -89,6 +90,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -122,6 +124,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -151,6 +154,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -180,6 +184,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -213,6 +218,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -243,6 +249,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -272,6 +279,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -301,6 +309,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -331,6 +340,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -361,6 +371,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -391,6 +402,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -424,6 +436,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -454,6 +467,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -487,6 +501,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -517,6 +532,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -547,6 +563,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(666L));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -577,6 +594,7 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(512));
     assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
   }
 
   @Test
@@ -610,5 +628,40 @@ public class S3MapReduceCpOptionsTest {
     assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
     assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
     assertThat(options.getCannedAcl(), is(CannedAccessControlList.BucketOwnerFullControl.toString()));
+    assertThat(options.getAssumeRole(), is(ConfigurationVariable.ASSUME_ROLE.defaultValue()));
+  }
+
+  @Test
+  public void builderWithAssumeRole() {
+    S3MapReduceCpOptions options = S3MapReduceCpOptions
+            .builder(SOURCES, TARGET)
+            .assumeRole("iam:role:1234:user")
+            .build();
+    assertThat(options.isHelp(), is(false));
+    assertThat(options.isBlocking(), is(true));
+    assertThat(options.getSources(), is(SOURCES));
+    assertThat(options.getTarget(), is(TARGET));
+    assertThat(options.getCredentialsProvider(), is(ConfigurationVariable.CREDENTIAL_PROVIDER.defaultURIValue()));
+    assertThat(options.getMultipartUploadPartSize(),
+            is(ConfigurationVariable.MINIMUM_UPLOAD_PART_SIZE.defaultLongValue()));
+    assertThat(options.isS3ServerSideEncryption(),
+            is(ConfigurationVariable.S3_SERVER_SIDE_ENCRYPTION.defaultBooleanValue()));
+    assertThat(options.getStorageClass(), is(ConfigurationVariable.STORAGE_CLASS.defaultValue()));
+    assertThat(options.getMaxBandwidth(), is(ConfigurationVariable.MAX_BANDWIDTH.defaultLongValue()));
+    assertThat(options.getNumberOfUploadWorkers(),
+            is(ConfigurationVariable.NUMBER_OF_UPLOAD_WORKERS.defaultIntValue()));
+    assertThat(options.getMultipartUploadThreshold(),
+            is(ConfigurationVariable.MULTIPART_UPLOAD_THRESHOLD.defaultLongValue()));
+    assertThat(options.getMaxMaps(), is(ConfigurationVariable.MAX_MAPS.defaultIntValue()));
+    assertThat(options.getCopyStrategy(), is(ConfigurationVariable.COPY_STRATEGY.defaultValue()));
+    assertThat(options.getLogPath(), is(nullValue()));
+    assertThat(options.getRegion(), is(ConfigurationVariable.REGION.defaultValue()));
+    assertThat(options.isIgnoreFailures(), is(ConfigurationVariable.IGNORE_FAILURES.defaultBooleanValue()));
+    assertThat(options.getS3EndpointUri(), is(ConfigurationVariable.S3_ENDPOINT_URI.defaultURIValue()));
+    assertThat(options.getUploadRetryCount(), is(ConfigurationVariable.UPLOAD_RETRY_COUNT.defaultIntValue()));
+    assertThat(options.getUploadRetryDelayMs(), is(ConfigurationVariable.UPLOAD_RETRY_DELAY_MS.defaultLongValue()));
+    assertThat(options.getUploadBufferSize(), is(ConfigurationVariable.UPLOAD_BUFFER_SIZE.defaultIntValue()));
+    assertThat(options.getCannedAcl(), is(ConfigurationVariable.CANNED_ACL.defaultValue()));
+    assertThat(options.getAssumeRole(), is("iam:role:1234:user"));
   }
 }
