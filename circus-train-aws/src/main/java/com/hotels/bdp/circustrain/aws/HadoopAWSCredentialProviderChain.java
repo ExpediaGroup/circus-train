@@ -25,6 +25,7 @@ import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
  * <ul>
  * <li>Credentials from Hadoop configuration set via JCE KS - if a JCE KS path or Hadoop {@code Configuration} is
  * provided</li>
+ * <li>{@link AssumeRoleCredentialProvider} that provides credentials by assuming a role</li>
  * <li>{@link EC2ContainerCredentialsProviderWrapper} that loads credentials from an Amazon Container (e.g. EC2)</li>
  * </ul>
  *
@@ -41,12 +42,9 @@ public class HadoopAWSCredentialProviderChain extends AWSCredentialsProviderChai
     this(AWSCredentialUtils.configureCredentialProvider(credentialProviderPath));
   }
 
-  /**
-   * The order of the providers is significant. {@link AWSCredentialsProviderChain}
-   */
   public HadoopAWSCredentialProviderChain(Configuration conf) {
+    // note that the order of these providers is significant as they will be tried in the order passed in
     super(new JceksAWSCredentialProvider(conf), new AssumeRoleCredentialProvider(conf),
         new EC2ContainerCredentialsProviderWrapper());
   }
-
 }

@@ -30,7 +30,6 @@ public class AssumeRoleCredentialProviderTest {
   public void refreshThrowsNullPointerException() {
     AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(null);
     provider.refresh();
-    ;
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -43,6 +42,6 @@ public class AssumeRoleCredentialProviderTest {
   public void refreshThrowsIllegalArgumentException() {
     AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(new Configuration());
     provider.refresh();
-    ;
   }
+  
 }
