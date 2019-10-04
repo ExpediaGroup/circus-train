@@ -5,9 +5,6 @@
 * If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. See [#131](https://github.com/HotelsDotCom/circus-train/issues/131).
 * Added `copier-options.assume-role` to assume a role when using the S3MapReduceCp copier class. See [README.md](https://github.com/HotelsDotCom/circus-train) for details.
 
-### Changed
-* Updated `jackson` version to 2.9.10 (was 2.9.9).
-
 ### Removed
 * Excluded `org.pentaho:pentaho-aggdesigner-algorithm` from build.
 
@@ -15,6 +12,7 @@
 * Bug in `AbstractAvroSerDeTransformation` where the config state wasn't refreshed on every replication.
 
 ### Changed
+* Updated `jackson` version to 2.9.10 (was 2.9.9).
 * Updated `jackson` version to 2.9.9 (was 2.9.8).
 * Updated `beeju` version to 2.0.0 (was 1.2.1).
 * Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
