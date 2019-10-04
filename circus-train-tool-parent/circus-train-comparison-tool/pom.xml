@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-tool-parent</artifactId>
-    <version>14.1.1-SNAPSHOT</version>
+    <version>14.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>circus-train-comparison-tool</artifactId>
