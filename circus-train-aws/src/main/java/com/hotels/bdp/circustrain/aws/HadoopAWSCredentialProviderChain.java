@@ -42,8 +42,8 @@ public class HadoopAWSCredentialProviderChain extends AWSCredentialsProviderChai
   }
 
   public HadoopAWSCredentialProviderChain(Configuration conf) {
-    super(new AssumeRoleCredentialProvider(),
-            new JceksAWSCredentialProvider(conf),
+    super(new JceksAWSCredentialProvider(conf),
+            new AssumeRoleCredentialProvider(conf),
             new EC2ContainerCredentialsProviderWrapper());
   }
 

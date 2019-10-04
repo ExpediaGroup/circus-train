@@ -141,6 +141,11 @@ public class S3MapReduceCpOptions {
       return this;
     }
 
+    public Builder assumeRole(String assumeRole) {
+      options.setAssumeRole(assumeRole);
+      return this;
+    }
+
     public S3MapReduceCpOptions build() {
       return options;
     }
@@ -213,6 +218,9 @@ public class S3MapReduceCpOptions {
   @Parameter(names = "--cannedAcl", description = "AWS Canned ACL")
   private String cannedAcl = ConfigurationVariable.CANNED_ACL.defaultValue();
 
+  @Parameter(names = "--assumeRole", description = "AWS IAM role to assume for writing to replica S3 bucket")
+  private String assumeRole = ConfigurationVariable.ASSUME_ROLE.defaultValue();
+
   public S3MapReduceCpOptions() {}
 
   public S3MapReduceCpOptions(S3MapReduceCpOptions options) {
@@ -237,6 +245,7 @@ public class S3MapReduceCpOptions {
     uploadRetryDelayMs = options.uploadRetryDelayMs;
     uploadBufferSize = options.uploadBufferSize;
     cannedAcl = options.cannedAcl;
+    assumeRole = options.assumeRole;
   }
 
   public boolean isHelp() {
@@ -411,6 +420,12 @@ public class S3MapReduceCpOptions {
     this.cannedAcl = cannedAcl;
   }
 
+  public String getAssumeRole() { return assumeRole; }
+
+  public void setAssumeRole(String assumeRole) {
+    this.assumeRole = assumeRole;
+  }
+
   public Map<String, String> toMap() {
     ImmutableMap.Builder<String, String> builder = ImmutableMap
         .<String, String>builder()
@@ -437,6 +452,9 @@ public class S3MapReduceCpOptions {
     }
     if (cannedAcl != null) {
       builder.put(ConfigurationVariable.CANNED_ACL.getName(), cannedAcl);
+    }
+    if (assumeRole != null) {
+      builder.put(ConfigurationVariable.ASSUME_ROLE.getName(), assumeRole);
     }
     return builder.build();
   }
@@ -465,6 +483,7 @@ public class S3MapReduceCpOptions {
         ", uploadRetryDelayMs=" + uploadRetryDelayMs +
         ", uploadBufferSize=" + uploadBufferSize +
         ", cannedAcl='" + cannedAcl + '\'' +
+        ", assumeRole='" + assumeRole + '\'' +
         '}';
   }
 }

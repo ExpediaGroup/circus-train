@@ -49,6 +49,7 @@ public class S3MapReduceCpOptionsParser {
   public static final String UPLOAD_RETRY_DELAY_MS = "upload-retry-delay-ms";
   public static final String UPLOAD_BUFFER_SIZE = "upload-buffer-size";
   public static final String CANNED_ACL = "canned-acl";
+  public static final String ASSUME_ROLE = "assume-role";
 
   private final S3MapReduceCpOptions.Builder optionsBuilder;
   private final URI defaultCredentialsProvider;
@@ -146,6 +147,8 @@ public class S3MapReduceCpOptionsParser {
     optionsBuilder.uploadBufferSize(uploadBufferSize);
 
     optionsBuilder.cannedAcl(MapUtils.getString(copierOptions, CANNED_ACL, ConfigurationVariable.CANNED_ACL.defaultValue()));
+
+    optionsBuilder.assumeRole(MapUtils.getString(copierOptions, ASSUME_ROLE, ConfigurationVariable.ASSUME_ROLE.defaultValue()));
 
     return optionsBuilder.build();
   }

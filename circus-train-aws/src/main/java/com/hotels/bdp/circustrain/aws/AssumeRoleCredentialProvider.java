@@ -18,17 +18,23 @@ package com.hotels.bdp.circustrain.aws;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import org.apache.commons.lang.NullArgumentException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
-    // TODO: pass in from ct.yml
-    private static final String ROLE_ARN = "arn:aws:iam::826353747357:role/jetstream-write-apiary-s3-role";
+    private static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.s3mapreducecp.assumeRole";
     private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
 
     private AWSCredentials credentials;
     private String roleArn;
 
-    public AssumeRoleCredentialProvider() {
-        roleArn = ROLE_ARN;
+
+    public AssumeRoleCredentialProvider(Configuration conf) {
+        checkNotNull(conf, "conf is required");
+        roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
     }
 
     @Override
@@ -45,6 +51,10 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
     }
 
     public AWSCredentials getAssumedRoleCredentials(String roleArn) {
+        if (StringUtils.isEmpty(roleArn)) {
+            throw new NullArgumentException("Role ARN must not be empty");
+        }
+
         STSAssumeRoleSessionCredentialsProvider.Builder builder =
                 new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
 

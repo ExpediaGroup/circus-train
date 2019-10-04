@@ -32,6 +32,7 @@ final class Constants {
 
 public enum ConfigurationVariable {
 
+  ASSUME_ROLE("com.hotels.bdp.circustrain.s3mapreducecp.assumeRole", null),
   CANNED_ACL("com.hotels.bdp.circustrain.s3mapreducecp.cannedAcl", null),
   CREDENTIAL_PROVIDER("com.hotels.bdp.circustrain.s3mapreducecp.credentialsProvider", null),
   MINIMUM_UPLOAD_PART_SIZE("com.hotels.bdp.circustrain.s3mapreducecp.minimumUploadPartSize",
