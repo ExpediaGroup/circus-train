@@ -3,6 +3,9 @@
 ### Added
 * Table transformation to add custom properties to tables during a replication.
 * If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. See [#131](https://github.com/HotelsDotCom/circus-train/issues/131).
+* Added `copier-options.assume-role` to assume a role when using the
+  S3MapReduceCp copier class. See
+  [README.md](https://github.com/HotelsDotCom/circus-train) for details.
 
 ### Changed
 * Updated `jackson` version to 2.9.10 (was 2.9.9).
