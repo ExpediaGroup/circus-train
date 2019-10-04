@@ -392,7 +392,14 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
 
 ### S3 Secret Configuration
-When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. To protect these from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.
+When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. Circus train has a couple of options depending on where you run Circus Train.
+* Running on EMR:
+We provide a `com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain` that uses Jceks (explained below), STS assume role credentials (see `copier-options.assume-role`) and Instance Profile credentials. If the EMR cluster is running with a role that has read write access to the necessary buckets no configuration is necessary and instance profile credentials will be used.
+* Running on on-premises:
+It is possible to provide s3 secret configuration with jceks (explained below) or STS assume role credentials (see `copier-options.assume-role`).
+
+#### S3 Secret Configuration with Jceks
+The AWS access key and secret key can be protected from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.
 
 To add your existing AWS keys for a new replication job run the following commands as the user that will be executing Circus Train and pass in your keys when prompted:
 
