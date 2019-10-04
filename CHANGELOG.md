@@ -1,4 +1,4 @@
-## [14.1.0] - TBD
+## [14.1.0] - 2019-10-04
 
 ### Added
 * Table transformation to add custom properties to tables during a replication.

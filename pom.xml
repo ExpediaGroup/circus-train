@@ -9,7 +9,7 @@
 
   <artifactId>circus-train-parent</artifactId>
   <description>circus-train replicates data and hive metadata between various clusters</description>
-  <version>14.0.2-SNAPSHOT</version>
+  <version>14.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Circus Train Parent</name>
   <inceptionYear>2016</inceptionYear>
