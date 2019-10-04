@@ -29,6 +29,11 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-sts</artifactId>
+      <version>${aws-jdk.version}</version>
+    </dependency>
 
     <!-- Test -->
     <dependency>

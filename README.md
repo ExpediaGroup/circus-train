@@ -376,6 +376,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
 | `copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL.|
 | `copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+| `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target replica. Useful when the target is in a different AWS account than CircusTrain is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials.|
 
 ##### S3 to S3 copier options
 If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
@@ -391,7 +392,14 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
 
 ### S3 Secret Configuration
-When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. To protect these from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.
+When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. Circus train has a couple of options depending on where you run Circus Train.
+* Running on EMR:
+We provide a `com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain` that uses Jceks (explained below), STS assume role credentials (see `copier-options.assume-role`) and Instance Profile credentials. If the EMR cluster is running with a role that has read write access to the necessary buckets no configuration is necessary and instance profile credentials will be used.
+* Running on on-premises:
+It is possible to provide s3 secret configuration with jceks (explained below) or STS assume role credentials (see `copier-options.assume-role`).
+
+#### S3 Secret Configuration with Jceks
+The AWS access key and secret key can be protected from being exposed in the job's Hadoop configuration, Circus Train expects them to be stored using the Hadoop Credential Provider and the JCEKS URL provided in the Circus Train configuration `security.credential-provider` property. This property is only required if a specific set of credentials is needed or if Circus Train runs on a non-AWS environment. If it is not set then the credentials of the instance where Circus Train runs will be used - note this scenario is only valid when Circus Train is executed on an AWS environment, i.e. EC2/EMR instance.
 
 To add your existing AWS keys for a new replication job run the following commands as the user that will be executing Circus Train and pass in your keys when prompted:
 
