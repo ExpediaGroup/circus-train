@@ -22,26 +22,37 @@ import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
     // TODO: pass in from ct.yml
     private static final String ROLE_ARN = "arn:aws:iam::826353747357:role/jetstream-write-apiary-s3-role";
+    private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
+
+    private AWSCredentials credentials;
+    private String roleArn;
 
     public AssumeRoleCredentialProvider() {
-
+        roleArn = ROLE_ARN;
     }
 
+    @Override
     public AWSCredentials getCredentials() {
-        return getAssumedRoleCredentials(ROLE_ARN);
+        if (credentials == null) {
+            refresh();
+        }
+        return credentials;
     }
 
+    @Override
     public void refresh() {
+        credentials = getAssumedRoleCredentials(this.roleArn);
     }
 
-    public AWSCredentials getAssumedRoleCredentials(String roleARN) {
+    public AWSCredentials getAssumedRoleCredentials(String roleArn) {
         STSAssumeRoleSessionCredentialsProvider.Builder builder =
-                new STSAssumeRoleSessionCredentialsProvider.Builder(roleARN, "ct-assume-role-session");
+                new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
 
-        AWSCredentials credentials = builder
-                .withRoleSessionDurationSeconds(12 * 60 * 60) // max duration for assumed role credentials
+        credentials = builder
+                .withRoleSessionDurationSeconds(CREDENTIALS_DURATION)
                 .build()
                 .getCredentials();
+
         return credentials;
     }
 }
