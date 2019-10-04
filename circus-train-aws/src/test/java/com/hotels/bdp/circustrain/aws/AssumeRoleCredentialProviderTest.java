@@ -15,20 +15,34 @@
  */
 package com.hotels.bdp.circustrain.aws;
 
-import com.amazonaws.auth.AWSCredentials;
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 public class AssumeRoleCredentialProviderTest {
 
-    @Test(expected = NullPointerException.class)
-    public void throwsNullPointerException() {
-        AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(null);
-    }
+  @Test(expected = NullPointerException.class)
+  public void getCredentialsThrowsNullPointerException() {
+    AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(null);
+    provider.getCredentials();
+  }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwsIllegalArgumentException() {
-        AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(new Configuration());
-    }
+  @Test(expected = NullPointerException.class)
+  public void refreshThrowsNullPointerException() {
+    AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(null);
+    provider.refresh();
+    ;
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getCredentialsThrowsIllegalArgumentException() {
+    AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(new Configuration());
+    provider.getCredentials();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void refreshThrowsIllegalArgumentException() {
+    AssumeRoleCredentialProvider provider = new AssumeRoleCredentialProvider(new Configuration());
+    provider.refresh();
+    ;
+  }
 }

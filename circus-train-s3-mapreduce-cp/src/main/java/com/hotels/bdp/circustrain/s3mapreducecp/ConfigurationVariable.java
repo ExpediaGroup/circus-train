@@ -24,6 +24,8 @@ import org.apache.hadoop.fs.Path;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
 
+import com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider;
+
 final class Constants {
   static final TransferManagerConfiguration DEFAULT_TRANSFER_MANAGER_CONFIGURATION = new TransferManagerConfiguration();
 
@@ -32,7 +34,7 @@ final class Constants {
 
 public enum ConfigurationVariable {
 
-  ASSUME_ROLE("com.hotels.bdp.circustrain.s3mapreducecp.assumeRole", null),
+  ASSUME_ROLE(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, null),
   CANNED_ACL("com.hotels.bdp.circustrain.s3mapreducecp.cannedAcl", null),
   CREDENTIAL_PROVIDER("com.hotels.bdp.circustrain.s3mapreducecp.credentialsProvider", null),
   MINIMUM_UPLOAD_PART_SIZE("com.hotels.bdp.circustrain.s3mapreducecp.minimumUploadPartSize",

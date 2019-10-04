@@ -15,48 +15,46 @@
  */
 package com.hotels.bdp.circustrain.aws;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
+
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
-    private static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.s3mapreducecp.assumeRole";
-    private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
+  public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
+  private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
 
-    private STSAssumeRoleSessionCredentialsProvider.Builder builder;
-    private AWSCredentials credentials;
+  private AWSCredentials credentials;
+  private final Configuration conf;
 
-    public AssumeRoleCredentialProvider(Configuration conf) {
-        checkNotNull(conf, "conf is required");
-        String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
-        checkArgument(StringUtils.isNotEmpty(roleArn), "Role ARN must not be empty");
+  public AssumeRoleCredentialProvider(Configuration conf) {
+    this.conf = conf;
+  }
 
-        builder = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
+  @Override
+  public AWSCredentials getCredentials() {
+    if (credentials == null) {
+      refresh();
     }
+    return credentials;
+  }
 
-    @Override
-    public AWSCredentials getCredentials() {
-        if (credentials == null) {
-            refresh();
-        }
-        return credentials;
-    }
+  @Override
+  public void refresh() {
+    checkNotNull(conf, "conf is required");
+    String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
+    checkArgument(StringUtils.isNotEmpty(roleArn),
+        "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    @Override
-    public void refresh() {
-        credentials = getAssumedRoleCredentials();
-    }
+    Builder builder = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
+    credentials = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION).build().getCredentials();
+  }
 
-    public AWSCredentials getAssumedRoleCredentials() {
-        return builder
-                .withRoleSessionDurationSeconds(CREDENTIALS_DURATION)
-                .build()
-                .getCredentials();
-    }
 }
