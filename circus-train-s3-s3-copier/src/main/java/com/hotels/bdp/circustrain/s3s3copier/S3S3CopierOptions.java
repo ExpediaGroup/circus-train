@@ -24,7 +24,6 @@ import org.apache.commons.collections.MapUtils;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
-import com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider;
 import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 
 public class S3S3CopierOptions {
@@ -60,7 +59,7 @@ public class S3S3CopierOptions {
      */
     SOURCE_ASSUME_ROLE("source-assume-role"),
     /**
-     * Role to assume from the source when writing S3 data
+     * Role to assume from the target when writing S3 data
      */
     TARGET_ASSUME_ROLE("target-assume-role"),
     /**
