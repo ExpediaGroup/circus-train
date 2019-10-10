@@ -17,6 +17,8 @@ package com.hotels.bdp.circustrain.s3s3copier.aws;
 
 import java.net.URI;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.Region;
-
 import com.hotels.bdp.circustrain.api.conf.Security;
 import com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
@@ -36,12 +37,19 @@ import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
   private final static Logger LOG = LoggerFactory.getLogger(JceksAmazonS3ClientFactory.class);
+  
+  public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
+
 
   private final Security security;
+  private final HiveConf sourceHiveConf;
+  private final HiveConf replicaHiveConf;
 
   @Autowired
-  public JceksAmazonS3ClientFactory(Security security) {
+  public JceksAmazonS3ClientFactory(Security security, HiveConf sourceHiveConf, HiveConf replicaHiveConf) {
     this.security = security;
+    this.sourceHiveConf = sourceHiveConf;
+    this.replicaHiveConf = replicaHiveConf;
   }
 
   @Override
@@ -104,13 +112,76 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     }
     return builder.build();
   }
+  
+  private AmazonS3 newSourceInstance(String region, S3S3CopierOptions s3s3CopierOptions) {
+    String assumedRole = s3s3CopierOptions.getSourceAssumedRole();
+    HadoopAWSCredentialProviderChain credentialsChain;
+    
+    if (assumedRole != null) {
+      // need to give the providerchain a conf object
+      // give the conf the assume role as a resource? 
+      // ASSUME_ROLE_PROPERTY_NAME 
+      // public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
+      
+      Configuration conf = sourceHiveConf;
+      conf.addResource(ASSUME_ROLE_PROPERTY_NAME);
+      conf.set(ASSUME_ROLE_PROPERTY_NAME, assumedRole);
+      credentialsChain = getCredentialsProviderChain(conf);
+    } else {
+      credentialsChain = getCredentialsProviderChain();
+    }
+    return buildClient(region, s3s3CopierOptions, credentialsChain);
+  }
+  
+  private AmazonS3 newTargetInstance(String region, S3S3CopierOptions s3s3CopierOptions) {
+    String assumedRole = s3s3CopierOptions.getTargetAssumedRole();
+    HadoopAWSCredentialProviderChain credentialsChain;
+    
+    if (assumedRole != null) {
+      Configuration conf = replicaHiveConf;
+      conf.addResource(ASSUME_ROLE_PROPERTY_NAME);
+      conf.set(ASSUME_ROLE_PROPERTY_NAME, assumedRole);
+      credentialsChain = getCredentialsProviderChain(conf);
+    } else {
+      credentialsChain = getCredentialsProviderChain();
+    }
+    return buildClient(region, s3s3CopierOptions, credentialsChain);
+  }
+  
+  private AmazonS3 buildClient(String region, S3S3CopierOptions s3s3CopierOptions, 
+      HadoopAWSCredentialProviderChain credentialsChain) {
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
+    URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
+    if (s3Endpoint != null) {
+      EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
+      builder.withEndpointConfiguration(endpointConfiguration);
+    } else {
+      builder.withRegion(region);
+    }
+    return builder.build();
+    
+  }
 
+  
+  
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain() {
     HadoopAWSCredentialProviderChain credentialsChain = null;
     if (security.getCredentialProvider() == null) {
       credentialsChain = new HadoopAWSCredentialProviderChain();
     } else {
       credentialsChain = new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
+    }
+    return credentialsChain;
+  }
+
+  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(Configuration conf) {
+    HadoopAWSCredentialProviderChain credentialsChain = null;
+    if (security.getCredentialProvider() == null) {
+      credentialsChain = new HadoopAWSCredentialProviderChain();
+    } else {
+      // conf needs to contain info for assume roles
+      // will use the conf for: new AssumeRoleCredentialProvider(conf)
+      credentialsChain = new HadoopAWSCredentialProviderChain(conf);
     }
     return credentialsChain;
   }
