@@ -56,9 +56,13 @@ public class S3S3CopierOptions {
      */
     CANNED_ACL("canned-acl"),
     /**
-     * Role to assume when writing S3 data
+     * Role to assume from the source when writing S3 data
      */
-    ASSUME_ROLE("assume-role"),
+    SOURCE_ASSUME_ROLE("source-assume-role"),
+    /**
+     * Role to assume from the source when writing S3 data
+     */
+    TARGET_ASSUME_ROLE("target-assume-role"),
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
@@ -126,24 +130,12 @@ public class S3S3CopierOptions {
      return null;
   }
   
-  // *
-  // * need roles for source and target ?????
-  public String getAssumedRole() {
-    String role = MapUtils.getString(copierOptions, Keys.ASSUME_ROLE.keyName(), null);
-    if (role != null) {
-      return role;
-    }
-    return null;
-  }
-  
   public String getSourceAssumedRole() {
-    // what is the key name?
-    return null;
+    return MapUtils.getString(copierOptions, Keys.SOURCE_ASSUME_ROLE.keyName(), null);
   }
 
   public String getTargetAssumedRole() {
-    // what is the key name?
-    return null;
+    return MapUtils.getString(copierOptions, Keys.TARGET_ASSUME_ROLE.keyName(), null);
   }
 
   public int getMaxCopyAttempts() {

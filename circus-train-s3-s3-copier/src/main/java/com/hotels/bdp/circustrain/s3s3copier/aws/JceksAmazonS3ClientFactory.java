@@ -30,6 +30,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.Region;
 import com.hotels.bdp.circustrain.api.conf.Security;
+import com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider;
 import com.hotels.bdp.circustrain.aws.HadoopAWSCredentialProviderChain;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
@@ -38,9 +39,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
   private final static Logger LOG = LoggerFactory.getLogger(JceksAmazonS3ClientFactory.class);
   
-  public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-
-
   private final Security security;
   private final HiveConf sourceHiveConf;
   private final HiveConf replicaHiveConf;
@@ -59,7 +57,24 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     try {
       String bucketRegion = regionForUri(globalClient, uri);
       LOG.debug("Bucket region: {}", bucketRegion);
-      return newInstance(bucketRegion, s3s3CopierOptions);
+      return newSourceInstance(bucketRegion, s3s3CopierOptions);
+    } catch (IllegalArgumentException e) {
+      LOG.warn("Using global (non region specific) client", e);
+      return globalClient;
+    }
+  }
+  
+//  public AmazonS3 newSourceInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
+//    return newInstance(uri, s3s3CopierOptions);
+//  }
+  
+  public AmazonS3 newTargetInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
+    LOG.debug("trying to get a target client for uri '{}'", uri);
+    AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions);
+    try {
+      String bucketRegion = regionForUri(globalClient, uri);
+      LOG.debug("Bucket region: {}", bucketRegion);
+      return newTargetInstance(bucketRegion, s3s3CopierOptions);
     } catch (IllegalArgumentException e) {
       LOG.warn("Using global (non region specific) client", e);
       return globalClient;
@@ -85,19 +100,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
-  private AmazonS3 newInstance(String region, S3S3CopierOptions s3s3CopierOptions) {
-    HadoopAWSCredentialProviderChain credentialsChain = getCredentialsProviderChain();
-    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
-    URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
-    if (s3Endpoint != null) {
-      EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
-      builder.withEndpointConfiguration(endpointConfiguration);
-    } else {
-      builder.withRegion(region);
-    }
-    return builder.build();
-  }
-
   private AmazonS3 newGlobalInstance(S3S3CopierOptions s3s3CopierOptions) {
     HadoopAWSCredentialProviderChain credentialsChain = getCredentialsProviderChain();
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
@@ -114,18 +116,13 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   }
   
   private AmazonS3 newSourceInstance(String region, S3S3CopierOptions s3s3CopierOptions) {
-    String assumedRole = s3s3CopierOptions.getSourceAssumedRole();
     HadoopAWSCredentialProviderChain credentialsChain;
     
+    String assumedRole = s3s3CopierOptions.getSourceAssumedRole();
     if (assumedRole != null) {
-      // need to give the providerchain a conf object
-      // give the conf the assume role as a resource? 
-      // ASSUME_ROLE_PROPERTY_NAME 
-      // public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-      
       Configuration conf = sourceHiveConf;
-      conf.addResource(ASSUME_ROLE_PROPERTY_NAME);
-      conf.set(ASSUME_ROLE_PROPERTY_NAME, assumedRole);
+      conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
+      conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
       credentialsChain = getCredentialsProviderChain(conf);
     } else {
       credentialsChain = getCredentialsProviderChain();
@@ -134,13 +131,13 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   }
   
   private AmazonS3 newTargetInstance(String region, S3S3CopierOptions s3s3CopierOptions) {
-    String assumedRole = s3s3CopierOptions.getTargetAssumedRole();
     HadoopAWSCredentialProviderChain credentialsChain;
     
+    String assumedRole = s3s3CopierOptions.getTargetAssumedRole();
     if (assumedRole != null) {
       Configuration conf = replicaHiveConf;
-      conf.addResource(ASSUME_ROLE_PROPERTY_NAME);
-      conf.set(ASSUME_ROLE_PROPERTY_NAME, assumedRole);
+      conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
+      conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
       credentialsChain = getCredentialsProviderChain(conf);
     } else {
       credentialsChain = getCredentialsProviderChain();
@@ -159,10 +156,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       builder.withRegion(region);
     }
     return builder.build();
-    
   }
-
-  
   
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain() {
     HadoopAWSCredentialProviderChain credentialsChain = null;
@@ -179,8 +173,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     if (security.getCredentialProvider() == null) {
       credentialsChain = new HadoopAWSCredentialProviderChain();
     } else {
-      // conf needs to contain info for assume roles
-      // will use the conf for: new AssumeRoleCredentialProvider(conf)
       credentialsChain = new HadoopAWSCredentialProviderChain(conf);
     }
     return credentialsChain;
