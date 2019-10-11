@@ -49,6 +49,12 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     this.sourceHiveConf = sourceHiveConf;
     this.replicaHiveConf = replicaHiveConf;
   }
+  
+  public JceksAmazonS3ClientFactory(Security security) {
+    this.security = security;
+    this.sourceHiveConf = new HiveConf();
+    this.replicaHiveConf = new HiveConf();
+  }
 
   @Override
   public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {

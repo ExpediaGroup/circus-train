@@ -115,5 +115,32 @@ public class S3S3CopierOptionsTest {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertThat(options.getMaxCopyAttempts(), is(3));
   }
+  
+  @Test
+  public void getSourceAssumedRole() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.SOURCE_ASSUME_ROLE.keyName(), "iam:role:1234:user");
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.getSourceAssumedRole(), is("iam:role:1234:user"));
+  }
+  
+  @Test
+  public void getSourceAssumedRoleDefaultIsNull() throws Exception {
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertNull(options.getSourceAssumedRole());
+  }
+
+  @Test
+  public void getTargetAssumedRole() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.TARGET_ASSUME_ROLE.keyName(), "iam:role:1234:user");
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.getTargetAssumedRole(), is("iam:role:1234:user"));
+  }
+  
+  @Test
+  public void getTargetAssumedRoleDefaultIsNull() throws Exception {
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertNull(options.getTargetAssumedRole());
+    
+  }
 
 }
