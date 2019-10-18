@@ -1,5 +1,10 @@
-## TBD
-* Updated `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
+## [14.1.1] - TBD
+
+### Updated
+* `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
+
+### Fixed
+* Table properties can now be added to default transformations.
 
 ## [14.1.0] - 2019-10-04
 
