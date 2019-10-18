@@ -251,12 +251,42 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void partitionedTableNoHousekeepingWithTableParameters() throws Exception {
+  public void partitionedTableNoHousekeepingWithTableReplicationParameters() throws Exception {
     helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-table-parameters.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+            .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableNoHousekeepingWithDefaultTableParameters() throws Exception {
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-default-table-parameters.yml");
     CircusTrainRunner runner = CircusTrainRunner
       .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
       .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),

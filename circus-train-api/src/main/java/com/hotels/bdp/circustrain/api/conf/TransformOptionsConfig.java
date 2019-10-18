@@ -13,28 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.conf;
-
-import static com.hotels.bdp.circustrain.core.conf.TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS;
+package com.hotels.bdp.circustrain.api.conf;
 
 import java.util.Map;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+public class TransformOptionsConfig {
 
-@Configuration
-@ConfigurationProperties(prefix = TABLE_REPLICATION_TABLE_PARAMETERS)
-public class TableParametersConfig {
-
+  public static final String TRANSFORM_OPTIONS_PROPERTY = "transform-options";
   public static final String TABLE_REPLICATION_TABLE_PARAMETERS = "table-properties";
 
-  private Map<String, String> parameters;
+  private Map<String, String> tableProperties;
 
-  public Map<String, String> getParameters() {
-    return parameters;
+  public Map<String, String> getTableProperties() {
+    return tableProperties;
   }
 
-  public void setParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
+  public void setTableProperties(Map<String, String> tableProperties) {
+    this.tableProperties = tableProperties;
   }
 }

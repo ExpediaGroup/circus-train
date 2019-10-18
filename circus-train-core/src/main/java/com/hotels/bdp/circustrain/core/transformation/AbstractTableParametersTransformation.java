@@ -15,37 +15,39 @@
  */
 package com.hotels.bdp.circustrain.core.transformation;
 
+import static com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig.TABLE_REPLICATION_TABLE_PARAMETERS;
+
 import java.util.Collections;
 import java.util.Map;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
-import com.hotels.bdp.circustrain.core.conf.TableParametersConfig;
 
 public abstract class AbstractTableParametersTransformation implements TableReplicationListener {
 
-  private final TableParametersConfig tableParametersConfig;
-  private Map<String, String> tableParametersConfigOverride;
+  private Map<String, String> tableParameters;
+  private Map<String, String> tableParametersOverride;
 
-  protected AbstractTableParametersTransformation(TableParametersConfig tableParametersConfig) {
-    this.tableParametersConfig = tableParametersConfig;
+  protected AbstractTableParametersTransformation(TransformOptionsConfig transformOptionsConfig) {
+    this.tableParameters = transformOptionsConfig.getTableProperties();
   }
 
   protected Map<String, String> getTableParameters() {
-    if (tableParametersConfigOverride != null && !tableParametersConfigOverride.isEmpty()) {
-      return tableParametersConfigOverride;
+    if (tableParametersOverride != null && !tableParametersOverride.isEmpty()) {
+      return tableParametersOverride;
     }
-    return tableParametersConfig.getParameters();
+    return tableParameters;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
-    tableParametersConfigOverride = Collections.emptyMap();
+    tableParametersOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
-    Object tableParametersOverride = transformOptions.get(TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS);
+    Object tableParametersOverride = transformOptions.get(TABLE_REPLICATION_TABLE_PARAMETERS);
     if (tableParametersOverride != null && tableParametersOverride instanceof Map) {
-      tableParametersConfigOverride = (Map<String, String>) tableParametersOverride;
+      this.tableParametersOverride = (Map<String, String>) tableParametersOverride;
     }
   }
 
