@@ -15,7 +15,7 @@
  */
 package com.hotels.bdp.circustrain.core.transformation;
 
-import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TABLE_REPLICATION_TABLE_PARAMETERS;
+import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TABLE_PROPERTIES;
 
 import java.util.Collections;
 import java.util.Map;
@@ -45,7 +45,7 @@ public abstract class AbstractTableParametersTransformation implements TableRepl
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     tableParametersOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
-    Object tableParametersOverride = transformOptions.get(TABLE_REPLICATION_TABLE_PARAMETERS);
+    Object tableParametersOverride = transformOptions.get(TABLE_PROPERTIES);
     if (tableParametersOverride != null && tableParametersOverride instanceof Map) {
       this.tableParametersOverride = (Map<String, String>) tableParametersOverride;
     }

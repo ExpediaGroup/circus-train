@@ -148,7 +148,7 @@ public class TableParametersTransformationTest {
     Map<String, Object> transformOptions = new HashMap<>();
     Map<String, Object> tableParametersOptions = new HashMap<>();
     tableParametersOptions.put(overrideKey, overrideValue);
-    transformOptions.put(CircusTrainTransformOptions.TABLE_REPLICATION_TABLE_PARAMETERS, tableParametersOptions);
+    transformOptions.put(CircusTrainTransformOptions.TABLE_PROPERTIES, tableParametersOptions);
     return createEventTableReplication(transformOptions);
   }
 

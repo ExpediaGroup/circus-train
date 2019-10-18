@@ -29,6 +29,6 @@ public class CircusTrainTransformOptions extends TransformOptions {
 
   public static final String TRANSFORM_OPTIONS_BEAN = "transformOptions";
   public static final String TRANSFORM_OPTIONS_PROPERTY = "transform-options";
-  public static final String TABLE_REPLICATION_TABLE_PARAMETERS = "table-properties";
+  public static final String TABLE_PROPERTIES = "table-properties";
 
 }
