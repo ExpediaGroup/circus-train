@@ -15,12 +15,12 @@
  */
 package com.hotels.bdp.circustrain.core.transformation;
 
-import static com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig.TABLE_REPLICATION_TABLE_PARAMETERS;
+import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TABLE_REPLICATION_TABLE_PARAMETERS;
 
 import java.util.Collections;
 import java.util.Map;
 
-import com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig;
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
 
@@ -29,8 +29,8 @@ public abstract class AbstractTableParametersTransformation implements TableRepl
   private Map<String, String> tableParameters;
   private Map<String, String> tableParametersOverride;
 
-  protected AbstractTableParametersTransformation(TransformOptionsConfig transformOptionsConfig) {
-    this.tableParameters = transformOptionsConfig.getTableProperties();
+  protected AbstractTableParametersTransformation(TransformOptions transformOptions) {
+    this.tableParameters = transformOptions.getTableProperties();
   }
 
   protected Map<String, String> getTableParameters() {

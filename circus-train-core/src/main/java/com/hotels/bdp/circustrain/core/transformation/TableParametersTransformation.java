@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig;
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 
 @Profile({ Modules.REPLICATION })
@@ -32,8 +32,8 @@ import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 public final class TableParametersTransformation extends AbstractTableParametersTransformation implements TableTransformation {
 
   @Autowired
-  public TableParametersTransformation(TransformOptionsConfig transformOptionsConfig) {
-    super(transformOptionsConfig);
+  public TableParametersTransformation(TransformOptions transformOptions) {
+    super(transformOptions);
   }
 
   @Override

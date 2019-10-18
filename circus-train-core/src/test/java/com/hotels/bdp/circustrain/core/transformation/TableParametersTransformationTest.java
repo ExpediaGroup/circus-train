@@ -28,9 +28,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.api.conf.TransformOptionsConfig;
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptionsConfig;
+import com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TableParametersTransformationTest {
@@ -49,9 +49,9 @@ public class TableParametersTransformationTest {
   public void init() {
     Map<String, String> tableProperties = new HashMap<>();
     tableProperties.put(KEY, VALUE);
-    TransformOptionsConfig transformOptionsConfig = new TransformOptionsConfig();
-    transformOptionsConfig.setTableProperties(tableProperties);
-    transformation = new TableParametersTransformation(transformOptionsConfig);
+    TransformOptions transformOptions = new TransformOptions();
+    transformOptions.setTableProperties(tableProperties);
+    transformation = new TableParametersTransformation(transformOptions);
   }
 
   @Test
@@ -148,7 +148,7 @@ public class TableParametersTransformationTest {
     Map<String, Object> transformOptions = new HashMap<>();
     Map<String, Object> tableParametersOptions = new HashMap<>();
     tableParametersOptions.put(overrideKey, overrideValue);
-    transformOptions.put(CircusTrainTransformOptionsConfig.TABLE_REPLICATION_TABLE_PARAMETERS, tableParametersOptions);
+    transformOptions.put(CircusTrainTransformOptions.TABLE_REPLICATION_TABLE_PARAMETERS, tableParametersOptions);
     return createEventTableReplication(transformOptions);
   }
 

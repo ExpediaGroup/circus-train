@@ -17,10 +17,7 @@ package com.hotels.bdp.circustrain.api.conf;
 
 import java.util.Map;
 
-public class TransformOptionsConfig {
-
-  public static final String TRANSFORM_OPTIONS_PROPERTY = "transform-options";
-  public static final String TABLE_REPLICATION_TABLE_PARAMETERS = "table-properties";
+public class TransformOptions {
 
   private Map<String, String> tableProperties;
 
