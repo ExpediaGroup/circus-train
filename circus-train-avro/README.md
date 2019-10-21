@@ -42,10 +42,11 @@ the global level, then be overriden for certain replications.
           database-name: my_database
           table-name: table_two_copy
           table-location: /example/url
-        
-    avro-serde-options:
-      base-url: /example/url/
-      #Schema url's for each table will be copied to /example/url/<eventId>/.schema/
+    
+    transform-options:    
+      avro-serde-options:
+        base-url: /example/url/
+        #Schema url's for each table will be copied to /example/url/<eventId>/.schema/
 
 
     #Per table replication example:
@@ -93,8 +94,9 @@ the global level, then be overriden for certain replications.
             #avro schema file will be copied to /overriden/url/<eventId>/ rather than /global/url/<eventId>/
             base-url: /overriden/url/
     
-        avro-serde-options:
-            base-url: /global/url
+    transform-options:     
+      avro-serde-options:
+        base-url: /global/url
 
 
 

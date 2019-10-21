@@ -19,6 +19,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.AVRO_SERDE_OPTIONS;
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.BASE_URL;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
@@ -40,8 +44,8 @@ public class AbstractAvroSerDeTransformationTest {
 
   private class DummyAvroSerDeTransformation extends AbstractAvroSerDeTransformation {
 
-    protected DummyAvroSerDeTransformation(AvroSerDeConfig avroSerDeConfig) {
-      super(avroSerDeConfig);
+    protected DummyAvroSerDeTransformation(TransformOptions transformOptions) {
+      super(transformOptions);
     }
 
   }
@@ -51,9 +55,13 @@ public class AbstractAvroSerDeTransformationTest {
 
   @Before
   public void setUp() {
-    AvroSerDeConfig defaultConfig = new AvroSerDeConfig();
-    defaultConfig.setBaseUrl(DEFAULT_DESTINATION_FOLDER);
-    transformation = new DummyAvroSerDeTransformation(defaultConfig);
+    Map<String, String> avroSerdeOptions = new HashMap<>();
+    avroSerdeOptions.put(BASE_URL, DEFAULT_DESTINATION_FOLDER);
+    Map<String, Object> options = new HashMap<>();
+    options.put(AVRO_SERDE_OPTIONS, avroSerdeOptions);
+    TransformOptions transformOptions = new TransformOptions();
+    transformOptions.setTransformOptions(options);
+    transformation = new DummyAvroSerDeTransformation(transformOptions);
   }
 
   @Test
@@ -135,8 +143,8 @@ public class AbstractAvroSerDeTransformationTest {
     Map<String, Object> transformOptions = new HashMap<>();
     if (overrideBaseUrl != null) {
       Map<String, Object> avroOverrideOptions = new HashMap<>();
-      avroOverrideOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_BASE_URL, overrideBaseUrl);
-      transformOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS, avroOverrideOptions);
+      avroOverrideOptions.put(AvroSerDeConfig.BASE_URL, overrideBaseUrl);
+      transformOptions.put(AvroSerDeConfig.AVRO_SERDE_OPTIONS, avroOverrideOptions);
     }
     when(result.getTransformOptions()).thenReturn(transformOptions);
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", TABLE_LOCATION);

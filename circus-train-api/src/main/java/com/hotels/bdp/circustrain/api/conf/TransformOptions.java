@@ -19,13 +19,13 @@ import java.util.Map;
 
 public class TransformOptions {
 
-  private Map<String, String> tableProperties;
+  private Map<String, Object> transformOptions;
 
-  public Map<String, String> getTableProperties() {
-    return tableProperties;
+  public Map<String, Object> getTransformOptions() {
+    return transformOptions;
   }
 
-  public void setTableProperties(Map<String, String> tableProperties) {
-    this.tableProperties = tableProperties;
+  public void setTransformOptions(Map<String, Object> transformOptions) {
+    this.transformOptions = transformOptions;
   }
 }

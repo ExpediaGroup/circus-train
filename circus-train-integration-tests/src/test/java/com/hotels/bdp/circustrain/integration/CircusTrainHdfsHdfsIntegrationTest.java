@@ -1183,10 +1183,12 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       public void checkAssertion() throws Exception {
         Table replicaHiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
         String expectedReplicaSchemaUrl = replicaWarehouseUri.toURI().toString() + "ct_database/";
-        String transformedAvroUrl = replicaHiveTable.getParameters().get("avro.schema.url");
-
+        Map<String, String> parameters = replicaHiveTable.getParameters();
+        String transformedAvroUrl = parameters.get("avro.schema.url");
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
+        assertThat(parameters.get("table.transformed"), is("true"));
         assertThat(transformedAvroUrl, startsWith(expectedReplicaSchemaUrl));
-        assertThat(replicaHiveTable.getParameters().get("table.transformed"), is("true"));
       }
     });
 

@@ -15,20 +15,15 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TRANSFORM_OPTIONS_BEAN;
-import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TRANSFORM_OPTIONS_PROPERTY;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 
-@Configuration(TRANSFORM_OPTIONS_BEAN)
-@ConfigurationProperties(TRANSFORM_OPTIONS_PROPERTY)
+@Configuration
+@ConfigurationProperties
 public class CircusTrainTransformOptions extends TransformOptions {
 
-  public static final String TRANSFORM_OPTIONS_BEAN = "transformOptions";
-  public static final String TRANSFORM_OPTIONS_PROPERTY = "transform-options";
   public static final String TABLE_PROPERTIES = "table-properties";
 
 }

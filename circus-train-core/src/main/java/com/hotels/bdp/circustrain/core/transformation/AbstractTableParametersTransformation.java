@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core.transformation;
 import static com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions.TABLE_PROPERTIES;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.hotels.bdp.circustrain.api.conf.TransformOptions;
@@ -26,11 +27,17 @@ import com.hotels.bdp.circustrain.api.event.TableReplicationListener;
 
 public abstract class AbstractTableParametersTransformation implements TableReplicationListener {
 
-  private Map<String, String> tableParameters;
+  private final Map<String, String> tableParameters = new HashMap<>();
   private Map<String, String> tableParametersOverride;
 
   protected AbstractTableParametersTransformation(TransformOptions transformOptions) {
-    this.tableParameters = transformOptions.getTableProperties();
+    if (transformOptions.getTransformOptions() == null) {
+      return;
+    }
+    Object tableParameters = transformOptions.getTransformOptions().get(TABLE_PROPERTIES);
+    if (tableParameters instanceof Map) {
+      this.tableParameters.putAll((Map<String, String>) tableParameters);
+    }
   }
 
   protected Map<String, String> getTableParameters() {
@@ -46,7 +53,7 @@ public abstract class AbstractTableParametersTransformation implements TableRepl
     tableParametersOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();
     Object tableParametersOverride = transformOptions.get(TABLE_PROPERTIES);
-    if (tableParametersOverride != null && tableParametersOverride instanceof Map) {
+    if (tableParametersOverride instanceof Map) {
       this.tableParametersOverride = (Map<String, String>) tableParametersOverride;
     }
   }

@@ -1,10 +1,13 @@
-## [14.1.1] - TBD
+## [15.0.0] - TBD
 
 ### Updated
 * `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
 
 ### Fixed
 * Table properties can now be added to default transformations.
+
+### Changed
+* Default `avro-serde-options` must now be included within `transform-options`.
 
 ## [14.1.0] - 2019-10-04
 

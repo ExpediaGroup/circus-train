@@ -15,15 +15,11 @@
  */
 package com.hotels.bdp.circustrain.avro.conf;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ConfigurationProperties(prefix = "avro-serde-options")
 public class AvroSerDeConfig {
 
-  public static final String TABLE_REPLICATION_OVERRIDE_BASE_URL = "base-url";
-  public static final String TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS = "avro-serde-options";
+  public static final String AVRO_SERDE_OPTIONS = "avro-serde-options";
+  public static final String BASE_URL = "base-url";
+
   private String avroSchemaBaseUrl;
 
   public String getBaseUrl() {

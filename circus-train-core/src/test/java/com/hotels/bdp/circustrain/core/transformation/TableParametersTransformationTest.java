@@ -49,8 +49,10 @@ public class TableParametersTransformationTest {
   public void init() {
     Map<String, String> tableProperties = new HashMap<>();
     tableProperties.put(KEY, VALUE);
+    Map<String, Object> options = new HashMap<>();
+    options.put(CircusTrainTransformOptions.TABLE_PROPERTIES, tableProperties);
     TransformOptions transformOptions = new TransformOptions();
-    transformOptions.setTableProperties(tableProperties);
+    transformOptions.setTransformOptions(options);
     transformation = new TableParametersTransformation(transformOptions);
   }
 

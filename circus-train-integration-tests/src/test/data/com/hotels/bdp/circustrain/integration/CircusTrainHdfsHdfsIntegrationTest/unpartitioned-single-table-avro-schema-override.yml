@@ -8,5 +8,6 @@ table-replications:
     transform-options:
       avro-serde-options:
         base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}-override/
-avro-serde-options:
-  base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/
+transform-options:
+  avro-serde-options:
+    base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/
