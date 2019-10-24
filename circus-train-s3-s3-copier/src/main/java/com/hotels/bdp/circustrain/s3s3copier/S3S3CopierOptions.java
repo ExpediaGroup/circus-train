@@ -55,7 +55,7 @@ public class S3S3CopierOptions {
      */
     CANNED_ACL("canned-acl"),
     /**
-     * Role to assume from the source when writing S3 data
+     * Role to assume from the source when reading S3 data
      */
     SOURCE_ASSUME_ROLE("source-assume-role"),
     /**

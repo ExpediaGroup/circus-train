@@ -37,6 +37,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
 import org.gaul.s3proxy.junit.S3ProxyRule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -74,6 +75,7 @@ import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class S3S3CopierTest {
 

@@ -43,7 +43,6 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
@@ -162,6 +161,7 @@ public class S3S3Copier implements Copier {
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
     targetClient = ((JceksAmazonS3ClientFactory) s3ClientFactory).newTargetInstance(targetBase, s3s3CopierOptions);
+    
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
       initialiseCopyJobs(sourceBase, targetBase);
@@ -293,7 +293,7 @@ public class S3S3Copier implements Copier {
                   copyObjectRequest.getSourceBucketName(),
                   copyObjectRequest.getSourceKey());
           LOG
-              .debug("Copy failed with exception:", e);
+              .info("Copy failed with exception:", e);
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {
