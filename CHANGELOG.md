@@ -1,6 +1,9 @@
 ## TBD
 * Updated `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
 
+### Added
+* Added `copier-options.assume-role` to assume a role when using the S3S3 copier.  
+
 ## [14.1.0] - 2019-10-04
 
 ### Added
