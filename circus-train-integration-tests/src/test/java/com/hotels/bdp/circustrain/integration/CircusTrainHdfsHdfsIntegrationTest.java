@@ -1170,7 +1170,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
 
     exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("unpartitioned-single-table-avro-schema.yml");
+    File config = dataFolder.getFile("unpartitioned-single-table-mutliple-transformations.yml");
     CircusTrainRunner runner = CircusTrainRunner
         .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
         .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
