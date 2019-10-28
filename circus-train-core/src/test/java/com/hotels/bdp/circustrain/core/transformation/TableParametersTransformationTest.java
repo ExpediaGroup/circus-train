@@ -146,6 +146,27 @@ public class TableParametersTransformationTest {
     assertThat(tableParameters.get(SECOND_OVERRIDE_KEY), is(SECOND_OVERRIDE_VALUE));
   }
 
+  @Test
+  public void tableReplicationOverridesNullDefault() {
+    transformation = new TableParametersTransformation(new TransformOptions());
+    transformation.tableReplicationStart(createEventTableReplication(OVERRIDE_KEY, OVERRIDE_VALUE),EVENT_ID);
+    transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
+    assertThat(table.getParameters().get(OVERRIDE_KEY), is(OVERRIDE_VALUE));
+  }
+
+  @Test
+  public void noTransformations() {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put(KEY, VALUE);
+    table.setParameters(parameters);
+    transformation = new TableParametersTransformation(new TransformOptions());
+    transformation.tableReplicationStart(createEventTableReplication(null),EVENT_ID);
+    transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
+    assertThat(table.getParameters().get(KEY), is(VALUE));
+  }
+
   private EventTableReplication createEventTableReplication(String overrideKey, String overrideValue) {
     Map<String, Object> transformOptions = new HashMap<>();
     Map<String, Object> tableParametersOptions = new HashMap<>();

@@ -138,6 +138,28 @@ public class AbstractAvroSerDeTransformationTest {
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
+  @Test
+  public void testReplicationOverrideNullTransformOptions() {;
+    transformation = new DummyAvroSerDeTransformation(new TransformOptions());
+    EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
+    runLifeCycleSuccess(tableReplication);
+    assertThat(EVENT_ID, is(transformation.getEventId()));
+    assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
+  }
+
+  @Test
+  public void testNullTransformOptions() {;
+    transformation = new DummyAvroSerDeTransformation(new TransformOptions());
+    EventTableReplication tableReplication = mockTableReplication(null);
+    runLifeCycleSuccess(tableReplication);
+    assertThat(EVENT_ID, is(transformation.getEventId()));
+    assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
+    assertThat(transformation.getAvroSchemaDestinationFolder(), is(TABLE_LOCATION));
+  }
+
   private EventTableReplication mockTableReplication(String overrideBaseUrl) {
     EventTableReplication result = Mockito.mock(EventTableReplication.class);
     Map<String, Object> transformOptions = new HashMap<>();
