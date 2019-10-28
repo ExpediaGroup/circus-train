@@ -73,21 +73,29 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     String assumedRole = s3s3CopierOptions.getAssumedRole();
     if (assumedRole != null) {
       globalClient = newGlobalInstance(s3s3CopierOptions, setConfRole(conf, assumedRole));
+      System.out.println("USING ROLE: " + assumedRole);
     } else {
       globalClient = newGlobalInstance(s3s3CopierOptions);
     }
     try {
+      System.out.println("Going to Sleep for 60 sec...");
+      Thread.sleep(60000);
+
       String bucketRegion = regionForUri(globalClient, uri);
       LOG.debug("Bucket region: {}", bucketRegion);
       return newTargetInstance(bucketRegion, s3s3CopierOptions);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException | InterruptedException e) {
       LOG.warn("Using global (non region specific) client", e);
       return globalClient;
     }
   }
 
   private String regionForUri(AmazonS3 client, AmazonS3URI uri) {
-    String bucketRegion = client.getBucketLocation(uri.getBucket());
+    String bucketName = uri.getBucket();
+
+    System.out.println("TRYING TO GET BUCKET " + bucketName);
+
+    String bucketRegion = client.getBucketLocation(bucketName);
     Region region = Region.fromValue(bucketRegion);
 
     // S3 doesn't have a US East 1 region, US East 1 is really the region

@@ -127,7 +127,6 @@ public class S3S3CopierOptionsTest {
   public void getAssumedRoleDefaultIsNull() throws Exception {
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertNull(options.getAssumedRole());
-    
   }
 
 }
