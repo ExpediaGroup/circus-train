@@ -78,13 +78,14 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       globalClient = newGlobalInstance(s3s3CopierOptions);
     }
     try {
-      System.out.println("Going to Sleep for 60 sec...");
-      Thread.sleep(60000);
+//      System.out.println("Going to Sleep for 60 sec...");
+//      Thread.sleep(60000);
 
       String bucketRegion = regionForUri(globalClient, uri);
       LOG.debug("Bucket region: {}", bucketRegion);
       return newTargetInstance(bucketRegion, s3s3CopierOptions);
-    } catch (IllegalArgumentException | InterruptedException e) {
+    } catch (IllegalArgumentException e) {
+//    | InterruptedException e) {
       LOG.warn("Using global (non region specific) client", e);
       return globalClient;
     }

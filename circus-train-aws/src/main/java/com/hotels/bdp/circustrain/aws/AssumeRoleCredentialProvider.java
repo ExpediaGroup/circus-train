@@ -20,8 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -30,10 +28,8 @@ import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
 
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
-  private final static Logger LOG = LoggerFactory.getLogger(AssumeRoleCredentialProvider.class);
-
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-  private static final int CREDENTIALS_DURATION = 60 * 60; // max duration for assumed role credentials
+  private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
 
   private AWSCredentials credentials;
   private final Configuration conf;
@@ -57,21 +53,8 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
     checkArgument(StringUtils.isNotEmpty(roleArn),
         "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    LOG.info("INSIDE ASSUME ROLE PROVIDER");
-
     Builder builder = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
-//    credentials = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION).build().getCredentials();
-
-    STSAssumeRoleSessionCredentialsProvider provider = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION)
-        .build();
-
-    System.out.println("HELLO HELLO PROVIDER: " + provider);
-
-    credentials = provider.getCredentials();
-
-    LOG.info("HELLO JAY");
-
-    LOG.info("CREDENTIALS: " + credentials.getAWSAccessKeyId() + " " + credentials.getAWSSecretKey());
+    credentials = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION).build().getCredentials();
   }
 
 }
