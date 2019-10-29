@@ -15,26 +15,15 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import static com.hotels.bdp.circustrain.core.conf.TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS;
-
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
+
 @Configuration
-@ConfigurationProperties(prefix = TABLE_REPLICATION_TABLE_PARAMETERS)
-public class TableParametersConfig {
+@ConfigurationProperties
+public class CircusTrainTransformOptions extends TransformOptions {
 
-  public static final String TABLE_REPLICATION_TABLE_PARAMETERS = "table-properties";
+  public static final String TABLE_PROPERTIES = "table-properties";
 
-  private Map<String, String> parameters;
-
-  public Map<String, String> getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
-  }
 }

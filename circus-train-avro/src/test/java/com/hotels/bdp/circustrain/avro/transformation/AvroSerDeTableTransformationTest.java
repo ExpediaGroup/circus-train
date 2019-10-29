@@ -21,6 +21,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.avro.TestUtils.newTable;
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.AVRO_SERDE_OPTIONS;
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.BASE_URL;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
@@ -44,8 +47,7 @@ public class AvroSerDeTableTransformationTest {
 
   private static final String AVRO_SCHEMA_URL_PARAMETER = "avro.schema.url";
 
-  @Mock
-  private AvroSerDeConfig avroSerDeConfig;
+  private TransformOptions transformOptions = new TransformOptions();
 
   @Mock
   private SchemaCopier schemaCopier;
@@ -60,7 +62,12 @@ public class AvroSerDeTableTransformationTest {
 
   @Before
   public void setUp() {
-    transformation = new AvroSerDeTableTransformation(avroSerDeConfig, schemaCopier);
+    Map<String, String> avroSerdeOptions = new HashMap<>();
+    avroSerdeOptions.put(BASE_URL, "schema");
+    Map<String, Object> options = new HashMap<>();
+    options.put(AVRO_SERDE_OPTIONS, avroSerdeOptions);
+    transformOptions.setTransformOptions(options);
+    transformation = new AvroSerDeTableTransformation(transformOptions, schemaCopier);
   }
 
   @Test
@@ -72,7 +79,6 @@ public class AvroSerDeTableTransformationTest {
 
   @Test
   public void missingEventId() {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     transformation.transform(table);
     verifyZeroInteractions(schemaCopier);
     assertThat(table, is(newTable()));
@@ -103,7 +109,6 @@ public class AvroSerDeTableTransformationTest {
 
   @Test
   public void transformNoSourceUrl() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
@@ -120,6 +125,7 @@ public class AvroSerDeTableTransformationTest {
     HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
     when(schemaCopier.copy("avroSourceUrl", "location/eventId/.schema")).thenReturn(destinationPath);
 
+    transformation = new AvroSerDeTableTransformation(new TransformOptions(), schemaCopier);
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
     Table result = transformation.transform(table);
     assertThat(result.getParameters().get(AVRO_SCHEMA_URL_PARAMETER), is(destinationPathString));
@@ -127,7 +133,6 @@ public class AvroSerDeTableTransformationTest {
 
   @Test
   public void transform() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
     HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
@@ -140,11 +145,10 @@ public class AvroSerDeTableTransformationTest {
 
   @Test
   public void transformOverride() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     Map<String, Object> avroOverrideOptions = new HashMap<>();
-    avroOverrideOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_BASE_URL, "schemaOverride");
+    avroOverrideOptions.put(AvroSerDeConfig.BASE_URL, "schemaOverride");
     Map<String, Object> transformOptions = new HashMap<>();
-    transformOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS, avroOverrideOptions);
+    transformOptions.put(AVRO_SERDE_OPTIONS, avroOverrideOptions);
     when(tableReplicationEvent.getTransformOptions()).thenReturn(transformOptions);
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);

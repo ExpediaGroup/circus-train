@@ -28,8 +28,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
-import com.hotels.bdp.circustrain.core.conf.TableParametersConfig;
+import com.hotels.bdp.circustrain.core.conf.CircusTrainTransformOptions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TableParametersTransformationTest {
@@ -46,11 +47,13 @@ public class TableParametersTransformationTest {
 
   @Before
   public void init() {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put(KEY, VALUE);
-    TableParametersConfig tableParametersConfig = new TableParametersConfig();
-    tableParametersConfig.setParameters(parameters);
-    transformation = new TableParametersTransformation(tableParametersConfig);
+    Map<String, String> tableProperties = new HashMap<>();
+    tableProperties.put(KEY, VALUE);
+    Map<String, Object> options = new HashMap<>();
+    options.put(CircusTrainTransformOptions.TABLE_PROPERTIES, tableProperties);
+    TransformOptions transformOptions = new TransformOptions();
+    transformOptions.setTransformOptions(options);
+    transformation = new TableParametersTransformation(transformOptions);
   }
 
   @Test
@@ -143,11 +146,32 @@ public class TableParametersTransformationTest {
     assertThat(tableParameters.get(SECOND_OVERRIDE_KEY), is(SECOND_OVERRIDE_VALUE));
   }
 
+  @Test
+  public void tableReplicationOverridesNullDefault() {
+    transformation = new TableParametersTransformation(new TransformOptions());
+    transformation.tableReplicationStart(createEventTableReplication(OVERRIDE_KEY, OVERRIDE_VALUE),EVENT_ID);
+    transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
+    assertThat(table.getParameters().get(OVERRIDE_KEY), is(OVERRIDE_VALUE));
+  }
+
+  @Test
+  public void noTransformations() {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put(KEY, VALUE);
+    table.setParameters(parameters);
+    transformation = new TableParametersTransformation(new TransformOptions());
+    transformation.tableReplicationStart(createEventTableReplication(null),EVENT_ID);
+    transformation.transform(table);
+    assertThat(table.getParameters().size(), is(1));
+    assertThat(table.getParameters().get(KEY), is(VALUE));
+  }
+
   private EventTableReplication createEventTableReplication(String overrideKey, String overrideValue) {
     Map<String, Object> transformOptions = new HashMap<>();
     Map<String, Object> tableParametersOptions = new HashMap<>();
     tableParametersOptions.put(overrideKey, overrideValue);
-    transformOptions.put(TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS, tableParametersOptions);
+    transformOptions.put(CircusTrainTransformOptions.TABLE_PROPERTIES, tableParametersOptions);
     return createEventTableReplication(transformOptions);
   }
 
