@@ -46,7 +46,7 @@ the global level, then be overriden for certain replications.
     transform-options:    
       avro-serde-options:
         base-url: /example/url/
-        #Schema url's for each table will be copied to /example/url/<eventId>/.schema/
+        #Schema URLs for each table will be copied to /example/url/<eventId>/.schema/
 
 
     #Per table replication example:
