@@ -102,7 +102,8 @@ public class S3S3CopierTest {
     client.createBucket("source");
     client.createBucket("target");
 
-    when(s3ClientFactory.newInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class))).thenReturn(newClient());
+    when(s3ClientFactory.newSourceInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class)))
+        .thenReturn(newClient());
 
     when(s3ClientFactory.newTargetInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class)))
         .thenReturn(newClient());
