@@ -54,7 +54,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   }
 
   @Override
-  public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
+  public AmazonS3 newSourceInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
     LOG.debug("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions);
     try {
@@ -67,21 +67,13 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     }
   }
 
+  @Override
   public AmazonS3 newTargetInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
     String assumedRole = s3s3CopierOptions.getAssumedRole();
     if (assumedRole != null) {
       return newTargetInstanceWithRole(uri, s3s3CopierOptions, assumedRole);
     }
-
-    AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions);
-    try {
-      String bucketRegion = regionForUri(globalClient, uri);
-      LOG.debug("Bucket region: {}", bucketRegion);
-      return newInstance(bucketRegion, s3s3CopierOptions);
-    } catch (IllegalArgumentException e) {
-      LOG.warn("Using global (non region specific) client", e);
-      return globalClient;
-    }
+    return newSourceInstance(uri, s3s3CopierOptions);
   }
 
   private AmazonS3 newTargetInstanceWithRole(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions, String role) {
@@ -171,13 +163,10 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   }
 
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain() {
-    HadoopAWSCredentialProviderChain credentialsChain = null;
     if (security.getCredentialProvider() == null) {
-      credentialsChain = new HadoopAWSCredentialProviderChain();
-    } else {
-      credentialsChain = new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
+      return new HadoopAWSCredentialProviderChain();
     }
-    return credentialsChain;
+    return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
   }
 
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain(Configuration conf) {

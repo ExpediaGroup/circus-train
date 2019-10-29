@@ -17,7 +17,6 @@ package com.hotels.bdp.circustrain.s3s3copier.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
-
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 public interface AmazonS3ClientFactory {
@@ -28,6 +27,7 @@ public interface AmazonS3ClientFactory {
    * @param s3s3CopierOptions Copier options.
    * @return a new instance of {@linkplain AmazonS3 AmazonS3}
    */
-  AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions);
+  AmazonS3 newSourceInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions);
 
+  AmazonS3 newTargetInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions);
 }
