@@ -68,6 +68,14 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     LOG.debug("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, assumedRoleProvided);
     try {
+
+      /*
+       * When using roles it can take a while for the credentials to be retrieved from the
+       * AssumeRoleCredentialsProvider. This can mean that the rest of the code completes before the credentials are
+       * retrieved, resulting in errors. A temporary fix for this situation is to put the thread to sleep for 10s to
+       * allow for retrieval before the code continues. Thread.sleep(10000);
+       **/
+
       String bucketRegion = regionForUri(globalClient, uri);
       LOG.debug("Bucket region: {}", bucketRegion);
       return newInstance(bucketRegion, s3s3CopierOptions, assumedRoleProvided);
