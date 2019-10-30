@@ -67,9 +67,10 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.s3s3copier.aws.JceksAmazonS3ClientFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
@@ -87,7 +88,7 @@ public class S3S3CopierTest {
 
   private final S3S3CopierOptions s3S3CopierOptions = new S3S3CopierOptions(new HashMap<String, Object>());
 
-  private @Mock JceksAmazonS3ClientFactory s3ClientFactory;
+  private @Mock AmazonS3ClientFactory s3ClientFactory;
 
   private File inputData;
 
@@ -102,10 +103,7 @@ public class S3S3CopierTest {
     client.createBucket("source");
     client.createBucket("target");
 
-    when(s3ClientFactory.newSourceInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class)))
-        .thenReturn(newClient());
-
-    when(s3ClientFactory.newTargetInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class)))
+    when(s3ClientFactory.newInstance(any(AmazonS3URI.class), any(S3S3CopierOptions.class)))
         .thenReturn(newClient());
   }
 

@@ -15,6 +15,13 @@
  */
 package com.hotels.bdp.circustrain.integration;
 
+import static org.apache.hadoop.fs.s3a.Constants.ACCESS_KEY;
+import static org.apache.hadoop.fs.s3a.Constants.ENDPOINT;
+import static org.apache.hadoop.fs.s3a.Constants.SECRET_KEY;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertThat;
+
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
@@ -23,12 +30,6 @@ import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPAR
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
-import static org.apache.hadoop.fs.s3a.Constants.ACCESS_KEY;
-import static org.apache.hadoop.fs.s3a.Constants.ENDPOINT;
-import static org.apache.hadoop.fs.s3a.Constants.SECRET_KEY;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.net.URI;
@@ -46,10 +47,14 @@ import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.TemporaryFolder;
 
+import fm.last.commons.test.file.ClassDataFolder;
+import fm.last.commons.test.file.DataFolder;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.ImmutableMap;
+
 import com.hotels.bdp.circustrain.api.conf.Security;
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
@@ -57,9 +62,6 @@ import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.JceksAmazonS3ClientFactory;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
-
-import fm.last.commons.test.file.ClassDataFolder;
-import fm.last.commons.test.file.DataFolder;
 
 public class CircusTrainS3S3IntegrationTest {
 
@@ -121,7 +123,7 @@ public class CircusTrainS3S3IntegrationTest {
         .<String, Object> builder()
         .put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getUri().toString())
         .build());
-    return s3ClientFactory.newSourceInstance(base, s3s3CopierOptions);
+    return s3ClientFactory.newInstance(base, s3s3CopierOptions);
   }
 
   @Test
