@@ -144,7 +144,8 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return new HadoopAWSCredentialProviderChain();
   }
 
-  private Configuration createNewConf(Configuration conf, String assumedRole) {
+  private Configuration createNewConf(Configuration config, String assumedRole) {
+    Configuration conf = new Configuration(config);
     conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
     conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
     return conf;
