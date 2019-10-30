@@ -54,19 +54,19 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   }
 
   @Override
-  public AmazonS3 newSourceInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
-    return newS3Client(uri, s3s3CopierOptions, false);
+  public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
+    HadoopAWSCredentialProviderChain credentialProviderChain = getCredentialsProviderChain(
+        s3s3CopierOptions.getAssumedRole());
+
+    return newS3Client(uri, s3s3CopierOptions, credentialProviderChain);
   }
 
-  @Override
-  public AmazonS3 newTargetInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
-    String assumedRole = s3s3CopierOptions.getAssumedRole();
-    return newS3Client(uri, s3s3CopierOptions, assumedRole != null);
-  }
-
-  private AmazonS3 newS3Client(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions, boolean assumedRoleProvided) {
+  private AmazonS3 newS3Client(
+      AmazonS3URI uri,
+      S3S3CopierOptions s3s3CopierOptions,
+      HadoopAWSCredentialProviderChain credentialProviderChain) {
     LOG.debug("trying to get a client for uri '{}'", uri);
-    AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, assumedRoleProvided);
+    AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, credentialProviderChain);
     try {
 
       /*
@@ -78,7 +78,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
       String bucketRegion = regionForUri(globalClient, uri);
       LOG.debug("Bucket region: {}", bucketRegion);
-      return newInstance(bucketRegion, s3s3CopierOptions, assumedRoleProvided);
+      return newInstance(bucketRegion, s3s3CopierOptions, credentialProviderChain);
     } catch (IllegalArgumentException e) {
       LOG.warn("Using global (non region specific) client", e);
       return globalClient;
@@ -104,13 +104,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
-  private AmazonS3 newGlobalInstance(S3S3CopierOptions s3s3CopierOptions, boolean assumedRoleProvided) {
-    HadoopAWSCredentialProviderChain credentialsChain;
-    credentialsChain = getCredentialsProviderChain(s3s3CopierOptions, assumedRoleProvided);
-    return buildGlobalInstance(s3s3CopierOptions, credentialsChain);
-  }
-
-  private AmazonS3 buildGlobalInstance(
+  private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
@@ -126,13 +120,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return builder.build();
   }
 
-  private AmazonS3 newInstance(String region, S3S3CopierOptions s3s3CopierOptions, boolean assumedRoleProvided) {
-    HadoopAWSCredentialProviderChain credentialsChain = getCredentialsProviderChain(s3s3CopierOptions,
-        assumedRoleProvided);
-    return buildClient(region, s3s3CopierOptions, credentialsChain);
-  }
-
-  private AmazonS3 buildClient(
+  private AmazonS3 newInstance(
       String region,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
@@ -147,20 +135,16 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return builder.build();
   }
 
-  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(
-      S3S3CopierOptions s3s3CopierOptions,
-      boolean assumedRoleProvided) {
-
-    if (assumedRoleProvided) {
-      setConfRole(conf, s3s3CopierOptions.getAssumedRole());
-      return new HadoopAWSCredentialProviderChain(conf);
-    } else if (security.getCredentialProvider() == null) {
+  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole) {
+    if (assumedRole != null) {
+      return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole));
+    } else if (security.getCredentialProvider() != null) {
       return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
     }
     return new HadoopAWSCredentialProviderChain();
   }
 
-  private Configuration setConfRole(Configuration conf, String assumedRole) {
+  private Configuration createNewConf(Configuration conf, String assumedRole) {
     conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
     conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
     return conf;

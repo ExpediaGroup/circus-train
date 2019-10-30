@@ -43,6 +43,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
@@ -158,8 +159,8 @@ public class S3S3Copier implements Copier {
         .info("Initialising all copy jobs");
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
-    srcClient = s3ClientFactory.newSourceInstance(sourceBase, s3s3CopierOptions);
-    targetClient = s3ClientFactory.newTargetInstance(targetBase, s3s3CopierOptions);
+    srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
+    targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
       initialiseCopyJobs(sourceBase, targetBase);
