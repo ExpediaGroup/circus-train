@@ -21,6 +21,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.avro.TestUtils.newPartition;
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.AVRO_SERDE_OPTIONS;
+import static com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig.BASE_URL;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.event.EventReplicaTable;
 import com.hotels.bdp.circustrain.api.event.EventTableReplication;
 import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
@@ -43,9 +46,6 @@ import com.hotels.bdp.circustrain.avro.util.SchemaCopier;
 public class AvroSerDePartitionTransformationTest {
 
   private static final String AVRO_SCHEMA_URL_PARAMETER = "avro.schema.url";
-
-  @Mock
-  private AvroSerDeConfig avroSerDeConfig;
 
   @Mock
   private SchemaCopier schemaCopier;
@@ -60,7 +60,13 @@ public class AvroSerDePartitionTransformationTest {
 
   @Before
   public void setUp() {
-    transformation = new AvroSerDePartitionTransformation(avroSerDeConfig, schemaCopier);
+    Map<String, String> avroSerdeOptions = new HashMap<>();
+    avroSerdeOptions.put(BASE_URL, "schema");
+    Map<String, Object> options = new HashMap<>();
+    options.put(AVRO_SERDE_OPTIONS, avroSerdeOptions);
+    TransformOptions transformOptions = new TransformOptions();
+    transformOptions.setTransformOptions(options);
+    transformation = new AvroSerDePartitionTransformation(transformOptions, schemaCopier);
   }
 
   @Test
@@ -72,7 +78,6 @@ public class AvroSerDePartitionTransformationTest {
 
   @Test
   public void missingEventId() {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     transformation.transform(partition);
     verifyZeroInteractions(schemaCopier);
     assertThat(partition, is(newPartition()));
@@ -91,7 +96,6 @@ public class AvroSerDePartitionTransformationTest {
 
   @Test
   public void transformNoSourceUrl() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
@@ -103,7 +107,6 @@ public class AvroSerDePartitionTransformationTest {
 
   @Test
   public void transform() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
@@ -116,11 +119,10 @@ public class AvroSerDePartitionTransformationTest {
 
   @Test
   public void transformOverride() throws Exception {
-    when(avroSerDeConfig.getBaseUrl()).thenReturn("schema");
     Map<String, Object> avroOverrideOptions = new HashMap<>();
-    avroOverrideOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_BASE_URL, "schemaOverride");
+    avroOverrideOptions.put(AvroSerDeConfig.BASE_URL, "schemaOverride");
     Map<String, Object> transformOptions = new HashMap<>();
-    transformOptions.put(AvroSerDeConfig.TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS, avroOverrideOptions);
+    transformOptions.put(AvroSerDeConfig.AVRO_SERDE_OPTIONS, avroOverrideOptions);
     when(tableReplicationEvent.getTransformOptions()).thenReturn(transformOptions);
     EventReplicaTable eventReplicaTable = new EventReplicaTable("db", "table", "location");
     when(tableReplicationEvent.getReplicaTable()).thenReturn(eventReplicaTable);

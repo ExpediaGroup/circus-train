@@ -594,7 +594,7 @@ To use this feature, add properties to your configuration:
             my-custom-property: my-custom-value
             my-custom-property2: my-custom-value2
 
-This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. These default properties can also be overridden by individual replications:
+This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. Surround each value with single quotes to ensure that Circus Train reads them as a String. Default properties can also be overridden by individual replications:
 
          table-replications:
            - source-table:
@@ -610,10 +610,10 @@ This will add `my-custom-property` and `my-custom-property2` to the metadata of 
                ...
          transform-options:
            table-properties:
-            my-custom-param: my-custom-value
-            my-custom-param2: my-custom-value2
+            my-custom-property: my-custom-value
+            my-custom-property2: my-custom-value2
 
-In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than "-"), surround the key with single quotes and brackets like so:
+In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than '-'), surround the key with single quotes and brackets like so:
 
         transform-options:
           table-properties:

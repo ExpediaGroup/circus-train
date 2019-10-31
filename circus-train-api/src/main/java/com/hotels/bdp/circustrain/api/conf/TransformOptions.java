@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.avro.conf;
+package com.hotels.bdp.circustrain.api.conf;
 
-public class AvroSerDeConfig {
+import java.util.Map;
 
-  public static final String AVRO_SERDE_OPTIONS = "avro-serde-options";
-  public static final String BASE_URL = "base-url";
+public class TransformOptions {
 
-  private String avroSchemaBaseUrl;
+  private Map<String, Object> transformOptions;
 
-  public String getBaseUrl() {
-    return avroSchemaBaseUrl;
+  public Map<String, Object> getTransformOptions() {
+    return transformOptions;
   }
 
-  public void setBaseUrl(String avroSchemaBaseUrl) {
-    this.avroSchemaBaseUrl = avroSchemaBaseUrl;
+  public void setTransformOptions(Map<String, Object> transformOptions) {
+    this.transformOptions = transformOptions;
   }
 }

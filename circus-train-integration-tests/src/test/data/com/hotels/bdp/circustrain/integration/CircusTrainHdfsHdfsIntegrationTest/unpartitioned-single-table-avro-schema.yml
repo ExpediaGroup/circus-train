@@ -6,5 +6,6 @@ table-replications:
     replica-table:
       table-name: ct_table_u_managed_copy
       table-location: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/ct_table_u_managed_copy
-avro-serde-options:
-  base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/
+transform-options:
+  avro-serde-options:
+    base-url: ${circus-train-runner.replica-warehouse-uri}${circus-train-runner.database-name}/

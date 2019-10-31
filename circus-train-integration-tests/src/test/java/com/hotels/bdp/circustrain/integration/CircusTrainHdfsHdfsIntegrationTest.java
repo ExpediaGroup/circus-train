@@ -251,12 +251,42 @@ public class CircusTrainHdfsHdfsIntegrationTest {
   }
 
   @Test
-  public void partitionedTableNoHousekeepingWithTableParameters() throws Exception {
+  public void partitionedTableNoHousekeepingWithTableReplicationParameters() throws Exception {
     helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     exit.expectSystemExitWithStatus(0);
     File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-table-parameters.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        String jdbcUrl = housekeepingDbJdbcUrl();
+        try (Connection conn = getConnection(jdbcUrl, HOUSEKEEPING_DB_USER, HOUSEKEEPING_DB_PASSWD)) {
+          List<LegacyReplicaPath> cleanUpPaths = TestUtils
+            .getCleanUpPaths(conn, "SELECT * FROM circus_train.legacy_replica_path");
+          assertThat(cleanUpPaths.size(), is(0));
+        }
+        Map<String, String> parameters = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE).getParameters();
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableNoHousekeepingWithDefaultTableParameters() throws Exception {
+    helper.createPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping-with-default-table-parameters.yml");
     CircusTrainRunner runner = CircusTrainRunner
       .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
       .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
@@ -1140,7 +1170,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
 
     exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("unpartitioned-single-table-avro-schema.yml");
+    File config = dataFolder.getFile("unpartitioned-single-table-multiple-transformations.yml");
     CircusTrainRunner runner = CircusTrainRunner
         .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
         .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
@@ -1153,10 +1183,53 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       public void checkAssertion() throws Exception {
         Table replicaHiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
         String expectedReplicaSchemaUrl = replicaWarehouseUri.toURI().toString() + "ct_database/";
-        String transformedAvroUrl = replicaHiveTable.getParameters().get("avro.schema.url");
-
+        Map<String, String> parameters = replicaHiveTable.getParameters();
+        String transformedAvroUrl = parameters.get("avro.schema.url");
+        assertThat(parameters.get("table.property.first"), is("first"));
+        assertThat(parameters.get("table.property.second"), is("second"));
+        assertThat(parameters.get("table.transformed"), is("true"));
         assertThat(transformedAvroUrl, startsWith(expectedReplicaSchemaUrl));
-        assertThat(replicaHiveTable.getParameters().get("table.transformed"), is("true"));
+      }
+    });
+
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void multipleTransformationOverridesApplied() throws Exception {
+    helper.createManagedUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE));
+
+    java.nio.file.Path sourceAvroSchemaPath = Paths.get(sourceWarehouseUri.toString() + "/avro-schema-file.test");
+    Files.createDirectories(sourceAvroSchemaPath);
+
+    String avroSchemaBaseUrl = sourceAvroSchemaPath.toString();
+
+    Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE);
+    sourceTable.putToParameters("avro.schema.url", avroSchemaBaseUrl);
+    sourceTable.putToParameters("circus.train.test.transformation", "enabled");
+    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("unpartitioned-single-table-multiple-transformation-overrides.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+      .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+      .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+        sourceCatalog.driverClassName())
+      .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+      .build();
+
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        Table replicaHiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
+        String expectedReplicaSchemaUrl = replicaWarehouseUri.toURI().toString() + "ct_database/override";
+        Map<String, String> parameters = replicaHiveTable.getParameters();
+        String transformedAvroUrl = parameters.get("avro.schema.url");
+        assertThat(parameters.get("table.property.first"), is("first-override"));
+        assertThat(parameters.get("table.property.second"), is("second-override"));
+        assertThat(parameters.get("table.transformed"), is("true"));
+        assertThat(transformedAvroUrl, startsWith(expectedReplicaSchemaUrl));
       }
     });
 

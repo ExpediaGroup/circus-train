@@ -1,7 +1,11 @@
-## TBD
+## [15.0.0] - TBD
 
 ### Changed
-* Updated `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
+* Default `avro-serde-options` must now be included within `transform-options`. This is a backwards incompatible change to the configuration file. Please see [Avro Schema Replication](https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-avro/README.md) for more information.
+* `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
+
+### Fixed
+* Table properties can now be added to default transformations.
 
 ### Added
 * Added `copier-options.assume-role` to assume a role when using the S3S3 copier.  
