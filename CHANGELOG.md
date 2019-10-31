@@ -1,4 +1,6 @@
 ## TBD
+
+### Changed
 * Updated `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
 
 ### Added
