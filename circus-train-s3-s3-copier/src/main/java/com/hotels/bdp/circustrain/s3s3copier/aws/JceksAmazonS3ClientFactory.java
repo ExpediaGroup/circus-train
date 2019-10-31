@@ -57,7 +57,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
     HadoopAWSCredentialProviderChain credentialProviderChain = getCredentialsProviderChain(
         s3s3CopierOptions.getAssumedRole());
-
     return newS3Client(uri, s3s3CopierOptions, credentialProviderChain);
   }
 
