@@ -29,7 +29,7 @@ import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-  private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration for assumed role credentials
+  private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration in seconds for assumed role credentials
 
   private AWSCredentials credentials;
   private final Configuration conf;

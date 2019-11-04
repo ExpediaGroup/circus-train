@@ -24,7 +24,6 @@ import org.apache.commons.collections.MapUtils;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
-
 import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 
 public class S3S3CopierOptions {
@@ -55,6 +54,11 @@ public class S3S3CopierOptions {
      * Optional AWS Canned ACL
      */
     CANNED_ACL("canned-acl"),
+    /**
+     * Role to assume when writing S3 data. Needs read access for source, and write
+     * access to the target.
+     */
+    ASSUME_ROLE("assume-role"),
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
@@ -120,6 +124,10 @@ public class S3S3CopierOptions {
      }
 
      return null;
+  }
+  
+  public String getAssumedRole() {
+    return MapUtils.getString(copierOptions, Keys.ASSUME_ROLE.keyName(), null);
   }
 
   public int getMaxCopyAttempts() {

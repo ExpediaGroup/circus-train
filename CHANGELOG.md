@@ -7,6 +7,9 @@
 ### Fixed
 * Table properties can now be added to default transformations.
 
+### Added
+* Added `copier-options.assume-role` to assume a role when using the S3S3 copier.  
+
 ## [14.1.0] - 2019-10-04
 
 ### Added
