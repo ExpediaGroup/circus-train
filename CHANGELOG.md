@@ -2,6 +2,7 @@
 
 ### Changed
 * Default `avro-serde-options` must now be included within `transform-options`. This is a backwards incompatible change to the configuration file. Please see [Avro Schema Replication](https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-avro/README.md) for more information.
+* Updated `jackson` version to 2.10.0 (was 2.9.10).
 * `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
 
 ### Fixed
