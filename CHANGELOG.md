@@ -1,4 +1,4 @@
-## [15.0.0] - TBD
+## [15.0.0] - 2019-11-12
 
 ### Changed
 * Default `avro-serde-options` must now be included within `transform-options`. This is a backwards incompatible change to the configuration file. Please see [Avro Schema Replication](https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-avro/README.md) for more information.
