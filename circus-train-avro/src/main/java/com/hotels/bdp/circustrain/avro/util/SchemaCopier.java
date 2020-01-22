@@ -68,7 +68,7 @@ public class SchemaCopier {
 
     Path destinationSchemaFile = new Path(destination, sourceLocation.getName());
 
-    Map<String, Object> mergeCopierOptions = new HashMap<>(TableReplication
+    Map<String, Object> mergedCopierOptions = new HashMap<>(TableReplication
         .getMergedCopierOptions(globalCopierOptions.getCopierOptions(), eventTableReplication.getCopierOptions()));
     mergeCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
     CopierFactory copierFactory = copierFactoryManager
