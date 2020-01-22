@@ -58,21 +58,22 @@ public class FileSystemPathResolver {
   }
 
   public Path resolveNameServices(Path path) {
-    String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
-    if (isNotBlank(nameService)) {
-      URI uri = path.toUri();
-      String scheme = uri.getScheme();
-      String url = uri.getPath();
-      final String original = path.toString();
-      if (isBlank(scheme)) {
-        url = String.format("/%s%s", nameService, path);
-        path = new Path(url);
-      } else {
-        path = new Path(scheme, nameService, url);
+    if ("hdfs".equalsIgnoreCase(path.toUri().getScheme())) {
+      String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
+      if (isNotBlank(nameService)) {
+        URI uri = path.toUri();
+        String scheme = uri.getScheme();
+        String url = uri.getPath();
+        final String original = path.toString();
+        if (isBlank(scheme)) {
+          url = String.format("/%s%s", nameService, path);
+          path = new Path(url);
+        } else {
+          path = new Path(scheme, nameService, url);
+        }
+        LOG.info("Added nameservice to path. {} became {}", original, path);
       }
-      LOG.info("Added nameservice to path. {} became {}", original, path);
     }
-
     return path;
   }
 

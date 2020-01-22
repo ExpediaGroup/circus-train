@@ -25,8 +25,8 @@ import org.junit.Test;
 
 public class FileSystemPathResolverTest {
 
-  private Configuration configuration = new Configuration();
-  private FileSystemPathResolver resolver = new FileSystemPathResolver(configuration);
+  private final Configuration configuration = new Configuration();
+  private final FileSystemPathResolver resolver = new FileSystemPathResolver(configuration);
 
   @Test
   public void resolveSchemeDoesntChangeSchemeForPathWithScheme() {
@@ -60,6 +60,14 @@ public class FileSystemPathResolverTest {
   }
 
   @Test
+  public void resolveNameServiceS3() {
+    setDfsPaths("hdp-ha");
+    Path input = new Path("s3:///etl/test/avsc/schema.avsc");
+    Path result = resolver.resolveNameServices(input);
+    assertThat(result, is(input));
+  }
+
+  @Test
   public void resolveNameServicesAddsAuthorityToFullyQualifiedPathWithScheme() {
     setDfsPaths("hdp-ha");
     Path input = new Path("hdfs:///etl/test/avsc/schema.avsc");
@@ -73,7 +81,7 @@ public class FileSystemPathResolverTest {
     setDfsPaths("foo");
     Path input = new Path("/etl/test/avsc/schema.avsc");
     Path result = resolver.resolveNameServices(input);
-    Path expected = new Path("/foo/etl/test/avsc/schema.avsc");
+    Path expected = new Path("/etl/test/avsc/schema.avsc");
     assertThat(result, is(expected));
   }
 
