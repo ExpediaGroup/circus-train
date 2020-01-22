@@ -1,6 +1,6 @@
 ## TBD - TBD
 ### Changed
-* Change the way the AVRO Schema Copier works, reusing normal 'data' copier. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
+* AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
 
 ## [15.0.0] - 2019-11-12
 ### Changed
@@ -373,4 +373,3 @@ _New configuration file_
 # 1.5.1
 
 * `DistCP` temporary path is now set per task.
-
