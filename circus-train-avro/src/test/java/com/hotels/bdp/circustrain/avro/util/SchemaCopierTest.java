@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,39 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.event.EventTableReplication;
+
+@RunWith(MockitoJUnitRunner.class)
 public class SchemaCopierTest {
 
   @Rule
   public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  private @Mock CopierFactoryManager copierFactoryManager;
+  private @Mock CopierOptions copierOptions;
+  private @Mock EventTableReplication eventTableReplication;
+  private SchemaCopier copier;
+  private final String eventId = "eventId";
+
+  @Before
+  public void setUp() {
+    copier = new SchemaCopier(new HiveConf(), copierFactoryManager, copierOptions);
+  }
 
   @Test
   public void copiedToCorrectDestination() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
+    copier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(destination.toString() + "/test.txt")));
   }
@@ -53,8 +71,8 @@ public class SchemaCopierTest {
     File source = temporaryFolder.newFile("test.txt");
     FileUtils.writeLines(source, randomData);
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    File copy = new File(copier.copy(source.toString(), destination.toString()).toString());
+    File copy = new File(
+        copier.copy(source.toString(), destination.toString(), eventTableReplication, eventId).toString());
     assertTrue(FileUtils.contentEquals(source, copy));
   }
 
@@ -62,8 +80,7 @@ public class SchemaCopierTest {
   public void copyDoesntDeleteOriginalFile() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
+    copier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
     FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
     assertTrue(fs.exists(new Path(source.toString())));
   }
@@ -72,36 +89,31 @@ public class SchemaCopierTest {
   public void copiedFileAndNotDirectory() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
+    copier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
     assertTrue(new File(destination.toString() + "/test.txt").isFile());
   }
 
   @Test(expected = NullPointerException.class)
   public void copyWithNullSourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(null, destination.toString());
+    copier.copy(null, destination.toString(), eventTableReplication, eventId);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptySourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy("", destination.toString());
+    copier.copy("", destination.toString(), eventTableReplication, eventId);
   }
 
   @Test(expected = NullPointerException.class)
   public void copyWithNullDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), null);
+    copier.copy(source.toString(), null, eventTableReplication, eventId);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptyDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), "");
+    copier.copy(source.toString(), "", eventTableReplication, eventId);
   }
 }

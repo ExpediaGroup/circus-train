@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.appendForwardSlashIfNotPresent;
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.argsPresent;
 import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.avroDestination;
-import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
 
 import org.junit.Test;
 
@@ -66,40 +65,6 @@ public class AvroStringUtilsTest {
   @Test(expected = IllegalArgumentException.class)
   public void emptyEventIdParamTest() {
     avroDestination("", null, "location");
-  }
-
-  @Test
-  public void fileNameTest() {
-    String path = "file://test/path/test.avsc";
-    assertThat(fileName(path), is("test.avsc"));
-  }
-
-  @Test
-  public void fileNameTestStringEndsWithForwardSlash() {
-    String path = "file://test/path/test.avsc/";
-    assertThat(fileName(path), is("test.avsc"));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void fileNameWherePathDoesntEndInFileThrowsException() {
-    String path = "file://test/path/";
-    fileName(path);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void fileNameWithTwoPeriodsThrowsException() {
-    String path = "file://test/path/test.av.sc";
-    fileName(path);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void nullFullPathParamTest() {
-    fileName(null);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void emptyFullPathParamTest() {
-    fileName("");
   }
 
   @Test

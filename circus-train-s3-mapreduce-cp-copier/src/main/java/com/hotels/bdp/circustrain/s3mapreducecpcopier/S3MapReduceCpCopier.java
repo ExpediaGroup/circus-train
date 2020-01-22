@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
@@ -101,7 +102,7 @@ public class S3MapReduceCpCopier implements Copier {
       defaultCredentialsProvider = URI.create(defaultCredentialsProviderString);
     }
 
-    URI replicaDataLocationUri = toDirectoryUri(replicaDataLocation);
+    URI replicaDataLocationUri = toURI(replicaDataLocation);
     S3MapReduceCpOptionsParser optionsParser = null;
     if (sourceDataLocations.isEmpty()) {
       LOG.debug("Will copy all sub-paths.");
@@ -114,6 +115,14 @@ public class S3MapReduceCpCopier implements Copier {
           defaultCredentialsProvider);
     }
     return optionsParser.parse(copierOptions);
+  }
+
+  private URI toURI(Path replicaDataLocation) {
+    if (Boolean.parseBoolean((String) copierOptions.get(CopierOptions.COPY_DESTINATION_IS_FILE))) {
+      return replicaDataLocation.toUri();
+    } else {
+      return toDirectoryUri(replicaDataLocation);
+    }
   }
 
   private URI toDirectoryUri(Path path) {

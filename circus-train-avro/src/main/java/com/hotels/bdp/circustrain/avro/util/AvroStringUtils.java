@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,30 +37,6 @@ public final class AvroStringUtils {
       return pathToDestinationFolder + eventId + ".schema";
     }
     return pathToDestinationFolder + eventId;
-  }
-
-  public static String fileName(String pathToFile) {
-    checkArgument(isNotBlank(pathToFile), "There must be a pathToFile provided");
-    if (pathToFile.charAt(pathToFile.length() - 1) == '/') {
-      pathToFile = pathToFile.substring(0, pathToFile.length() - 1);
-    }
-
-    String fileName = pathToFile.substring(pathToFile.lastIndexOf("/") + 1, pathToFile.length());
-    if (countPeriods(fileName) != 1) {
-      throw new IllegalArgumentException("Incorrect fileName " + fileName);
-    }
-
-    return fileName;
-  }
-
-  private static int countPeriods(String string) {
-    int periodCount = 0;
-    for (int i = 0; i < string.length(); i++) {
-      if (string.charAt(i) == '.') {
-        periodCount++;
-      }
-    }
-    return periodCount;
   }
 
   public static boolean argsPresent(String... args) {

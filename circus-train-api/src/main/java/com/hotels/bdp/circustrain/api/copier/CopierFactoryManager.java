@@ -17,14 +17,9 @@ package com.hotels.bdp.circustrain.api.copier;
 
 import java.util.Map;
 
-public interface CopierOptions {
+import org.apache.hadoop.fs.Path;
 
-  String IGNORE_MISSING_PARTITION_FOLDER_ERRORS = "ignore-missing-partition-folder-errors";
+public interface CopierFactoryManager {
 
-  // internal option used to track if the destination of the replication should be treated as a folder or file. Value
-  // can be parsed with Boolean.parseValue. If not set a folder is assumed.
-  String COPY_DESTINATION_IS_FILE = "copy-destination-is-file";
-
-  Map<String, Object> getCopierOptions();
-
+  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions);
 }

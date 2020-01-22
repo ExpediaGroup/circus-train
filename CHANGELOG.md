@@ -1,5 +1,8 @@
-## [15.0.0] - 2019-11-12
+## TBD - TBD
+### Changed
+* Change the way the AVRO Schema Copier works, reusing normal 'data' copier. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
 
+## [15.0.0] - 2019-11-12
 ### Changed
 * Default `avro-serde-options` must now be included within `transform-options`. This is a backwards incompatible change to the configuration file. Please see [Avro Schema Replication](https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-avro/README.md) for more information.
 * Updated `jackson` version to 2.10.0 (was 2.9.10).
@@ -12,7 +15,6 @@
 * Added `copier-options.assume-role` to assume a role when using the S3S3 copier.  
 
 ## [14.1.0] - 2019-10-04
-
 ### Added
 * Table transformation to add custom properties to tables during a replication.
 * If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. See [#131](https://github.com/HotelsDotCom/circus-train/issues/131).

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 @Profile({ Modules.REPLICATION })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class CopierFactoryManager {
+public class DefaultCopierFactoryManager implements com.hotels.bdp.circustrain.api.copier.CopierFactoryManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CopierFactoryManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultCopierFactoryManager.class);
   private static final String COPIER_FACTORY_CLASS = "copier-factory-class";
 
   private final List<CopierFactory> copierFactories;
 
   @Autowired
-  public CopierFactoryManager(List<CopierFactory> copierFactories) {
+  public DefaultCopierFactoryManager(List<CopierFactory> copierFactories) {
     this.copierFactories = ImmutableList.copyOf(copierFactories);
   }
 
@@ -57,7 +57,8 @@ public class CopierFactoryManager {
     }
   }
 
-  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions) {
+  @Override
+  public CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions) {
     String sourceScheme = sourceLocation.toUri().getScheme();
     String replicaScheme = replicaLocation.toUri().getScheme();
     if (copierOptions.containsKey(COPIER_FACTORY_CLASS)) {
@@ -72,8 +73,9 @@ public class CopierFactoryManager {
       for (CopierFactory copierFactory : copierFactories) {
         final String copierFactoryClassName = copierFactory.getClass().getName();
         if (copierFactory.supportsSchemes(sourceScheme, replicaScheme)) {
-          LOG.debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'",
-                  copierFactoryClassName, sourceScheme, replicaScheme);
+          LOG
+              .debug("Found CopierFactory '{}' for sourceScheme '{}' and replicaScheme '{}'", copierFactoryClassName,
+                  sourceScheme, replicaScheme);
           return copierFactory;
         }
       }

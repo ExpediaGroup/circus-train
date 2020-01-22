@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
@@ -58,7 +59,6 @@ import com.hotels.bdp.circustrain.api.metrics.MetricSender;
 import com.hotels.bdp.circustrain.api.metrics.ScheduledReporterFactory;
 import com.hotels.bdp.circustrain.comparator.hive.functions.PathDigest;
 import com.hotels.bdp.circustrain.comparator.hive.functions.PathToPathMetadata;
-import com.hotels.bdp.circustrain.core.CopierFactoryManager;
 import com.hotels.bdp.circustrain.core.PartitionPredicateFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactoryImpl;

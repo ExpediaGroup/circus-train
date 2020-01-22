@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,10 @@ package com.hotels.bdp.circustrain.avro.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import static com.hotels.bdp.circustrain.avro.util.AvroStringUtils.fileName;
-
-import java.io.IOException;
-import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.event.EventTableReplication;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 @Profile({ Modules.REPLICATION })
 @Component
@@ -41,64 +44,42 @@ public class SchemaCopier {
   private static final Logger LOG = LoggerFactory.getLogger(SchemaCopier.class);
 
   private final Configuration sourceHiveConf;
-  private final Configuration replicaHiveConf;
+  private final CopierFactoryManager copierFactoryManager;
+  private final CopierOptions globalCopierOptions;
 
   @Autowired
-  public SchemaCopier(Configuration sourceHiveConf, Configuration replicaHiveConf) {
+  public SchemaCopier(
+      Configuration sourceHiveConf,
+      CopierFactoryManager copierFactoryManager,
+      CopierOptions globalCopierOptions) {
     this.sourceHiveConf = sourceHiveConf;
-    this.replicaHiveConf = replicaHiveConf;
+    this.copierFactoryManager = copierFactoryManager;
+    this.globalCopierOptions = globalCopierOptions;
   }
 
-  public Path copy(String source, String destination) {
+  public Path copy(String source, String destination, EventTableReplication eventTableReplication, String eventId) {
     checkNotNull(source, "source cannot be null");
     checkNotNull(destination, "destinationFolder cannot be null");
-
-    java.nio.file.Path temporaryDirectory = createTempDirectory();
 
     FileSystemPathResolver sourceFileSystemPathResolver = new FileSystemPathResolver(sourceHiveConf);
     Path sourceLocation = new Path(source);
     sourceLocation = sourceFileSystemPathResolver.resolveScheme(sourceLocation);
     sourceLocation = sourceFileSystemPathResolver.resolveNameServices(sourceLocation);
-    Path localLocation = new Path(temporaryDirectory.toString(), fileName(source));
-    copyToLocal(sourceLocation, localLocation);
 
-    Path destinationLocation = new Path(destination, fileName(source));
-    copyToRemote(localLocation, destinationLocation);
+    Path destinationSchemaFile = new Path(destination, sourceLocation.getName());
 
-    LOG.info("Avro schema has been copied from '{}' to '{}'", sourceLocation, destinationLocation);
-    return destinationLocation;
-  }
+    Map<String, Object> mergeCopierOptions = new HashMap<>(TableReplication
+        .getMergedCopierOptions(globalCopierOptions.getCopierOptions(), eventTableReplication.getCopierOptions()));
+    mergeCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+    CopierFactory copierFactory = copierFactoryManager
+        .getCopierFactory(sourceLocation, destinationSchemaFile, mergeCopierOptions);
+    LOG.info("Going to replicate the Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
+    Copier copier = copierFactory.newInstance(eventId, sourceLocation, destinationSchemaFile, mergeCopierOptions);
+    Metrics metrics = copier.copy();
 
-  private java.nio.file.Path createTempDirectory() {
-    java.nio.file.Path temporaryDirectory = null;
-    try {
-      temporaryDirectory = Files.createTempDirectory("avro-schema-download-folder");
-      temporaryDirectory.toFile().deleteOnExit();
-    } catch (IOException e) {
-      throw new CircusTrainException("Couldn't create temporaryDirectory in the default temporary directory", e);
-    }
-    return temporaryDirectory;
-  }
-
-  private void copyToLocal(Path sourceLocation, Path localLocation) {
-    try {
-      FileSystem sourceFileSystem;
-      sourceFileSystem = sourceLocation.getFileSystem(sourceHiveConf);
-      sourceFileSystem.copyToLocalFile(false, sourceLocation, localLocation);
-      LOG.info("Copy from {} to {} succeeded", sourceLocation, localLocation);
-    } catch (IOException e) {
-      throw new CircusTrainException("Couldn't copy file from " + sourceLocation + " to " + localLocation, e);
-    }
-  }
-
-  private void copyToRemote(Path localLocation, Path remoteDestinationLocation) {
-    FileSystem destinationFileSystem;
-    try {
-      destinationFileSystem = remoteDestinationLocation.getFileSystem(replicaHiveConf);
-      destinationFileSystem.copyFromLocalFile(localLocation, remoteDestinationLocation);
-    } catch (IOException e) {
-      throw new CircusTrainException("Couldn't copy file from " + localLocation + " to " + remoteDestinationLocation,
-          e);
-    }
+    LOG
+        .info("Avro schema '{} byes' has been copied from '{}' to '{}'", metrics.getBytesReplicated(), sourceLocation,
+            destinationSchemaFile);
+    return destinationSchemaFile;
   }
 }
