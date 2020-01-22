@@ -35,6 +35,8 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 public class FileSystemPathResolver {
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemPathResolver.class);
 
+  private static final String HDFS_SCHEME = "hdfs";
+
   private final Configuration configuration;
 
   public FileSystemPathResolver(Configuration configuration) {
@@ -58,7 +60,7 @@ public class FileSystemPathResolver {
   }
 
   public Path resolveNameServices(Path path) {
-    if ("hdfs".equalsIgnoreCase(path.toUri().getScheme())) {
+    if (HDFS_SCHEME.equalsIgnoreCase(path.toUri().getScheme())) {
       String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
       if (isNotBlank(nameService)) {
         URI uri = path.toUri();
