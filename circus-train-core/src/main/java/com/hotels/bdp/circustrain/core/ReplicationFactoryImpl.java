@@ -47,7 +47,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
   public ReplicationFactoryImpl(
       SourceFactory sourceFactory,
       ReplicaFactory replicaFactory,
-      CopierFactoryManager CopierFactoryManager,
+      CopierFactoryManager copierFactoryManager,
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
       CopierOptions copierOptions) {
