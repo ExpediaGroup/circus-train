@@ -53,7 +53,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       CopierOptions copierOptions) {
     this.sourceFactory = sourceFactory;
     this.replicaFactory = replicaFactory;
-    copierFactoryManager = CopierFactoryManager;
+    this.copierFactoryManager = copierFactoryManager;
     this.copierListener = copierListener;
     this.partitionPredicateFactory = partitionPredicateFactory;
     this.copierOptions = copierOptions;

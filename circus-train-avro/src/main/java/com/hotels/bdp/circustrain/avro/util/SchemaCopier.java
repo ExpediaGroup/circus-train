@@ -70,11 +70,11 @@ public class SchemaCopier {
 
     Map<String, Object> mergedCopierOptions = new HashMap<>(TableReplication
         .getMergedCopierOptions(globalCopierOptions.getCopierOptions(), eventTableReplication.getCopierOptions()));
-    mergeCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+    mergedCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
     CopierFactory copierFactory = copierFactoryManager
-        .getCopierFactory(sourceLocation, destinationSchemaFile, mergeCopierOptions);
+        .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
     LOG.info("Going to replicate the Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
-    Copier copier = copierFactory.newInstance(eventId, sourceLocation, destinationSchemaFile, mergeCopierOptions);
+    Copier copier = copierFactory.newInstance(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
     Metrics metrics = copier.copy();
 
     LOG
