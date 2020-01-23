@@ -73,12 +73,12 @@ public class SchemaCopier {
     mergedCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
     CopierFactory copierFactory = copierFactoryManager
         .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
-    LOG.info("Going to replicate the Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
+    LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
     Copier copier = copierFactory.newInstance(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
     Metrics metrics = copier.copy();
 
     LOG
-        .info("Avro schema '{} byes' has been copied from '{}' to '{}'", metrics.getBytesReplicated(), sourceLocation,
+        .info("Avro schema '{} bytes' has been copied from '{}' to '{}'", metrics.getBytesReplicated(), sourceLocation,
             destinationSchemaFile);
     return destinationSchemaFile;
   }
