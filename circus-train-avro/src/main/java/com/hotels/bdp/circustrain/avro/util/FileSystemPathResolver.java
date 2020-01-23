@@ -60,10 +60,10 @@ public class FileSystemPathResolver {
   }
 
   public Path resolveNameServices(Path path) {
-    if (HDFS_SCHEME.equalsIgnoreCase(path.toUri().getScheme())) {
+    URI uri = path.toUri();
+    if (HDFS_SCHEME.equalsIgnoreCase(uri.getScheme())) {
       String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
       if (isNotBlank(nameService)) {
-        URI uri = path.toUri();
         String scheme = uri.getScheme();
         String url = uri.getPath();
         final String original = path.toString();
