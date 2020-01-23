@@ -94,6 +94,23 @@ Circus Train returns the following exit codes:
 * _-1_ if all the configured replications failed.
 * _-2_ if at least one of the configured replications succeeded but one or more of the other replications failed.
 
+## Logging
+TODO: tidy up below, make it more generic etc. Double check that we only support log4j for now etc. (check what we do in integration tests...)
+Circus Train uses Log4J [TODO-link] for logging, to configure it to use a Log4J file add the path to the logging configuration file you create to the Circus Train configuration:
+logging:
+ 
+  config: file:/home/foo/circus-train/log4j.xml
+
+The Log4J XML file referred to above should be created to store log messages on disk for future debugging. A template Log4 XML file that could be modified and used can be found at
+
+https://github.expedia.biz/hotels-bdp/circus-train-rpm/blob/master/circus-train-rpm/src/main/resources/log4j.xml.template
+
+This ships with the RPM version of Circus Train where it will be unpacked to "/opt/circus-train/conf/" and you should then modify it according to your needs. An example of a team creating their own log4j.xml can be found at
+
+https://github.expedia.biz/hotels-bdp/circus-train-bdp/blob/master/circus-train-bdp-aws-config/src/main/resources/log4j.xml
+
+Note: If using the above Log4J file as a starting point remember to change the "applicationLogFilename" and "eventLogFilename" to point at folders and files specific for your installation (and that these are created with permissions that the user running Circus Train has write access to).
+
 ## Configuring replication and housekeeping
 By default when Circus Train runs it will first perform all configured replications and then it will perform an additional "housekeeping" step where it removes any dereferenced data in the replica file system. Depending on the nature of your replications this housekeeping might take a while to run. It is possible to schedule a separate  (e.g. daily) run to perform this and configure your other Circus Train runs to perform replication only. The above two scripts support this via a `--modules` parameter that can be set to one of the following values:
 
@@ -120,7 +137,7 @@ Naturally, to substitute housekeeping, Circus Train supports the addition of pro
 
 If your table already exists, you will need to add these properties to your replica table manually, as well as your Circus Train configuration.
 
-## Configuration
+## Configuration Reference
 Circus Train uses [Spring Boot](http://projects.spring.io/spring-boot/) for configuration so you are free to use any of the [many configuration strategies](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) supported by this framework to configure your Circus Train instance.
 
 ### Example configurations
@@ -928,4 +945,4 @@ The Circus Train logo uses the [Ewert font](http://www.1001fonts.com/ewert-font.
 # Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-Copyright 2016-2019 Expedia Inc.
+Copyright 2016-2019 Expedia, Inc.
