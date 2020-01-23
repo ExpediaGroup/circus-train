@@ -91,15 +91,8 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   }
 
   @Override
-  public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {
-    this.eventId = null;
-    this.tableReplication = null;
-  }
+  public void tableReplicationSuccess(EventTableReplication tableReplication, String eventId) {}
 
   @Override
-  public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {
-    this.eventId = null;
-    this.tableReplication = null;
-
-  }
+  public void tableReplicationFailure(EventTableReplication tableReplication, String eventId, Throwable t) {}
 }
