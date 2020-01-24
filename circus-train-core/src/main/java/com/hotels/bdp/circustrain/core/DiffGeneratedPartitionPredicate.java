@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import com.hotels.bdp.circustrain.hive.fetcher.BufferedPartitionFetcher;
 import com.hotels.bdp.circustrain.hive.fetcher.PartitionFetcher;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator.Ordering;
 
 public class DiffGeneratedPartitionPredicate implements PartitionPredicate {
 
@@ -66,7 +67,7 @@ public class DiffGeneratedPartitionPredicate implements PartitionPredicate {
       try (CloseableMetaStoreClient replicaMetastore = replica.getMetaStoreClientSupplier().get()) {
         Table sourceTable = source.getTableAndStatistics(tableReplication).getTable();
         PartitionIterator partitionIterator = new PartitionIterator(sourceMetastore, sourceTable,
-            tableReplication.getPartitionIteratorBatchSize());
+            tableReplication.getPartitionIteratorBatchSize(), Ordering.REVERSE);
         Optional<Table> replicaTable = getReplicaTable(tableReplication);
         Optional<? extends PartitionFetcher> replicaPartitionFetcher = Optional.absent();
         if (replicaTable.isPresent()) {
