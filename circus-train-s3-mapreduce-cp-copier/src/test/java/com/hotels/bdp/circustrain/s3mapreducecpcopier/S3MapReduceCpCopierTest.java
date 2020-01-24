@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpOption
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.codahale.metrics.MetricRegistry;
 
+import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
@@ -71,7 +73,7 @@ public class S3MapReduceCpCopierTest {
 
   private @Mock S3MapReduceCpExecutor executor;
   private @Mock Job job;
-  private @Mock Map<String, Object> copierOptions;
+  private final Map<String, Object> copierOptions = new HashMap<>();
   private @Mock MetricRegistry metricRegistry;
 
   private @Captor ArgumentCaptor<Configuration> confCaptor;
@@ -91,7 +93,7 @@ public class S3MapReduceCpCopierTest {
 
   @Test
   public void tableArgsAndConfiguration() throws Exception {
-    S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, Collections.<Path> emptyList(),
+    S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, Collections.<Path>emptyList(),
         replicaDataLocation, copierOptions, executor, metricRegistry);
     Metrics metrics = copier.copy();
     assertThat(metrics, not(nullValue()));
@@ -105,22 +107,40 @@ public class S3MapReduceCpCopierTest {
   }
 
   @Test
-  public void overwriteAllCopierOptions() throws Exception {
-    when(copierOptions.get(CREDENTIAL_PROVIDER)).thenReturn("jceks://hdfs/foo/bar.jceks");
-    when(copierOptions.get(MULTIPART_UPLOAD_CHUNK_SIZE)).thenReturn("1234");
-    when(copierOptions.get(S3_SERVER_SIDE_ENCRYPTION)).thenReturn("true");
-    when(copierOptions.get(STORAGE_CLASS)).thenReturn("reduced_redundancy");
-    when(copierOptions.get(TASK_BANDWIDTH)).thenReturn("567");
-    when(copierOptions.get(NUMBER_OF_WORKERS_PER_MAP)).thenReturn("89");
-    when(copierOptions.get(MULTIPART_UPLOAD_THRESHOLD)).thenReturn("123456");
-    when(copierOptions.get(MAX_MAPS)).thenReturn("78");
-    when(copierOptions.get(COPY_STRATEGY)).thenReturn("the-strategy");
-    when(copierOptions.get(LOG_PATH)).thenReturn("hdfs://path/to/logs/");
-    when(copierOptions.get(REGION)).thenReturn("us-east-1");
-    when(copierOptions.get(IGNORE_FAILURES)).thenReturn("true");
-    when(copierOptions.get(CANNED_ACL)).thenReturn(CannedAccessControlList.BucketOwnerFullControl.toString());
+  public void tableArgsAndConfigurationOneFileCopy() throws Exception {
+    Path sourceDataBaseFile = new Path("hdfs://source/data.txt");
+    Path replicaDataFile = new Path("s3://target/data.txt");
+    copierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+    S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseFile, Collections.<Path>emptyList(),
+        replicaDataFile, copierOptions, executor, metricRegistry);
+    Metrics metrics = copier.copy();
+    assertThat(metrics, not(nullValue()));
 
-    S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, Collections.<Path> emptyList(),
+    verify(executor).exec(confCaptor.capture(), optionsCaptor.capture());
+
+    S3MapReduceCpOptions options = optionsCaptor.getValue();
+    assertThat(options.getSources(), is(Arrays.asList(sourceDataBaseFile)));
+    assertThat(options.getTarget(), is(replicaDataFile.toUri()));
+    assertThat(options.getCredentialsProvider(), is(credentialsProvider));
+  }
+
+  @Test
+  public void overwriteAllCopierOptions() throws Exception {
+    copierOptions.put(CREDENTIAL_PROVIDER, "jceks://hdfs/foo/bar.jceks");
+    copierOptions.put(MULTIPART_UPLOAD_CHUNK_SIZE, "1234");
+    copierOptions.put(S3_SERVER_SIDE_ENCRYPTION, "true");
+    copierOptions.put(STORAGE_CLASS, "reduced_redundancy");
+    copierOptions.put(TASK_BANDWIDTH, "567");
+    copierOptions.put(NUMBER_OF_WORKERS_PER_MAP, "89");
+    copierOptions.put(MULTIPART_UPLOAD_THRESHOLD, "123456");
+    copierOptions.put(MAX_MAPS, "78");
+    copierOptions.put(COPY_STRATEGY, "the-strategy");
+    copierOptions.put(LOG_PATH, "hdfs://path/to/logs/");
+    copierOptions.put(REGION, "us-east-1");
+    copierOptions.put(IGNORE_FAILURES, "true");
+    copierOptions.put(CANNED_ACL, CannedAccessControlList.BucketOwnerFullControl.toString());
+
+    S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, Collections.<Path>emptyList(),
         replicaDataLocation, copierOptions, executor, metricRegistry);
     Metrics metrics = copier.copy();
     assertThat(metrics, not(nullValue()));
@@ -147,8 +167,8 @@ public class S3MapReduceCpCopierTest {
 
   @Test
   public void partitionsArgsAndConfiguration() throws Exception {
-    List<Path> partitionLocations = Arrays.asList(new Path(sourceDataBaseLocation, "p1"),
-        new Path(sourceDataBaseLocation, "p2"));
+    List<Path> partitionLocations = Arrays
+        .asList(new Path(sourceDataBaseLocation, "p1"), new Path(sourceDataBaseLocation, "p2"));
     S3MapReduceCpCopier copier = new S3MapReduceCpCopier(conf, sourceDataBaseLocation, partitionLocations,
         replicaDataLocation, copierOptions, executor, metricRegistry);
 

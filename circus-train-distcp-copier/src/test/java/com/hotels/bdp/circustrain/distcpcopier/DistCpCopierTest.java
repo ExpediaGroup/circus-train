@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Rule;
@@ -92,6 +94,26 @@ public class DistCpCopierTest {
     assertTrue(outputSub4Data.exists());
     assertThat(Files.asCharSource(outputSub4Data, UTF_8).read(), is("test2"));
     assertThat(registry.getGauges().containsKey(RunningMetrics.DIST_CP_BYTES_REPLICATED.name()), is(true));
+  }
+
+  @Test
+  public void typicalOneFile() throws Exception {
+    Path inputFile = new Path(sourceDataBaseLocation, "sub1/sub2/data");
+    Path targetFile = new Path(replicaDataLocation, "output.txt");
+    copier = new DistCpCopier(conf, inputFile, Collections.<Path>emptyList(), targetFile, null, registry);
+
+    Metrics metrics = copier.copy();
+    assertThat(metrics, not(nullValue()));
+
+    String outputPath = targetFile.toUri().getPath();
+
+    Path parent = targetFile.getParent();
+    FileSystem fs = parent.getFileSystem(conf);
+    int fileCopyCount = fs.listStatus(parent).length;
+    assertThat(fileCopyCount, is(1));
+    File outputSub2Data = new File(outputPath);
+    assertTrue(outputSub2Data.exists());
+    assertThat(Files.asCharSource(outputSub2Data, UTF_8).read(), is("test1"));
   }
 
   @Test
