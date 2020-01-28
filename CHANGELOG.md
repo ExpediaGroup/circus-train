@@ -1,4 +1,4 @@
-## [15.1.0] - TBD
+## [15.1.0] - 2020-01-28
 ### Changed
 * AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
 * Changed the order of the generated partition filter used by "HiveDiff"  - it is now reverse natural order (which means new partitions first when partitions are date/time strings). When in doubt use the circus-train-tool `check-filters.sh` to see what would be generated.
