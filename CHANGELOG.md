@@ -1,6 +1,7 @@
 ## [15.1.0] - TBD
 ### Changed
 * AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
+
 ### Fixed
 Fixed issue where partition-limit is not correctly applied when generating a partition filter. See [#164](https://github.com/HotelsDotCom/circus-train/issues/164).
 
