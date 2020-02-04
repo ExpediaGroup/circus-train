@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hotels.bdp.circustrain.core;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -94,7 +93,6 @@ public class DiffGeneratedPartitionPredicateTest {
     HiveConf hiveConf = new HiveConf();
     supplier = new HiveMetaStoreClientSupplier(factory, hiveConf, "name");
     when(source.getHiveConf()).thenReturn(hiveConf);
-    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
     when(source.getMetaStoreClientSupplier()).thenReturn(supplier);
     when(replica.getMetaStoreClientSupplier()).thenReturn(supplier);
     when(source.getMetaStoreClientSupplier()).thenReturn(supplier);
@@ -107,17 +105,23 @@ public class DiffGeneratedPartitionPredicateTest {
   public void autogeneratePredicate() throws Exception {
     when(replica.getTableAndStatistics(tableReplication)).thenReturn(replicaTableAndStats);
     when(replicaTableAndStats.getTable()).thenReturn(table2);
+    when(sourceTable.getPartitionLimit()).thenReturn((short) 10);
+
+    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
 
     assertThat(predicate.getPartitionPredicate(),
-        is("(p1='value1' AND p2='value2') OR (p1='value11' AND p2='value22')"));
+        is("(p1='value11' AND p2='value22') OR (p1='value1' AND p2='value2')"));
   }
 
   @Test
   public void autogeneratePredicateReplicaTableDoesNotExist() throws Exception {
     when(replica.getTableAndStatistics(tableReplication)).thenThrow(new CircusTrainException("Table does not exist!"));
+    when(sourceTable.getPartitionLimit()).thenReturn((short) 10);
+
+    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
 
     assertThat(predicate.getPartitionPredicate(),
-        is("(p1='value1' AND p2='value2') OR (p1='value11' AND p2='value22')"));
+        is("(p1='value11' AND p2='value22') OR (p1='value1' AND p2='value2')"));
   }
 
   @Test
@@ -125,6 +129,8 @@ public class DiffGeneratedPartitionPredicateTest {
     when(replica.getTableAndStatistics(tableReplication)).thenReturn(replicaTableAndStats);
     when(replicaTableAndStats.getTable()).thenReturn(table2);
     when(sourceTable.getPartitionLimit()).thenReturn((short) 10);
+
+    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
 
     assertThat(predicate.getPartitionPredicateLimit(), is((short) 10));
   }
@@ -135,6 +141,8 @@ public class DiffGeneratedPartitionPredicateTest {
     when(replicaTableAndStats.getTable()).thenReturn(table2);
     when(sourceTable.getPartitionLimit()).thenReturn(null);
 
+    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
+
     assertThat(predicate.getPartitionPredicateLimit(), is((short) -1));
   }
 
@@ -144,6 +152,8 @@ public class DiffGeneratedPartitionPredicateTest {
     when(replica.getTableAndStatistics(tableReplication)).thenReturn(replicaTableAndStats);
     when(replicaTableAndStats.getTable()).thenReturn(table2);
     when(sourceTable.getPartitionLimit()).thenReturn((short) 10);
+
+    predicate = new DiffGeneratedPartitionPredicate(source, replica, tableReplication, checksumFunction);
 
     assertThat(predicate.getPartitionPredicateLimit(), is((short) 0));
   }
@@ -157,8 +167,9 @@ public class DiffGeneratedPartitionPredicateTest {
     Partition partition1 = newPartition(table1, "value1", "value2");
     Partition partition2 = newPartition(table1, "value11", "value22");
     table1Partitions = Arrays.asList(partition1, partition2); //
-    table1PartitionNames = Arrays.asList(Warehouse.makePartName(partitionKeys, partition1.getValues()),
-        Warehouse.makePartName(partitionKeys, partition2.getValues()));
+    table1PartitionNames = Arrays
+        .asList(Warehouse.makePartName(partitionKeys, partition1.getValues()),
+            Warehouse.makePartName(partitionKeys, partition2.getValues()));
 
     File tableLocation2 = new File("db2", "table2");
     StorageDescriptor sd2 = newStorageDescriptor(tableLocation2, "col0");

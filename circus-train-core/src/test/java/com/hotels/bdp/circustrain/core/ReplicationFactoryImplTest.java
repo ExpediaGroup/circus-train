@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package com.hotels.bdp.circustrain.core;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -27,8 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
@@ -47,6 +43,7 @@ import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.SourceTable;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.core.replica.Replica;
@@ -121,7 +118,7 @@ public class ReplicationFactoryImplTest {
 
   @Test
   public void unpartitionedTableReplicationPartitionKeysEmpty() throws Exception {
-    when(table.getPartitionKeys()).thenReturn(Collections.<FieldSchema> emptyList());
+    when(table.getPartitionKeys()).thenReturn(Collections.<FieldSchema>emptyList());
     Replication replication = factory.newInstance(tableReplication);
     assertThat(replication, is(instanceOf(UnpartitionedTableReplication.class)));
   }
@@ -190,33 +187,6 @@ public class ReplicationFactoryImplTest {
   public void replicaDatabaseDoesNotExist() {
     when(replica.getDatabase(DATABASE)).thenThrow(new CircusTrainException(""));
     factory.newInstance(tableReplication);
-  }
-
-  @Test
-  public void mergeNullOptions() {
-    when(copierOptions.getCopierOptions()).thenReturn(null);
-    ReplicationFactoryImpl factory = new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager,
-        copierListener, partitionPredicateFactory, copierOptions);
-    Map<String, Object> mergedCopierOptions = factory.mergeCopierOptions(null);
-    assertThat(mergedCopierOptions, is(not(nullValue())));
-    assertThat(mergedCopierOptions.isEmpty(), is(true));
-  }
-
-  @Test
-  public void mergeOptions() {
-    Map<String, Object> globalOptions = new HashMap<>();
-    globalOptions.put("one", Integer.valueOf(1));
-    globalOptions.put("two", Integer.valueOf(2));
-    when(copierOptions.getCopierOptions()).thenReturn(globalOptions);
-    Map<String, Object> overrideOptions = new HashMap<>();
-    overrideOptions.put("two", "two");
-    overrideOptions.put("three", "three");
-    ReplicationFactoryImpl factory = new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager,
-        copierListener, partitionPredicateFactory, copierOptions);
-    Map<String, Object> mergedCopierOptions = factory.mergeCopierOptions(overrideOptions);
-    assertThat((Integer) mergedCopierOptions.get("one"), is(Integer.valueOf(1)));
-    assertThat((String) mergedCopierOptions.get("two"), is("two"));
-    assertThat((String) mergedCopierOptions.get("three"), is("three"));
   }
 
   @Test(expected = CircusTrainException.class)

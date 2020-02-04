@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import java.util.Map;
 public interface CopierOptions {
 
   String IGNORE_MISSING_PARTITION_FOLDER_ERRORS = "ignore-missing-partition-folder-errors";
+
+  // internal option used to track if the destination of the replication should be treated as a folder or file. Value
+  // can be parsed with Boolean.parseValue. If not set a folder is assumed.
+  String COPY_DESTINATION_IS_FILE = "copy-destination-is-file";
 
   Map<String, Object> getCopierOptions();
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import static org.junit.Assert.assertThat;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
-import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
@@ -34,9 +34,12 @@ import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3U
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.gaul.s3proxy.junit.S3ProxyRule;
@@ -73,6 +76,7 @@ public class CircusTrainHdfsS3IntegrationTest {
   private static final String TARGET_PARTITIONED_TABLE = "ct_table_p_copy";
 
   private static final String DUMMY_EVENT_ID = "dummyEventID";
+  private static final String AVRO_SCHEMA_CONTENT = "avro schema content";
 
   public @Rule ExpectedSystemExit exit = ExpectedSystemExit.none();
   public @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -85,7 +89,7 @@ public class CircusTrainHdfsS3IntegrationTest {
       .ignoreUnknownHeaders()
       .build();
   private final Map<String, String> metastoreProperties = ImmutableMap
-      .<String, String> builder()
+      .<String, String>builder()
       .put(ENDPOINT, String.format("http://127.0.0.1:%d", s3ProxyPort))
       .put(ACCESS_KEY, S3_ACCESS_KEY)
       .put(SECRET_KEY, S3_SECRET_KEY)
@@ -126,7 +130,7 @@ public class CircusTrainHdfsS3IntegrationTest {
   private AmazonS3 newS3Client(String tableUri) {
     AmazonS3URI base = toAmazonS3URI(URI.create(tableUri));
     S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(ImmutableMap
-        .<String, Object> builder()
+        .<String, Object>builder()
         .put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getUri().toString())
         .build());
     return s3ClientFactory.newInstance(base, s3s3CopierOptions);
@@ -159,14 +163,71 @@ public class CircusTrainHdfsS3IntegrationTest {
         assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
         // Assert copied files
         File dataFile = new File(sourceTableUri.getPath(), PART_00000);
-        String fileKeyRegex = String.format("%s/%s/ctt-\\d{8}t\\d{6}.\\d{3}z-\\w{8}/%s", DATABASE,
-            TARGET_UNPARTITIONED_TABLE, PART_00000);
+        String fileKeyRegex = String
+            .format("%s/%s/ctt-\\d{8}t\\d{6}.\\d{3}z-\\w{8}/%s", DATABASE, TARGET_UNPARTITIONED_TABLE, PART_00000);
         List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
         assertThat(replicaFiles.size(), is(1));
         for (S3ObjectSummary objectSummary : replicaFiles) {
           assertThat(objectSummary.getSize(), is(dataFile.length()));
           assertThat(objectSummary.getKey().matches(fileKeyRegex), is(true));
         }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableWithExternalAvroSchema() throws Exception {
+    final URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, UNPARTITIONED_TABLE);
+    helper.createUnpartitionedTable(sourceTableUri);
+
+    java.nio.file.Path sourceAvroSchemaPath = Paths.get(sourceWarehouseUri.toString() + "/avro-schema-file.test");
+    Files.write(sourceAvroSchemaPath, AVRO_SCHEMA_CONTENT.getBytes());
+    String avroSchemaUrl = sourceAvroSchemaPath.toString();
+
+    Table sourceTable = sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE);
+    sourceTable.putToParameters("avro.schema.url", avroSchemaUrl);
+    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("unpartitioned-single-table-avro-schema.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .copierOption(S3MapReduceCpOptionsParser.S3_ENDPOINT_URI, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
+        .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        // Assert location
+        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_TABLE);
+        String eventId = hiveTable.getParameters().get(REPLICATION_EVENT.parameterName());
+        URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_UNPARTITIONED_TABLE + "/" + eventId);
+        assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
+        // Assert copied files
+        File dataFile = new File(sourceTableUri.getPath(), PART_00000);
+        String fileKeyRegex = String
+            .format("%s/%s/ctt-\\d{8}t\\d{6}.\\d{3}z-\\w{8}/%s", DATABASE, TARGET_UNPARTITIONED_TABLE, PART_00000);
+        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
+        assertThat(replicaFiles.size(), is(2));
+        // assert Avro schema copied
+        S3ObjectSummary s3ObjectSummary = replicaFiles.get(0);
+        String content = IOUtils
+            .toString(s3Client
+                .getObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey())
+                .getObjectContent()
+                .getDelegateStream());
+        assertThat(content, is(AVRO_SCHEMA_CONTENT));
+        String transformedAvroUrl = hiveTable.getParameters().get("avro.schema.url");
+        assertThat(transformedAvroUrl, is(replicaLocation + "/.schema/avro-schema-file.test"));
+        // data file
+        assertThat(replicaFiles.get(1).getSize(), is(dataFile.length()));
+        assertThat(replicaFiles.get(1).getKey().matches(fileKeyRegex), is(true));
       }
     });
     runner.run(config.getAbsolutePath());
@@ -199,8 +260,9 @@ public class CircusTrainHdfsS3IntegrationTest {
         assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
         assertThat(eventId, startsWith("ctp-"));
         // Assert partitions
-        List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, TARGET_PARTITIONED_TABLE,
-            (short) -1);
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) -1);
         assertThat(partitions.size(), is(0));
         // Assert table directory
         List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
@@ -213,8 +275,8 @@ public class CircusTrainHdfsS3IntegrationTest {
   @Test
   public void partitionedTableWithNoPartitionsMetadataUpdate() throws Exception {
     URI sourceTableUri = toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE);
-    Table sourceTable = TestUtils.createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE,
-        sourceTableUri);
+    Table sourceTable = TestUtils
+        .createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE, sourceTableUri);
 
     // creating replicaTable
     final URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_PARTITIONED_TABLE);
@@ -251,8 +313,9 @@ public class CircusTrainHdfsS3IntegrationTest {
         assertThat(isExternalTable(hiveTable), is(true));
         assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
         // Assert partitions
-        List<Partition> partitions = replicaCatalog.client().listPartitions(DATABASE, TARGET_PARTITIONED_TABLE,
-            (short) -1);
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) -1);
         assertThat(partitions.size(), is(0));
         // Assert table directory
         List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");

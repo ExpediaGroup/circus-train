@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CopierFactoryManagerTest {
+public class DefaultCopierFactoryManagerTest {
 
   private static final String SCHEME = "scheme";
 
@@ -43,14 +43,14 @@ public class CopierFactoryManagerTest {
   @Mock
   private CopierFactory copierFactory;
 
-  private CopierFactoryManager copierFactoryManager;
+  private DefaultCopierFactoryManager defaultCopierFactoryManager;
 
   @Test
   public void supportsScheme() {
-    copierFactoryManager = new CopierFactoryManager(Arrays.asList(copierFactory));
+    defaultCopierFactoryManager = new DefaultCopierFactoryManager(Arrays.asList(copierFactory));
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(true);
 
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path,
+    CopierFactory copierFactoryResult = defaultCopierFactoryManager.getCopierFactory(path, path,
         ImmutableMap.<String, Object> of());
 
     assertEquals(copierFactory, copierFactoryResult);
@@ -58,17 +58,17 @@ public class CopierFactoryManagerTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void doesNotSupportScheme() {
-    copierFactoryManager = new CopierFactoryManager(Arrays.asList(copierFactory));
+    defaultCopierFactoryManager = new DefaultCopierFactoryManager(Arrays.asList(copierFactory));
     when(copierFactory.supportsSchemes(SCHEME, SCHEME)).thenReturn(false);
 
-    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of());
+    defaultCopierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of());
   }
 
   @Test
   public void supportsSchemeWithCopierFactoryClass() {
     CopierFactory testCopierFactory = new TestCopierFactory();
-    copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
-    CopierFactory copierFactoryResult = copierFactoryManager.getCopierFactory(path, path,
+    defaultCopierFactoryManager = new DefaultCopierFactoryManager(Arrays.asList(testCopierFactory));
+    CopierFactory copierFactoryResult = defaultCopierFactoryManager.getCopierFactory(path, path,
         ImmutableMap.<String, Object> of("copier-factory-class", testCopierFactory.getClass().getName()));
 
     assertEquals(copierFactoryResult, testCopierFactory);
@@ -77,9 +77,9 @@ public class CopierFactoryManagerTest {
   @Test(expected = UnsupportedOperationException.class)
   public void supportsSchemeWithCopierFactoryClassNotFound() {
     CopierFactory testCopierFactory = new TestCopierFactory();
-    copierFactoryManager = new CopierFactoryManager(Arrays.asList(testCopierFactory));
+    defaultCopierFactoryManager = new DefaultCopierFactoryManager(Arrays.asList(testCopierFactory));
 
-    copierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of("copier-factory-class", "test"));
+    defaultCopierFactoryManager.getCopierFactory(path, path, ImmutableMap.<String, Object> of("copier-factory-class", "test"));
   }
 
   class TestCopierFactory implements CopierFactory {

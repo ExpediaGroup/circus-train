@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2017 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import com.hotels.bdp.circustrain.hive.fetcher.PartitionNotFoundException;
 
 public class HiveDifferences {
 
+  private static final int UNLIMITED = Integer.MAX_VALUE;
   private static final Function<TableAndMetadata, TableAndMetadata> CLEAN_TABLE_FUNCTION = new CleanTableFunction();
   private static final Function<PartitionAndMetadata, PartitionAndMetadata> CLEAN_PARTITION_FUNCTION = new CleanPartitionFunction();
 
@@ -95,6 +96,7 @@ public class HiveDifferences {
     private Optional<Table> replicaTable;
     private Optional<? extends PartitionFetcher> replicaPartitionFetcher;
     private Function<Path, String> checksumFunction;
+    private int partitionLimit = UNLIMITED;
 
     private Builder(DiffListener diffListener) {
       this.diffListener = diffListener;
@@ -126,6 +128,11 @@ public class HiveDifferences {
       return this;
     }
 
+    public Builder partitionLimit(int partitionLimit) {
+      this.partitionLimit = partitionLimit;
+      return this;
+    }
+
     public HiveDifferences build() {
       checkNotNull(diffListener, "diffListener is required");
       checkNotNull(comparatorRegistry, "comparatorRegistry is required");
@@ -139,8 +146,9 @@ public class HiveDifferences {
         checksumFunction = Functions.compose(new PathDigest(), new PathToPathMetadata(sourceConfiguration));
       }
       return new HiveDifferences(comparatorRegistry, diffListener, sourceTable, sourcePartitionIterator, replicaTable,
-          replicaPartitionFetcher, checksumFunction);
+          replicaPartitionFetcher, checksumFunction, partitionLimit);
     }
+
   }
 
   public static Builder builder(DiffListener diffListener) {
@@ -154,6 +162,7 @@ public class HiveDifferences {
   private final Optional<Table> replicaTable;
   private final Optional<? extends PartitionFetcher> replicaPartitionFetcher;
   private final Function<Path, String> checksumFunction;
+  private final int partitionLimit;
 
   private HiveDifferences(
       ComparatorRegistry comparatorRegistry,
@@ -162,7 +171,8 @@ public class HiveDifferences {
       Iterator<Partition> sourcePartitionIterator,
       Optional<Table> replicaTable,
       Optional<? extends PartitionFetcher> replicaPartitionFetcher,
-      Function<Path, String> checksumFunction) {
+      Function<Path, String> checksumFunction,
+      int partitionLimit) {
     this.diffListener = diffListener;
     this.comparatorRegistry = comparatorRegistry;
     this.sourceTable = sourceTable;
@@ -170,6 +180,7 @@ public class HiveDifferences {
     this.replicaTable = replicaTable;
     this.replicaPartitionFetcher = replicaPartitionFetcher;
     this.checksumFunction = checksumFunction;
+    this.partitionLimit = partitionLimit < 0 ? UNLIMITED : partitionLimit;
   }
 
   @SuppressWarnings("unchecked")
@@ -193,6 +204,7 @@ public class HiveDifferences {
   }
 
   public void run() {
+    int partitionsChanged = 0;
     TableAndMetadata source = CLEAN_TABLE_FUNCTION.apply(sourceTableToTableAndMetadata(sourceTable));
     Optional<TableAndMetadata> replica = Optional.absent();
     if (replicaTable.isPresent()) {
@@ -204,7 +216,7 @@ public class HiveDifferences {
       diffListener.onChangedTable(tableDiffs);
     }
 
-    while (sourcePartitionIterator.hasNext()) {
+    while (sourcePartitionIterator.hasNext() && partitionsChanged < partitionLimit) {
       Partition sourcePartition = sourcePartitionIterator.next();
       String sourcePartitionName = partitionName(source.getTable(), sourcePartition);
       PartitionAndMetadata sourcePartitionAndMetadata = CLEAN_PARTITION_FUNCTION
@@ -220,6 +232,7 @@ public class HiveDifferences {
       }
       if (replicaPartition == null) {
         diffListener.onNewPartition(sourcePartitionName, sourcePartition);
+        partitionsChanged++;
         continue;
       }
 
@@ -229,6 +242,7 @@ public class HiveDifferences {
           .compare(sourcePartitionAndMetadata, replicaPartitionAndMetadata);
       if (!partitionDiffs.isEmpty()) {
         diffListener.onChangedPartition(sourcePartitionName, sourcePartition, partitionDiffs);
+        partitionsChanged++;
         continue;
       }
 
@@ -238,6 +252,7 @@ public class HiveDifferences {
           .get(CircusTrainTableParameter.PARTITION_CHECKSUM.parameterName());
       if (replicaChecksum == null || !sourceChecksum.equals(replicaChecksum)) {
         diffListener.onDataChanged(sourcePartitionName, sourcePartition);
+        partitionsChanged++;
       }
 
       // Partition remains unchanged

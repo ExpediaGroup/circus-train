@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,12 @@
 package com.hotels.bdp.circustrain.api.conf;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -87,6 +91,28 @@ public class TableReplicationTest {
     Set<ConstraintViolation<TableReplication>> violations = validator.validate(tableReplication);
 
     assertThat(violations.size(), is(1));
+  }
+
+  @Test
+  public void mergeNullOptions() {
+    Map<String, Object> mergedCopierOptions = tableReplication.getMergedCopierOptions(null);
+    assertThat(mergedCopierOptions, is(not(nullValue())));
+    assertThat(mergedCopierOptions.isEmpty(), is(true));
+  }
+
+  @Test
+  public void mergeOptions() {
+    Map<String, Object> globalOptions = new HashMap<>();
+    globalOptions.put("one", Integer.valueOf(1));
+    globalOptions.put("two", Integer.valueOf(2));
+    Map<String, Object> overrideOptions = new HashMap<>();
+    overrideOptions.put("two", "two");
+    overrideOptions.put("three", "three");
+    tableReplication.setCopierOptions(overrideOptions);
+    Map<String, Object> mergedCopierOptions = tableReplication.getMergedCopierOptions(globalOptions);
+    assertThat((Integer) mergedCopierOptions.get("one"), is(Integer.valueOf(1)));
+    assertThat((String) mergedCopierOptions.get("two"), is("two"));
+    assertThat((String) mergedCopierOptions.get("three"), is("three"));
   }
 
 }

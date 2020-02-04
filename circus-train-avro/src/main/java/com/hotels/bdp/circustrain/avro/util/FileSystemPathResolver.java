@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hotels.bdp.circustrain.avro.util;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -35,6 +34,8 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 
 public class FileSystemPathResolver {
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemPathResolver.class);
+
+  private static final String HDFS_SCHEME = "hdfs";
 
   private final Configuration configuration;
 
@@ -59,21 +60,22 @@ public class FileSystemPathResolver {
   }
 
   public Path resolveNameServices(Path path) {
-    String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
-    if (isNotBlank(nameService)) {
-      URI uri = path.toUri();
-      String scheme = uri.getScheme();
-      String url = uri.getPath();
-      final String original = path.toString();
-      if (isBlank(scheme)) {
-        url = String.format("/%s%s", nameService, path);
-        path = new Path(url);
-      } else {
-        path = new Path(scheme, nameService, url);
+    URI uri = path.toUri();
+    if (HDFS_SCHEME.equalsIgnoreCase(uri.getScheme())) {
+      String nameService = configuration.get(DFSConfigKeys.DFS_NAMESERVICES);
+      if (isNotBlank(nameService)) {
+        String scheme = uri.getScheme();
+        String url = uri.getPath();
+        final String original = path.toString();
+        if (isBlank(scheme)) {
+          url = String.format("/%s%s", nameService, path);
+          path = new Path(url);
+        } else {
+          path = new Path(scheme, nameService, url);
+        }
+        LOG.info("Added nameservice to path. {} became {}", original, path);
       }
-      LOG.info("Added nameservice to path. {} became {}", original, path);
     }
-
     return path;
   }
 

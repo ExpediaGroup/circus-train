@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,9 +204,9 @@ public final class TestUtils {
       List<FieldSchema> partitionColumns) {
     List<String> dataColumnNames = toQualifiedColumnNames(table, dataColumns);
     List<String> partitionColumnNames = partitionColumns != null ? toQualifiedColumnNames(table, partitionColumns)
-        : ImmutableList.<String> of();
+        : ImmutableList.<String>of();
     List<String> colNames = ImmutableList
-        .<String> builder()
+        .<String>builder()
         .addAll(dataColumnNames)
         .addAll(partitionColumnNames)
         .build();

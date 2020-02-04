@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hotels.bdp.circustrain.comparator.hive;
 
 import static org.mockito.Matchers.any;
@@ -135,7 +134,7 @@ public class HiveDifferencesIntegrationTest {
       String sourceTable,
       String sourceLocation,
       boolean addChecksum)
-      throws Exception {
+    throws Exception {
     File partition0 = createPartitionData("part=0", tableLocation, Arrays.asList("1\tadam", "2\tsusan"));
     File partition1 = createPartitionData("part=1", tableLocation, Arrays.asList("3\tchun", "4\tkim"));
 
@@ -166,12 +165,15 @@ public class HiveDifferencesIntegrationTest {
 
     HiveMetaStoreClient client = catalog.client();
     client.createTable(table);
-    LOG.info(">>>> Partitions added: {}",
-        +client.add_partitions(Arrays.asList(
-            newPartition(databaseName, tableName, sd, Arrays.asList("0"), partition0, sourceTable,
-                sourceLocation + "part=0", addChecksum),
-            newPartition(databaseName, tableName, sd, Arrays.asList("1"), partition1, sourceTable,
-                sourceLocation + "part=1", addChecksum))));
+    LOG
+        .info(">>>> Partitions added: {}",
+            +client
+                .add_partitions(Arrays
+                    .asList(
+                        newPartition(databaseName, tableName, sd, Arrays.asList("0"), partition0, sourceTable,
+                            sourceLocation + "part=0", addChecksum),
+                        newPartition(databaseName, tableName, sd, Arrays.asList("1"), partition1, sourceTable,
+                            sourceLocation + "part=1", addChecksum))));
   }
 
   private Partition newPartition(
@@ -268,10 +270,111 @@ public class HiveDifferencesIntegrationTest {
         .build()
         .run();
     verify(diffListener, never()).onChangedTable(anyList());
-    verify(diffListener, times(1)).onNewPartition("part=2",
-        catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=2"));
+    verify(diffListener, times(1))
+        .onNewPartition("part=2", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=2"));
     verify(diffListener, never()).onChangedPartition(anyString(), any(Partition.class), anyList());
     verify(diffListener, never()).onDataChanged(anyString(), any(Partition.class));
+  }
+
+  @Test
+  public void multiple() throws Exception {
+    Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
+
+    // changed partition
+    Partition sourcePartition1 = catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1");
+    sourcePartition1.getSd().getCols().add(BAZ_COL);
+    catalog.client().alter_partition(DATABASE, SOURCE_TABLE, sourcePartition1);
+
+    // new
+    File sourcePartition2Location = createPartitionData("part=2", sourceTableUri,
+        Arrays.asList("5\troberto", "6\tpedro"));
+    Partition sourcePartition2 = newPartition(DATABASE, SOURCE_TABLE, sourceTable.getSd(), Arrays.asList("2"),
+        sourcePartition2Location, null, null, false);
+    catalog.client().add_partition(sourcePartition2);
+
+    // changed data
+    reset(checksumFunction);
+    when(checksumFunction.apply(any(Path.class))).thenAnswer(new Answer<String>() {
+      @Override
+      public String answer(InvocationOnMock invocation) throws Throwable {
+        Path path = (Path) invocation.getArguments()[0];
+        if ("part=0".equals(path.getName())) {
+          return "new part=0 checksum";
+        }
+        return path.getName();
+      }
+    });
+
+    Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
+
+    HiveDifferences
+        .builder(diffListener)
+        .comparatorRegistry(comparatorRegistry)
+        .source(configuration, sourceTable, new PartitionIterator(catalog.client(), sourceTable, PARTITION_BATCH_SIZE))
+        .replica(Optional.of(replicaTable),
+            Optional.of(new BufferedPartitionFetcher(catalog.client(), replicaTable, PARTITION_BATCH_SIZE)))
+        .checksumFunction(checksumFunction)
+        .build()
+        .run();
+    verify(diffListener, never()).onChangedTable(anyList());
+    verify(diffListener, times(1))
+        .onNewPartition("part=2", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=2"));
+    verify(diffListener, times(1))
+        .onChangedPartition("part=1", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"), Arrays
+            .<Diff<Object, Object>>asList(new BaseDiff<Object, Object>(
+                "Collection partition.sd.cols of class java.util.ArrayList has different size: left.size()=3 and right.size()=2",
+                Arrays.asList(FOO_COL, BAR_COL, BAZ_COL), Arrays.asList(FOO_COL, BAR_COL))));
+    verify(diffListener, times(1))
+        .onDataChanged("part=0", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=0"));
+  }
+
+  @Test
+  public void multipleApplyLimit() throws Exception {
+    Table sourceTable = catalog.client().getTable(DATABASE, SOURCE_TABLE);
+
+    // changed partition
+    Partition sourcePartition1 = catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1");
+    sourcePartition1.getSd().getCols().add(BAZ_COL);
+    catalog.client().alter_partition(DATABASE, SOURCE_TABLE, sourcePartition1);
+
+    // new
+    File sourcePartition2Location = createPartitionData("part=2", sourceTableUri,
+        Arrays.asList("5\troberto", "6\tpedro"));
+    Partition sourcePartition2 = newPartition(DATABASE, SOURCE_TABLE, sourceTable.getSd(), Arrays.asList("2"),
+        sourcePartition2Location, null, null, false);
+    catalog.client().add_partition(sourcePartition2);
+
+    // changed data
+    reset(checksumFunction);
+    when(checksumFunction.apply(any(Path.class))).thenAnswer(new Answer<String>() {
+      @Override
+      public String answer(InvocationOnMock invocation) throws Throwable {
+        Path path = (Path) invocation.getArguments()[0];
+        if ("part=0".equals(path.getName())) {
+          return "new part=0 checksum";
+        }
+        return path.getName();
+      }
+    });
+
+    Table replicaTable = catalog.client().getTable(DATABASE, REPLICA_TABLE);
+
+    HiveDifferences
+        .builder(diffListener)
+        .comparatorRegistry(comparatorRegistry)
+        .source(configuration, sourceTable, new PartitionIterator(catalog.client(), sourceTable, PARTITION_BATCH_SIZE))
+        .replica(Optional.of(replicaTable),
+            Optional.of(new BufferedPartitionFetcher(catalog.client(), replicaTable, PARTITION_BATCH_SIZE)))
+        .checksumFunction(checksumFunction)
+        // set limit
+        .partitionLimit(1)
+        .build()
+        .run();
+    verify(diffListener, never()).onChangedTable(anyList());
+    verify(diffListener, never()).onNewPartition(anyString(), any(Partition.class));
+    verify(diffListener, never()).onChangedPartition(anyString(), any(Partition.class), anyList());
+    verify(diffListener, times(1))
+        .onDataChanged("part=0", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=0"));
   }
 
   @Test
@@ -320,11 +423,11 @@ public class HiveDifferencesIntegrationTest {
 
     verify(diffListener, never()).onChangedTable(anyList());
     verify(diffListener, never()).onNewPartition(anyString(), any(Partition.class));
-    verify(diffListener, times(1)).onChangedPartition("part=1",
-        catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"),
-        Arrays.<Diff<Object, Object>> asList(new BaseDiff<Object, Object>(
-            "Collection partition.sd.cols of class java.util.ArrayList has different size: left.size()=3 and right.size()=2",
-            Arrays.asList(FOO_COL, BAR_COL, BAZ_COL), Arrays.asList(FOO_COL, BAR_COL))));
+    verify(diffListener, times(1))
+        .onChangedPartition("part=1", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"), Arrays
+            .<Diff<Object, Object>>asList(new BaseDiff<Object, Object>(
+                "Collection partition.sd.cols of class java.util.ArrayList has different size: left.size()=3 and right.size()=2",
+                Arrays.asList(FOO_COL, BAR_COL, BAZ_COL), Arrays.asList(FOO_COL, BAR_COL))));
     verify(diffListener, never()).onDataChanged(anyString(), any(Partition.class));
   }
 
@@ -348,11 +451,11 @@ public class HiveDifferencesIntegrationTest {
         .run();
     verify(diffListener, never()).onChangedTable(anyList());
     verify(diffListener, never()).onNewPartition(anyString(), any(Partition.class));
-    verify(diffListener, times(1)).onChangedPartition("part=1",
-        catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"),
-        Arrays.<Diff<Object, Object>> asList(new BaseDiff<Object, Object>(
-            "Collection partition.sd.cols of class java.util.ArrayList has different size: left.size()=2 and right.size()=3",
-            Arrays.asList(FOO_COL, BAR_COL), Arrays.asList(FOO_COL, BAR_COL, BAZ_COL))));
+    verify(diffListener, times(1))
+        .onChangedPartition("part=1", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"), Arrays
+            .<Diff<Object, Object>>asList(new BaseDiff<Object, Object>(
+                "Collection partition.sd.cols of class java.util.ArrayList has different size: left.size()=2 and right.size()=3",
+                Arrays.asList(FOO_COL, BAR_COL), Arrays.asList(FOO_COL, BAR_COL, BAZ_COL))));
     verify(diffListener, never()).onDataChanged(anyString(), any(Partition.class));
   }
 
@@ -414,8 +517,8 @@ public class HiveDifferencesIntegrationTest {
     verify(diffListener, never()).onChangedTable(anyList());
     verify(diffListener, never()).onNewPartition(anyString(), any(Partition.class));
     verify(diffListener, never()).onChangedPartition(anyString(), any(Partition.class), anyList());
-    verify(diffListener, times(1)).onDataChanged("part=1",
-        catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"));
+    verify(diffListener, times(1))
+        .onDataChanged("part=1", catalog.client().getPartition(DATABASE, SOURCE_TABLE, "part=1"));
   }
 
 }

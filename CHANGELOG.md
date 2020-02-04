@@ -1,5 +1,24 @@
-## [14.1.0] - TBD
+## [15.1.0] - 2020-01-28
+### Changed
+* AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
+* Changed the order of the generated partition filter used by "HiveDiff"  - it is now reverse natural order (which means new partitions first when partitions are date/time strings). When in doubt use the circus-train-tool `check-filters.sh` to see what would be generated.
 
+### Fixed
+Fixed issue where partition-limit is not correctly applied when generating a partition filter. See [#164](https://github.com/HotelsDotCom/circus-train/issues/164).
+
+## [15.0.0] - 2019-11-12
+### Changed
+* Default `avro-serde-options` must now be included within `transform-options`. This is a backwards incompatible change to the configuration file. Please see [Avro Schema Replication](https://github.com/HotelsDotCom/circus-train/blob/master/circus-train-avro/README.md) for more information.
+* Updated `jackson` version to 2.10.0 (was 2.9.10).
+* `hotels-oss-parent` version to 4.2.0 (was 4.0.0). Contains updates to the copyright header.
+
+### Fixed
+* Table properties can now be added to default transformations.
+
+### Added
+* Added `copier-options.assume-role` to assume a role when using the S3S3 copier.  
+
+## [14.1.0] - 2019-10-04
 ### Added
 * Table transformation to add custom properties to tables during a replication.
 * If a user doesn't specify `avro-serde-options`, Circus Train will still copy the external schema over to the target table. See [#131](https://github.com/HotelsDotCom/circus-train/issues/131).
@@ -358,4 +377,3 @@ _New configuration file_
 # 1.5.1
 
 * `DistCP` temporary path is now set per task.
-

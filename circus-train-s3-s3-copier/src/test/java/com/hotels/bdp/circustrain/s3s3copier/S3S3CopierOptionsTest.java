@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,19 @@ public class S3S3CopierOptionsTest {
     copierOptions.put(S3S3CopierOptions.Keys.MAX_COPY_ATTEMPTS.keyName(), -1);
     S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
     assertThat(options.getMaxCopyAttempts(), is(3));
+  }
+  
+  @Test
+  public void getAssumedRole() throws Exception {
+    copierOptions.put(S3S3CopierOptions.Keys.ASSUME_ROLE.keyName(), "iam:role:1234:user");
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertThat(options.getAssumedRole(), is("iam:role:1234:user"));
+  }
+  
+  @Test
+  public void getAssumedRoleDefaultIsNull() throws Exception {
+    S3S3CopierOptions options = new S3S3CopierOptions(copierOptions);
+    assertNull(options.getAssumedRole());
   }
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.api.validation.constraints.TableReplicationFullReplicationModeConstraint;
 
@@ -57,6 +59,23 @@ public class TableReplication {
 
   public Map<String, Object> getCopierOptions() {
     return copierOptions;
+  }
+
+  public Map<String, Object> getMergedCopierOptions(Map<String, Object> baseCopierOptions) {
+    return getMergedCopierOptions(baseCopierOptions, getCopierOptions());
+  }
+
+  public static Map<String, Object> getMergedCopierOptions(
+      Map<String, Object> baseCopierOptions,
+      Map<String, Object> overrideCopierOptions) {
+    Map<String, Object> mergedCopierOptions = new HashMap<>();
+    if (baseCopierOptions != null) {
+      mergedCopierOptions.putAll(baseCopierOptions);
+    }
+    if (overrideCopierOptions != null) {
+      mergedCopierOptions.putAll(overrideCopierOptions);
+    }
+    return ImmutableMap.copyOf(mergedCopierOptions);
   }
 
   public void setCopierOptions(Map<String, Object> copierOptions) {

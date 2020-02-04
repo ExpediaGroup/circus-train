@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,11 @@
  */
 package com.hotels.bdp.circustrain.avro.conf;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ConfigurationProperties(prefix = "avro-serde-options")
 public class AvroSerDeConfig {
 
-  public static final String TABLE_REPLICATION_OVERRIDE_BASE_URL = "base-url";
-  public static final String TABLE_REPLICATION_OVERRIDE_AVRO_SERDE_OPTIONS = "avro-serde-options";
+  public static final String AVRO_SERDE_OPTIONS = "avro-serde-options";
+  public static final String BASE_URL = "base-url";
+
   private String avroSchemaBaseUrl;
 
   public String getBaseUrl() {

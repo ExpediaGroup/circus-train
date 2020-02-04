@@ -376,7 +376,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
 | `copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL.|
 | `copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
-| `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target replica. Useful when the target is in a different AWS account than CircusTrain is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials.|
+| `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target replica. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials.|
 
 ##### S3 to S3 copier options
 If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 API to copy data between S3 buckets. Using the AWS provided APIs no data needs to be downloaded or uploaded to the machine on which Circus Train is running but is copied by AWS internal infrastructure and stays in the AWS network boundaries. Assuming the correct bucket policies are in place cross region and cross account replication is supported. We are using the [TransferManager](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html) to do the copying and we expose its options via copier-options see the table below. Given the source and target buckets Circus-Train will try to infer the region from them.
@@ -390,6 +390,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3S3Copier` will not specify any canned ACL.|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
+| `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target S3 location. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials. The role provided must have read access to the S3 source and write access to the S3 target.|
 
 ### S3 Secret Configuration
 When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. Circus train has a couple of options depending on where you run Circus Train.
@@ -593,7 +594,7 @@ To use this feature, add properties to your configuration:
             my-custom-property: my-custom-value
             my-custom-property2: my-custom-value2
 
-This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. These default properties can also be overridden by individual replications:
+This will add `my-custom-property` and `my-custom-property2` to the metadata of all tables in your replication. Surround each value with single quotes to ensure that Circus Train reads them as a String. Default properties can also be overridden by individual replications:
 
          table-replications:
            - source-table:
@@ -609,10 +610,10 @@ This will add `my-custom-property` and `my-custom-property2` to the metadata of 
                ...
          transform-options:
            table-properties:
-            my-custom-param: my-custom-value
-            my-custom-param2: my-custom-value2
+            my-custom-property: my-custom-value
+            my-custom-property2: my-custom-value2
 
-In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than "-"), surround the key with single quotes and brackets like so:
+In this case, the first table replication will add just one property, `my-custom-override`, while the second will add the two default properties. Adding any number of override properties to a replication will override all default properties. To add properties to your table with non-alphanumeric characters (other than '-'), surround the key with single quotes and brackets like so:
 
         transform-options:
           table-properties:

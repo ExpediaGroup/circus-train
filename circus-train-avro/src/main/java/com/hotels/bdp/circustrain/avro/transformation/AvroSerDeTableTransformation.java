@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2018 Expedia Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.avro.conf.AvroSerDeConfig;
 import com.hotels.bdp.circustrain.avro.hive.HiveObjectUtils;
 import com.hotels.bdp.circustrain.avro.util.SchemaCopier;
 
@@ -36,8 +36,8 @@ public final class AvroSerDeTableTransformation extends AbstractAvroSerDeTransfo
   private final SchemaCopier copier;
 
   @Autowired
-  public AvroSerDeTableTransformation(AvroSerDeConfig avroSerDeConfig, SchemaCopier copier) {
-    super(avroSerDeConfig);
+  public AvroSerDeTableTransformation(TransformOptions transformOptions, SchemaCopier copier) {
+    super(transformOptions);
     this.copier = copier;
   }
 
@@ -52,7 +52,9 @@ public final class AvroSerDeTableTransformation extends AbstractAvroSerDeTransfo
   private Table apply(Table table, String avroSchemaDestination) {
     String source = HiveObjectUtils.getParameter(table, AVRO_SCHEMA_URL_PARAMETER);
     if (argsPresent(source, avroSchemaDestination)) {
-      String destinationPath = copier.copy(source, avroSchemaDestination).toString();
+      String destinationPath = copier
+          .copy(source, avroSchemaDestination, getTableReplication(), getEventId())
+          .toString();
       HiveObjectUtils.updateSerDeUrl(table, AVRO_SCHEMA_URL_PARAMETER, destinationPath);
     }
     return table;

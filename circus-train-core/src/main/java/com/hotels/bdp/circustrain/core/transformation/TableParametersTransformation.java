@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.core.conf.TableParametersConfig;
 
 @Profile({ Modules.REPLICATION })
 @Component
 public final class TableParametersTransformation extends AbstractTableParametersTransformation implements TableTransformation {
 
   @Autowired
-  public TableParametersTransformation(TableParametersConfig tableParametersConfig) {
-    super(tableParametersConfig);
+  public TableParametersTransformation(TransformOptions transformOptions) {
+    super(transformOptions);
   }
 
   @Override

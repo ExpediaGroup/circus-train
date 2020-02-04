@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,15 @@
  */
 package com.hotels.bdp.circustrain.core.conf;
 
-import static com.hotels.bdp.circustrain.core.conf.TableParametersConfig.TABLE_REPLICATION_TABLE_PARAMETERS;
-
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.hotels.bdp.circustrain.api.conf.TransformOptions;
+
 @Configuration
-@ConfigurationProperties(prefix = TABLE_REPLICATION_TABLE_PARAMETERS)
-public class TableParametersConfig {
+@ConfigurationProperties
+public class CircusTrainTransformOptions extends TransformOptions {
 
-  public static final String TABLE_REPLICATION_TABLE_PARAMETERS = "table-properties";
+  public static final String TABLE_PROPERTIES = "table-properties";
 
-  private Map<String, String> parameters;
-
-  public Map<String, String> getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
-  }
 }
