@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.aws.S3Schemes;
 
 public class S3SchemesTest {
 

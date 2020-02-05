@@ -30,8 +30,6 @@ import org.junit.Test;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.copier.Copier;
-import com.hotels.bdp.circustrain.distcpcopier.DistCpCopier;
-import com.hotels.bdp.circustrain.distcpcopier.DistCpCopierFactory;
 
 public class DistCpCopierFactoryTest {
 

@@ -32,7 +32,6 @@ import org.apache.hadoop.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.s3mapreducecp.io.ThrottledInputStream;
 
 public class ThrottledInputStreamTest {
   private static final Log LOG = LogFactory.getLog(ThrottledInputStreamTest.class);
