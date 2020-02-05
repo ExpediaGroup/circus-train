@@ -1,3 +1,7 @@
+## [15.1.1] - TBD
+### Fixed
+* When replicating tables with large numbers of partitions, `Replica.updateMetadata` now calls add/alter partition in batches of 1000. See [#166](https://github.com/HotelsDotCom/circus-train/issues/166). 
+
 ## [15.1.0] - 2020-01-28
 ### Changed
 * AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 

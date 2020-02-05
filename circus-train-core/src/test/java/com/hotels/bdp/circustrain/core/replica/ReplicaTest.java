@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.StatsSetupConst;
@@ -103,6 +94,7 @@ public class ReplicaTest {
   private static final FieldSchema FIELD_D = new FieldSchema(COLUMN_D, "string", null);
   private static final List<FieldSchema> FIELDS = Arrays.asList(FIELD_A, FIELD_B);
   private static final List<FieldSchema> PARTITIONS = Arrays.asList(FIELD_C, FIELD_D);
+  private static final int TEST_PARTITION_BATCH_SIZE = 2;
 
   public @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -175,7 +167,7 @@ public class ReplicaTest {
 
   private Replica newReplica(TableReplication tableReplication) {
     return new Replica(replicaCatalog, hiveConf, metaStoreClientSupplier, tableFactory, houseKeepingListener,
-        replicaCatalogListener, tableReplication);
+        replicaCatalogListener, tableReplication, TEST_PARTITION_BATCH_SIZE);
   }
 
   @Test
@@ -394,26 +386,41 @@ public class ReplicaTest {
   @Test
   public void alteringExistingPartitionedReplicaTableWithPartitionsSucceeds() throws TException, IOException {
     Partition newPartition = newPartition("three", "four");
+    Partition newPartition2 = newPartition("five", "six");
+    Partition newPartition3 = newPartition("seven", "eight");
+
     ColumnStatistics newPartitionStatistics = newPartitionStatistics("three", "four");
+    ColumnStatistics newPartitionStatistics2 = newPartitionStatistics("five", "six");
+    ColumnStatistics newPartitionStatistics3 = newPartitionStatistics("seven", "eight");
+
     Partition modifiedPartition = new Partition(existingPartition);
     ColumnStatistics modifiedPartitionStatistics = newPartitionStatistics("one", "two");
     when(mockMetaStoreClient
-        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
+        .getPartitionsByNames(DB_NAME, TABLE_NAME,
+                Lists.newArrayList("c=one/d=two",
+                        "c=three/d=four",
+                        "c=five/d=six",
+                        "c=seven/d=eight")))
             .thenReturn(Arrays.asList(existingPartition));
 
     Map<String, List<ColumnStatisticsObj>> partitionStatsMap = new HashMap<>();
     partitionStatsMap
         .put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()), newPartitionStatistics.getStatsObj());
     partitionStatsMap
-        .put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()),
-            modifiedPartitionStatistics.getStatsObj());
+        .put(Warehouse.makePartName(PARTITIONS, newPartition2.getValues()), newPartitionStatistics2.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, newPartition3.getValues()), newPartitionStatistics3.getStatsObj());
+    partitionStatsMap
+        .put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()), modifiedPartitionStatistics.getStatsObj());
 
     PartitionsAndStatistics partitionsAndStatistics = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
-        Arrays.asList(modifiedPartition, newPartition), partitionStatsMap);
+        Arrays.asList(modifiedPartition, newPartition, newPartition2, newPartition3), partitionStatsMap);
     when(mockReplicaLocationManager.getPartitionLocation(existingPartition))
         .thenReturn(new Path(tableLocation, "c=one/d=two"));
     when(mockReplicaLocationManager.getPartitionLocation(newPartition))
-        .thenReturn(new Path(tableLocation, "c=three/d=four"));
+        .thenReturn(new Path(tableLocation, "c=three/d=four"))
+        .thenReturn(new Path(tableLocation, "c=five/d=six"))
+        .thenReturn(new Path(tableLocation, "c=seven/d=eight"));
 
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
 
@@ -425,18 +432,28 @@ public class ReplicaTest {
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager).addCleanUpLocation(anyString(), any(Path.class));
     verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
-    verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
+    verify(mockMetaStoreClient, times(2)).add_partitions(addPartitionCaptor.capture());
 
     assertThat(alterPartitionCaptor.getValue().size(), is(1));
-    assertThat(addPartitionCaptor.getValue().size(), is(1));
+
+    // Validate that the args were expected number of batches (2), and expected batch sizes (2, then 1) since
+    // we sent a list of 3 new partitions and used a partitionBatchSize of 2
+
+    List<List<Partition>> addCaptorValues = addPartitionCaptor.getAllValues();
+    List<Partition> firstBatch = addCaptorValues.get(0);
+    List<Partition> secondBatch = addCaptorValues.get(1);
+    assertThat(addCaptorValues.size(), is(2));
+    assertThat(firstBatch.size(), is(2));
+    assertThat(secondBatch.size(), is(1));
 
     Partition altered = alterPartitionCaptor.getValue().get(0);
     assertThat(altered.getValues(), is(Arrays.asList("one", "two")));
 
-    Partition added = addPartitionCaptor.getValue().get(0);
-    assertThat(added.getValues(), is(Arrays.asList("three", "four")));
+    assertThat(firstBatch.get(0).getValues(), is(Arrays.asList("three", "four")));
+    assertThat(firstBatch.get(1).getValues(), is(Arrays.asList("five", "six")));
+    assertThat(secondBatch.get(0).getValues(), is(Arrays.asList("seven", "eight")));
 
-    verify(mockMetaStoreClient).setPartitionColumnStatistics(setStatsRequestCaptor.capture());
+    verify(mockMetaStoreClient, times(2)).setPartitionColumnStatistics(setStatsRequestCaptor.capture());
     SetPartitionsStatsRequest statsRequest = setStatsRequestCaptor.getValue();
 
     List<ColumnStatistics> columnStats = new ArrayList<>(statsRequest.getColStats());
@@ -446,18 +463,29 @@ public class ReplicaTest {
         return o1.getStatsDesc().getPartName().compareTo(o2.getStatsDesc().getPartName());
       }
     });
-    assertThat(columnStats.size(), is(2));
+    assertThat(columnStats.size(), is(4));
 
+    // List was sorted by partName, so make sure elements in list occur in that order
     assertThat(columnStats.get(0).getStatsDesc().isIsTblLevel(), is(false));
     assertThat(columnStats.get(0).getStatsDesc().getDbName(), is(DB_NAME));
     assertThat(columnStats.get(0).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(0).getStatsDesc().getPartName(), is("c=one/d=two"));
+    assertThat(columnStats.get(0).getStatsDesc().getPartName(), is("c=five/d=six"));
     assertThat(columnStats.get(0).getStatsObj().size(), is(2));
     assertThat(columnStats.get(1).getStatsDesc().isIsTblLevel(), is(false));
     assertThat(columnStats.get(1).getStatsDesc().getDbName(), is(DB_NAME));
     assertThat(columnStats.get(1).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(1).getStatsDesc().getPartName(), is("c=three/d=four"));
+    assertThat(columnStats.get(1).getStatsDesc().getPartName(), is("c=one/d=two"));
     assertThat(columnStats.get(1).getStatsObj().size(), is(2));
+    assertThat(columnStats.get(2).getStatsDesc().isIsTblLevel(), is(false));
+    assertThat(columnStats.get(2).getStatsDesc().getDbName(), is(DB_NAME));
+    assertThat(columnStats.get(2).getStatsDesc().getTableName(), is(TABLE_NAME));
+    assertThat(columnStats.get(2).getStatsDesc().getPartName(), is("c=seven/d=eight"));
+    assertThat(columnStats.get(2).getStatsObj().size(), is(2));
+    assertThat(columnStats.get(3).getStatsDesc().isIsTblLevel(), is(false));
+    assertThat(columnStats.get(3).getStatsDesc().getDbName(), is(DB_NAME));
+    assertThat(columnStats.get(3).getStatsDesc().getTableName(), is(TABLE_NAME));
+    assertThat(columnStats.get(3).getStatsDesc().getPartName(), is("c=three/d=four"));
+    assertThat(columnStats.get(3).getStatsObj().size(), is(2));
   }
 
   @Test
