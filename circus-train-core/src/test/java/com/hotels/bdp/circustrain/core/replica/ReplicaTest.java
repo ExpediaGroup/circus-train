@@ -30,21 +30,15 @@ import static org.mockito.Mockito.when;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 
-import com.google.common.base.Supplier;
-import com.google.common.collect.Lists;
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
-import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
-import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
-import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
-import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
-import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
-import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
-import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
-import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
-import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.StatsSetupConst;
@@ -75,14 +69,22 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
+
+import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
+import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
+import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
+import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
+import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
+import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
+import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
+import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTest {
