@@ -45,6 +45,7 @@ import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
+import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.StatsSetupConst;
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -102,7 +103,7 @@ public class ReplicaTest {
   private static final FieldSchema FIELD_D = new FieldSchema(COLUMN_D, "string", null);
   private static final List<FieldSchema> FIELDS = Arrays.asList(FIELD_A, FIELD_B);
   private static final List<FieldSchema> PARTITIONS = Arrays.asList(FIELD_C, FIELD_D);
-  private static final int TEST_PARTITION_BATCH_SIZE = 2;
+  private static final int TEST_PARTITION_BATCH_SIZE = 17;
 
   public @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -391,44 +392,70 @@ public class ReplicaTest {
     assertThat(replica.getName(), is(NAME));
   }
 
-  @Test
-  public void alteringExistingPartitionedReplicaTableWithPartitionsSucceeds() throws TException, IOException {
-    Partition newPartition = newPartition("three", "four");
-    Partition newPartition2 = newPartition("five", "six");
-    Partition newPartition3 = newPartition("seven", "eight");
+  private void alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(
+          int numTestAlterPartitions, int numTestAddPartitions) throws TException, IOException {
+    List<Partition> existingPartitions = new ArrayList<>();
+    List<Partition> newPartitions = new ArrayList<>();
+    List<ColumnStatistics> modifiedPartitionStatisticsList = new ArrayList<>();
+    List<ColumnStatistics> newPartitionStatisticsList = new ArrayList<>();
 
-    ColumnStatistics newPartitionStatistics = newPartitionStatistics("three", "four");
-    ColumnStatistics newPartitionStatistics2 = newPartitionStatistics("five", "six");
-    ColumnStatistics newPartitionStatistics3 = newPartitionStatistics("seven", "eight");
+    int numAddBatches = numTestAddPartitions == 0 ? 0 : ((numTestAddPartitions - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
+    int lastAddBatchSize = numTestAddPartitions % TEST_PARTITION_BATCH_SIZE;
+    if (lastAddBatchSize == 0)
+      lastAddBatchSize = TEST_PARTITION_BATCH_SIZE;
 
-    Partition modifiedPartition = new Partition(existingPartition);
-    ColumnStatistics modifiedPartitionStatistics = newPartitionStatistics("one", "two");
-    when(mockMetaStoreClient
-        .getPartitionsByNames(DB_NAME, TABLE_NAME,
-                Lists.newArrayList("c=one/d=two",
-                        "c=three/d=four",
-                        "c=five/d=six",
-                        "c=seven/d=eight")))
-            .thenReturn(Arrays.asList(existingPartition));
+    int numAlterBatches = numTestAlterPartitions == 0 ? 0 : ((numTestAlterPartitions - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
+    int lastAlterBatchSize = numTestAlterPartitions % TEST_PARTITION_BATCH_SIZE;
+    if (lastAlterBatchSize == 0)
+      lastAlterBatchSize = TEST_PARTITION_BATCH_SIZE;
+
+    int numStatisticsBatches = (numTestAlterPartitions + numTestAddPartitions) == 0 ? 0 :
+            (((numTestAlterPartitions + numTestAddPartitions) - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
+    int lastStatisticsBatchSize = (numTestAlterPartitions + numTestAddPartitions) % TEST_PARTITION_BATCH_SIZE;
+    if (lastStatisticsBatchSize == 0)
+      lastStatisticsBatchSize = TEST_PARTITION_BATCH_SIZE;
+
+    for (int i = 0; i < numTestAlterPartitions; i++) {
+      existingPartitions.add(newPartition(String.format("exist_%s", i), String.format("exist_%s_sub", i)));
+      modifiedPartitionStatisticsList.add(
+              newPartitionStatistics(String.format("exist_%s", i), String.format("exist_%s_sub", i)));
+    }
+    for (int i = 0; i < numTestAddPartitions; i++) {
+      newPartitions.add(newPartition(String.format("new_%s", i), String.format("new_%s_sub", i)));
+      newPartitionStatisticsList.add(
+              newPartitionStatistics(String.format("new_%s", i), String.format("new_%s_sub", i)));
+    }
+
+    List<String> testPartitionNames = new ArrayList<>();
+    for (Partition p : (List<Partition>) ListUtils.union(existingPartitions, newPartitions)) {
+      testPartitionNames.add(partitionName((String[]) p.getValues().toArray()));
+    }
+
+    when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME, testPartitionNames))
+            .thenReturn(existingPartitions);
 
     Map<String, List<ColumnStatisticsObj>> partitionStatsMap = new HashMap<>();
-    partitionStatsMap
-        .put(Warehouse.makePartName(PARTITIONS, newPartition.getValues()), newPartitionStatistics.getStatsObj());
-    partitionStatsMap
-        .put(Warehouse.makePartName(PARTITIONS, newPartition2.getValues()), newPartitionStatistics2.getStatsObj());
-    partitionStatsMap
-        .put(Warehouse.makePartName(PARTITIONS, newPartition3.getValues()), newPartitionStatistics3.getStatsObj());
-    partitionStatsMap
-        .put(Warehouse.makePartName(PARTITIONS, modifiedPartition.getValues()), modifiedPartitionStatistics.getStatsObj());
+    for (int i = 0; i < numTestAddPartitions; i++) {
+      partitionStatsMap
+              .put(Warehouse.makePartName(PARTITIONS, newPartitions.get(i).getValues()),
+                      newPartitionStatisticsList.get(i).getStatsObj());
+    }
+    for (int i = 0; i < numTestAlterPartitions; i++) {
+      partitionStatsMap
+              .put(Warehouse.makePartName(PARTITIONS, existingPartitions.get(i).getValues()),
+                      modifiedPartitionStatisticsList.get(i).getStatsObj());
+    }
 
     PartitionsAndStatistics partitionsAndStatistics = new PartitionsAndStatistics(sourceTable.getPartitionKeys(),
-        Arrays.asList(modifiedPartition, newPartition, newPartition2, newPartition3), partitionStatsMap);
-    when(mockReplicaLocationManager.getPartitionLocation(existingPartition))
-        .thenReturn(new Path(tableLocation, "c=one/d=two"));
-    when(mockReplicaLocationManager.getPartitionLocation(newPartition))
-        .thenReturn(new Path(tableLocation, "c=three/d=four"))
-        .thenReturn(new Path(tableLocation, "c=five/d=six"))
-        .thenReturn(new Path(tableLocation, "c=seven/d=eight"));
+        ListUtils.union(existingPartitions, newPartitions), partitionStatsMap);
+    for (int i = 0; i < numTestAddPartitions; i++) {
+      when(mockReplicaLocationManager.getPartitionLocation(newPartitions.get(i)))
+              .thenReturn(new Path(tableLocation, String.format("c=new_%s/d=new_%s_sub", i, i)));
+    }
+    for (int i = 0; i < numTestAlterPartitions; i++) {
+      when(mockReplicaLocationManager.getPartitionLocation(existingPartitions.get(i)))
+              .thenReturn(new Path(tableLocation, String.format("c=exist_%s/d=exist_%s_sub", i, i)));
+    }
 
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
 
@@ -438,62 +465,102 @@ public class ReplicaTest {
 
     verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
-    verify(mockReplicaLocationManager).addCleanUpLocation(anyString(), any(Path.class));
-    verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
-    verify(mockMetaStoreClient, times(2)).add_partitions(addPartitionCaptor.capture());
+    verify(mockReplicaLocationManager, times(numTestAlterPartitions)).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockMetaStoreClient, times(numAlterBatches)).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
+    verify(mockMetaStoreClient, times(numAddBatches)).add_partitions(addPartitionCaptor.capture());
 
-    assertThat(alterPartitionCaptor.getValue().size(), is(1));
-
-    // Validate that the args were expected number of batches (2), and expected batch sizes (2, then 1) since
-    // we sent a list of 3 new partitions and used a partitionBatchSize of 2
-
+    // Validate that the args were expected number of batches , and expected batch sizes
     List<List<Partition>> addCaptorValues = addPartitionCaptor.getAllValues();
-    List<Partition> firstBatch = addCaptorValues.get(0);
-    List<Partition> secondBatch = addCaptorValues.get(1);
-    assertThat(addCaptorValues.size(), is(2));
-    assertThat(firstBatch.size(), is(2));
-    assertThat(secondBatch.size(), is(1));
-
-    Partition altered = alterPartitionCaptor.getValue().get(0);
-    assertThat(altered.getValues(), is(Arrays.asList("one", "two")));
-
-    assertThat(firstBatch.get(0).getValues(), is(Arrays.asList("three", "four")));
-    assertThat(firstBatch.get(1).getValues(), is(Arrays.asList("five", "six")));
-    assertThat(secondBatch.get(0).getValues(), is(Arrays.asList("seven", "eight")));
-
-    verify(mockMetaStoreClient, times(2)).setPartitionColumnStatistics(setStatsRequestCaptor.capture());
-    SetPartitionsStatsRequest statsRequest = setStatsRequestCaptor.getValue();
-
-    List<ColumnStatistics> columnStats = new ArrayList<>(statsRequest.getColStats());
-    Collections.sort(columnStats, new Comparator<ColumnStatistics>() {
-      @Override
-      public int compare(ColumnStatistics o1, ColumnStatistics o2) {
-        return o1.getStatsDesc().getPartName().compareTo(o2.getStatsDesc().getPartName());
+    assertThat(addCaptorValues.size(), is(numAddBatches));
+    for (int i = 0; i < numAddBatches; i++) {
+      int thisBatchSize = i < (numAddBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAddBatchSize;
+      List<Partition> addBatch = addCaptorValues.get(i);
+      assertThat(addBatch.size(), is(thisBatchSize));
+      for (int j = 0; j < addBatch.size(); j++) {
+        assertThat(addBatch.get(j).getValues(),
+                is(Arrays.asList(String.format("new_%s", (i * TEST_PARTITION_BATCH_SIZE) + j),
+                        String.format("new_%s_sub", (i * TEST_PARTITION_BATCH_SIZE) + j))));
       }
-    });
-    assertThat(columnStats.size(), is(4));
+    }
 
-    // List was sorted by partName, so make sure elements in list occur in that order
-    assertThat(columnStats.get(0).getStatsDesc().isIsTblLevel(), is(false));
-    assertThat(columnStats.get(0).getStatsDesc().getDbName(), is(DB_NAME));
-    assertThat(columnStats.get(0).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(0).getStatsDesc().getPartName(), is("c=five/d=six"));
-    assertThat(columnStats.get(0).getStatsObj().size(), is(2));
-    assertThat(columnStats.get(1).getStatsDesc().isIsTblLevel(), is(false));
-    assertThat(columnStats.get(1).getStatsDesc().getDbName(), is(DB_NAME));
-    assertThat(columnStats.get(1).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(1).getStatsDesc().getPartName(), is("c=one/d=two"));
-    assertThat(columnStats.get(1).getStatsObj().size(), is(2));
-    assertThat(columnStats.get(2).getStatsDesc().isIsTblLevel(), is(false));
-    assertThat(columnStats.get(2).getStatsDesc().getDbName(), is(DB_NAME));
-    assertThat(columnStats.get(2).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(2).getStatsDesc().getPartName(), is("c=seven/d=eight"));
-    assertThat(columnStats.get(2).getStatsObj().size(), is(2));
-    assertThat(columnStats.get(3).getStatsDesc().isIsTblLevel(), is(false));
-    assertThat(columnStats.get(3).getStatsDesc().getDbName(), is(DB_NAME));
-    assertThat(columnStats.get(3).getStatsDesc().getTableName(), is(TABLE_NAME));
-    assertThat(columnStats.get(3).getStatsDesc().getPartName(), is("c=three/d=four"));
-    assertThat(columnStats.get(3).getStatsObj().size(), is(2));
+    List<List<Partition>> alterCaptorValues = alterPartitionCaptor.getAllValues();
+    assertThat(alterCaptorValues.size(), is(numAlterBatches));
+    for (int i = 0; i < numAlterBatches; i++) {
+      int thisBatchSize = i < (numAlterBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAlterBatchSize;
+      List<Partition> alterBatch = alterCaptorValues.get(i);
+      assertThat(alterBatch.size(), is(thisBatchSize));
+      for (int j = 0; j < alterBatch.size(); j++) {
+        assertThat(alterBatch.get(j).getValues(),
+                is(Arrays.asList(String.format("exist_%s", (i * TEST_PARTITION_BATCH_SIZE) + j),
+                        String.format("exist_%s_sub", (i * TEST_PARTITION_BATCH_SIZE) + j))));
+      }
+    }
+
+    verify(mockMetaStoreClient, times(numStatisticsBatches)).setPartitionColumnStatistics(setStatsRequestCaptor.capture());
+    List<SetPartitionsStatsRequest> statsRequestList = setStatsRequestCaptor.getAllValues();
+    assertThat(statsRequestList.size(), is(numStatisticsBatches));
+
+    List<ColumnStatistics> columnStats = new ArrayList<>();
+    for (int i = 0; i < numStatisticsBatches; i++) {
+      int thisBatchSize = i < (numStatisticsBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastStatisticsBatchSize;
+      assertThat(statsRequestList.get(i).getColStats().size(), is(thisBatchSize));
+      columnStats.addAll(statsRequestList.get(i).getColStats());
+    }
+
+    assertThat(columnStats.size(), is(numTestAlterPartitions + numTestAddPartitions));
+
+    for (int i = 0; i < numTestAlterPartitions; i++) {
+      assertThat(columnStats.get(i).getStatsDesc().isIsTblLevel(), is(false));
+      assertThat(columnStats.get(i).getStatsDesc().getDbName(), is(DB_NAME));
+      assertThat(columnStats.get(i).getStatsDesc().getTableName(), is(TABLE_NAME));
+      assertThat(columnStats.get(i).getStatsDesc().getPartName(), is(String.format("c=exist_%s/d=exist_%s_sub", i, i)));
+      assertThat(columnStats.get(i).getStatsObj().size(), is(2));
+    }
+
+    for (int i = numTestAlterPartitions; i < numTestAlterPartitions + numTestAddPartitions; i++) {
+      assertThat(columnStats.get(i).getStatsDesc().isIsTblLevel(), is(false));
+      assertThat(columnStats.get(i).getStatsDesc().getDbName(), is(DB_NAME));
+      assertThat(columnStats.get(i).getStatsDesc().getTableName(), is(TABLE_NAME));
+      assertThat(columnStats.get(i).getStatsDesc().getPartName(),
+              is(String.format("c=new_%s/d=new_%s_sub", i - numTestAlterPartitions, i - numTestAlterPartitions)));
+      assertThat(columnStats.get(i).getStatsObj().size(), is(2));
+    }
+  }
+
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_0() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(0,0);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_1() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(0,1);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_0() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(1,0);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_1() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(1,1);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_boundaries() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(TEST_PARTITION_BATCH_SIZE,TEST_PARTITION_BATCH_SIZE);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_many() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(17,28);
+  }
+
+  @Test
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_lots() throws TException, IOException {
+    alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(172,333);
   }
 
   @Test

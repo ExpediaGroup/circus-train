@@ -67,14 +67,13 @@ import com.hotels.hcommon.hive.metastore.util.LocationUtils;
 public class Replica extends HiveEndpoint {
 
   private static final Logger LOG = LoggerFactory.getLogger(Replica.class);
-  private static final int DEFAULT_PARTITION_BATCH_SIZE = 1000;
 
   private final ReplicaTableFactory tableFactory;
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
   private final TableReplication tableReplication;
-  private final int partitionBatchSize;
+  private int partitionBatchSize = 1000;
 
   /**
    * Use {@link ReplicaFactory}
@@ -93,7 +92,6 @@ public class Replica extends HiveEndpoint {
     this.housekeepingListener = housekeepingListener;
     replicationMode = tableReplication.getReplicationMode();
     this.tableReplication = tableReplication;
-    this.partitionBatchSize = DEFAULT_PARTITION_BATCH_SIZE;
   }
 
   /**
@@ -226,7 +224,7 @@ public class Replica extends HiveEndpoint {
           for (List<Partition> sublist : Lists.partition(partitionsToAlter, partitionBatchSize)) {
             int start = counter * partitionBatchSize;
             LOG.info("Altering partitions {} through {}", start, start + sublist.size() - 1);
-            client.alter_partitions(replicaDatabaseName, replicaTableName, partitionsToAlter);
+            client.alter_partitions(replicaDatabaseName, replicaTableName, sublist);
             counter++;
           }
         } catch (TException e) {
@@ -246,7 +244,7 @@ public class Replica extends HiveEndpoint {
           for (List<ColumnStatistics> sublist : Lists.partition(statisticsToSet, partitionBatchSize)) {
             int start = counter * partitionBatchSize;
             LOG.info("Setting column statistics for partitions {} through {}", start, start + sublist.size() - 1);
-            client.setPartitionColumnStatistics(new SetPartitionsStatsRequest(statisticsToSet));
+            client.setPartitionColumnStatistics(new SetPartitionsStatsRequest(sublist));
             counter++;
           }
         } catch (TException e) {
