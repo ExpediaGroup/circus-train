@@ -1,4 +1,4 @@
-## [15.1.1] - TBD
+## [15.1.1] - 2020-02-06
 ### Fixed
 * When replicating tables with large numbers of partitions, `Replica.updateMetadata` now calls add/alter partition in batches of 1000. See [#166](https://github.com/HotelsDotCom/circus-train/issues/166). 
 
