@@ -401,32 +401,31 @@ public class ReplicaTest {
     List<ColumnStatistics> modifiedPartitionStatisticsList = new ArrayList<>();
     List<ColumnStatistics> newPartitionStatisticsList = new ArrayList<>();
 
-    int numAddBatches = numTestAddPartitions == 0 ? 0 : ((numTestAddPartitions - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
-    int lastAddBatchSize = numTestAddPartitions % TEST_PARTITION_BATCH_SIZE;
-    if (lastAddBatchSize == 0)
-      lastAddBatchSize = TEST_PARTITION_BATCH_SIZE;
-
-    int numAlterBatches = numTestAlterPartitions == 0 ? 0 : ((numTestAlterPartitions - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
-    int lastAlterBatchSize = numTestAlterPartitions % TEST_PARTITION_BATCH_SIZE;
-    if (lastAlterBatchSize == 0)
-      lastAlterBatchSize = TEST_PARTITION_BATCH_SIZE;
-
-    int numStatisticsBatches = (numTestAlterPartitions + numTestAddPartitions) == 0 ? 0 :
-            (((numTestAlterPartitions + numTestAddPartitions) - 1) / TEST_PARTITION_BATCH_SIZE) + 1;
-    int lastStatisticsBatchSize = (numTestAlterPartitions + numTestAddPartitions) % TEST_PARTITION_BATCH_SIZE;
-    if (lastStatisticsBatchSize == 0)
-      lastStatisticsBatchSize = TEST_PARTITION_BATCH_SIZE;
-
     for (int i = 0; i < numTestAlterPartitions; i++) {
       existingPartitions.add(newPartition(String.format("exist_%s", i), String.format("exist_%s_sub", i)));
       modifiedPartitionStatisticsList.add(
               newPartitionStatistics(String.format("exist_%s", i), String.format("exist_%s_sub", i)));
     }
+
     for (int i = 0; i < numTestAddPartitions; i++) {
       newPartitions.add(newPartition(String.format("new_%s", i), String.format("new_%s_sub", i)));
       newPartitionStatisticsList.add(
               newPartitionStatistics(String.format("new_%s", i), String.format("new_%s_sub", i)));
     }
+
+    List<List<Partition>> alterSublists = Lists.partition(existingPartitions, TEST_PARTITION_BATCH_SIZE);
+    int numAlterBatches = alterSublists.size();
+    int lastAlterBatchSize = numAlterBatches == 0 ? 0 : alterSublists.get(alterSublists.size()-1).size();
+
+    List<List<Partition>> addSublists = Lists.partition(newPartitions, TEST_PARTITION_BATCH_SIZE);
+    int numAddBatches = addSublists.size();
+    int lastAddBatchSize = numAddBatches == 0 ? 0 : addSublists.get(addSublists.size()-1).size();
+
+    List<List<ColumnStatistics>> statsSublists = Lists.partition(
+            ListUtils.union(modifiedPartitionStatisticsList, newPartitionStatisticsList), TEST_PARTITION_BATCH_SIZE);
+    int numStatisticsBatches = statsSublists.size();
+    int lastStatisticsBatchSize = numStatisticsBatches == 0 ? 0 : statsSublists.get(statsSublists.size()-1).size();
+
 
     List<String> testPartitionNames = new ArrayList<>();
     for (Partition p : (List<Partition>) ListUtils.union(existingPartitions, newPartitions)) {
@@ -474,27 +473,28 @@ public class ReplicaTest {
     // Validate that the args were expected number of batches , and expected batch sizes
     List<List<Partition>> addCaptorValues = addPartitionCaptor.getAllValues();
     assertThat(addCaptorValues.size(), is(numAddBatches));
-    for (int i = 0; i < numAddBatches; i++) {
-      int thisBatchSize = i < (numAddBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAddBatchSize;
-      List<Partition> addBatch = addCaptorValues.get(i);
+
+    for (int batchNdx = 0; batchNdx < numAddBatches; batchNdx++) {
+      int thisBatchSize = batchNdx < (numAddBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAddBatchSize;
+      List<Partition> addBatch = addCaptorValues.get(batchNdx);
       assertThat(addBatch.size(), is(thisBatchSize));
-      for (int j = 0; j < addBatch.size(); j++) {
-        assertThat(addBatch.get(j).getValues(),
-                is(Arrays.asList(String.format("new_%s", (i * TEST_PARTITION_BATCH_SIZE) + j),
-                        String.format("new_%s_sub", (i * TEST_PARTITION_BATCH_SIZE) + j))));
+      for (int entryInBatchNdx = 0; entryInBatchNdx < addBatch.size(); entryInBatchNdx++) {
+        assertThat(addBatch.get(entryInBatchNdx).getValues(),
+                is(Arrays.asList(String.format("new_%s", (batchNdx * TEST_PARTITION_BATCH_SIZE) + entryInBatchNdx),
+                        String.format("new_%s_sub", (batchNdx * TEST_PARTITION_BATCH_SIZE) + entryInBatchNdx))));
       }
     }
 
     List<List<Partition>> alterCaptorValues = alterPartitionCaptor.getAllValues();
     assertThat(alterCaptorValues.size(), is(numAlterBatches));
-    for (int i = 0; i < numAlterBatches; i++) {
-      int thisBatchSize = i < (numAlterBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAlterBatchSize;
-      List<Partition> alterBatch = alterCaptorValues.get(i);
+    for (int batchNdx = 0; batchNdx < numAlterBatches; batchNdx++) {
+      int thisBatchSize = batchNdx < (numAlterBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastAlterBatchSize;
+      List<Partition> alterBatch = alterCaptorValues.get(batchNdx);
       assertThat(alterBatch.size(), is(thisBatchSize));
-      for (int j = 0; j < alterBatch.size(); j++) {
-        assertThat(alterBatch.get(j).getValues(),
-                is(Arrays.asList(String.format("exist_%s", (i * TEST_PARTITION_BATCH_SIZE) + j),
-                        String.format("exist_%s_sub", (i * TEST_PARTITION_BATCH_SIZE) + j))));
+      for (int entryInBatchNdx = 0; entryInBatchNdx < alterBatch.size(); entryInBatchNdx++) {
+        assertThat(alterBatch.get(entryInBatchNdx).getValues(),
+                is(Arrays.asList(String.format("exist_%s", (batchNdx * TEST_PARTITION_BATCH_SIZE) + entryInBatchNdx),
+                        String.format("exist_%s_sub", (batchNdx * TEST_PARTITION_BATCH_SIZE) + entryInBatchNdx))));
       }
     }
 
@@ -503,29 +503,32 @@ public class ReplicaTest {
     assertThat(statsRequestList.size(), is(numStatisticsBatches));
 
     List<ColumnStatistics> columnStats = new ArrayList<>();
-    for (int i = 0; i < numStatisticsBatches; i++) {
-      int thisBatchSize = i < (numStatisticsBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastStatisticsBatchSize;
-      assertThat(statsRequestList.get(i).getColStats().size(), is(thisBatchSize));
-      columnStats.addAll(statsRequestList.get(i).getColStats());
+    for (int colStatNdx = 0; colStatNdx < numStatisticsBatches; colStatNdx++) {
+      int thisBatchSize = colStatNdx < (numStatisticsBatches - 1) ? TEST_PARTITION_BATCH_SIZE : lastStatisticsBatchSize;
+      assertThat(statsRequestList.get(colStatNdx).getColStats().size(), is(thisBatchSize));
+      columnStats.addAll(statsRequestList.get(colStatNdx).getColStats());
     }
 
     assertThat(columnStats.size(), is(numTestAlterPartitions + numTestAddPartitions));
 
-    for (int i = 0; i < numTestAlterPartitions; i++) {
-      assertThat(columnStats.get(i).getStatsDesc().isIsTblLevel(), is(false));
-      assertThat(columnStats.get(i).getStatsDesc().getDbName(), is(DB_NAME));
-      assertThat(columnStats.get(i).getStatsDesc().getTableName(), is(TABLE_NAME));
-      assertThat(columnStats.get(i).getStatsDesc().getPartName(), is(String.format("c=exist_%s/d=exist_%s_sub", i, i)));
-      assertThat(columnStats.get(i).getStatsObj().size(), is(2));
+    for (int colStatNdx = 0; colStatNdx < numTestAlterPartitions; colStatNdx++) {
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().isIsTblLevel(), is(false));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getDbName(), is(DB_NAME));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getTableName(), is(TABLE_NAME));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getPartName(),
+              is(String.format("c=exist_%s/d=exist_%s_sub", colStatNdx, colStatNdx)));
+      assertThat(columnStats.get(colStatNdx).getStatsObj().size(), is(2));
     }
 
-    for (int i = numTestAlterPartitions; i < numTestAlterPartitions + numTestAddPartitions; i++) {
-      assertThat(columnStats.get(i).getStatsDesc().isIsTblLevel(), is(false));
-      assertThat(columnStats.get(i).getStatsDesc().getDbName(), is(DB_NAME));
-      assertThat(columnStats.get(i).getStatsDesc().getTableName(), is(TABLE_NAME));
-      assertThat(columnStats.get(i).getStatsDesc().getPartName(),
-              is(String.format("c=new_%s/d=new_%s_sub", i - numTestAlterPartitions, i - numTestAlterPartitions)));
-      assertThat(columnStats.get(i).getStatsObj().size(), is(2));
+    for (int colStatNdx = numTestAlterPartitions, addPartColStatNdx = 0;
+         colStatNdx < numTestAlterPartitions + numTestAddPartitions;
+         colStatNdx++, addPartColStatNdx++) {
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().isIsTblLevel(), is(false));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getDbName(), is(DB_NAME));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getTableName(), is(TABLE_NAME));
+      assertThat(columnStats.get(colStatNdx).getStatsDesc().getPartName(),
+              is(String.format("c=new_%s/d=new_%s_sub", addPartColStatNdx, addPartColStatNdx)));
+      assertThat(columnStats.get(colStatNdx).getStatsObj().size(), is(2));
     }
   }
 
