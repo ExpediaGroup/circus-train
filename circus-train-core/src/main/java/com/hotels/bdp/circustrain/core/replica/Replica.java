@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,11 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Enums;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
@@ -71,6 +73,7 @@ public class Replica extends HiveEndpoint {
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
   private final TableReplication tableReplication;
+  private int partitionBatchSize = 1000;
 
   /**
    * Use {@link ReplicaFactory}
@@ -89,6 +92,28 @@ public class Replica extends HiveEndpoint {
     this.housekeepingListener = housekeepingListener;
     replicationMode = tableReplication.getReplicationMode();
     this.tableReplication = tableReplication;
+  }
+
+  /**
+   * Use {@link ReplicaFactory}
+   */
+  @VisibleForTesting
+  Replica(
+          ReplicaCatalog replicaCatalog,
+          HiveConf replicaHiveConf,
+          Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+          ReplicaTableFactory replicaTableFactory,
+          HousekeepingListener housekeepingListener,
+          ReplicaCatalogListener replicaCatalogListener,
+          TableReplication tableReplication,
+          int partitionBatchSize) {
+    super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
+    this.replicaCatalogListener = replicaCatalogListener;
+    tableFactory = replicaTableFactory;
+    this.housekeepingListener = housekeepingListener;
+    replicationMode = tableReplication.getReplicationMode();
+    this.tableReplication = tableReplication;
+    this.partitionBatchSize = partitionBatchSize;
   }
 
   public void updateMetadata(
@@ -175,7 +200,13 @@ public class Replica extends HiveEndpoint {
       if (!partitionsToCreate.isEmpty()) {
         LOG.info("Creating {} new partitions.", partitionsToCreate.size());
         try {
-          client.add_partitions(partitionsToCreate);
+          int counter = 0;
+          for (List<Partition> sublist : Lists.partition(partitionsToCreate, partitionBatchSize)) {
+            int start = counter * partitionBatchSize;
+            LOG.info("Creating partitions {} through {}", start, start + sublist.size() - 1);
+            client.add_partitions(sublist);
+            counter++;
+          }
         } catch (TException e) {
           throw new MetaStoreClientException("Unable to add partitions '"
               + partitionsToCreate
@@ -189,7 +220,13 @@ public class Replica extends HiveEndpoint {
       if (!partitionsToAlter.isEmpty()) {
         LOG.info("Altering {} existing partitions.", partitionsToAlter.size());
         try {
-          client.alter_partitions(replicaDatabaseName, replicaTableName, partitionsToAlter);
+          int counter = 0;
+          for (List<Partition> sublist : Lists.partition(partitionsToAlter, partitionBatchSize)) {
+            int start = counter * partitionBatchSize;
+            LOG.info("Altering partitions {} through {}", start, start + sublist.size() - 1);
+            client.alter_partitions(replicaDatabaseName, replicaTableName, sublist);
+            counter++;
+          }
         } catch (TException e) {
           throw new MetaStoreClientException("Unable to alter partitions '"
               + partitionsToAlter
@@ -203,7 +240,13 @@ public class Replica extends HiveEndpoint {
       if (!statisticsToSet.isEmpty()) {
         LOG.info("Setting column statistics for {} partitions.", statisticsToSet.size());
         try {
-          client.setPartitionColumnStatistics(new SetPartitionsStatsRequest(statisticsToSet));
+          int counter = 0;
+          for (List<ColumnStatistics> sublist : Lists.partition(statisticsToSet, partitionBatchSize)) {
+            int start = counter * partitionBatchSize;
+            LOG.info("Setting column statistics for partitions {} through {}", start, start + sublist.size() - 1);
+            client.setPartitionColumnStatistics(new SetPartitionsStatsRequest(sublist));
+            counter++;
+          }
         } catch (TException e) {
           throw new MetaStoreClientException(
               "Unable to set column statistics of replica table '" + replicaDatabaseName + "." + replicaTableName + "'",
