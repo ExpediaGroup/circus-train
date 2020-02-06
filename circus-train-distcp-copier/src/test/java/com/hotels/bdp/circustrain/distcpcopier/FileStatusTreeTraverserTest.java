@@ -38,7 +38,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.Iterables;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.distcpcopier.FileStatusTreeTraverser;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileStatusTreeTraverserTest {

@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.distcpcopier.RelativePathFunction;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RelativePathFunctionTest {

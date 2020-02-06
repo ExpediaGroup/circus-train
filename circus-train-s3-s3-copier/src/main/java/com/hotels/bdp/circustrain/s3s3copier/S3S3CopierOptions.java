@@ -24,6 +24,7 @@ import org.apache.commons.collections.MapUtils;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.transfer.TransferManagerConfiguration;
+
 import com.hotels.bdp.circustrain.aws.CannedAclUtils;
 
 public class S3S3CopierOptions {

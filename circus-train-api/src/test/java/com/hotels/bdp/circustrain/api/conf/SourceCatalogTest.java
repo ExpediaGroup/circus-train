@@ -28,7 +28,6 @@ import javax.validation.ValidatorFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.api.conf.SourceCatalog;
 
 public class SourceCatalogTest {
 

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThat;
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.s3mapreducecp.jcommander.PathConverter;
 
 public class PathConverterTest {
 

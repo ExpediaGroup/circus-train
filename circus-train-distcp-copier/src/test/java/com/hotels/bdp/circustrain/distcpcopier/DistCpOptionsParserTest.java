@@ -43,7 +43,6 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.apache.hadoop.tools.DistCpOptions.FileAttribute;
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.distcpcopier.DistCpOptionsParser;
 
 public class DistCpOptionsParserTest {
 

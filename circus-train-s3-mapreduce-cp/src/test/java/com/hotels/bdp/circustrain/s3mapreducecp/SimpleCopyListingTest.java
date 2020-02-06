@@ -21,13 +21,14 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecp;
 
-import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.createFile;
-import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.delete;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+
+import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.createFile;
+import static com.hotels.bdp.circustrain.s3mapreducecp.util.S3MapReduceCpTestUtils.delete;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.common.collect.Sets;
+
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.DuplicateFileException;
 import com.hotels.bdp.circustrain.s3mapreducecp.CopyListing.InvalidInputException;
 import com.hotels.bdp.circustrain.s3mapreducecp.util.PathUtil;

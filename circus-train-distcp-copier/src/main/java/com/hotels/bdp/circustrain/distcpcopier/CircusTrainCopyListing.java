@@ -15,12 +15,12 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import static org.apache.hadoop.io.SequenceFile.createWriter;
 import static org.apache.hadoop.io.SequenceFile.CompressionType.NONE;
 import static org.apache.hadoop.io.SequenceFile.Writer.compression;
 import static org.apache.hadoop.io.SequenceFile.Writer.file;
 import static org.apache.hadoop.io.SequenceFile.Writer.keyClass;
 import static org.apache.hadoop.io.SequenceFile.Writer.valueClass;
+import static org.apache.hadoop.io.SequenceFile.createWriter;
 import static org.apache.hadoop.tools.DistCpConstants.CONF_LABEL_COPY_LISTING_CLASS;
 
 import java.io.IOException;
