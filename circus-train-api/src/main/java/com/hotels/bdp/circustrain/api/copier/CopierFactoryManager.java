@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.s3mapreducecp.jcommander;
+package com.hotels.bdp.circustrain.api.copier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
-import org.junit.Test;
 
+public interface CopierFactoryManager {
 
-public class PathConverterTest {
-
-  private final PathConverter converter = new PathConverter();
-
-  @Test
-  public void typical() {
-    assertThat(converter.convert("s3://bucket/foo/bar"), is(new Path("s3://bucket/foo/bar")));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void invalid() {
-    converter.convert("s3:");
-  }
-
+  CopierFactory getCopierFactory(Path sourceLocation, Path replicaLocation, Map<String, Object> copierOptions);
 }

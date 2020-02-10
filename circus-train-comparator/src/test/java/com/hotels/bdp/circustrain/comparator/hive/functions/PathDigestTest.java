@@ -31,7 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.comparator.hive.functions.PathDigest;
 import com.hotels.bdp.circustrain.comparator.hive.wrappers.PathMetadata;
 
 @RunWith(MockitoJUnitRunner.class)

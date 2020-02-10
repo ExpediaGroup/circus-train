@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,8 @@ public class AvroSerDePartitionTransformationTest {
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
     HiveObjectUtils.updateSerDeUrl(partition, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
 
-    when(schemaCopier.copy("avroSourceUrl", "schema/eventId/")).thenReturn(destinationPath);
+    when(schemaCopier.copy("avroSourceUrl", "schema/eventId/", tableReplicationEvent, "eventId"))
+        .thenReturn(destinationPath);
     Partition result = transformation.transform(partition);
     assertThat(result.getParameters().get(AVRO_SCHEMA_URL_PARAMETER), is(destinationPathString));
   }
@@ -129,7 +130,8 @@ public class AvroSerDePartitionTransformationTest {
     transformation.tableReplicationStart(tableReplicationEvent, "eventId");
 
     HiveObjectUtils.updateSerDeUrl(partition, AVRO_SCHEMA_URL_PARAMETER, "avroSourceUrl");
-    when(schemaCopier.copy("avroSourceUrl", "schemaOverride/eventId/")).thenReturn(destinationPath);
+    when(schemaCopier.copy("avroSourceUrl", "schemaOverride/eventId/", tableReplicationEvent, "eventId"))
+        .thenReturn(destinationPath);
 
     Partition result = transformation.transform(partition);
     assertThat(result.getParameters().get(AVRO_SCHEMA_URL_PARAMETER), is(destinationPathString));

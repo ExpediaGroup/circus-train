@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   private String eventId;
   private String tableLocation;
   private Map<String, Object> avroSerdeConfigOverride = Collections.emptyMap();
+  private EventTableReplication tableReplication;
   static final String AVRO_SCHEMA_URL_PARAMETER = "avro.schema.url";
 
   protected AbstractAvroSerDeTransformation(TransformOptions transformOptions) {
@@ -50,6 +51,10 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
 
   protected String getEventId() {
     return eventId;
+  }
+
+  protected EventTableReplication getTableReplication() {
+    return tableReplication;
   }
 
   protected String getTableLocation() {
@@ -75,6 +80,7 @@ public abstract class AbstractAvroSerDeTransformation implements TableReplicatio
   @Override
   public void tableReplicationStart(EventTableReplication tableReplication, String eventId) {
     this.eventId = eventId;
+    this.tableReplication = tableReplication;
     tableLocation = tableReplication.getReplicaTable().getTableLocation();
     avroSerdeConfigOverride = Collections.emptyMap();
     Map<String, Object> transformOptions = tableReplication.getTransformOptions();

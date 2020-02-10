@@ -4,12 +4,12 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>hotels-oss-parent</artifactId>
-    <version>4.2.0</version>
+    <version>4.3.1</version>
   </parent>
 
   <artifactId>circus-train-parent</artifactId>
   <description>circus-train replicates data and hive metadata between various clusters</description>
-  <version>15.0.1-SNAPSHOT</version>
+  <version>15.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Circus Train Parent</name>
   <inceptionYear>2016</inceptionYear>

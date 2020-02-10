@@ -20,7 +20,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.hotels.bdp.circustrain.hive.view.transformation.TableTranslation;
 
 public class TableTranslationTest {
 

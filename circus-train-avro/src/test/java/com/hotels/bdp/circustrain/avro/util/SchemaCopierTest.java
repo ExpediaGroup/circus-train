@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,93 +15,89 @@
  */
 package com.hotels.bdp.circustrain.avro.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.event.EventTableReplication;
+import com.hotels.bdp.circustrain.api.metrics.Metrics;
+
+@RunWith(MockitoJUnitRunner.class)
 public class SchemaCopierTest {
 
   @Rule
   public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  private @Mock CopierFactoryManager copierFactoryManager;
+  private @Mock CopierFactory copierFactory;
+  private @Mock CopierOptions copierOptions;
+  private @Mock Copier copier;
+  private @Mock EventTableReplication eventTableReplication;
+  private SchemaCopier schemaCopier;
+  private final String eventId = "eventId";
+  private @Mock Metrics metrics;
+
+  @Before
+  public void setUp() {
+    schemaCopier = new SchemaCopier(new HiveConf(), copierFactoryManager, copierOptions);
+  }
 
   @Test
   public void copiedToCorrectDestination() throws IOException {
-    File source = temporaryFolder.newFile("test.txt");
+    Path source = new Path(temporaryFolder.newFile("test.txt").toURI());
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
-    FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
-    assertTrue(fs.exists(new Path(destination.toString() + "/test.txt")));
-  }
-
-  @Test
-  public void copiedCorrectFile() throws IOException {
-    List<String> randomData = new ArrayList<>();
-    randomData.add("foo");
-    randomData.add("baz");
-    File source = temporaryFolder.newFile("test.txt");
-    FileUtils.writeLines(source, randomData);
-    File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    File copy = new File(copier.copy(source.toString(), destination.toString()).toString());
-    assertTrue(FileUtils.contentEquals(source, copy));
-  }
-
-  @Test
-  public void copyDoesntDeleteOriginalFile() throws IOException {
-    File source = temporaryFolder.newFile("test.txt");
-    File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
-    FileSystem fs = new Path(destination.toString()).getFileSystem(new HiveConf());
-    assertTrue(fs.exists(new Path(source.toString())));
-  }
-
-  @Test
-  public void copiedFileAndNotDirectory() throws IOException {
-    File source = temporaryFolder.newFile("test.txt");
-    File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), destination.toString());
-    assertTrue(new File(destination.toString() + "/test.txt").isFile());
+    Path targetFile = new Path(destination.toString(), "test.txt");
+    Map<String, Object> copierOptionsMap = new HashMap<>();
+    copierOptionsMap.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+    when(copierFactoryManager.getCopierFactory(eq(source), eq(targetFile), eq(copierOptionsMap)))
+        .thenReturn(copierFactory);
+    when(copierFactory.newInstance(eq(eventId), eq(source), eq(targetFile), eq(copierOptionsMap))).thenReturn(copier);
+    when(copier.copy()).thenReturn(metrics);
+    when(metrics.getBytesReplicated()).thenReturn(123L);
+    Path result = schemaCopier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
+    assertThat(result, is(targetFile));
   }
 
   @Test(expected = NullPointerException.class)
   public void copyWithNullSourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(null, destination.toString());
+    schemaCopier.copy(null, destination.toString(), eventTableReplication, eventId);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptySourceParamThrowsException() throws IOException {
     File destination = temporaryFolder.newFolder();
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy("", destination.toString());
+    schemaCopier.copy("", destination.toString(), eventTableReplication, eventId);
   }
 
   @Test(expected = NullPointerException.class)
   public void copyWithNullDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), null);
+    schemaCopier.copy(source.toString(), null, eventTableReplication, eventId);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void copyWithEmptyDestinationParamThrowsException() throws IOException {
     File source = temporaryFolder.newFile("test.txt");
-    SchemaCopier copier = new SchemaCopier(new HiveConf(), new HiveConf());
-    copier.copy(source.toString(), "");
+    schemaCopier.copy(source.toString(), "", eventTableReplication, eventId);
   }
 }

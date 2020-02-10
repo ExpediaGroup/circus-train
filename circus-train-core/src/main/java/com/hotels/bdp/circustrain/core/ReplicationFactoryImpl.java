@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,18 @@
  */
 package com.hotels.bdp.circustrain.core;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.MetaStoreUtils;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.SourceTable;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.core.replica.Replica;
@@ -111,7 +108,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
           partitionPredicate, source, replica, eventIdFactory, replicaDatabaseName, replicaTableName);
       break;
     case FULL:
-      Map<String, Object> mergedCopierOptions = mergeCopierOptions(tableReplication.getCopierOptions());
+      Map<String, Object> mergedCopierOptions = tableReplication
+          .getMergedCopierOptions(copierOptions.getCopierOptions());
       replication = new PartitionedTableReplication(sourceDatabaseName, sourceTableName, partitionPredicate, source,
           replica, copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
           mergedCopierOptions, copierListener);
@@ -144,7 +142,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
           replica, eventIdFactory, replicaDatabaseName, replicaTableName);
       break;
     case FULL:
-      Map<String, Object> mergedCopierOptions = mergeCopierOptions(tableReplication.getCopierOptions());
+      Map<String, Object> mergedCopierOptions = tableReplication
+          .getMergedCopierOptions(copierOptions.getCopierOptions());
       replication = new UnpartitionedTableReplication(sourceDatabaseName, sourceTableName, source, replica,
           copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
           mergedCopierOptions, copierListener);
@@ -171,18 +170,6 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
           .format("Cannot replicate view %s. Only %s is supported for views",
               tableReplication.getSourceTable().getQualifiedName(), ReplicationMode.METADATA_MIRROR.name()));
     }
-  }
-
-  @VisibleForTesting
-  Map<String, Object> mergeCopierOptions(Map<String, Object> overridingCopierOptions) {
-    Map<String, Object> mergedCopierOptions = new HashMap<>();
-    if (copierOptions.getCopierOptions() != null) {
-      mergedCopierOptions.putAll(copierOptions.getCopierOptions());
-    }
-    if (overridingCopierOptions != null) {
-      mergedCopierOptions.putAll(overridingCopierOptions);
-    }
-    return ImmutableMap.copyOf(mergedCopierOptions);
   }
 
 }

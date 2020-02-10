@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableReplication(), is(tableReplication));
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
@@ -79,11 +80,13 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableReplication(), is(tableReplication));
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
     EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleSuccess(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableReplication(), is(tableReplication2));
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
@@ -108,6 +111,7 @@ public class AbstractAvroSerDeTransformationTest {
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
+    assertThat(transformation.getTableReplication(), is(tableReplication));
   }
 
   @Test
@@ -116,11 +120,13 @@ public class AbstractAvroSerDeTransformationTest {
     runLifeCycleSuccess(tableReplication);
     assertThat("overrideBaseUrl", is(transformation.getAvroSchemaDestinationFolder()));
     assertThat(EVENT_ID, is(transformation.getEventId()));
+    assertThat(transformation.getTableReplication(), is(tableReplication));
     assertThat(TABLE_LOCATION, is(transformation.getTableLocation()));
     EventTableReplication tableReplication2 = mockTableReplication("overrideBaseUrl2");
     runLifeCycleFailure(tableReplication2);
     assertThat(transformation.getAvroSchemaDestinationFolder(), is("overrideBaseUrl2"));
     assertThat(transformation.getEventId(), is(EVENT_ID));
+    assertThat(transformation.getTableReplication(), is(tableReplication2));
     assertThat(transformation.getTableLocation(), is(TABLE_LOCATION));
   }
 
@@ -139,7 +145,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testReplicationOverrideNullTransformOptions() {;
+  public void testReplicationOverrideNullTransformOptions() {
     transformation = new DummyAvroSerDeTransformation(new TransformOptions());
     EventTableReplication tableReplication = mockTableReplication("overrideBaseUrl");
     runLifeCycleSuccess(tableReplication);
@@ -150,7 +156,7 @@ public class AbstractAvroSerDeTransformationTest {
   }
 
   @Test
-  public void testNullTransformOptions() {;
+  public void testNullTransformOptions() {
     transformation = new DummyAvroSerDeTransformation(new TransformOptions());
     EventTableReplication tableReplication = mockTableReplication(null);
     runLifeCycleSuccess(tableReplication);
