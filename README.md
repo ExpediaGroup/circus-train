@@ -95,8 +95,7 @@ Circus Train returns the following exit codes:
 * _-2_ if at least one of the configured replications succeeded but one or more of the other replications failed.
 
 ## Logging
-Circus Train uses [Log4J](https://logging.apache.org/log4j/) for logging, to configure it to use a custom Log4J file add the path to the logging configuration file 
-to the Circus Train configuration:
+Circus Train uses [Log4J](https://logging.apache.org/log4j/) for logging, to configure it to use a custom Log4J file add the path to the logging configuration file to the Circus Train configuration:
 
     logging:
         config: file:/home/foo/circus-train/log4j.xml
