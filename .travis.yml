@@ -1,9 +1,8 @@
 language: java
 jdk:
-  - openjdk7
+  - openjdk8
 os:
   - linux
-dist: trusty
 cache:
   directories:
     - ~/.m2/repository
@@ -12,4 +11,4 @@ install:
 before_script:
   - echo "MAVEN_OPTS=${TEST_MEM_SETTINGS}" > ~/.mavenrc
 script:
-  - mvn cobertura:cobertura coveralls:report --batch-mode --activate-profiles travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
+  - mvn jacoco:report coveralls:report --batch-mode --activate-profiles travis -DrepoToken=${COVERALLS_REPO_TOKEN} -Dtest.arguments="${TEST_MEM_SETTINGS}"
