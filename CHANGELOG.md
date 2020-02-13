@@ -1,6 +1,7 @@
 ## [16.0.0] - TBD
 ### Changed
 * Minimum supported Java version is now 8 (was 7).
+* `hotels-oss-parent` version to 5.0.0 (was 4.3.1).
 
 ## [15.1.1] - 2020-02-06
 ### Fixed
