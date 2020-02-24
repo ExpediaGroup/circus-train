@@ -1,7 +1,9 @@
-## [15.1.2] - 2020-02-24
+## [15.2.0] - TBD
 ### Changed
-* Update aws sdk version to `1.11.728`.
-* Update apache httpcomponents version to `4.5.11`.
+* Updated `aws-java-sdk-s3` version to 1.11.728 (was 1.11.505).
+* Updated `aws-java-sdk-sns` version to 1.11.728 (was 1.11.505).
+* Updated `aws-java-sdk-core` version to 1.11.728 (was 1.11.505).
+* Updated `httpclient` version to 4.5.11 (was 4.5.5).
 
 
 ## [15.1.1] - 2020-02-06
