@@ -5,7 +5,6 @@
 * Updated `aws-java-sdk-core` version to 1.11.728 (was 1.11.505).
 * Updated `httpclient` version to 4.5.11 (was 4.5.5).
 
-
 ## [15.1.1] - 2020-02-06
 ### Fixed
 * When replicating tables with large numbers of partitions, `Replica.updateMetadata` now calls add/alter partition in batches of 1000. See [#166](https://github.com/HotelsDotCom/circus-train/issues/166). 
