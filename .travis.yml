@@ -11,4 +11,4 @@ install:
 before_script:
   - echo "MAVEN_OPTS=${TEST_MEM_SETTINGS}" > ~/.mavenrc
 script:
-  - mvn package jacoco:report coveralls:report --batch-mode -Dtest.arguments="${TEST_MEM_SETTINGS}" -P coveralls --quiet
+  - mvn jacoco:report coveralls:report --batch-mode -Dtest.arguments="${TEST_MEM_SETTINGS}"

@@ -9,7 +9,7 @@
 
   <artifactId>circus-train-parent</artifactId>
   <description>circus-train replicates data and hive metadata between various clusters</description>
-  <version>15.1.2-SNAPSHOT</version>
+  <version>16.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Circus Train Parent</name>
   <inceptionYear>2016</inceptionYear>
@@ -44,7 +44,7 @@
   </modules>
 
   <properties>
-    <jdk.version>1.7</jdk.version>
+    <jdk.version>1.8</jdk.version>
     <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
