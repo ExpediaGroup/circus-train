@@ -2,6 +2,8 @@
 ### Changed
 * Minimum supported Java version is now 8 (was 7).
 * `hotels-oss-parent` version to 5.0.0 (was 4.3.1).
+* Updated property `aws-jdk.version` to 1.11.728 (was 1.11.505).
+* Updated property `httpcomponents.httpclient.version` to 4.5.11 (was 4.5.5).
 
 ## [15.1.1] - 2020-02-06
 ### Fixed
