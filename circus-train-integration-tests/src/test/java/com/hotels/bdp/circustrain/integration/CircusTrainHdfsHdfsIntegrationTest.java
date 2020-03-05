@@ -44,6 +44,7 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePar
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -54,6 +55,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -1398,4 +1401,69 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     runner.run(config.getAbsolutePath());
   }
 
+  @Test
+  public void partitionedTableColumnAdditionInStruct() throws Exception {
+    Schema schema = SchemaBuilder
+        .builder("name.space")
+        .record(PARTITIONED_TABLE)
+        .fields()
+        .requiredInt("id")
+        .name("details")
+        .type()
+        .record("details_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .endRecord()
+        .noDefault()
+        .endRecord();
+    File schemaFile = writeSchema(schema, 1);
+
+    helper.createAvroPartitionedTableWithStruct(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, schemaFile);
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+
+    File config = dataFolder.getFile("partitioned-single-table-one-partition.yml");
+    exit.expectSystemExitWithStatus(0);
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        Schema schemaV2 = SchemaBuilder
+            .builder("name.space")
+            .record(PARTITIONED_TABLE)
+            .fields()
+            .requiredInt("id")
+            .name("details")
+            .type()
+            .record("details_struct")
+            .fields()
+            .requiredString("name")
+            .requiredString("city")
+            .requiredString("dob")
+            .endRecord()
+            .noDefault()
+            .endRecord();
+        File schemaFileV2 = writeSchema(schemaV2, 2);
+
+        helper.evolveAvroTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schemaV2, schemaFileV2);
+
+        runner.run(config.getAbsolutePath());
+
+        int x = 10;
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  private File writeSchema(Schema schema, int version) throws IOException {
+    File schemaLocation = temporaryFolder.newFile("avroSchema" + version + ".avsc");
+    Files.write(schemaLocation.toPath(), schema.toString(true).getBytes());
+    return schemaLocation;
+  }
 }

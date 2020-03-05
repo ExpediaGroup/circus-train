@@ -124,8 +124,9 @@ public final class TestUtils {
       HiveMetaStoreClient metaStoreClient,
       String database,
       String table,
-      URI location)
-    throws Exception {
+      URI location,
+      List<FieldSchema> columns)
+      throws Exception {
 
     Table hiveTable = new Table();
     hiveTable.setDbName(database);
@@ -136,7 +137,7 @@ public final class TestUtils {
     hiveTable.setPartitionKeys(PARTITION_COLUMNS);
 
     StorageDescriptor sd = new StorageDescriptor();
-    sd.setCols(DATA_COLUMNS);
+    sd.setCols(columns);
     sd.setLocation(location.toString());
     sd.setParameters(new HashMap<String, String>());
     sd.setInputFormat(TextInputFormat.class.getName());
@@ -155,6 +156,15 @@ public final class TestUtils {
     metaStoreClient.updateTableColumnStatistics(new ColumnStatistics(statsDesc, statsObj));
 
     return hiveTable;
+  }
+
+  public static Table createPartitionedTable(
+      HiveMetaStoreClient metaStoreClient,
+      String database,
+      String table,
+      URI location)
+    throws Exception {
+    return createPartitionedTable(metaStoreClient, database, table, location, DATA_COLUMNS);
   }
 
   public static Partition newTablePartition(Table hiveTable, List<String> values, URI location) {

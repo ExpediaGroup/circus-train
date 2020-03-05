@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,40 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePar
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPartition;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.time.Clock;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.CodecFactory;
+import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
+import org.apache.hadoop.hive.metastore.Warehouse;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.CircusTrainTableParameter;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
+import com.hotels.road.hive.metastore.AvroHiveTableStrategy;
+import com.hotels.road.hive.metastore.SchemaUriResolver;
+import com.hotels.road.truck.park.avro.AvroRecordWriter;
+import com.hotels.road.truck.park.spi.RecordWriter;
 
 public class IntegrationTestHelper {
+
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
 
   public static final String DATABASE = "ct_database";
@@ -65,13 +84,120 @@ public class IntegrationTestHelper {
     URI partitionAsia = URI.create(sourceTableUri + "/continent=Asia");
     URI partitionChina = URI.create(partitionAsia + "/country=China");
     File dataFileChina = new File(partitionChina.getPath(), PART_00000);
-    FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tshanghai\tmilan\n");
+    FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tpatrick\tshanghai\n");
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
                     .asList(newTablePartition(hiveTable, Arrays.asList("Europe", "UK"), partitionUk),
                         newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
+  }
+
+  void createAvroPartitionedTableWithStruct(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
+    List<FieldSchema> columns = Arrays
+        .asList(
+            new FieldSchema("id", "bigint", ""),
+            new FieldSchema("details", "struct", "")
+        );
+    Table table = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
+        .newHiveTable(DATABASE, PARTITIONED_TABLE, "country", sourceTableUri.getPath(), schema, 1);
+    URI partitionUk = createData(sourceTableUri, schema, "UK", 1, "adam", "london", null);
+    URI partitionChina = createData(sourceTableUri, schema, "China", 2, "zhang", "shanghai", null);
+    metaStoreClient.createTable(table);
+    LOG
+        .info(">>>> Partitions added: {}",
+            metaStoreClient
+                .add_partitions(Arrays
+                    .asList(newTablePartition(table, Arrays.asList("UK"), partitionUk),
+                        newTablePartition(table, Arrays.asList("China"), partitionChina))));
+  }
+
+  void evolveAvroTable(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
+    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+    if (!table.isSetParameters()) {
+      table.setParameters(new HashMap<>());
+    }
+    Table alterHiveTable = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
+        .alterHiveTable(table, schema, 2);
+    metaStoreClient.alter_table(DATABASE, PARTITIONED_TABLE, alterHiveTable);
+    Table alteredTable = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+    URI partitionUk = createData(sourceTableUri, schema, "UK", 1, "adam", "london", "22/09/1992");
+    URI partitionChina = createData(sourceTableUri, schema, "China", 2, "zhang", "shanghai", "23/09/1992");
+    dropTablePartitions(alteredTable);
+    LOG
+        .info(">>>> Partitions added: {}",
+            metaStoreClient
+                .add_partitions(Arrays
+                    .asList(newTablePartition(alteredTable, Arrays.asList("UK"), partitionUk),
+                        newTablePartition(alteredTable, Arrays.asList("China"), partitionChina))));
+  }
+
+  private void dropTablePartitions(Table alteredTable) throws TException {
+    PartitionIterator partitionIterator = new PartitionIterator(metaStoreClient, alteredTable, (short) 1000);
+    while (partitionIterator.hasNext()) {
+      Partition partition = partitionIterator.next();
+      List<String> values = partition.getValues();
+      List<FieldSchema> partitionKeys = alteredTable.getPartitionKeys();
+      String partitionName = Warehouse.makePartName(partitionKeys, values);
+
+      metaStoreClient.dropPartition(
+          DATABASE,
+          PARTITIONED_TABLE,
+          partitionName,
+          false);
+    }
+  }
+
+  private URI createData(
+      URI sourceTableUri,
+      Schema schema,
+      String country,
+      int id,
+      String name,
+      String city,
+      String dob) throws IOException {
+    GenericData.Record record = new GenericData.Record(schema);
+    Schema detailsSchema = schema.getField("details").schema();
+    GenericData.Record details = new GenericData.Record(detailsSchema);
+    details.put("name", name);
+    details.put("city", city);
+    if (dob != null) {
+      details.put("dob", dob);
+    }
+    record.put("id", id);
+    record.put("details", details);
+
+    URI partitionCountry = URI.create(sourceTableUri + "/country=" + country);
+    String path = partitionCountry.getPath();
+    File parentFolder = new File(path);
+    parentFolder.mkdirs();
+    File partitionFile = new File(parentFolder, "avro0000");
+    if (partitionFile.exists()) {
+      partitionFile.delete();
+    }
+    partitionFile.createNewFile();
+    CodecFactory codeFactory = CodecFactory.nullCodec();
+    RecordWriter writer = new AvroRecordWriter.Factory(codeFactory).create(schema, new FileOutputStream(partitionFile));
+    try {
+      writer.write(record);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    writer.flush();
+    return partitionCountry;
+  }
+
+  private class FileBasedSchemaUriResolver implements SchemaUriResolver {
+    private final File schemaFile;
+
+    public FileBasedSchemaUriResolver(File schemaFile) {
+      this.schemaFile = schemaFile;
+    }
+
+    @Override
+    public URI resolve(Schema schema, String road, int version) {
+      return schemaFile.toURI();
+    }
   }
 
   void createUnpartitionedTable(URI sourceTableUri) throws Exception {
@@ -154,5 +280,4 @@ public class IntegrationTestHelper {
     metaStoreClient.alter_table(database, tableName, table);
     return table;
   }
-
 }
