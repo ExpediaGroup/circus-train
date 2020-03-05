@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package com.hotels.bdp.circustrain.s3s3copier;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -159,7 +162,17 @@ public class S3S3Copier implements Copier {
         .info("Initialising all copy jobs");
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
-    srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
+
+    Map<String, Object> srcOptions = new HashMap<>();
+    srcOptions.put(S3S3CopierOptions.Keys.CANNED_ACL.keyName(), s3s3CopierOptions.getCannedAcl());
+    srcOptions.put(S3S3CopierOptions.Keys.MAX_COPY_ATTEMPTS.keyName(), s3s3CopierOptions.getMaxCopyAttempts());
+    srcOptions.put(S3S3CopierOptions.Keys.MULTIPART_COPY_PART_SIZE.keyName(), s3s3CopierOptions.getMultipartCopyPartSize());
+    srcOptions.put(S3S3CopierOptions.Keys.MULTIPART_COPY_THRESHOLD.keyName(), s3s3CopierOptions.getMultipartCopyThreshold());
+    srcOptions.put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3s3CopierOptions.getS3Endpoint());
+    srcOptions.put(S3S3CopierOptions.Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), s3s3CopierOptions.isS3ServerSideEncryption());
+    S3S3CopierOptions srcCopierOptions = new S3S3CopierOptions(srcOptions);
+    srcClient = s3ClientFactory.newInstance(sourceBase, srcCopierOptions);
+
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
@@ -291,8 +304,9 @@ public class S3S3Copier implements Copier {
               .info("Copying '{}/{}' failed, adding to retry list.",
                   copyObjectRequest.getSourceBucketName(),
                   copyObjectRequest.getSourceKey());
+
           LOG
-              .debug("Copy failed with exception:", e);
+              .error("Copy failed with exception:", e);
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {

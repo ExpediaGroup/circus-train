@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       AmazonS3URI uri,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialProviderChain) {
-    LOG.debug("trying to get a client for uri '{}'", uri);
+    LOG.info("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, credentialProviderChain);
     try {
 
@@ -76,7 +76,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
        **/
 
       String bucketRegion = regionForUri(globalClient, uri);
-      LOG.debug("Bucket region: {}", bucketRegion);
+      LOG.info("Bucket region: {}", bucketRegion);
       return newInstance(bucketRegion, s3s3CopierOptions, credentialProviderChain);
     } catch (IllegalArgumentException e) {
       LOG.warn("Using global (non region specific) client", e);
@@ -136,10 +136,13 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole) {
     if (assumedRole != null) {
+      LOG.info("Creating credential chain for assuming role {}", assumedRole);
       return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole));
     } else if (security.getCredentialProvider() != null) {
+      LOG.info("Creating credential chain for assuming role with cred provider {}", security.getCredentialProvider());
       return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
     }
+    LOG.info("Creating empty credential provider chain");
     return new HadoopAWSCredentialProviderChain();
   }
 
