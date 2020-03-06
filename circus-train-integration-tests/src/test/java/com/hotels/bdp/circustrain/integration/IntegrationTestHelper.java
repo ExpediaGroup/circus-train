@@ -100,16 +100,16 @@ public class IntegrationTestHelper {
             new FieldSchema("details", "struct", "")
         );
     Table table = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
-        .newHiveTable(DATABASE, PARTITIONED_TABLE, "country", sourceTableUri.getPath(), schema, 1);
-    URI partitionUk = createData(sourceTableUri, schema, "UK", 1, "adam", "london", null);
-    URI partitionChina = createData(sourceTableUri, schema, "China", 2, "zhang", "shanghai", null);
+        .newHiveTable(DATABASE, PARTITIONED_TABLE, "hour", sourceTableUri.getPath(), schema, 1);
+    URI partitionUk = createData(sourceTableUri, schema, "1", 1, "adam", "london", null);
+    URI partitionChina = createData(sourceTableUri, schema, "2", 2, "zhang", "shanghai", null);
     metaStoreClient.createTable(table);
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
-                    .asList(newTablePartition(table, Arrays.asList("UK"), partitionUk),
-                        newTablePartition(table, Arrays.asList("China"), partitionChina))));
+                    .asList(newTablePartition(table, Arrays.asList("1"), partitionUk),
+                        newTablePartition(table, Arrays.asList("2"), partitionChina))));
   }
 
   void evolveAvroTable(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
@@ -121,37 +121,20 @@ public class IntegrationTestHelper {
         .alterHiveTable(table, schema, 2);
     metaStoreClient.alter_table(DATABASE, PARTITIONED_TABLE, alterHiveTable);
     Table alteredTable = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-    URI partitionUk = createData(sourceTableUri, schema, "UK", 1, "adam", "london", "22/09/1992");
-    URI partitionChina = createData(sourceTableUri, schema, "China", 2, "zhang", "shanghai", "23/09/1992");
-    dropTablePartitions(alteredTable);
+    URI partitionUk = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", "22/09/1992");
+    URI partitionChina = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", "23/09/1992");
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
-                    .asList(newTablePartition(alteredTable, Arrays.asList("UK"), partitionUk),
-                        newTablePartition(alteredTable, Arrays.asList("China"), partitionChina))));
-  }
-
-  private void dropTablePartitions(Table alteredTable) throws TException {
-    PartitionIterator partitionIterator = new PartitionIterator(metaStoreClient, alteredTable, (short) 1000);
-    while (partitionIterator.hasNext()) {
-      Partition partition = partitionIterator.next();
-      List<String> values = partition.getValues();
-      List<FieldSchema> partitionKeys = alteredTable.getPartitionKeys();
-      String partitionName = Warehouse.makePartName(partitionKeys, values);
-
-      metaStoreClient.dropPartition(
-          DATABASE,
-          PARTITIONED_TABLE,
-          partitionName,
-          false);
-    }
+                    .asList(newTablePartition(alteredTable, Arrays.asList("3"), partitionUk),
+                        newTablePartition(alteredTable, Arrays.asList("4"), partitionChina))));
   }
 
   private URI createData(
       URI sourceTableUri,
       Schema schema,
-      String country,
+      String hour,
       int id,
       String name,
       String city,
@@ -167,14 +150,14 @@ public class IntegrationTestHelper {
     record.put("id", id);
     record.put("details", details);
 
-    URI partitionCountry = URI.create(sourceTableUri + "/country=" + country);
-    String path = partitionCountry.getPath();
+    URI partition = URI.create(sourceTableUri + "/hour=" + hour);
+    String path = partition.getPath();
     File parentFolder = new File(path);
     parentFolder.mkdirs();
     File partitionFile = new File(parentFolder, "avro0000");
-    if (partitionFile.exists()) {
-      partitionFile.delete();
-    }
+//    if (partitionFile.exists()) {
+//      partitionFile.delete();
+//    }
     partitionFile.createNewFile();
     CodecFactory codeFactory = CodecFactory.nullCodec();
     RecordWriter writer = new AvroRecordWriter.Factory(codeFactory).create(schema, new FileOutputStream(partitionFile));
@@ -184,7 +167,7 @@ public class IntegrationTestHelper {
       e.printStackTrace();
     }
     writer.flush();
-    return partitionCountry;
+    return partition;
   }
 
   private class FileBasedSchemaUriResolver implements SchemaUriResolver {
