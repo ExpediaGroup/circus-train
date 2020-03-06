@@ -136,10 +136,10 @@ public class IntegrationTestHelper {
     Schema detailsSchema = schema.getField("details").schema();
     GenericData.Record details = new GenericData.Record(detailsSchema);
     details.put("name", name);
-    details.put("city", city);
     if (dob != null) {
       details.put("dob", dob);
     }
+    details.put("city", city);
     record.put("id", id);
     record.put("details", details);
 
