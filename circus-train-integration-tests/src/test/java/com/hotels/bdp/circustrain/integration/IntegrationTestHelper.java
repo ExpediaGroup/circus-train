@@ -94,41 +94,34 @@ public class IntegrationTestHelper {
   }
 
   void createAvroPartitionedTableWithStruct(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
-    List<FieldSchema> columns = Arrays
-        .asList(
-            new FieldSchema("id", "bigint", ""),
-            new FieldSchema("details", "struct", "")
-        );
     Table table = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
         .newHiveTable(DATABASE, PARTITIONED_TABLE, "hour", sourceTableUri.getPath(), schema, 1);
-    URI partitionUk = createData(sourceTableUri, schema, "1", 1, "adam", "london", null);
-    URI partitionChina = createData(sourceTableUri, schema, "2", 2, "zhang", "shanghai", null);
+    URI partition1 = createData(sourceTableUri, schema, "1", 1, "adam", "london", null);
+    URI partition2 = createData(sourceTableUri, schema, "2", 2, "zhang", "shanghai", null);
     metaStoreClient.createTable(table);
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
-                    .asList(newTablePartition(table, Arrays.asList("1"), partitionUk),
-                        newTablePartition(table, Arrays.asList("2"), partitionChina))));
+                    .asList(newTablePartition(table, Arrays.asList("1"), partition1),
+                        newTablePartition(table, Arrays.asList("2"), partition2))));
   }
 
   void evolveAvroTable(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
-    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-    if (!table.isSetParameters()) {
-      table.setParameters(new HashMap<>());
-    }
-    Table alterHiveTable = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
-        .alterHiveTable(table, schema, 2);
-    metaStoreClient.alter_table(DATABASE, PARTITIONED_TABLE, alterHiveTable);
+//    Doesn't seem to matter at all if we do an alter table command here
+//    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+//    Table alterHiveTable = new AvroHiveTableStrategy((new FileBasedSchemaUriResolver(schemaFile)), Clock.systemUTC())
+//        .alterHiveTable(table, schema, 2);
+//    metaStoreClient.alter_table(DATABASE, PARTITIONED_TABLE, alterHiveTable);
     Table alteredTable = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-    URI partitionUk = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", "22/09/1992");
-    URI partitionChina = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", "23/09/1992");
+    URI partition3 = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", "22/09/1992");
+    URI partition4 = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", "23/09/1992");
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
-                    .asList(newTablePartition(alteredTable, Arrays.asList("3"), partitionUk),
-                        newTablePartition(alteredTable, Arrays.asList("4"), partitionChina))));
+                    .asList(newTablePartition(alteredTable, Arrays.asList("3"), partition3),
+                        newTablePartition(alteredTable, Arrays.asList("4"), partition4))));
   }
 
   private URI createData(
@@ -155,9 +148,6 @@ public class IntegrationTestHelper {
     File parentFolder = new File(path);
     parentFolder.mkdirs();
     File partitionFile = new File(parentFolder, "avro0000");
-//    if (partitionFile.exists()) {
-//      partitionFile.delete();
-//    }
     partitionFile.createNewFile();
     CodecFactory codeFactory = CodecFactory.nullCodec();
     RecordWriter writer = new AvroRecordWriter.Factory(codeFactory).create(schema, new FileOutputStream(partitionFile));
