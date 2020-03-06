@@ -1444,8 +1444,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             .record("details_struct")
             .fields()
             .requiredString("name")
+            .requiredInt("dob")
             .requiredString("city")
-            .requiredString("dob")
             .endRecord()
             .noDefault()
             .endRecord();

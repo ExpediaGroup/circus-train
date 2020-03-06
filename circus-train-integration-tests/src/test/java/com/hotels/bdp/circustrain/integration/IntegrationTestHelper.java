@@ -19,37 +19,29 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePar
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPartition;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Clock;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
-import org.apache.avro.file.CodecFactory;
 import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
-import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
-import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.thrift.TException;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.CircusTrainTableParameter;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
-import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
-import com.hotels.road.hive.metastore.AvroHiveTableStrategy;
-import com.hotels.road.hive.metastore.SchemaUriResolver;
-import com.hotels.road.truck.park.avro.AvroRecordWriter;
-import com.hotels.road.truck.park.spi.RecordWriter;
 
 public class IntegrationTestHelper {
 
@@ -94,11 +86,16 @@ public class IntegrationTestHelper {
   }
 
   void createAvroPartitionedTableWithStruct(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
-    Table table = new AvroHiveTableStrategy(new FileBasedSchemaUriResolver(schemaFile), Clock.systemUTC())
-        .newHiveTable(DATABASE, PARTITIONED_TABLE, "hour", sourceTableUri.getPath(), schema, 1);
+    List<FieldSchema> columns = Arrays.asList(
+        new FieldSchema("id", "string", ""),
+        new FieldSchema("details", "struct", "")
+    );
+    List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
+    Table table = TestUtils
+        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri, columns, partitionKeys,
+            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe");
     URI partition1 = createData(sourceTableUri, schema, "1", 1, "adam", "london", null);
     URI partition2 = createData(sourceTableUri, schema, "2", 2, "zhang", "shanghai", null);
-    metaStoreClient.createTable(table);
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
@@ -108,20 +105,15 @@ public class IntegrationTestHelper {
   }
 
   void evolveAvroTable(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
-//    Doesn't seem to matter at all if we do an alter table command here
-//    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-//    Table alterHiveTable = new AvroHiveTableStrategy((new FileBasedSchemaUriResolver(schemaFile)), Clock.systemUTC())
-//        .alterHiveTable(table, schema, 2);
-//    metaStoreClient.alter_table(DATABASE, PARTITIONED_TABLE, alterHiveTable);
-    Table alteredTable = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-    URI partition3 = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", "22/09/1992");
-    URI partition4 = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", "23/09/1992");
+    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+    URI partition3 = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", 22);
+    URI partition4 = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", 23);
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
-                    .asList(newTablePartition(alteredTable, Arrays.asList("3"), partition3),
-                        newTablePartition(alteredTable, Arrays.asList("4"), partition4))));
+                    .asList(newTablePartition(table, Arrays.asList("3"), partition3),
+                        newTablePartition(table, Arrays.asList("4"), partition4))));
   }
 
   private URI createData(
@@ -131,7 +123,7 @@ public class IntegrationTestHelper {
       int id,
       String name,
       String city,
-      String dob) throws IOException {
+      Integer dob) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
     Schema detailsSchema = schema.getField("details").schema();
     GenericData.Record details = new GenericData.Record(detailsSchema);
@@ -147,30 +139,20 @@ public class IntegrationTestHelper {
     String path = partition.getPath();
     File parentFolder = new File(path);
     parentFolder.mkdirs();
-    File partitionFile = new File(parentFolder, "avro0000");
-    partitionFile.createNewFile();
-    CodecFactory codeFactory = CodecFactory.nullCodec();
-    RecordWriter writer = new AvroRecordWriter.Factory(codeFactory).create(schema, new FileOutputStream(partitionFile));
+    File partitionFile = new File(parentFolder, "parquet0000");
+    Path filePath = new Path(partitionFile.toURI());
+    ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(filePath)
+        .withSchema(schema)
+        .withConf(new Configuration())
+        .build();
+
     try {
       writer.write(record);
     } catch (IOException e) {
       e.printStackTrace();
     }
-    writer.flush();
+    writer.close();
     return partition;
-  }
-
-  private class FileBasedSchemaUriResolver implements SchemaUriResolver {
-    private final File schemaFile;
-
-    public FileBasedSchemaUriResolver(File schemaFile) {
-      this.schemaFile = schemaFile;
-    }
-
-    @Override
-    public URI resolve(Schema schema, String road, int version) {
-      return schemaFile.toURI();
-    }
   }
 
   void createUnpartitionedTable(URI sourceTableUri) throws Exception {
