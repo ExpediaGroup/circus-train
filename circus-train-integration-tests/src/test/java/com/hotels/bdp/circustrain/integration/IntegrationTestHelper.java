@@ -21,9 +21,9 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPart
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -35,6 +35,8 @@ import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetInputFormat;
+import org.apache.parquet.hadoop.ParquetOutputFormat;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,35 +87,25 @@ public class IntegrationTestHelper {
                         newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
   }
 
-  void createAvroPartitionedTableWithStruct(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
+  Table createParquetPartitionedTableWithStruct(
+      URI sourceTableUri,
+      Schema schema,
+      String structType,
+      Map<String, String> structData,
+      int version) throws Exception {
     List<FieldSchema> columns = Arrays.asList(
         new FieldSchema("id", "string", ""),
-        new FieldSchema("details", "struct", "")
+        new FieldSchema("details", structType, "")
     );
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
     Table table = TestUtils
         .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri, columns, partitionKeys,
-            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe");
-    URI partition1 = createData(sourceTableUri, schema, "1", 1, "adam", "london", null);
-    URI partition2 = createData(sourceTableUri, schema, "2", 2, "zhang", "shanghai", null);
-    LOG
-        .info(">>>> Partitions added: {}",
-            metaStoreClient
-                .add_partitions(Arrays
-                    .asList(newTablePartition(table, Arrays.asList("1"), partition1),
-                        newTablePartition(table, Arrays.asList("2"), partition2))));
-  }
-
-  void evolveAvroTable(URI sourceTableUri, Schema schema, File schemaFile) throws Exception {
-    Table table = metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
-    URI partition3 = createData(sourceTableUri, schema, "3", 3, "suzy", "glasgow", 22);
-    URI partition4 = createData(sourceTableUri, schema, "4", 4, "xi", "beijing", 23);
-    LOG
-        .info(">>>> Partitions added: {}",
-            metaStoreClient
-                .add_partitions(Arrays
-                    .asList(newTablePartition(table, Arrays.asList("3"), partition3),
-                        newTablePartition(table, Arrays.asList("4"), partition4))));
+            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
+            ParquetOutputFormat.class.getName());
+    URI partition = createData(sourceTableUri, schema, Integer.toString(version), version, structData);
+    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
+        Arrays.asList(Integer.toString(version)), partition)));
+    return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
   }
 
   private URI createData(
@@ -121,17 +113,11 @@ public class IntegrationTestHelper {
       Schema schema,
       String hour,
       int id,
-      String name,
-      String city,
-      Integer dob) throws IOException {
+      Map<String, String> detailsStruct) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
     Schema detailsSchema = schema.getField("details").schema();
     GenericData.Record details = new GenericData.Record(detailsSchema);
-    details.put("name", name);
-    if (dob != null) {
-      details.put("dob", dob);
-    }
-    details.put("city", city);
+    detailsStruct.forEach(details::put);
     record.put("id", id);
     record.put("details", details);
 

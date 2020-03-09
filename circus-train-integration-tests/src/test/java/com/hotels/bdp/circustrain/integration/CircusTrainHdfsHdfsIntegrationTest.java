@@ -44,7 +44,6 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePar
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -52,6 +51,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1417,9 +1417,17 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         .endRecord()
         .noDefault()
         .endRecord();
-    File schemaFile = writeSchema(schema, 1);
 
-    helper.createAvroPartitionedTableWithStruct(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, schemaFile);
+    HashMap<String, String> structData = new HashMap<>();
+    structData.put("name", "adam");
+    structData.put("city", "blackpool");
+
+    helper.createParquetPartitionedTableWithStruct(
+        toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        schema,
+        "struct<name:string, city:string>",
+        structData,
+        1);
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     CircusTrainRunner runner = CircusTrainRunner
@@ -1444,14 +1452,31 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             .record("details_struct")
             .fields()
             .requiredString("name")
-            .requiredInt("dob")
             .requiredString("city")
+            .optionalString("dob")
             .endRecord()
             .noDefault()
             .endRecord();
-        File schemaFileV2 = writeSchema(schemaV2, 2);
 
-        helper.evolveAvroTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schemaV2, schemaFileV2);
+        HashMap<String, String> structData = new HashMap<>();
+        structData.put("name", "adam");
+        structData.put("city", "blackpool");
+        structData.put("dob", "22/09/1992");
+
+        sourceCatalog.client().dropTable(DATABASE, PARTITIONED_TABLE, false, false);
+
+        Table table = helper.createParquetPartitionedTableWithStruct(
+            toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+            schemaV2,
+            "struct<name:string, city:string, dob:string>",
+            structData,
+            2);
+        LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+        URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
+        sourceCatalog.client().add_partitions(Arrays.asList(
+            newTablePartition(table, Arrays.asList("1"), partition)
+        ));
 
         runner.run(config.getAbsolutePath());
 
@@ -1459,11 +1484,5 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       }
     });
     runner.run(config.getAbsolutePath());
-  }
-
-  private File writeSchema(Schema schema, int version) throws IOException {
-    File schemaLocation = temporaryFolder.newFile("avroSchema" + version + ".avsc");
-    Files.write(schemaLocation.toPath(), schema.toString(true).getBytes());
-    return schemaLocation;
   }
 }

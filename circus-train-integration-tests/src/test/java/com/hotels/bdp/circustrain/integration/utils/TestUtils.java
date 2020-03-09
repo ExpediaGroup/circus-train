@@ -126,8 +126,10 @@ public final class TestUtils {
       String table,
       URI location,
       List<FieldSchema> columns,
-      List<FieldSchema> partiionKeys,
-      String serializationLib)
+      List<FieldSchema> partitionKeys,
+      String serializationLib,
+      String inputFormatClassName,
+      String outputFormatClassName)
       throws Exception {
 
     Table hiveTable = new Table();
@@ -136,14 +138,14 @@ public final class TestUtils {
     hiveTable.setTableType(TableType.EXTERNAL_TABLE.name());
     hiveTable.putToParameters("EXTERNAL", "TRUE");
 
-    hiveTable.setPartitionKeys(partiionKeys);
+    hiveTable.setPartitionKeys(partitionKeys);
 
     StorageDescriptor sd = new StorageDescriptor();
     sd.setCols(columns);
     sd.setLocation(location.toString());
     sd.setParameters(new HashMap<String, String>());
-    sd.setInputFormat(TextInputFormat.class.getName());
-    sd.setOutputFormat(TextOutputFormat.class.getName());
+    sd.setInputFormat(inputFormatClassName);
+    sd.setOutputFormat(outputFormatClassName);
     sd.setSerdeInfo(new SerDeInfo());
     sd.getSerdeInfo().setSerializationLib(serializationLib);
 
@@ -167,7 +169,8 @@ public final class TestUtils {
       URI location)
     throws Exception {
     return createPartitionedTable(metaStoreClient, database, table, location, DATA_COLUMNS, PARTITION_COLUMNS,
-        "org.apache.hadoop.hive.serde2.OpenCSVSerde");
+        "org.apache.hadoop.hive.serde2.OpenCSVSerde", TextInputFormat.class.getName(),
+        TextOutputFormat.class.getName());
   }
 
   public static Partition newTablePartition(Table hiveTable, List<String> values, URI location) {
