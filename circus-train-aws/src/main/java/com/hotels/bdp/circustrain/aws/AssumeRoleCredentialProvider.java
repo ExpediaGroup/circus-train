@@ -36,7 +36,6 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   public AssumeRoleCredentialProvider(Configuration conf) {
     this.conf = conf;
-    initializeCredProvider();
   }
 
   private void initializeCredProvider() {
@@ -54,11 +53,19 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   @Override
   public AWSCredentials getCredentials() {
+    if (this.credProvider == null) {
+      initializeCredProvider();
+    }
+
     return this.credProvider.getCredentials();
   }
 
   @Override
   public void refresh() {
+    if (this.credProvider == null) {
+      initializeCredProvider();
+    }
+
     this.credProvider.refresh();
   }
 
