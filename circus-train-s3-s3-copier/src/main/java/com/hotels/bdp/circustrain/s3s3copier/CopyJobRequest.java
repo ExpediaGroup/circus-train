@@ -21,10 +21,12 @@ import com.amazonaws.services.s3.transfer.internal.TransferStateChangeListener;
 public class CopyJobRequest {
   private CopyObjectRequest copyObjectRequest;
   private TransferStateChangeListener transferStateChangeListener;
+  private int attempts;
 
   public CopyJobRequest(CopyObjectRequest copyObjectRequest, TransferStateChangeListener transferStateChangeListener) {
     this.copyObjectRequest = copyObjectRequest;
     this.transferStateChangeListener = transferStateChangeListener;
+    this.attempts = 0;
   }
 
   public CopyObjectRequest getCopyObjectRequest() {
@@ -34,4 +36,8 @@ public class CopyJobRequest {
   public TransferStateChangeListener getTransferStateChangeListener() {
     return transferStateChangeListener;
   }
+
+  public int getAttempts() { return this.attempts; }
+
+  public void incrementAttempts() { this.attempts += 1; }
 }

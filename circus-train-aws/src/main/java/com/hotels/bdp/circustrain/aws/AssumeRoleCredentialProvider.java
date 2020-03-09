@@ -31,30 +31,35 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
   private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration in seconds for assumed role credentials
 
-  private AWSCredentials credentials;
   private final Configuration conf;
+  private STSAssumeRoleSessionCredentialsProvider credProvider;
 
   public AssumeRoleCredentialProvider(Configuration conf) {
     this.conf = conf;
+    initializeCredProvider();
+  }
+
+  private void initializeCredProvider() {
+    String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
+
+    checkArgument(StringUtils.isNotEmpty(roleArn),
+        "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
+
+    // STSAssumeRoleSessionCredentialsProvider should auto refresh it's creds in the background.
+    this.credProvider = new STSAssumeRoleSessionCredentialsProvider
+        .Builder(roleArn, "ct-assume-role-session")
+        .withRoleSessionDurationSeconds(CREDENTIALS_DURATION)
+        .build();
   }
 
   @Override
   public AWSCredentials getCredentials() {
-    if (credentials == null) {
-      refresh();
-    }
-    return credentials;
+    return this.credProvider.getCredentials();
   }
 
   @Override
   public void refresh() {
-    checkNotNull(conf, "conf is required");
-    String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
-    checkArgument(StringUtils.isNotEmpty(roleArn),
-        "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
-
-    Builder builder = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
-    credentials = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION).build().getCredentials();
+    this.credProvider.refresh();
   }
 
 }
