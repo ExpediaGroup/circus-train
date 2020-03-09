@@ -63,7 +63,12 @@ public class S3S3CopierOptions {
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
-    MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts");
+    MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts"),
+    /**
+     * Number of threads to allocate to the thread pool used by transfer manager. Defaults internally to 10.
+     */
+    THREAD_POOL_THREAD_COUNT("s3s3-thread-pool-thread-count");
+
 
     private final String keyName;
 
@@ -84,6 +89,10 @@ public class S3S3CopierOptions {
 
   public S3S3CopierOptions(Map<String, Object> copierOptions) {
     this.copierOptions = new HashMap<>(copierOptions);
+  }
+
+  public int getThreadPoolThreadCount() {
+    return MapUtils.getInteger(copierOptions, Keys.THREAD_POOL_THREAD_COUNT.keyName(), -1);
   }
 
   public Long getMultipartCopyThreshold() {

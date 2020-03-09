@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -111,11 +112,20 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
         .withCredentials(credentialsChain);
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint();
+
+    // TODO: Stop this from overriding our s3 endpoint
+    if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
+      builder.withClientConfiguration(new ClientConfiguration()
+          .withMaxConnections(s3s3CopierOptions.getThreadPoolThreadCount())
+      );
+    }
+
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(),
           Region.US_Standard.getFirstRegionId());
       builder.withEndpointConfiguration(endpointConfiguration);
     }
+
     return builder.build();
   }
 
@@ -125,12 +135,21 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       HadoopAWSCredentialProviderChain credentialsChain) {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
+
+    // TODO: Stop this from overriding our s3 endpoint
+    if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
+      builder.withClientConfiguration(new ClientConfiguration()
+          .withMaxConnections(s3s3CopierOptions.getThreadPoolThreadCount())
+      );
+    }
+
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
       builder.withEndpointConfiguration(endpointConfiguration);
     } else {
       builder.withRegion(region);
     }
+
     return builder.build();
   }
 
