@@ -137,7 +137,6 @@ public class S3S3Copier implements Copier {
     this.listObjectsRequestFactory = listObjectsRequestFactory;
     this.registry = registry;
     this.s3s3CopierOptions = s3s3CopierOptions;
-//    LogManager.getRootLogger().setLevel(Level.DEBUG);
   }
 
   @Override
@@ -164,7 +163,6 @@ public class S3S3Copier implements Copier {
         .info("Initialising all copy jobs");
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
-
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
@@ -297,10 +295,8 @@ public class S3S3Copier implements Copier {
               .info("Copying '{}/{}' failed, adding to retry list.",
                   copyObjectRequest.getSourceBucketName(),
                   copyObjectRequest.getSourceKey());
-
           LOG
               .error("Copy failed with exception:", e);
-
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {
