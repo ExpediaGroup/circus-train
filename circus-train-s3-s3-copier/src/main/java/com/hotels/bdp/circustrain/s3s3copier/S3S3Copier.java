@@ -165,16 +165,7 @@ public class S3S3Copier implements Copier {
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
 
-    Map<String, Object> srcOptions = new HashMap<>();
-    srcOptions.put(S3S3CopierOptions.Keys.CANNED_ACL.keyName(), s3s3CopierOptions.getCannedAcl());
-    srcOptions.put(S3S3CopierOptions.Keys.MAX_COPY_ATTEMPTS.keyName(), s3s3CopierOptions.getMaxCopyAttempts());
-    srcOptions.put(S3S3CopierOptions.Keys.MULTIPART_COPY_PART_SIZE.keyName(), s3s3CopierOptions.getMultipartCopyPartSize());
-    srcOptions.put(S3S3CopierOptions.Keys.MULTIPART_COPY_THRESHOLD.keyName(), s3s3CopierOptions.getMultipartCopyThreshold());
-    srcOptions.put(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3s3CopierOptions.getS3Endpoint());
-    srcOptions.put(S3S3CopierOptions.Keys.S3_SERVER_SIDE_ENCRYPTION.keyName(), s3s3CopierOptions.isS3ServerSideEncryption());
-    S3S3CopierOptions srcCopierOptions = new S3S3CopierOptions(srcOptions);
-    srcClient = s3ClientFactory.newInstance(sourceBase, srcCopierOptions);
-
+    srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
@@ -243,31 +234,30 @@ public class S3S3Copier implements Copier {
 
   private void processAllCopyJobs() {
     List<CopyJobRequest> copyJobsToSubmit = copyJobRequests;
-
-    while (!copyJobsToSubmit.isEmpty()) {
-      LOG.info("Submitting {} copy job(s).", copyJobsToSubmit.size());
+    int maxCopyAttempts = s3s3CopierOptions.getMaxCopyAttempts();
+    for (int copyAttempt = 1; copyAttempt <= maxCopyAttempts; copyAttempt++) {
+      LOG
+          .info("Submitting {} copy job(s), attempt {}/{}", copyJobsToSubmit.size(), copyAttempt, maxCopyAttempts);
       copyJobsToSubmit = submitAndGatherCopyJobs(copyJobsToSubmit);
-      LOG.info("Finished gathering jobs. Retrying {} failed job(s).", copyJobsToSubmit.size());
+      if (copyJobsToSubmit.isEmpty()) {
+        LOG
+            .info("Successfully gathered all copy jobs on attempt {}/{}", copyAttempt, maxCopyAttempts);
+        return;
+      }
+      if (copyAttempt == maxCopyAttempts) {
+        throw new CircusTrainException(copyJobsToSubmit.size() + " job(s) failed the maximum number of copy attempts, " + maxCopyAttempts);
+      }
+      LOG
+          .info("Finished gathering jobs on attempt {}/{}. Retrying {} failed job(s).",
+              copyAttempt,
+              maxCopyAttempts,
+              copyJobsToSubmit.size());
     }
   }
 
   private List<CopyJobRequest> submitAndGatherCopyJobs(List<CopyJobRequest> copyJobsToSubmit) {
     List<CopyJob> submittedCopyJobs = new ArrayList<>();
-    int maxCopyAttempts = s3s3CopierOptions.getMaxCopyAttempts();
-
     for (CopyJobRequest copyJobRequest : copyJobsToSubmit) {
-
-      if (copyJobRequest.getAttempts() == maxCopyAttempts) {
-        throw new CircusTrainException(String.format(
-            "Job: [{}/{} -> {}/{}] failed the maximum number of copy attempts ({} attempts). Exiting.",
-            copyJobRequest.getCopyObjectRequest().getSourceBucketName(),
-            copyJobRequest.getCopyObjectRequest().getSourceKey(),
-            copyJobRequest.getCopyObjectRequest().getDestinationBucketName(),
-            copyJobRequest.getCopyObjectRequest().getDestinationKey(),
-            maxCopyAttempts
-        ));
-      }
-
       Copy copy = submitCopyJob(copyJobRequest);
       CopyJob newCopyJob = new CopyJob(copy, copyJobRequest);
       submittedCopyJobs.add(newCopyJob);
@@ -303,15 +293,14 @@ public class S3S3Copier implements Copier {
           }
         } catch (AmazonClientException e) {
           CopyObjectRequest copyObjectRequest = copyJob.getCopyJobRequest().getCopyObjectRequest();
+          LOG
+              .info("Copying '{}/{}' failed, adding to retry list.",
+                  copyObjectRequest.getSourceBucketName(),
+                  copyObjectRequest.getSourceKey());
 
-          if (e.getMessage() == "The provided token has expired.") {
-            LOG.info("S3 copier failed due to token expiration. Not counting failure against this request.");
-          } else {
-            LOG.info("Copying '{}/{}' failed, adding to retry list.", copyObjectRequest.getSourceBucketName(),
-                copyObjectRequest.getSourceKey());
-            LOG.error("Copy failed with exception:", e);
-            copyJob.getCopyJobRequest().incrementAttempts();
-          }
+          LOG
+              .error("Copy failed with exception:", e);
+
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {
