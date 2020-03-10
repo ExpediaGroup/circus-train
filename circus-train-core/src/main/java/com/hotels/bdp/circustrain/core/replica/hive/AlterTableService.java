@@ -51,13 +51,14 @@ public class AlterTableService {
           .info("Found columns that have changed type, attempting to recreate target table with the new columns."
               + "Old columns: {}, new columns: {}", oldColumns, newColumns);
       Table tempTable = new Table(newTable);
-      tempTable.setTableName(newTable.getTableName() + "_temp");
+      String tempName = newTable.getTableName() + "_temp";
+      tempTable.setTableName(tempName);
       try {
         client.createTable(tempTable);
         copyPartitionsOperation.execute(client, newTable, tempTable);
         renameTableOperation.execute(client, tempTable, newTable);
       } finally {
-        client.dropTable(tempTable.getDbName(), tempTable.getTableName(), false, true);
+        client.dropTable(newTable.getDbName(), tempName, false, true);
       }
     } else {
       client.alter_table(newTable.getDbName(), newTable.getTableName(), newTable);

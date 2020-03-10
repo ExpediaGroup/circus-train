@@ -1487,12 +1487,24 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     exit.checkAssertionAfterwards(new Assertion() {
       @Override
       public void checkAssertion() throws Exception {
-        Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
-        List<FieldSchema> cols = replicaTable.getSd().getCols();
+        Table sourceTable = sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        List<FieldSchema> cols = sourceTable.getSd().getCols();
         assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
         assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
-        PartitionIterator partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
+        PartitionIterator partitionIterator = new PartitionIterator(sourceCatalog.client(), sourceTable, (short) 1000);
         List<Partition> partitions = new ArrayList<>();
+        while (partitionIterator.hasNext()) {
+          Partition partition = partitionIterator.next();
+          partitions.add(partition);
+        }
+        assertThat(partitions.size(), is(2));
+
+        Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        cols = replicaTable.getSd().getCols();
+        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
+        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
+        partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
           Partition partition = partitionIterator.next();
           partitions.add(partition);
