@@ -50,6 +50,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.Warehouse;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
@@ -85,6 +87,7 @@ import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public class CircusTrainHdfsHdfsIntegrationTest {
@@ -1484,7 +1487,17 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     exit.checkAssertionAfterwards(new Assertion() {
       @Override
       public void checkAssertion() throws Exception {
-        int x = 10;
+        Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        List<FieldSchema> cols = replicaTable.getSd().getCols();
+        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
+        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        PartitionIterator partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
+        List<Partition> partitions = new ArrayList<>();
+        while (partitionIterator.hasNext()) {
+          Partition partition = partitionIterator.next();
+          partitions.add(partition);
+        }
+        assertThat(partitions.size(), is(2));
       }
     });
     runner.run(config.getAbsolutePath());

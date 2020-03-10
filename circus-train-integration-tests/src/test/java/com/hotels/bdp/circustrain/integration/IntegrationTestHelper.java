@@ -109,7 +109,7 @@ public class IntegrationTestHelper {
   }
 
   URI createData(
-      URI sourceTableUri,
+      URI tableUri,
       Schema schema,
       String hour,
       int id,
@@ -121,7 +121,7 @@ public class IntegrationTestHelper {
     record.put("id", id);
     record.put("details", details);
 
-    URI partition = URI.create(sourceTableUri + "/hour=" + hour);
+    URI partition = URI.create(tableUri + "/hour=" + hour);
     String path = partition.getPath();
     File parentFolder = new File(path);
     parentFolder.mkdirs();
