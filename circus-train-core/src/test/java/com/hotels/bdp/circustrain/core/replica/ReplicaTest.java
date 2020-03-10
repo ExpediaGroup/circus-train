@@ -84,6 +84,7 @@ import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -118,6 +119,7 @@ public class ReplicaTest {
   private @Captor ArgumentCaptor<SetPartitionsStatsRequest> setStatsRequestCaptor;
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
+  private @Mock AlterTableService alterTableService;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
       TableTransformation.IDENTITY, PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
@@ -178,7 +180,7 @@ public class ReplicaTest {
 
   private Replica newReplica(TableReplication tableReplication) {
     return new Replica(replicaCatalog, hiveConf, metaStoreClientSupplier, tableFactory, houseKeepingListener,
-        replicaCatalogListener, tableReplication, TEST_PARTITION_BATCH_SIZE);
+        replicaCatalogListener, tableReplication, alterTableService, TEST_PARTITION_BATCH_SIZE);
   }
 
   @Test

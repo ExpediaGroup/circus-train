@@ -60,6 +60,7 @@ import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
+import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
@@ -73,6 +74,7 @@ public class Replica extends HiveEndpoint {
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicationMode replicationMode;
   private final TableReplication tableReplication;
+  private final AlterTableService alterTableService;
   private int partitionBatchSize = 1000;
 
   /**
@@ -85,13 +87,15 @@ public class Replica extends HiveEndpoint {
       ReplicaTableFactory replicaTableFactory,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      TableReplication tableReplication) {
+      TableReplication tableReplication,
+      AlterTableService alterTableService) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
     this.housekeepingListener = housekeepingListener;
     replicationMode = tableReplication.getReplicationMode();
     this.tableReplication = tableReplication;
+    this.alterTableService = alterTableService;
   }
 
   /**
@@ -106,6 +110,7 @@ public class Replica extends HiveEndpoint {
           HousekeepingListener housekeepingListener,
           ReplicaCatalogListener replicaCatalogListener,
           TableReplication tableReplication,
+          AlterTableService alterTableService,
           int partitionBatchSize) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
@@ -114,6 +119,7 @@ public class Replica extends HiveEndpoint {
     replicationMode = tableReplication.getReplicationMode();
     this.tableReplication = tableReplication;
     this.partitionBatchSize = partitionBatchSize;
+    this.alterTableService = alterTableService;
   }
 
   public void updateMetadata(
@@ -310,7 +316,7 @@ public class Replica extends HiveEndpoint {
       makeSureCanReplicate(oldReplicaTable.get(), replicaTable.getTable());
       LOG.debug("Existing replica table found, altering.");
       try {
-        client.alter_table(replicaDatabaseName, replicaTableName, replicaTable.getTable());
+        alterTableService.alterTable(client, oldReplicaTable.get(), replicaTable.getTable());
         updateTableColumnStatistics(client, replicaTable);
       } catch (TException e) {
         throw new MetaStoreClientException(

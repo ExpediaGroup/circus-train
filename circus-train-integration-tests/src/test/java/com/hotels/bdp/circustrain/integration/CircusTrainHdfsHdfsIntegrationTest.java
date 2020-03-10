@@ -1478,11 +1478,18 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             newTablePartition(table, Arrays.asList("1"), partition)
         ));
 
+        exit.expectSystemExitWithStatus(0);
+        exit.checkAssertionAfterwards(new Assertion() {
+          @Override
+          public void checkAssertion() throws Exception {
+            int x = 10;
+          }
+        });
         runner.run(config.getAbsolutePath());
-
-        int x = 10;
       }
     });
     runner.run(config.getAbsolutePath());
+
+    int x = 10;
   }
 }
