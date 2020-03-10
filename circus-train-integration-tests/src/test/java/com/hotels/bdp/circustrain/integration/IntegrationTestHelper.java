@@ -88,7 +88,7 @@ public class IntegrationTestHelper {
   }
 
   Table createParquetPartitionedTableWithStruct(
-      URI sourceTableUri,
+      URI tableUri,
       Schema schema,
       String structType,
       Map<String, String> structData,
@@ -99,16 +99,16 @@ public class IntegrationTestHelper {
     );
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
     Table table = TestUtils
-        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri, columns, partitionKeys,
+        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
             "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
             ParquetOutputFormat.class.getName());
-    URI partition = createData(sourceTableUri, schema, Integer.toString(version), version, structData);
+    URI partition = createData(tableUri, schema, Integer.toString(version), version, structData);
     metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
         Arrays.asList(Integer.toString(version)), partition)));
     return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
   }
 
-  private URI createData(
+  URI createData(
       URI sourceTableUri,
       Schema schema,
       String hour,

@@ -1403,6 +1403,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
   @Test
   public void partitionedTableColumnAdditionInStruct() throws Exception {
+    // Create a table with a struct in the replica db (setting a Circus Train event id manually).
     Schema schema = SchemaBuilder
         .builder("name.space")
         .record(PARTITIONED_TABLE)
@@ -1422,13 +1423,54 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("name", "adam");
     structData.put("city", "blackpool");
 
-    helper.createParquetPartitionedTableWithStruct(
-        toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+    Table replicaTable = replicaHelper.createParquetPartitionedTableWithStruct(
+        toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
         schema,
         "struct<name:string, city:string>",
         structData,
         1);
+    LOG.info(">>>> Table {} ", replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
+    replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
+
+    // Create the source partition with the original struct.
+    helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, structData);
+
+    // Create the source table with an additional column in the struct.
+    Schema schemaV2 = SchemaBuilder
+        .builder("name.space")
+        .record(PARTITIONED_TABLE)
+        .fields()
+        .requiredInt("id")
+        .name("details")
+        .type()
+        .record("details_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .optionalString("dob")
+        .endRecord()
+        .noDefault()
+        .endRecord();
+
+    structData = new HashMap<>();
+    structData.put("name", "adam");
+    structData.put("city", "blackpool");
+    structData.put("dob", "22/09/1992");
+
+    Table table = helper.createParquetPartitionedTableWithStruct(
+        toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        schemaV2,
+        "struct<name:string, city:string, dob:string>",
+        structData,
+        2);
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
+    sourceCatalog.client().add_partitions(Arrays.asList(
+        newTablePartition(table, Arrays.asList("1"), partition)
+    ));
 
     CircusTrainRunner runner = CircusTrainRunner
         .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
@@ -1442,54 +1484,10 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     exit.checkAssertionAfterwards(new Assertion() {
       @Override
       public void checkAssertion() throws Exception {
-        Schema schemaV2 = SchemaBuilder
-            .builder("name.space")
-            .record(PARTITIONED_TABLE)
-            .fields()
-            .requiredInt("id")
-            .name("details")
-            .type()
-            .record("details_struct")
-            .fields()
-            .requiredString("name")
-            .requiredString("city")
-            .optionalString("dob")
-            .endRecord()
-            .noDefault()
-            .endRecord();
-
-        HashMap<String, String> structData = new HashMap<>();
-        structData.put("name", "adam");
-        structData.put("city", "blackpool");
-        structData.put("dob", "22/09/1992");
-
-        sourceCatalog.client().dropTable(DATABASE, PARTITIONED_TABLE, false, false);
-
-        Table table = helper.createParquetPartitionedTableWithStruct(
-            toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
-            schemaV2,
-            "struct<name:string, city:string, dob:string>",
-            structData,
-            2);
-        LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
-
-        URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
-        sourceCatalog.client().add_partitions(Arrays.asList(
-            newTablePartition(table, Arrays.asList("1"), partition)
-        ));
-
-        exit.expectSystemExitWithStatus(0);
-        exit.checkAssertionAfterwards(new Assertion() {
-          @Override
-          public void checkAssertion() throws Exception {
-            int x = 10;
-          }
-        });
-        runner.run(config.getAbsolutePath());
+        int x = 10;
       }
     });
     runner.run(config.getAbsolutePath());
 
-    int x = 10;
   }
 }
