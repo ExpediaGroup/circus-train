@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core.replica.hive;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
 import org.junit.Before;
@@ -115,5 +117,15 @@ public class DropTableServiceTest {
     Map<String, String> parameters = capturedTables.get(0).getParameters();
     assertThat(parameters.size(), is(1));
     assertThat(parameters.get("key"), is("value"));
+  }
+
+  @Test
+  public void removeParamsAndDropTableDoesNotExist() throws TException {
+    doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
+
+    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verifyNoMoreInteractions(client);
   }
 }

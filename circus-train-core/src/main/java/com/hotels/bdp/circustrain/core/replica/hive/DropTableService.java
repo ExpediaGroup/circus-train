@@ -17,6 +17,7 @@ package com.hotels.bdp.circustrain.core.replica.hive;
 
 import java.util.Map;
 
+import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -39,7 +40,12 @@ public class DropTableService {
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName) throws TException {
-    Table table = client.getTable(databaseName, tableName);
+    Table table;
+    try {
+       table = client.getTable(databaseName, tableName);
+    } catch (NoSuchObjectException e) {
+      return;
+    }
     Map<String, String> tableParameters = table.getParameters();
     if (tableParameters != null && !tableParameters.isEmpty()) {
       Map<String, String> transformationTableParameters = tableParametersTransformation.getTableParameters();
