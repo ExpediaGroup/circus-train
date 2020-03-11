@@ -36,14 +36,12 @@ public class TransferManagerFactory {
   public TransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions) {
     TransferManagerBuilder builder = TransferManagerBuilder.standard()
         .withMultipartCopyThreshold(s3s3CopierOptions.getMultipartCopyThreshold())
-        .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize());
-
+        .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
+        .withS3Client(targetS3Client);
 
     if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
       LOG.info("Initializing thread pool with {} threads", s3s3CopierOptions.getThreadPoolThreadCount());
-      builder.withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getThreadPoolThreadCount()));
-    } else {
-      builder.withS3Client(targetS3Client);
+      builder = builder.withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getThreadPoolThreadCount()));
     }
 
     return builder.build();

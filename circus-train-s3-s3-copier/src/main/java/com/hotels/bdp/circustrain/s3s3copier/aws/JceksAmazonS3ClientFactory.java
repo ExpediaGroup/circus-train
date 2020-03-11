@@ -65,7 +65,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       AmazonS3URI uri,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialProviderChain) {
-    LOG.info("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, credentialProviderChain);
     try {
 
@@ -77,7 +76,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
        **/
 
       String bucketRegion = regionForUri(globalClient, uri);
-      LOG.info("Bucket region: {}", bucketRegion);
+      LOG.debug("Bucket region: {}", bucketRegion);
       return newInstance(bucketRegion, s3s3CopierOptions, credentialProviderChain);
     } catch (IllegalArgumentException e) {
       LOG.warn("Using global (non region specific) client", e);
@@ -104,45 +103,48 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
+  private AmazonS3ClientBuilder applyClientConfigurations(AmazonS3ClientBuilder builder, S3S3CopierOptions s3s3CopierOptions) {
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+
+    if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
+      clientConfiguration.withMaxConnections(s3s3CopierOptions.getThreadPoolThreadCount());
+    }
+
+    return builder.withClientConfiguration(clientConfiguration);
+  }
+
   private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
-      HadoopAWSCredentialProviderChain credentialsChain) {
+      HadoopAWSCredentialProviderChain credentialsChain
+  ) {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
         .standard()
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
         .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint();
-
-    // TODO: Stop this from overriding our s3 endpoint
-    if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
-      builder.withClientConfiguration(new ClientConfiguration()
-          .withMaxConnections(s3s3CopierOptions.getThreadPoolThreadCount())
-      );
-    }
-
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(),
           Region.US_Standard.getFirstRegionId());
       builder.withEndpointConfiguration(endpointConfiguration);
     }
-
     return builder.build();
   }
 
   private AmazonS3 newInstance(
       String region,
       S3S3CopierOptions s3s3CopierOptions,
-      HadoopAWSCredentialProviderChain credentialsChain) {
-    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
+      HadoopAWSCredentialProviderChain credentialsChain
+  ) {
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
+        .standard()
+        .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
-
-    // TODO: Stop this from overriding our s3 endpoint
-    if (s3s3CopierOptions.getThreadPoolThreadCount() != -1) {
-      builder.withClientConfiguration(new ClientConfiguration()
-          .withMaxConnections(s3s3CopierOptions.getThreadPoolThreadCount())
-      );
-    }
-
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
       builder.withEndpointConfiguration(endpointConfiguration);
