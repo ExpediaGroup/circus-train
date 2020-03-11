@@ -61,14 +61,18 @@ public class S3S3CopierOptions {
      */
     ASSUME_ROLE("assume-role"),
     /**
+     * Number of time (in seconds) that the AWS SDK should assume the given role for.
+     * Defaults to 12 hours.
+     */
+    ASSUME_ROLE_CREDENTIAL_DURATION("assume-role-credential-duration"),
+    /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
     MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts"),
     /**
-     * Number of threads to allocate to the thread pool used by transfer manager. Defaults internally to 10.
+     * Max number of threads to use for the transferManager thread pool. Defaults internally to 10 if unset on the client.
      */
-    THREAD_POOL_THREAD_COUNT("s3s3-thread-pool-thread-count");
-
+    MAX_THREAD_POOL_SIZE("s3s3-max-thread-pool-size");
 
     private final String keyName;
 
@@ -91,8 +95,12 @@ public class S3S3CopierOptions {
     this.copierOptions = new HashMap<>(copierOptions);
   }
 
-  public int getThreadPoolThreadCount() {
-    return MapUtils.getInteger(copierOptions, Keys.THREAD_POOL_THREAD_COUNT.keyName(), -1);
+  public void overrideMaxThreadPoolSize(int newMax) {
+    copierOptions.put(Keys.MAX_THREAD_POOL_SIZE.keyName(), newMax);
+  }
+
+  public int getMaxThreadPoolSize() {
+    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), -1);
   }
 
   public Long getMultipartCopyThreshold() {
@@ -138,6 +146,10 @@ public class S3S3CopierOptions {
   
   public String getAssumedRole() {
     return MapUtils.getString(copierOptions, Keys.ASSUME_ROLE.keyName(), null);
+  }
+
+  public int getAssumedRoleCredentialDuration() {
+    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_CREDENTIAL_DURATION.keyName(), 12 * 60 * 60);
   }
 
   public int getMaxCopyAttempts() {

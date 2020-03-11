@@ -27,7 +27,8 @@ import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-  private static final int CREDENTIALS_DURATION = 15 * 60; // TMP DEBUG: Set to minimum //12 * 60 * 60; // max duration in seconds for assumed role credentials
+  public static final String ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRoleCredentialDuration";
+  private static final int DEFAULT_CREDENTIALS_DURATION = 12 * 60 * 60; // max duration in seconds for assumed role credentials
 
   private final Configuration conf;
   private STSAssumeRoleSessionCredentialsProvider credProvider;
@@ -38,14 +39,15 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   private void initializeCredProvider() {
     String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
+    int credDuration = conf.getInt(ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
 
     checkArgument(StringUtils.isNotEmpty(roleArn),
         "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    // STSAssumeRoleSessionCredentialsProvider should auto refresh it's creds in the background.
+    // STSAssumeRoleSessionCredentialsProvider should auto refresh its creds in the background.
     this.credProvider = new STSAssumeRoleSessionCredentialsProvider
         .Builder(roleArn, "ct-assume-role-session")
-        .withRoleSessionDurationSeconds(CREDENTIALS_DURATION)
+        .withRoleSessionDurationSeconds(credDuration)
         .build();
   }
 
