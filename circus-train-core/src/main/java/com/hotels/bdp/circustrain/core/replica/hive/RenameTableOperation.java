@@ -24,7 +24,14 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class RenameTableOperation {
 
-  private final static Logger LOG = LoggerFactory.getLogger(RenameTableOperation.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RenameTableOperation.class);
+  private static final String TEMP_SUFFIX = "_original";
+
+  private DropTableService dropTableService;
+
+  public RenameTableOperation(DropTableService dropTableService) {
+    this.dropTableService = dropTableService;
+  }
 
   /**
    * <p>
@@ -37,18 +44,17 @@ public class RenameTableOperation {
     LOG
         .info("Renaming table {}.{} to {}.{}", from.getDbName(), from.getTableName(), to.getDbName(),
             to.getTableName());
-    from = client.getTable(from.getDbName(), from.getTableName());
-    to = client.getTable(to.getDbName(), to.getTableName());
-    String fromTableName = from.getTableName();
-    String toTableName = to.getTableName();
-    String toTableNameTemp = toTableName + "_original";
+    Table fromTable = client.getTable(from.getDbName(), from.getTableName());
+    Table toTable = client.getTable(to.getDbName(), to.getTableName());
+    String fromTableName = fromTable.getTableName();
+    String toTableName = toTable.getTableName();
     try {
-      from.setTableName(toTableName);
-      to.setTableName(toTableNameTemp);
-      client.alter_table(to.getDbName(), toTableName, to);
-      client.alter_table(from.getDbName(), fromTableName, from);
+      fromTable.setTableName(toTableName);
+      toTable.setTableName(toTableName + TEMP_SUFFIX);
+      client.alter_table(toTable.getDbName(), toTableName, toTable);
+      client.alter_table(fromTable.getDbName(), fromTableName, fromTable);
     } finally {
-      client.dropTable(to.getDbName(), toTableNameTemp, false, true);
+      dropTableService.removeCustomParamsAndDrop(client, toTable.getDbName(), toTable.getTableName());
     }
   }
 }

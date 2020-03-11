@@ -48,6 +48,7 @@ public class AlterTableServiceTest {
   private static final String NEW_DB_NAME = "new_db";
 
   private @Mock CloseableMetaStoreClient client;
+  private @Mock DropTableService dropTableService;
   private @Mock CopyPartitionsOperation copyPartitionsOperation;
   private @Mock RenameTableOperation renameTableOperation;
 
@@ -57,7 +58,7 @@ public class AlterTableServiceTest {
 
   @Before
   public void setUp() {
-    service = new AlterTableService(copyPartitionsOperation, renameTableOperation);
+    service = new AlterTableService(dropTableService, copyPartitionsOperation, renameTableOperation);
     oldTable.setTableName(OLD_TABLE_NAME);
     newTable.setTableName(NEW_TABLE_NAME);
     oldTable.setDbName(OLD_DB_NAME);
@@ -85,7 +86,7 @@ public class AlterTableServiceTest {
     service.alterTable(client, oldTable, newTable);
 
     verify(client).createTable(tempTable);
-    verify(client).dropTable(NEW_DB_NAME, NEW_TABLE_NAME_TEMP, false, true);
+    verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
     verify(copyPartitionsOperation).execute(client, newTable, tempTable);
     verify(renameTableOperation).execute(client, tempTable, newTable);
     verifyNoMoreInteractions(client);
@@ -105,7 +106,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(client).dropTable(NEW_DB_NAME, NEW_TABLE_NAME_TEMP, false, true);
+      verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verifyZeroInteractions(renameTableOperation);
       verifyNoMoreInteractions(client);
@@ -127,7 +128,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(client).dropTable(NEW_DB_NAME, NEW_TABLE_NAME_TEMP, false, true);
+      verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verify(renameTableOperation).execute(client, tempTable, newTable);
       verifyNoMoreInteractions(client);

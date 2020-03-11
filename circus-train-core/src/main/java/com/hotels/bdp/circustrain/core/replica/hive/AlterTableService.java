@@ -26,19 +26,21 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class AlterTableService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Replica.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AlterTableService.class);
 
+  private DropTableService dropTableService;
   private CopyPartitionsOperation copyPartitionsOperation;
   private RenameTableOperation renameTableOperation;
 
   public AlterTableService(
+      DropTableService dropTableService,
       CopyPartitionsOperation copyPartitionsOperation,
       RenameTableOperation renameTableOperation) {
+    this.dropTableService = dropTableService;
     this.copyPartitionsOperation = copyPartitionsOperation;
     this.renameTableOperation = renameTableOperation;
   }
@@ -58,7 +60,7 @@ public class AlterTableService {
         copyPartitionsOperation.execute(client, newTable, tempTable);
         renameTableOperation.execute(client, tempTable, newTable);
       } finally {
-        client.dropTable(newTable.getDbName(), tempName, false, true);
+        dropTableService.removeCustomParamsAndDrop(client, tempTable.getDbName(), tempName);
       }
     } else {
       client.alter_table(newTable.getDbName(), newTable.getTableName(), newTable);

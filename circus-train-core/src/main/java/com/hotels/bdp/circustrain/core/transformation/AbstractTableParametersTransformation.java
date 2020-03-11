@@ -40,7 +40,7 @@ public abstract class AbstractTableParametersTransformation implements TableRepl
     }
   }
 
-  protected Map<String, String> getTableParameters() {
+  public Map<String, String> getTableParameters() {
     if (tableParametersOverride != null && !tableParametersOverride.isEmpty()) {
       return tableParametersOverride;
     }

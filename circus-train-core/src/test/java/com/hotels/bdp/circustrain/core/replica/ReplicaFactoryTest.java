@@ -31,6 +31,7 @@ import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
+import com.hotels.bdp.circustrain.core.transformation.TableParametersTransformation;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,13 +44,14 @@ public class ReplicaFactoryTest {
   private @Mock ReplicaCatalogListener replicaCatalogListener;
   private @Mock ReplicaTableFactoryProvider replicaTableFactoryPicker;
   private @Mock TableReplication tableReplication;
+  private @Mock TableParametersTransformation tableParametersTransformation;
 
   private ReplicaFactory replicaFactory;
 
   @Before
   public void setUp() {
     replicaFactory = new ReplicaFactory(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier,
-        housekeepingListener, replicaCatalogListener, replicaTableFactoryPicker);
+        housekeepingListener, replicaCatalogListener, replicaTableFactoryPicker, tableParametersTransformation);
   }
 
   @Test

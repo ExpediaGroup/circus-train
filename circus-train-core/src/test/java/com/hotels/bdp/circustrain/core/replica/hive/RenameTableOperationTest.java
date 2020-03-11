@@ -43,13 +43,14 @@ public class RenameTableOperationTest {
   private static final String TO_DB_NAME = "new_db";
 
   private @Mock CloseableMetaStoreClient client;
+  private @Mock DropTableService dropTableService;
   private Table fromTable = new Table();
   private Table toTable = new Table();
   private RenameTableOperation operation;
 
   @Before
   public void setUp() throws TException {
-    operation = new RenameTableOperation();
+    operation = new RenameTableOperation(dropTableService);
     fromTable.setTableName(FROM_TABLE_NAME);
     toTable.setTableName(TO_TABLE_NAME);
     fromTable.setDbName(FROM_DB_NAME);
@@ -68,7 +69,7 @@ public class RenameTableOperationTest {
     fromTable.setTableName(TO_TABLE_NAME);
     verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
     verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-    verify(client).dropTable(TO_DB_NAME, TO_TABLE_NAME_TEMP, false, true);
+    verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
   }
 
   @Test
@@ -86,7 +87,7 @@ public class RenameTableOperationTest {
       verify(client).getTable(TO_DB_NAME, TO_TABLE_NAME);
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
-      verify(client).dropTable(TO_DB_NAME, TO_TABLE_NAME_TEMP, false, true);
+      verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }
@@ -108,7 +109,7 @@ public class RenameTableOperationTest {
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
       verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-      verify(client).dropTable(TO_DB_NAME, TO_TABLE_NAME_TEMP, false, true);
+      verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }

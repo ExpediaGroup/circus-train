@@ -29,7 +29,7 @@ import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 
 @Profile({ Modules.REPLICATION })
 @Component
-public final class TableParametersTransformation extends AbstractTableParametersTransformation implements TableTransformation {
+public class TableParametersTransformation extends AbstractTableParametersTransformation implements TableTransformation {
 
   @Autowired
   public TableParametersTransformation(TransformOptions transformOptions) {
