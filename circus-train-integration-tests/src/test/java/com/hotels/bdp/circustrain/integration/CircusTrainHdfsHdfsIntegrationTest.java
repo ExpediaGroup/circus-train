@@ -1487,6 +1487,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     exit.checkAssertionAfterwards(new Assertion() {
       @Override
       public void checkAssertion() throws Exception {
+        assertThat(sourceCatalog.client().getAllTables(DATABASE).size(), is(1));
         Table sourceTable = sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         List<FieldSchema> cols = sourceTable.getSd().getCols();
         assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
@@ -1495,10 +1496,12 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         List<Partition> partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
           Partition partition = partitionIterator.next();
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
           partitions.add(partition);
         }
         assertThat(partitions.size(), is(2));
 
+        assertThat(replicaCatalog.client().getAllTables(DATABASE).size(), is(1));
         Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         cols = replicaTable.getSd().getCols();
         assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
@@ -1507,6 +1510,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
           Partition partition = partitionIterator.next();
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
           partitions.add(partition);
         }
         assertThat(partitions.size(), is(2));

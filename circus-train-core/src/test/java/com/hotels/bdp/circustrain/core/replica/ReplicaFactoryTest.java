@@ -44,14 +44,13 @@ public class ReplicaFactoryTest {
   private @Mock ReplicaCatalogListener replicaCatalogListener;
   private @Mock ReplicaTableFactoryProvider replicaTableFactoryPicker;
   private @Mock TableReplication tableReplication;
-  private @Mock TableParametersTransformation tableParametersTransformation;
 
   private ReplicaFactory replicaFactory;
 
   @Before
   public void setUp() {
     replicaFactory = new ReplicaFactory(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier,
-        housekeepingListener, replicaCatalogListener, replicaTableFactoryPicker, tableParametersTransformation);
+        housekeepingListener, replicaCatalogListener, replicaTableFactoryPicker);
   }
 
   @Test

@@ -39,7 +39,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.core.transformation.TableParametersTransformation;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,7 +48,6 @@ public class DropTableServiceTest {
   private static final String DB_NAME = "db";
 
   private @Mock CloseableMetaStoreClient client;
-  private @Mock TableParametersTransformation tableParametersTransformation;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
   private DropTableService service;
@@ -57,7 +55,7 @@ public class DropTableServiceTest {
 
   @Before
   public void setUp() throws TException {
-    service = new DropTableService(tableParametersTransformation);
+    service = new DropTableService();
     table.setTableName(TABLE_NAME);
     table.setDbName(DB_NAME);
     when(client.getTable(DB_NAME, TABLE_NAME)).thenReturn(table);
@@ -65,7 +63,7 @@ public class DropTableServiceTest {
 
   @Test
   public void removeParamsAndDropNullParams() throws TException {
-    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
 
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
     verify(client).getTable(DB_NAME, TABLE_NAME);
@@ -76,7 +74,7 @@ public class DropTableServiceTest {
   public void removeParamsAndDropEmptyParams() throws TException {
     table.setParameters(Collections.emptyMap());
 
-    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
@@ -86,27 +84,12 @@ public class DropTableServiceTest {
   @Test
   public void removeParamsAndDrop() throws TException {
     HashMap<String, String> params = new HashMap<>();
-    params.put("key", "value");
+    params.put("key1", "value");
+    params.put("key2", "value");
+    params.put("EXTERNAL", "true");
     table.setParameters(params);
 
-    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
-
-    verify(client).getTable(DB_NAME, TABLE_NAME);
-    verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verifyNoMoreInteractions(client);
-  }
-
-  @Test
-  public void removeParamsAndDropWithTransformationParams() throws TException {
-    HashMap<String, String> transformationParams = new HashMap<>();
-    transformationParams.put("transformationKey", "value");
-    when(tableParametersTransformation.getTableParameters()).thenReturn(transformationParams);
-    HashMap<String, String> params = new HashMap<>();
-    params.put("key", "value");
-    params.put("transformationKey", "value");
-    table.setParameters(params);
-
-    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).alter_table(eq(DB_NAME), eq(TABLE_NAME), tableCaptor.capture());
@@ -116,14 +99,35 @@ public class DropTableServiceTest {
     assertThat(capturedTables.size(), is(1));
     Map<String, String> parameters = capturedTables.get(0).getParameters();
     assertThat(parameters.size(), is(1));
-    assertThat(parameters.get("key"), is("value"));
+    assertThat(parameters.get("EXTERNAL"), is("true"));
+  }
+
+  @Test
+  public void removeParamsAndDropCaseInsensitiveExternalTable() throws TException {
+    HashMap<String, String> params = new HashMap<>();
+    params.put("key1", "value");
+    params.put("key2", "value");
+    params.put("external", "TRUE");
+    table.setParameters(params);
+
+    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verify(client).alter_table(eq(DB_NAME), eq(TABLE_NAME), tableCaptor.capture());
+    verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
+    verifyNoMoreInteractions(client);
+    List<Table> capturedTables = tableCaptor.getAllValues();
+    assertThat(capturedTables.size(), is(1));
+    Map<String, String> parameters = capturedTables.get(0).getParameters();
+    assertThat(parameters.size(), is(1));
+    assertThat(parameters.get("EXTERNAL"), is("true"));
   }
 
   @Test
   public void removeParamsAndDropTableDoesNotExist() throws TException {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.removeCustomParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);

@@ -38,7 +38,7 @@ public class RenameTableOperationTest {
 
   private static final String FROM_TABLE_NAME = "old_table";
   private static final String TO_TABLE_NAME = "new_table";
-  private static final String TO_TABLE_NAME_TEMP = TO_TABLE_NAME + "_original";
+  private static final String TO_TABLE_NAME_TEMP = TO_TABLE_NAME + "_delete_me";
   private static final String FROM_DB_NAME = "old_db";
   private static final String TO_DB_NAME = "new_db";
 
@@ -69,7 +69,7 @@ public class RenameTableOperationTest {
     fromTable.setTableName(TO_TABLE_NAME);
     verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
     verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-    verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+    verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
   }
 
   @Test
@@ -87,7 +87,7 @@ public class RenameTableOperationTest {
       verify(client).getTable(TO_DB_NAME, TO_TABLE_NAME);
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
-      verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+      verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }
@@ -109,7 +109,7 @@ public class RenameTableOperationTest {
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
       verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-      verify(dropTableService).removeCustomParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+      verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }

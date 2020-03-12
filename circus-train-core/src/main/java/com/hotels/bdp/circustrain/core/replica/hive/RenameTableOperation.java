@@ -25,7 +25,7 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 public class RenameTableOperation {
 
   private static final Logger LOG = LoggerFactory.getLogger(RenameTableOperation.class);
-  private static final String TEMP_SUFFIX = "_original";
+  private static final String DELETE_ME = "_delete_me";
 
   private DropTableService dropTableService;
 
@@ -48,13 +48,14 @@ public class RenameTableOperation {
     Table toTable = client.getTable(to.getDbName(), to.getTableName());
     String fromTableName = fromTable.getTableName();
     String toTableName = toTable.getTableName();
+    String toDelete = toTableName + DELETE_ME;
     try {
       fromTable.setTableName(toTableName);
-      toTable.setTableName(toTableName + TEMP_SUFFIX);
+      toTable.setTableName(toDelete);
       client.alter_table(toTable.getDbName(), toTableName, toTable);
       client.alter_table(fromTable.getDbName(), fromTableName, fromTable);
     } finally {
-      dropTableService.removeCustomParamsAndDrop(client, toTable.getDbName(), toTable.getTableName());
+      dropTableService.removeTableParamsAndDrop(client, toTable.getDbName(), toDelete);
     }
   }
 }

@@ -15,28 +15,28 @@
  */
 package com.hotels.bdp.circustrain.core.replica.hive;
 
+import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.core.transformation.TableParametersTransformation;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class DropTableService {
 
   private static final Logger LOG = LoggerFactory.getLogger(DropTableService.class);
+  private static final String EXTERNAL_KEY = "EXTERNAL";
+  private static final String IS_EXTERNAL = "true";
 
-  private TableParametersTransformation tableParametersTransformation;
-
-  public DropTableService(TableParametersTransformation tableParametersTransformation) {
-    this.tableParametersTransformation = tableParametersTransformation;
-  }
-
-  public void removeCustomParamsAndDrop(
+  /**
+   * Removes all parameters from a table before dropping the table.
+   */
+  public void removeTableParamsAndDrop(
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName) throws TException {
@@ -48,17 +48,20 @@ public class DropTableService {
     }
     Map<String, String> tableParameters = table.getParameters();
     if (tableParameters != null && !tableParameters.isEmpty()) {
-      Map<String, String> transformationTableParameters = tableParametersTransformation.getTableParameters();
-      if (!transformationTableParameters.isEmpty()) {
-        transformationTableParameters.entrySet().forEach(parameter -> {
-          tableParameters.remove(parameter.getKey(), parameter.getValue());
-        });
-        table.setParameters(tableParameters);
-        client.alter_table(databaseName, tableName, table);
+      if (isExternal(tableParameters)) {
+        table.setParameters(Collections.singletonMap(EXTERNAL_KEY, IS_EXTERNAL));
+      } else {
+        table.setParameters(Collections.emptyMap());
       }
+      client.alter_table(databaseName, tableName, table);
     }
     LOG
         .info("Dropping table '{}.{}'.", table.getDbName(), table.getTableName());
     client.dropTable(table.getDbName(), table.getTableName(), false, true);
+  }
+
+  private boolean isExternal(Map<String, String> tableParameters) {
+    CaseInsensitiveMap caseInsensitiveParams = new CaseInsensitiveMap(tableParameters);
+    return IS_EXTERNAL.equalsIgnoreCase((String) caseInsensitiveParams.get(EXTERNAL_KEY));
   }
 }

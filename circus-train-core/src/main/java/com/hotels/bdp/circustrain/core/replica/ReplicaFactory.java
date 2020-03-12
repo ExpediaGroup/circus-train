@@ -46,7 +46,6 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
   private final HousekeepingListener housekeepingListener;
   private final ReplicaCatalogListener replicaCatalogListener;
   private final ReplicaTableFactoryProvider replicaTableFactoryPicker;
-  private final TableParametersTransformation tableParametersTransformation;
 
   @Autowired
   public ReplicaFactory(
@@ -55,21 +54,19 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      ReplicaTableFactoryProvider replicaTableFactoryPicker,
-      TableParametersTransformation tableParametersTransformation) {
+      ReplicaTableFactoryProvider replicaTableFactoryProvider) {
     this.replicaCatalog = replicaCatalog;
     this.replicaHiveConf = replicaHiveConf;
     this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
     this.housekeepingListener = housekeepingListener;
     this.replicaCatalogListener = replicaCatalogListener;
-    this.replicaTableFactoryPicker = replicaTableFactoryPicker;
-    this.tableParametersTransformation = tableParametersTransformation;
+    this.replicaTableFactoryPicker = replicaTableFactoryProvider;
   }
 
   @Override
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
-    DropTableService dropTableService = new DropTableService(tableParametersTransformation);
+    DropTableService dropTableService = new DropTableService();
     AlterTableService alterTableService = new AlterTableService(dropTableService, new CopyPartitionsOperation(),
         new RenameTableOperation(dropTableService));
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,

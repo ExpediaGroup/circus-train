@@ -86,7 +86,7 @@ public class AlterTableServiceTest {
     service.alterTable(client, oldTable, newTable);
 
     verify(client).createTable(tempTable);
-    verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+    verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
     verify(copyPartitionsOperation).execute(client, newTable, tempTable);
     verify(renameTableOperation).execute(client, tempTable, newTable);
     verifyNoMoreInteractions(client);
@@ -106,7 +106,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+      verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verifyZeroInteractions(renameTableOperation);
       verifyNoMoreInteractions(client);
@@ -128,7 +128,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(dropTableService).removeCustomParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+      verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verify(renameTableOperation).execute(client, tempTable, newTable);
       verifyNoMoreInteractions(client);

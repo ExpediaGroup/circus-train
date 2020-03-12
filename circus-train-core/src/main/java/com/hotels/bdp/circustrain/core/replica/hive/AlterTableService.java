@@ -60,7 +60,7 @@ public class AlterTableService {
         copyPartitionsOperation.execute(client, newTable, tempTable);
         renameTableOperation.execute(client, tempTable, newTable);
       } finally {
-        dropTableService.removeCustomParamsAndDrop(client, tempTable.getDbName(), tempName);
+        dropTableService.removeTableParamsAndDrop(client, tempTable.getDbName(), tempName);
       }
     } else {
       client.alter_table(newTable.getDbName(), newTable.getTableName(), newTable);
