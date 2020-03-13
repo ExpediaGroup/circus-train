@@ -34,8 +34,8 @@ public class TransferManagerFactoryTest {
     TransferManager transferManager = factory.newInstance(mockClient, s3Options);
     assertThat(transferManager.getAmazonS3Client(), is(mockClient));
 
-    TransferManagerConfiguration tmConfig = transferManager.getConfiguration();
-    assertThat(tmConfig.getMultipartCopyPartSize(), is(MULTIPART_COPY_PART_SIZE));
-    assertThat(tmConfig.getMultipartCopyThreshold(), is(MULTIPART_COPY_THRESHOLD_VALUE));
+    TransferManagerConfiguration managerConfig = transferManager.getConfiguration();
+    assertThat(managerConfig.getMultipartCopyPartSize(), is(MULTIPART_COPY_PART_SIZE));
+    assertThat(managerConfig.getMultipartCopyThreshold(), is(MULTIPART_COPY_THRESHOLD_VALUE));
   }
 }
