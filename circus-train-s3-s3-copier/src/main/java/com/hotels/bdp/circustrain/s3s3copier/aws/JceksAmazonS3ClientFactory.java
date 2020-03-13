@@ -65,6 +65,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       AmazonS3URI uri,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialProviderChain) {
+    LOG.debug("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, credentialProviderChain);
     try {
 
@@ -103,16 +104,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
-  private AmazonS3ClientBuilder applyClientConfigurations(AmazonS3ClientBuilder builder, S3S3CopierOptions s3s3CopierOptions) {
-    ClientConfiguration clientConfiguration = new ClientConfiguration();
-
-    if (s3s3CopierOptions.getMaxThreadPoolSize() != S3S3CopierOptions.USE_DEFAULT_THREAD_POOL_MAX) {
-      clientConfiguration.withMaxConnections(s3s3CopierOptions.getMaxThreadPoolSize());
-    }
-
-    return builder.withClientConfiguration(clientConfiguration);
-  }
-
   private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain
@@ -121,8 +112,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
         .standard()
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
         .withCredentials(credentialsChain);
-
-    applyClientConfigurations(builder, s3s3CopierOptions);
 
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint();
     if (s3Endpoint != null) {
@@ -141,8 +130,6 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
         .standard()
         .withCredentials(credentialsChain);
-
-    applyClientConfigurations(builder, s3s3CopierOptions);
 
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
     if (s3Endpoint != null) {

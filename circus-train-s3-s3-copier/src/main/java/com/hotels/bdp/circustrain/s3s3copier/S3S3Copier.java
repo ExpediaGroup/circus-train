@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,8 @@ public class S3S3Copier implements Copier {
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
     AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
-
+    targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
+    transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
     if (sourceSubLocations.isEmpty()) {
       initialiseCopyJobs(sourceBase, targetBase);
     } else {
@@ -172,16 +173,8 @@ public class S3S3Copier implements Copier {
         initialiseCopyJobs(subLocation, targetS3Uri);
       }
     }
-
-    int totalCopyJobs = copyJobRequests.size();
-    LOG.info("Finished initialising {} copy job(s)", totalCopyJobs);
-    s3s3CopierOptions.overrideMaxThreadPoolSize(determineThreadPoolSize(totalCopyJobs, s3s3CopierOptions.getMaxThreadPoolSize()));
-    targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
-    transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
-  }
-
-  private int determineThreadPoolSize(int totalCopyJobs, int maxThreadPoolSize) {
-    return Math.min(totalCopyJobs, maxThreadPoolSize);
+    LOG
+        .info("Finished initialising {} copy job(s)", copyJobRequests.size());
   }
 
   private void initialiseCopyJobs(AmazonS3URI source, AmazonS3URI target) {
@@ -299,7 +292,7 @@ public class S3S3Copier implements Copier {
                   copyObjectRequest.getSourceBucketName(),
                   copyObjectRequest.getSourceKey());
           LOG
-              .warn("Copy failed with exception:", e);
+              .debug("Copy failed with exception:", e);
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {
