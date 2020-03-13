@@ -57,7 +57,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   @Override
   public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
     HadoopAWSCredentialProviderChain credentialProviderChain = getCredentialsProviderChain(
-        s3s3CopierOptions.getAssumedRole(), s3s3CopierOptions.getAssumedRoleCredentialDuration());
+        s3s3CopierOptions.getAssumedRole());
     return newS3Client(uri, s3s3CopierOptions, credentialProviderChain);
   }
 
@@ -155,10 +155,10 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return builder.build();
   }
 
-  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole, int assumedRoleDuration) {
+  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole) {
     if (assumedRole != null) {
       LOG.debug("Creating credential chain for assuming role {}", assumedRole);
-      return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole, assumedRoleDuration));
+      return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole));
     } else if (security.getCredentialProvider() != null) {
       LOG.debug("Creating credential chain with Jceks - cred provider {}", security.getCredentialProvider());
       return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
@@ -167,11 +167,10 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return new HadoopAWSCredentialProviderChain();
   }
 
-  private Configuration createNewConf(Configuration config, String assumedRole, int assumedRoleDuration) {
+  private Configuration createNewConf(Configuration config, String assumedRole) {
     Configuration conf = new Configuration(config);
     conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
     conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
-    conf.setInt(AssumeRoleCredentialProvider.ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, assumedRoleDuration);
     return conf;
   }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2019 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 package com.hotels.bdp.circustrain.aws;
 
 import static com.google.common.base.Preconditions.checkArgument;
-
-import java.util.concurrent.TimeUnit;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -25,50 +24,37 @@ import org.apache.hadoop.conf.Configuration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
 
 public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
-  public static final String ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRoleCredentialDuration";
-  private static final int DEFAULT_CREDENTIALS_DURATION = (int) TimeUnit.HOURS.toSeconds(12); // max duration in seconds for assumed role credentials
+  private static final int CREDENTIALS_DURATION = 12 * 60 * 60; // max duration in seconds for assumed role credentials
 
+  private AWSCredentials credentials;
   private final Configuration conf;
-  private STSAssumeRoleSessionCredentialsProvider credProvider;
 
   public AssumeRoleCredentialProvider(Configuration conf) {
     this.conf = conf;
   }
 
-  private void initializeCredProvider() {
-    String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
-    int credDuration = conf.getInt(ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
-
-    checkArgument(StringUtils.isNotEmpty(roleArn),
-        "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
-
-    // STSAssumeRoleSessionCredentialsProvider should auto refresh its creds in the background.
-    this.credProvider = new STSAssumeRoleSessionCredentialsProvider
-        .Builder(roleArn, "ct-assume-role-session")
-        .withRoleSessionDurationSeconds(credDuration)
-        .build();
-  }
-
   @Override
   public AWSCredentials getCredentials() {
-    if (this.credProvider == null) {
-      initializeCredProvider();
+    if (credentials == null) {
+      refresh();
     }
-
-    return this.credProvider.getCredentials();
+    return credentials;
   }
 
   @Override
   public void refresh() {
-    if (this.credProvider == null) {
-      initializeCredProvider();
-    }
+    checkNotNull(conf, "conf is required");
+    String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
+    checkArgument(StringUtils.isNotEmpty(roleArn),
+        "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    this.credProvider.refresh();
+    Builder builder = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "ct-assume-role-session");
+    credentials = builder.withRoleSessionDurationSeconds(CREDENTIALS_DURATION).build().getCredentials();
   }
 
 }
