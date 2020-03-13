@@ -66,7 +66,7 @@ public class S3S3CopierOptions {
      */
     MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts"),
     /**
-     * Max number of threads to use for the transferManager thread pool. Defaults internally to 10 if unset on the client.
+     * Max number of threads to use for the transferManager thread pool. Default value is 10.
      */
     MAX_THREAD_POOL_SIZE("s3s3-max-thread-pool-size");
 
@@ -82,7 +82,6 @@ public class S3S3CopierOptions {
   }
 
   private final Map<String, Object> copierOptions;
-  public static final int USE_DEFAULT_THREAD_POOL_MAX = -1;
 
   public S3S3CopierOptions() {
     copierOptions = new HashMap<>();
@@ -97,7 +96,7 @@ public class S3S3CopierOptions {
   }
 
   public int getMaxThreadPoolSize() {
-    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), USE_DEFAULT_THREAD_POOL_MAX);
+    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), 10);
   }
 
   public Long getMultipartCopyThreshold() {

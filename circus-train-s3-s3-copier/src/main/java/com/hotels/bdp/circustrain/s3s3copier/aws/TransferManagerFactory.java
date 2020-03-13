@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import jline.internal.Log;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -34,16 +36,14 @@ public class TransferManagerFactory {
   private static final Logger LOG = LoggerFactory.getLogger(TransferManagerFactory.class);
 
   public TransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions) {
-    TransferManagerBuilder builder = TransferManagerBuilder.standard()
+    LOG
+        .debug("Initializing transfer manager with {} threads.", s3s3CopierOptions.getMaxThreadPoolSize());
+
+    return TransferManagerBuilder.standard()
         .withMultipartCopyThreshold(s3s3CopierOptions.getMultipartCopyThreshold())
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
-        .withS3Client(targetS3Client);
-
-    if (s3s3CopierOptions.getMaxThreadPoolSize() != S3S3CopierOptions.USE_DEFAULT_THREAD_POOL_MAX) {
-      LOG.info("Initializing thread pool with {} threads", s3s3CopierOptions.getMaxThreadPoolSize());
-      builder = builder.withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getMaxThreadPoolSize()));
-    }
-
-    return builder.build();
+        .withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getMaxThreadPoolSize()))
+        .withS3Client(targetS3Client)
+        .build();
   }
 }
