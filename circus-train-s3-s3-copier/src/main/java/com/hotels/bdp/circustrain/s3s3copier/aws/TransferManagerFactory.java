@@ -39,7 +39,7 @@ public class TransferManagerFactory {
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
         .withS3Client(targetS3Client);
 
-    if (s3s3CopierOptions.getMaxThreadPoolSize() != -1) {
+    if (s3s3CopierOptions.getMaxThreadPoolSize() != S3S3CopierOptions.USE_DEFAULT_MAX_THREAD_POOL) {
       LOG.info("Initializing thread pool with {} threads", s3s3CopierOptions.getMaxThreadPoolSize());
       builder = builder.withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getMaxThreadPoolSize()));
     }

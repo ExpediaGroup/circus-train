@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.s3s3copier;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -61,7 +62,7 @@ public class S3S3CopierOptions {
      */
     ASSUME_ROLE("assume-role"),
     /**
-     * Number of time (in seconds) that the AWS SDK should assume the given role for.
+     * Amount of time (in seconds) that the AWS SDK should assume the given role for.
      * Defaults to 12 hours.
      */
     ASSUME_ROLE_CREDENTIAL_DURATION("assume-role-credential-duration"),
@@ -86,6 +87,7 @@ public class S3S3CopierOptions {
   }
 
   private final Map<String, Object> copierOptions;
+  public static final int USE_DEFAULT_MAX_THREAD_POOL = -1;
 
   public S3S3CopierOptions() {
     copierOptions = new HashMap<>();
@@ -100,7 +102,7 @@ public class S3S3CopierOptions {
   }
 
   public int getMaxThreadPoolSize() {
-    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), -1);
+    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), USE_DEFAULT_MAX_THREAD_POOL);
   }
 
   public Long getMultipartCopyThreshold() {
@@ -149,7 +151,8 @@ public class S3S3CopierOptions {
   }
 
   public int getAssumedRoleCredentialDuration() {
-    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_CREDENTIAL_DURATION.keyName(), 12 * 60 * 60);
+    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_CREDENTIAL_DURATION.keyName(),
+        (int) TimeUnit.HOURS.toSeconds(12));
   }
 
   public int getMaxCopyAttempts() {

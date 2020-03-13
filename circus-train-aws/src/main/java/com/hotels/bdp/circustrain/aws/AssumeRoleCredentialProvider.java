@@ -17,6 +17,8 @@ package com.hotels.bdp.circustrain.aws;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
@@ -28,7 +30,7 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   public static final String ASSUME_ROLE_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRole";
   public static final String ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME = "com.hotels.bdp.circustrain.aws.AssumeRoleCredentialProvider.assumeRoleCredentialDuration";
-  private static final int DEFAULT_CREDENTIALS_DURATION = 12 * 60 * 60; // max duration in seconds for assumed role credentials
+  private static final int DEFAULT_CREDENTIALS_DURATION = (int) TimeUnit.HOURS.toSeconds(12); // max duration in seconds for assumed role credentials
 
   private final Configuration conf;
   private STSAssumeRoleSessionCredentialsProvider credProvider;

@@ -397,7 +397,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
 |`copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target S3 location. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials. The role provided must have read access to the S3 source and write access to the S3 target.|
-|`copier-options.assume-role-credential-duration`|No| Number of time (in seconds) that the AWS SDK should assume the given role for. Default value is 12 hours.|
+|`copier-options.assume-role-credential-duration`|No| Amount of time (in seconds) that the AWS SDK should assume the given role for. Default value is 12 hours.|
 |`s3s3-max-thread-pool-size`|No| Max number of threads to use for the transferManager thread pool. Defaults internally to 10 if unset on the client.|
 
 ### S3 Secret Configuration

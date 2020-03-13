@@ -106,7 +106,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   private AmazonS3ClientBuilder applyClientConfigurations(AmazonS3ClientBuilder builder, S3S3CopierOptions s3s3CopierOptions) {
     ClientConfiguration clientConfiguration = new ClientConfiguration();
 
-    if (s3s3CopierOptions.getMaxThreadPoolSize() != -1) {
+    if (s3s3CopierOptions.getMaxThreadPoolSize() != S3S3CopierOptions.USE_DEFAULT_MAX_THREAD_POOL) {
       clientConfiguration.withMaxConnections(s3s3CopierOptions.getMaxThreadPoolSize());
     }
 
