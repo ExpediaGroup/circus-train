@@ -33,21 +33,21 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
   private static final int DEFAULT_CREDENTIALS_DURATION = (int) TimeUnit.HOURS.toSeconds(12); // max duration in seconds for assumed role credentials
 
   private final Configuration conf;
-  private STSAssumeRoleSessionCredentialsProvider credProvider;
+  private STSAssumeRoleSessionCredentialsProvider credentialsProvider;
 
   public AssumeRoleCredentialProvider(Configuration conf) {
     this.conf = conf;
   }
 
-  private void initializeCredProvider() {
+  private void initializeCredentialProvider() {
     String roleArn = conf.get(ASSUME_ROLE_PROPERTY_NAME);
-    int credDuration = conf.getInt(ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
-
     checkArgument(StringUtils.isNotEmpty(roleArn),
         "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    // STSAssumeRoleSessionCredentialsProvider should auto refresh its creds in the background.
-    this.credProvider = new STSAssumeRoleSessionCredentialsProvider
+    int credDuration = conf.getInt(ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
+
+    // STSAssumeRoleSessionCredentialsProvider should auto refresh its credentials in the background.
+    this.credentialsProvider = new STSAssumeRoleSessionCredentialsProvider
         .Builder(roleArn, "ct-assume-role-session")
         .withRoleSessionDurationSeconds(credDuration)
         .build();
@@ -55,19 +55,19 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
 
   @Override
   public AWSCredentials getCredentials() {
-    if (this.credProvider == null) {
-      initializeCredProvider();
+    if (this.credentialsProvider == null) {
+      initializeCredentialProvider();
     }
-    return this.credProvider.getCredentials();
+    return this.credentialsProvider.getCredentials();
   }
 
   @Override
   public void refresh() {
-    if (this.credProvider == null) {
-      initializeCredProvider();
+    if (this.credentialsProvider == null) {
+      initializeCredentialProvider();
     }
 
-    this.credProvider.refresh();
+    this.credentialsProvider.refresh();
   }
 
 }

@@ -65,7 +65,7 @@ public class S3S3CopierOptions {
      * Amount of time (in seconds) that the AWS SDK should assume the given role for.
      * Defaults to 12 hours.
      */
-    ASSUME_ROLE_CREDENTIAL_DURATION("assume-role-credential-duration"),
+    ASSUME_ROLE_CREDENTIAL_PERIOD("assume-role-credential-period"),
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
@@ -138,7 +138,7 @@ public class S3S3CopierOptions {
   }
 
   public int getAssumedRoleCredentialDuration() {
-    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_CREDENTIAL_DURATION.keyName(),
+    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_CREDENTIAL_PERIOD.keyName(),
         (int) TimeUnit.HOURS.toSeconds(12));
   }
 
