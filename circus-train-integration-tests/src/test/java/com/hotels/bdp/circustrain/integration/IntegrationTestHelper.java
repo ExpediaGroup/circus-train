@@ -134,10 +134,9 @@ public class IntegrationTestHelper {
 
     try {
       writer.write(record);
-    } catch (IOException e) {
-      e.printStackTrace();
+    } finally {
+      writer.close();
     }
-    writer.close();
     return partition;
   }
 

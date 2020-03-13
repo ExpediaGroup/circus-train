@@ -83,7 +83,7 @@ public class DropTableServiceTest {
 
   @Test
   public void removeParamsAndDrop() throws TException {
-    HashMap<String, String> params = new HashMap<>();
+    Map<String, String> params = new HashMap<>();
     params.put("key1", "value");
     params.put("key2", "value");
     params.put("EXTERNAL", "true");
@@ -104,7 +104,7 @@ public class DropTableServiceTest {
 
   @Test
   public void removeParamsAndDropCaseInsensitiveExternalTable() throws TException {
-    HashMap<String, String> params = new HashMap<>();
+    Map<String, String> params = new HashMap<>();
     params.put("key1", "value");
     params.put("key2", "value");
     params.put("external", "TRUE");

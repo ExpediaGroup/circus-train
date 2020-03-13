@@ -67,8 +67,8 @@ public class AlterTableServiceTest {
 
   @Test
   public void typicalAlterTable() throws TException {
-    oldTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
-    newTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
+    oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
+    newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
 
     service.alterTable(client, oldTable, newTable);
 
@@ -78,8 +78,8 @@ public class AlterTableServiceTest {
 
   @Test
   public void alterTableColumnChange() throws TException {
-    oldTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
-    newTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
+    oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
+    newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
     tempTable.setTableName(NEW_TABLE_NAME_TEMP);
 
@@ -94,8 +94,8 @@ public class AlterTableServiceTest {
 
   @Test
   public void alterTableCopyPartitionsFails() throws TException {
-    oldTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
-    newTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
+    oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
+    newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
     tempTable.setTableName(NEW_TABLE_NAME_TEMP);
     TException toBeThrown = new TException("error");
@@ -116,8 +116,8 @@ public class AlterTableServiceTest {
 
   @Test
   public void alterTableRenameTableFails() throws TException {
-    oldTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
-    newTable.setSd(getSd(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
+    oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
+    newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
     tempTable.setTableName(NEW_TABLE_NAME_TEMP);
     TException toBeThrown = new TException("error");
@@ -136,7 +136,7 @@ public class AlterTableServiceTest {
     }
   }
 
-  private StorageDescriptor getSd(List<FieldSchema> columns) {
+  private StorageDescriptor createStorageDescriptor(List<FieldSchema> columns) {
     StorageDescriptor storageDescriptor = new StorageDescriptor();
     storageDescriptor.setCols(columns);
     return storageDescriptor;

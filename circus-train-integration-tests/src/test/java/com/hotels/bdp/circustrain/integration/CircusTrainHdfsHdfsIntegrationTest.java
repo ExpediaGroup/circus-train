@@ -1422,7 +1422,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         .noDefault()
         .endRecord();
 
-    HashMap<String, String> structData = new HashMap<>();
+    Map<String, String> structData = new HashMap<>();
     structData.put("name", "adam");
     structData.put("city", "blackpool");
 

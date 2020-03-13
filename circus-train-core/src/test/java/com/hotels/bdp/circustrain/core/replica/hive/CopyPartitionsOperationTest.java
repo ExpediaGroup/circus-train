@@ -134,7 +134,7 @@ public class CopyPartitionsOperationTest {
   }
 
   private List<Partition> createPartitions(int count) {
-    ArrayList<Partition> partitions = new ArrayList<>();
+    List<Partition> partitions = new ArrayList<>();
     for (int i=0; i < count; i++) {
       Partition partition = new Partition();
       partition.setSd(new StorageDescriptor());
