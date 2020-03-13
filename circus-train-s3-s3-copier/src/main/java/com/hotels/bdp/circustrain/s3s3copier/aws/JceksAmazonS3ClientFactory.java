@@ -112,8 +112,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
   private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
-      HadoopAWSCredentialProviderChain credentialsChain
-  ) {
+      HadoopAWSCredentialProviderChain credentialsChain) {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
         .standard()
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
@@ -133,8 +132,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   private AmazonS3 newInstance(
       String region,
       S3S3CopierOptions s3s3CopierOptions,
-      HadoopAWSCredentialProviderChain credentialsChain
-  ) {
+      HadoopAWSCredentialProviderChain credentialsChain) {
     AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
         .standard()
         .withCredentials(credentialsChain);
