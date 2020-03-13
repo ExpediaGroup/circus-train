@@ -65,6 +65,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       AmazonS3URI uri,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialProviderChain) {
+    LOG.debug("trying to get a client for uri '{}'", uri);
     AmazonS3 globalClient = newGlobalInstance(s3s3CopierOptions, credentialProviderChain);
     try {
 
