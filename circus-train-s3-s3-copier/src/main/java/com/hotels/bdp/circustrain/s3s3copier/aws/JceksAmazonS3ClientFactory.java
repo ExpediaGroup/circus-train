@@ -154,13 +154,10 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
 
   private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole) {
     if (assumedRole != null) {
-      LOG.debug("Creating credential chain for assuming role {}", assumedRole);
       return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole));
     } else if (security.getCredentialProvider() != null) {
-      LOG.debug("Creating credential chain with Jceks - cred provider {}", security.getCredentialProvider());
       return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
     }
-    LOG.debug("Creating EC2ContainerCredentialsProviderWrapper provider chain");
     return new HadoopAWSCredentialProviderChain();
   }
 
