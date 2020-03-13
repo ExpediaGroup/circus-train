@@ -58,7 +58,6 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
     if (this.credProvider == null) {
       initializeCredProvider();
     }
-
     return this.credProvider.getCredentials();
   }
 
