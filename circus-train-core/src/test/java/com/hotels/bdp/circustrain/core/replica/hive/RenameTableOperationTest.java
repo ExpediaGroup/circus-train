@@ -73,7 +73,7 @@ public class RenameTableOperationTest {
   }
 
   @Test
-  public void renameTableExceptionThrown1() throws Exception {
+  public void renameToTableException() throws Exception {
     Table toTableTemp = new Table(toTable);
     toTableTemp.setTableName(TO_TABLE_NAME_TEMP);
     TException toBeThrown = new TException();
@@ -94,7 +94,7 @@ public class RenameTableOperationTest {
   }
 
   @Test
-  public void renameTableExceptionThrown2() throws Exception {
+  public void renameFromTableException() throws Exception {
     Table toTableTemp = new Table(toTable);
     toTableTemp.setTableName(TO_TABLE_NAME_TEMP);
     TException toBeThrown = new TException();

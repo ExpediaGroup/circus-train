@@ -179,10 +179,14 @@
     <dependency>
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-avro</artifactId>
+      <version>1.8.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
+      <version>1.7.7</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
