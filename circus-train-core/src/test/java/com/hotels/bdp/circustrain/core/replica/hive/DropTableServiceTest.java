@@ -99,7 +99,7 @@ public class DropTableServiceTest {
     assertThat(capturedTables.size(), is(1));
     Map<String, String> parameters = capturedTables.get(0).getParameters();
     assertThat(parameters.size(), is(1));
-    assertThat(parameters.get("EXTERNAL"), is("true"));
+    assertThat(parameters.get("EXTERNAL"), is("TRUE"));
   }
 
   @Test
@@ -120,7 +120,7 @@ public class DropTableServiceTest {
     assertThat(capturedTables.size(), is(1));
     Map<String, String> parameters = capturedTables.get(0).getParameters();
     assertThat(parameters.size(), is(1));
-    assertThat(parameters.get("EXTERNAL"), is("true"));
+    assertThat(parameters.get("EXTERNAL"), is("TRUE"));
   }
 
   @Test
