@@ -175,7 +175,7 @@ public class S3S3Copier implements Copier {
 
     int totalCopyJobs = copyJobRequests.size();
     LOG.info("Finished initialising {} copy job(s)", totalCopyJobs);
-    s3s3CopierOptions.overrideMaxThreadPoolSize(determineThreadPoolSize(totalCopyJobs, s3s3CopierOptions.getMaxThreadPoolSize()));
+    s3s3CopierOptions.setMaxThreadPoolSize(determineThreadPoolSize(totalCopyJobs, s3s3CopierOptions.getMaxThreadPoolSize()));
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
   }

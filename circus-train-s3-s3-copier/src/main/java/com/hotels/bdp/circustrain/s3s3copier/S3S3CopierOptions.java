@@ -18,7 +18,6 @@ package com.hotels.bdp.circustrain.s3s3copier;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -82,6 +81,7 @@ public class S3S3CopierOptions {
   }
 
   private final Map<String, Object> copierOptions;
+  private final int DEFAULT_MAX_THREAD_POOL_SIZE = 10;
 
   public S3S3CopierOptions() {
     copierOptions = new HashMap<>();
@@ -91,12 +91,12 @@ public class S3S3CopierOptions {
     this.copierOptions = new HashMap<>(copierOptions);
   }
 
-  public void overrideMaxThreadPoolSize(int newMax) {
-    copierOptions.put(Keys.MAX_THREAD_POOL_SIZE.keyName(), newMax);
+  public void setMaxThreadPoolSize(int maxThreadPoolSize) {
+    copierOptions.put(Keys.MAX_THREAD_POOL_SIZE.keyName(), maxThreadPoolSize);
   }
 
   public int getMaxThreadPoolSize() {
-    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), 10);
+    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), DEFAULT_MAX_THREAD_POOL_SIZE);
   }
 
   public Long getMultipartCopyThreshold() {
