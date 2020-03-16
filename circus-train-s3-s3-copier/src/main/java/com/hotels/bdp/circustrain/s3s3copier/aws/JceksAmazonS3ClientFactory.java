@@ -151,7 +151,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     Configuration conf = new Configuration(config);
     conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
     conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
-    conf.setInt(AssumeRoleCredentialProvider.ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, assumedRoleDuration);
+    conf.setInt(AssumeRoleCredentialProvider.ASSUME_ROLE_SESSION_DURATION_SECONDS_PROPERTY_NAME, assumedRoleDuration);
     return conf;
   }
 

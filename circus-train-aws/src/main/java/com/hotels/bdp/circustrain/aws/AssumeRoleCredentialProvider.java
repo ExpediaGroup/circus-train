@@ -44,12 +44,12 @@ public class AssumeRoleCredentialProvider implements AWSCredentialsProvider {
     checkArgument(StringUtils.isNotEmpty(roleArn),
         "Role ARN must not be empty, please set: " + ASSUME_ROLE_PROPERTY_NAME);
 
-    int rollSessionDuration = conf.getInt(ASSUME_ROLE_CREDENTIAL_DURATION_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
+    int roleSessionDuration = conf.getInt(ASSUME_ROLE_SESSION_DURATION_SECONDS_PROPERTY_NAME, DEFAULT_CREDENTIALS_DURATION);
 
     // STSAssumeRoleSessionCredentialsProvider should auto refresh its credentials in the background.
     this.credentialsProvider = new STSAssumeRoleSessionCredentialsProvider
         .Builder(roleArn, "ct-assume-role-session")
-        .withRoleSessionDurationSeconds(credDuration)
+        .withRoleSessionDurationSeconds(roleSessionDuration)
         .build();
   }
 
