@@ -1,6 +1,6 @@
 ## [16.0.1] - TBD
 ### Changed
-* Fix AssumeRoleCredentialProvider not auto renewing credentials on expiration.
+* Fix AssumeRoleCredentialProvider not auto-renewing credentials on expiration.
 
 ## [16.0.0] - 2020-02-26
 ### Changed
