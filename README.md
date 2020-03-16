@@ -396,7 +396,9 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3S3Copier` will not specify any canned ACL.|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
-| `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target S3 location. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials. The role provided must have read access to the S3 source and write access to the S3 target.|
+|`copier-options.s3s3-max-thread-pool-size`|No|Max number of threads to use for the transferManager thread pool. Default value is 10.|
+|`copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target S3 location. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials. The role provided must have read access to the S3 source and write access to the S3 target.|
+|`copier-options.assume-role-session-duration-seconds`|No| Amount of time (in seconds) that the AWS SDK should assume the given role for. Default value is 12 hours.|
 
 ### S3 Secret Configuration
 When configuring a job for replication to or from S3, the AWS access key and secret key with read/write access to the configured S3 buckets must be supplied. Circus train has a couple of options depending on where you run Circus Train.

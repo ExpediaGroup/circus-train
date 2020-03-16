@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.s3s3copier;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -61,9 +62,18 @@ public class S3S3CopierOptions {
      */
     ASSUME_ROLE("assume-role"),
     /**
+     * Amount of time (in seconds) that the AWS SDK should assume the given role for.
+     * Defaults to 12 hours.
+     */
+    ASSUME_ROLE_SESSION_DURATION_SECONDS("assume-role-session-duration-seconds"),
+    /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
-    MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts");
+    MAX_COPY_ATTEMPTS("s3s3-retry-max-copy-attempts"),
+    /**
+     * Max number of threads to use for the transferManager thread pool. Default value is 10.
+     */
+    MAX_THREAD_POOL_SIZE("s3s3-max-thread-pool-size");
 
     private final String keyName;
 
@@ -77,6 +87,7 @@ public class S3S3CopierOptions {
   }
 
   private final Map<String, Object> copierOptions;
+  private final int DEFAULT_MAX_THREAD_POOL_SIZE = 10;
 
   public S3S3CopierOptions() {
     copierOptions = new HashMap<>();
@@ -84,6 +95,14 @@ public class S3S3CopierOptions {
 
   public S3S3CopierOptions(Map<String, Object> copierOptions) {
     this.copierOptions = new HashMap<>(copierOptions);
+  }
+
+  public void setMaxThreadPoolSize(int maxThreadPoolSize) {
+    copierOptions.put(Keys.MAX_THREAD_POOL_SIZE.keyName(), maxThreadPoolSize);
+  }
+
+  public int getMaxThreadPoolSize() {
+    return MapUtils.getInteger(copierOptions, Keys.MAX_THREAD_POOL_SIZE.keyName(), DEFAULT_MAX_THREAD_POOL_SIZE);
   }
 
   public Long getMultipartCopyThreshold() {
@@ -129,6 +148,11 @@ public class S3S3CopierOptions {
   
   public String getAssumedRole() {
     return MapUtils.getString(copierOptions, Keys.ASSUME_ROLE.keyName(), null);
+  }
+
+  public int getAssumedRoleCredentialDuration() {
+    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_SESSION_DURATION_SECONDS.keyName(),
+        (int) TimeUnit.HOURS.toSeconds(12));
   }
 
   public int getMaxCopyAttempts() {

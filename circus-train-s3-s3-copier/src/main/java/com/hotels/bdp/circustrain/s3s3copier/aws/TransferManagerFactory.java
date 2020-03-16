@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier.aws;
 
+
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -26,11 +31,16 @@ import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 @Component
 public class TransferManagerFactory {
 
+  private static final Logger LOG = LoggerFactory.getLogger(TransferManagerFactory.class);
+
   public TransferManager newInstance(AmazonS3 targetS3Client, S3S3CopierOptions s3s3CopierOptions) {
-    return TransferManagerBuilder
-        .standard()
+    LOG
+        .debug("Initializing transfer manager with {} threads.", s3s3CopierOptions.getMaxThreadPoolSize());
+
+    return TransferManagerBuilder.standard()
         .withMultipartCopyThreshold(s3s3CopierOptions.getMultipartCopyThreshold())
         .withMultipartCopyPartSize(s3s3CopierOptions.getMultipartCopyPartSize())
+        .withExecutorFactory(() -> Executors.newFixedThreadPool(s3s3CopierOptions.getMaxThreadPoolSize()))
         .withS3Client(targetS3Client)
         .build();
   }

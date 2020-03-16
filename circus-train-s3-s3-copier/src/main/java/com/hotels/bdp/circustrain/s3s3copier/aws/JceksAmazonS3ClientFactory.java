@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -56,7 +57,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
   @Override
   public AmazonS3 newInstance(AmazonS3URI uri, S3S3CopierOptions s3s3CopierOptions) {
     HadoopAWSCredentialProviderChain credentialProviderChain = getCredentialsProviderChain(
-        s3s3CopierOptions.getAssumedRole());
+        s3s3CopierOptions.getAssumedRole(), s3s3CopierOptions.getAssumedRoleCredentialDuration());
     return newS3Client(uri, s3s3CopierOptions, credentialProviderChain);
   }
 
@@ -103,6 +104,12 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
+  private AmazonS3ClientBuilder applyClientConfigurations(AmazonS3ClientBuilder builder, S3S3CopierOptions s3s3CopierOptions) {
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+    clientConfiguration.withMaxConnections(s3s3CopierOptions.getMaxThreadPoolSize());
+    return builder.withClientConfiguration(clientConfiguration);
+  }
+
   private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
@@ -110,6 +117,9 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
         .standard()
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
         .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint();
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(),
@@ -123,7 +133,12 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       String region,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
-    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
+        .standard()
+        .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
@@ -131,22 +146,27 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     } else {
       builder.withRegion(region);
     }
+
     return builder.build();
   }
 
-  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole) {
+  private HadoopAWSCredentialProviderChain getCredentialsProviderChain(String assumedRole, int assumedRoleDuration) {
     if (assumedRole != null) {
-      return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole));
+      LOG.debug("Creating credential chain for assuming role {}", assumedRole);
+      return new HadoopAWSCredentialProviderChain(createNewConf(conf, assumedRole, assumedRoleDuration));
     } else if (security.getCredentialProvider() != null) {
+      LOG.debug("Creating credential chain with Jceks - cred provider {}", security.getCredentialProvider());
       return new HadoopAWSCredentialProviderChain(security.getCredentialProvider());
     }
+    LOG.debug("Creating EC2ContainerCredentialsProviderWrapper provider chain");
     return new HadoopAWSCredentialProviderChain();
   }
 
-  private Configuration createNewConf(Configuration config, String assumedRole) {
+  private Configuration createNewConf(Configuration config, String assumedRole, int assumedRoleDuration) {
     Configuration conf = new Configuration(config);
     conf.addResource(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME);
     conf.set(AssumeRoleCredentialProvider.ASSUME_ROLE_PROPERTY_NAME, assumedRole);
+    conf.setInt(AssumeRoleCredentialProvider.ASSUME_ROLE_SESSION_DURATION_SECONDS_PROPERTY_NAME, assumedRoleDuration);
     return conf;
   }
 

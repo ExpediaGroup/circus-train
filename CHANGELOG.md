@@ -1,6 +1,10 @@
 ## [16.1.0] - TBD
+### Changed
+* Updated S3S3Copier to have a configurable max number of threads to pass to TransferManager.
+* Fix AssumeRoleCredentialProvider not auto-renewing credentials on expiration.
+
 ### Fixed
-Fixed issue where replication breaks if struct columns have changed. See [#173](https://github.com/HotelsDotCom/circus-train/issues/173).
+* Fixed issue where replication breaks if struct columns have changed. See [#173](https://github.com/HotelsDotCom/circus-train/issues/173).
 
 ## [16.0.0] - 2020-02-26
 ### Changed
