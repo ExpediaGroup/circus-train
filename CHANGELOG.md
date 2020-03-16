@@ -1,5 +1,6 @@
-## [16.0.1] - TBD
+## [16.1.0] - TBD
 ### Changed
+* Updated S3S3Copier to have a configurable max number of threads to pass to TransferManager.
 * Fix AssumeRoleCredentialProvider not auto-renewing credentials on expiration.
 
 ## [16.0.0] - 2020-02-26

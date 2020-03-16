@@ -104,6 +104,12 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     return bucketRegion;
   }
 
+  private AmazonS3ClientBuilder applyClientConfigurations(AmazonS3ClientBuilder builder, S3S3CopierOptions s3s3CopierOptions) {
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+    clientConfiguration.withMaxConnections(s3s3CopierOptions.getMaxThreadPoolSize());
+    return builder.withClientConfiguration(clientConfiguration);
+  }
+
   private AmazonS3 newGlobalInstance(
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
@@ -111,6 +117,9 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
         .standard()
         .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
         .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint();
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(),
@@ -124,7 +133,12 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
       String region,
       S3S3CopierOptions s3s3CopierOptions,
       HadoopAWSCredentialProviderChain credentialsChain) {
-    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsChain);
+    AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
+        .standard()
+        .withCredentials(credentialsChain);
+
+    applyClientConfigurations(builder, s3s3CopierOptions);
+
     URI s3Endpoint = s3s3CopierOptions.getS3Endpoint(region);
     if (s3Endpoint != null) {
       EndpointConfiguration endpointConfiguration = new EndpointConfiguration(s3Endpoint.toString(), region);
@@ -132,6 +146,7 @@ public class JceksAmazonS3ClientFactory implements AmazonS3ClientFactory {
     } else {
       builder.withRegion(region);
     }
+
     return builder.build();
   }
 
