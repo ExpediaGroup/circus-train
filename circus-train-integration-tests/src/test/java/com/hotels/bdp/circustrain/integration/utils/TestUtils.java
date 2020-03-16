@@ -124,8 +124,13 @@ public final class TestUtils {
       HiveMetaStoreClient metaStoreClient,
       String database,
       String table,
-      URI location)
-    throws Exception {
+      URI location,
+      List<FieldSchema> columns,
+      List<FieldSchema> partitionKeys,
+      String serializationLib,
+      String inputFormatClassName,
+      String outputFormatClassName)
+      throws Exception {
 
     Table hiveTable = new Table();
     hiveTable.setDbName(database);
@@ -133,16 +138,16 @@ public final class TestUtils {
     hiveTable.setTableType(TableType.EXTERNAL_TABLE.name());
     hiveTable.putToParameters("EXTERNAL", "TRUE");
 
-    hiveTable.setPartitionKeys(PARTITION_COLUMNS);
+    hiveTable.setPartitionKeys(partitionKeys);
 
     StorageDescriptor sd = new StorageDescriptor();
-    sd.setCols(DATA_COLUMNS);
+    sd.setCols(columns);
     sd.setLocation(location.toString());
     sd.setParameters(new HashMap<String, String>());
-    sd.setInputFormat(TextInputFormat.class.getName());
-    sd.setOutputFormat(TextOutputFormat.class.getName());
+    sd.setInputFormat(inputFormatClassName);
+    sd.setOutputFormat(outputFormatClassName);
     sd.setSerdeInfo(new SerDeInfo());
-    sd.getSerdeInfo().setSerializationLib("org.apache.hadoop.hive.serde2.OpenCSVSerde");
+    sd.getSerdeInfo().setSerializationLib(serializationLib);
 
     hiveTable.setSd(sd);
 
@@ -155,6 +160,17 @@ public final class TestUtils {
     metaStoreClient.updateTableColumnStatistics(new ColumnStatistics(statsDesc, statsObj));
 
     return hiveTable;
+  }
+
+  public static Table createPartitionedTable(
+      HiveMetaStoreClient metaStoreClient,
+      String database,
+      String table,
+      URI location)
+    throws Exception {
+    return createPartitionedTable(metaStoreClient, database, table, location, DATA_COLUMNS, PARTITION_COLUMNS,
+        "org.apache.hadoop.hive.serde2.OpenCSVSerde", TextInputFormat.class.getName(),
+        TextOutputFormat.class.getName());
   }
 
   public static Partition newTablePartition(Table hiveTable, List<String> values, URI location) {

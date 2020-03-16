@@ -84,6 +84,7 @@ import com.hotels.bdp.circustrain.api.metadata.PartitionTransformation;
 import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -118,6 +119,7 @@ public class ReplicaTest {
   private @Captor ArgumentCaptor<SetPartitionsStatsRequest> setStatsRequestCaptor;
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
+  private @Mock AlterTableService alterTableService;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
       TableTransformation.IDENTITY, PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
@@ -178,14 +180,14 @@ public class ReplicaTest {
 
   private Replica newReplica(TableReplication tableReplication) {
     return new Replica(replicaCatalog, hiveConf, metaStoreClientSupplier, tableFactory, houseKeepingListener,
-        replicaCatalogListener, tableReplication, TEST_PARTITION_BATCH_SIZE);
+        replicaCatalogListener, tableReplication, alterTableService, TEST_PARTITION_BATCH_SIZE);
   }
 
   @Test
   public void alteringExistingUnpartitionedReplicaTableSucceeds() throws TException, IOException {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
@@ -195,7 +197,7 @@ public class ReplicaTest {
     tableAndStatistics = new TableAndStatistics(sourceTable, null);
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient, never()).updateTableColumnStatistics(any(ColumnStatistics.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
@@ -206,7 +208,7 @@ public class ReplicaTest {
     convertExistingReplicaTableToView();
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
 
@@ -332,7 +334,7 @@ public class ReplicaTest {
             new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
                 Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
             DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
@@ -350,7 +352,7 @@ public class ReplicaTest {
             new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
                 Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
             DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
 
@@ -464,7 +466,7 @@ public class ReplicaTest {
         .updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, DB_NAME, TABLE_NAME,
             mockReplicaLocationManager);
 
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager, times(numTestAlterPartitions)).addCleanUpLocation(anyString(), any(Path.class));
     verify(mockMetaStoreClient, times(numAlterBatches)).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
@@ -597,7 +599,7 @@ public class ReplicaTest {
         .updateMetadata(EVENT_ID, tableAndStatistics, partitionsAndStatistics, DB_NAME, TABLE_NAME,
             mockReplicaLocationManager);
 
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
@@ -640,7 +642,7 @@ public class ReplicaTest {
   public void updateMetadataCalledWithoutPartitionsDoesNotCleanUpLocations() throws TException, IOException {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(mockMetaStoreClient).alter_table(eq(DB_NAME), eq(TABLE_NAME), any(Table.class));
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }

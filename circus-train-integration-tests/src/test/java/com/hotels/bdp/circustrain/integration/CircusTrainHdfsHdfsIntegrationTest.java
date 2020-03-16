@@ -50,14 +50,19 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.Warehouse;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Before;
@@ -82,6 +87,7 @@ import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 import com.hotels.housekeeping.model.LegacyReplicaPath;
 
 public class CircusTrainHdfsHdfsIntegrationTest {
@@ -1398,4 +1404,119 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     runner.run(config.getAbsolutePath());
   }
 
+  @Test
+  public void partitionedTableColumnAdditionInStruct() throws Exception {
+    // Create a table with a struct in the replica db (setting a Circus Train event id manually).
+    Schema schema = SchemaBuilder
+        .builder("name.space")
+        .record(PARTITIONED_TABLE)
+        .fields()
+        .requiredInt("id")
+        .name("details")
+        .type()
+        .record("details_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .endRecord()
+        .noDefault()
+        .endRecord();
+
+    Map<String, String> structData = new HashMap<>();
+    structData.put("name", "adam");
+    structData.put("city", "blackpool");
+
+    Table replicaTable = replicaHelper.createParquetPartitionedTableWithStruct(
+        toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        schema,
+        "struct<name:string, city:string>",
+        structData,
+        1);
+    LOG.info(">>>> Table {} ", replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
+    replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
+
+    // Create the source partition with the original struct.
+    helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, structData);
+
+    // Create the source table with an additional column in the struct.
+    Schema schemaV2 = SchemaBuilder
+        .builder("name.space")
+        .record(PARTITIONED_TABLE)
+        .fields()
+        .requiredInt("id")
+        .name("details")
+        .type()
+        .record("details_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .optionalString("dob")
+        .endRecord()
+        .noDefault()
+        .endRecord();
+
+    structData = new HashMap<>();
+    structData.put("name", "adam");
+    structData.put("city", "blackpool");
+    structData.put("dob", "22/09/1992");
+
+    Table table = helper.createParquetPartitionedTableWithStruct(
+        toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        schemaV2,
+        "struct<name:string, city:string, dob:string>",
+        structData,
+        2);
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
+    sourceCatalog.client().add_partitions(Arrays.asList(
+        newTablePartition(table, Arrays.asList("1"), partition)
+    ));
+
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+
+    File config = dataFolder.getFile("partitioned-single-table-one-partition.yml");
+    exit.expectSystemExitWithStatus(0);
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        assertThat(sourceCatalog.client().getAllTables(DATABASE).size(), is(1));
+        Table sourceTable = sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        List<FieldSchema> cols = sourceTable.getSd().getCols();
+        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
+        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        PartitionIterator partitionIterator = new PartitionIterator(sourceCatalog.client(), sourceTable, (short) 1000);
+        List<Partition> partitions = new ArrayList<>();
+        while (partitionIterator.hasNext()) {
+          Partition partition = partitionIterator.next();
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
+          partitions.add(partition);
+        }
+        assertThat(partitions.size(), is(2));
+
+        assertThat(replicaCatalog.client().getAllTables(DATABASE).size(), is(1));
+        Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        cols = replicaTable.getSd().getCols();
+        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
+        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
+        partitions = new ArrayList<>();
+        while (partitionIterator.hasNext()) {
+          Partition partition = partitionIterator.next();
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
+          partitions.add(partition);
+        }
+        assertThat(partitions.size(), is(2));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+
+  }
 }

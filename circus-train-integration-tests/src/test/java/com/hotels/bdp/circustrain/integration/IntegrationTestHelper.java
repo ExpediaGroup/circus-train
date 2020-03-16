@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,25 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePar
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPartition;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetInputFormat;
+import org.apache.parquet.hadoop.ParquetOutputFormat;
+import org.apache.parquet.hadoop.ParquetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +46,7 @@ import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 
 public class IntegrationTestHelper {
+
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
 
   public static final String DATABASE = "ct_database";
@@ -65,13 +78,66 @@ public class IntegrationTestHelper {
     URI partitionAsia = URI.create(sourceTableUri + "/continent=Asia");
     URI partitionChina = URI.create(partitionAsia + "/country=China");
     File dataFileChina = new File(partitionChina.getPath(), PART_00000);
-    FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tshanghai\tmilan\n");
+    FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tpatrick\tshanghai\n");
     LOG
         .info(">>>> Partitions added: {}",
             metaStoreClient
                 .add_partitions(Arrays
                     .asList(newTablePartition(hiveTable, Arrays.asList("Europe", "UK"), partitionUk),
                         newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
+  }
+
+  Table createParquetPartitionedTableWithStruct(
+      URI tableUri,
+      Schema schema,
+      String structType,
+      Map<String, String> structData,
+      int version) throws Exception {
+    List<FieldSchema> columns = Arrays.asList(
+        new FieldSchema("id", "string", ""),
+        new FieldSchema("details", structType, "")
+    );
+    List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
+    Table table = TestUtils
+        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
+            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
+            ParquetOutputFormat.class.getName());
+    URI partition = createData(tableUri, schema, Integer.toString(version), version, structData);
+    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
+        Arrays.asList(Integer.toString(version)), partition)));
+    return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+  }
+
+  URI createData(
+      URI tableUri,
+      Schema schema,
+      String hour,
+      int id,
+      Map<String, String> detailsStruct) throws IOException {
+    GenericData.Record record = new GenericData.Record(schema);
+    Schema detailsSchema = schema.getField("details").schema();
+    GenericData.Record details = new GenericData.Record(detailsSchema);
+    detailsStruct.forEach(details::put);
+    record.put("id", id);
+    record.put("details", details);
+
+    URI partition = URI.create(tableUri + "/hour=" + hour);
+    String path = partition.getPath();
+    File parentFolder = new File(path);
+    parentFolder.mkdirs();
+    File partitionFile = new File(parentFolder, "parquet0000");
+    Path filePath = new Path(partitionFile.toURI());
+    ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(filePath)
+        .withSchema(schema)
+        .withConf(new Configuration())
+        .build();
+
+    try {
+      writer.write(record);
+    } finally {
+      writer.close();
+    }
+    return partition;
   }
 
   void createUnpartitionedTable(URI sourceTableUri) throws Exception {
@@ -154,5 +220,4 @@ public class IntegrationTestHelper {
     metaStoreClient.alter_table(database, tableName, table);
     return table;
   }
-
 }

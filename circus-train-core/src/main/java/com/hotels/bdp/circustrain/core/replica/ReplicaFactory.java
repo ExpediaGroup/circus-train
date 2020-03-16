@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpointFactory;
+import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
+import com.hotels.bdp.circustrain.core.replica.hive.CopyPartitionsOperation;
+import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
+import com.hotels.bdp.circustrain.core.replica.hive.RenameTableOperation;
+import com.hotels.bdp.circustrain.core.transformation.TableParametersTransformation;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
@@ -49,19 +54,22 @@ public class ReplicaFactory implements HiveEndpointFactory<Replica> {
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      ReplicaTableFactoryProvider replicaTableFactoryPicker) {
+      ReplicaTableFactoryProvider replicaTableFactoryProvider) {
     this.replicaCatalog = replicaCatalog;
     this.replicaHiveConf = replicaHiveConf;
     this.replicaMetaStoreClientSupplier = replicaMetaStoreClientSupplier;
     this.housekeepingListener = housekeepingListener;
     this.replicaCatalogListener = replicaCatalogListener;
-    this.replicaTableFactoryPicker = replicaTableFactoryPicker;
+    this.replicaTableFactoryPicker = replicaTableFactoryProvider;
   }
 
   @Override
   public Replica newInstance(TableReplication tableReplication) {
     ReplicaTableFactory replicaTableFactory = replicaTableFactoryPicker.newInstance(tableReplication);
+    DropTableService dropTableService = new DropTableService();
+    AlterTableService alterTableService = new AlterTableService(dropTableService, new CopyPartitionsOperation(),
+        new RenameTableOperation(dropTableService));
     return new Replica(replicaCatalog, replicaHiveConf, replicaMetaStoreClientSupplier, replicaTableFactory,
-        housekeepingListener, replicaCatalogListener, tableReplication);
+        housekeepingListener, replicaCatalogListener, tableReplication, alterTableService);
   }
 }
