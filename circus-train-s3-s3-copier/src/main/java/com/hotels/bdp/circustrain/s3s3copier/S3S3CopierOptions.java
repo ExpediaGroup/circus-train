@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.s3s3copier;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -60,6 +61,11 @@ public class S3S3CopierOptions {
      * access to the target.
      */
     ASSUME_ROLE("assume-role"),
+    /**
+     * Amount of time (in seconds) that the AWS SDK should assume the given role for.
+     * Defaults to 12 hours.
+     */
+    ASSUME_ROLE_SESSION_DURATION_SECONDS("assume-role-session-duration-seconds"),
     /**
      * Number of copy attempts to allow when copying from S3 to S3. Default value is 3.
      */
@@ -142,6 +148,11 @@ public class S3S3CopierOptions {
   
   public String getAssumedRole() {
     return MapUtils.getString(copierOptions, Keys.ASSUME_ROLE.keyName(), null);
+  }
+
+  public int getAssumedRoleCredentialDuration() {
+    return MapUtils.getIntValue(copierOptions, Keys.ASSUME_ROLE_SESSION_DURATION_SECONDS.keyName(),
+        (int) TimeUnit.HOURS.toSeconds(12));
   }
 
   public int getMaxCopyAttempts() {
