@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hotels</groupId>
     <artifactId>circus-train-parent</artifactId>
-    <version>16.0.1-SNAPSHOT</version>
+    <version>16.1.0</version>
   </parent>
 
   <artifactId>circus-train-integration-tests</artifactId>
