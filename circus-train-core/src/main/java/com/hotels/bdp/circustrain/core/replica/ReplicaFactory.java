@@ -33,7 +33,6 @@ import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.bdp.circustrain.core.replica.hive.CopyPartitionsOperation;
 import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
 import com.hotels.bdp.circustrain.core.replica.hive.RenameTableOperation;
-import com.hotels.bdp.circustrain.core.transformation.TableParametersTransformation;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @Profile({ Modules.REPLICATION })
