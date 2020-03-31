@@ -11,8 +11,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Hello world
-      run: echo Hello world $FIRST_NAME $middle_name $Last_Name!
+      run: echo Hello world $FIRST_NAME $GITHUB_CONTEXT
       env:
         FIRST_NAME: Mona
-        middle_name: The
-        Last_Name: Octocat
+        GITHUB_CONTEXT: ${{ toJson(github) }}
