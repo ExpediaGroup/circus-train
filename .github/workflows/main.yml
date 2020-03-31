@@ -23,7 +23,8 @@ jobs:
              COVERALLS_SKIP=false
           fi
           #echo set-output name=COVERALLS_SKIP::${COVERALLS_SKIP}
-          echo ::set-output name=COVERALLS_SKIP2::${COVERALLS_SKIP}
+          echo ::set-output name=COVERALLS_SKIP::ZZZ
+          echo ::set-env name=COVERALLS_SKIP2::YYY
     - name: Hello world
       shell: bash
-      run: echo "Hello world COVERALLS_SKIP - $COVERALLS_SKIP , from step ${{ steps.vars.outputs.COVERALLS_SKIP2 }}"
+      run: echo "Hello world COVERALLS_SKIP - $COVERALLS_SKIP , COVERALLS_SKIP2 - $COVERALLS_SKIP2 , from step ${{ steps.vars.outputs.COVERALLS_SKIP }}"
