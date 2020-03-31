@@ -26,10 +26,9 @@ jobs:
     - name: Hello world
       shell: bash
       run: echo "Hello world COVERALLS_SKIP - $COVERALLS_SKIP , COVERALLS_SKIP2 - $COVERALLS_SKIP2 , from step ${{ steps.vars.outputs.COVERALLS_SKIP }}"
-   - name: Set up JDK
+    - name: Set up JDK
       uses: actions/setup-java@v1
       with:
         java-version: 8
     - name: Run Maven Targets
       run:  echo "mvn package jacoco:report coveralls:report --batch-mode --show-version --activate-profiles coveralls -Dcoveralls.skip=$COVERALLS_SKIP2 -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }}"
-
