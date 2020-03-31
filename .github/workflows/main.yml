@@ -15,5 +15,6 @@ jobs:
       with:
         java-version: 8
     - name: Run Maven Targets
-      run: echo Hello World 6 {{ github.actor }}
+        env: SOME_VAR: somevalue
+      run: echo Hello World 7 $SOME_VAR
 
