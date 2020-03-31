@@ -11,7 +11,5 @@ jobs:
       with:
         fetch-depth: 0
     - name: Hello world
-      run: echo Hello world event path - $GITHUB_EVENT_PATH , workspace - $GITHUB_WORKSPACE , GITHUB_REF - $GITHUB_REF , GITHUB_HEAD_REF - $GITHUB_HEAD_REF , GITHUB_BASE_REF - $GITHUB_BASE_REF
-      env:
-        FIRST_NAME: Mona
-        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo Hello world token - ${{ secrets.COVERALLS_REPO_TOKEN }} , GITHUB_HEAD_REF - $GITHUB_HEAD_REF , GITHUB_BASE_REF - $GITHUB_BASE_REF
+
