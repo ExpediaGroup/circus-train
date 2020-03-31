@@ -10,6 +10,17 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Init Coveralls
+      shell: bash
+      run: |
+          FOO=${{ secrets.COVERALLS_REPO_TOKEN }}
+          if [ -z "$FOO" ]
+          then
+             echo "secret available"
+             COVERALLS_SKIP=false
+          else
+             echo "secret not available"
+             COVERALLS_SKIP=true
     - name: Hello world
-      run: echo Hello world token - ${{ secrets.COVERALLS_REPO_TOKEN }} , GITHUB_HEAD_REF - $GITHUB_HEAD_REF , GITHUB_BASE_REF - $GITHUB_BASE_REF
+      run: echo Hello world $COVERALLS_SKIP - $COVERALLS_SKIP
 
