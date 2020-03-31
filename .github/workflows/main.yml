@@ -23,9 +23,6 @@ jobs:
              COVERALLS_SKIP=false
           fi
           echo ::set-env name=COVERALLS_SKIP::${COVERALLS_SKIP}
-    - name: Hello world
-      shell: bash
-      run: echo "Hello world COVERALLS_SKIP - $COVERALLS_SKIP , COVERALLS_SKIP2 - $COVERALLS_SKIP2 , from step ${{ steps.vars.outputs.COVERALLS_SKIP }}"
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
