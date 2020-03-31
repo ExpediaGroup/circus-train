@@ -16,7 +16,7 @@ jobs:
           FOO=${{ secrets.COVERALLS_REPO_TOKEN }}
           FOO=something
           echo FOO $FOO
-          if [ -z "$FOO" ]
+          if [[ -z "${FOO}" ]]
           then
              echo "secret available"
              COVERALLS_SKIP=false
