@@ -15,8 +15,5 @@ jobs:
       with:
         java-version: 8
     - name: Run Maven Targets
-      run: echo Hello World 4
-    - name: Dump GitHub context
-      env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo "$GITHUB_CONTEXT"
+      run: echo Hello World 5
+
