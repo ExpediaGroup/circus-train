@@ -21,6 +21,7 @@ jobs:
           else
              echo "secret not available"
              COVERALLS_SKIP=true
+          fi
     - name: Hello world
       run: echo Hello world $COVERALLS_SKIP - $COVERALLS_SKIP
 
