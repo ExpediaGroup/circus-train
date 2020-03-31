@@ -11,7 +11,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Hello world
-      run: echo Hello world $FIRST_NAME $GITHUB_CONTEXT
+      run: echo Hello world actor - $GITHUB_ACTOR , repo - $GITHUB_REPOSITORY
       env:
         FIRST_NAME: Mona
         GITHUB_CONTEXT: ${{ toJson(github) }}
