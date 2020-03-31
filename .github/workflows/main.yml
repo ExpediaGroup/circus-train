@@ -15,6 +15,5 @@ jobs:
       with:
         java-version: 8
     - name: Run Maven Targets
-      env: GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo Hello World 6
+      run: echo Hello World 6 {{ github.actor }}
 
