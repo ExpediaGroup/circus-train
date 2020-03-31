@@ -10,11 +10,9 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 8
-    - name: Run Maven Targets
-        env: SOME_VAR: somevalue
-      run: echo Hello World 7 $SOME_VAR
-
+    - name: Hello world
+      run: echo Hello world $FIRST_NAME $middle_name $Last_Name!
+      env:
+        FIRST_NAME: Mona
+        middle_name: The
+        Last_Name: Octocat
