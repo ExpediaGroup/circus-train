@@ -22,9 +22,7 @@ jobs:
              echo "secret not available"
              COVERALLS_SKIP=false
           fi
-          #echo set-output name=COVERALLS_SKIP::${COVERALLS_SKIP}
-          echo ::set-output name=COVERALLS_SKIP::ZZZ
-          echo ::set-env name=COVERALLS_SKIP2::YYY
+          echo ::set-env name=COVERALLS_SKIP2::${COVERALLS_SKIP}
     - name: Hello world
       shell: bash
       run: echo "Hello world COVERALLS_SKIP - $COVERALLS_SKIP , COVERALLS_SKIP2 - $COVERALLS_SKIP2 , from step ${{ steps.vars.outputs.COVERALLS_SKIP }}"
