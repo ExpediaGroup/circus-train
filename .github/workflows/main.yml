@@ -14,6 +14,7 @@ jobs:
       shell: bash
       run: |
           FOO=${{ secrets.COVERALLS_REPO_TOKEN }}
+          echo FOO $FOO
           if [ -z "$FOO" ]
           then
              echo "secret available"
