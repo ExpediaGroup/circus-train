@@ -1,3 +1,7 @@
+## [16.1.1] - TBD
+### Changed
+* Changed version of `hive.version` to `2.3.7` (was `2.3.2`).
+
 ## [16.1.0] - 2020-03-18
 ### Changed
 * Updated S3S3Copier to have a configurable max number of threads to pass to TransferManager.
