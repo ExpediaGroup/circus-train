@@ -188,6 +188,12 @@
       <version>1.7.7</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-mapred</artifactId>
+      <version>1.7.7</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

@@ -21,6 +21,7 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPart
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -87,24 +88,25 @@ public class IntegrationTestHelper {
                         newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
   }
 
-  Table createParquetPartitionedTableWithStruct(
-      URI tableUri,
-      Schema schema,
-      String structType,
-      Map<String, String> structData,
-      int version) throws Exception {
-    List<FieldSchema> columns = Arrays.asList(
-        new FieldSchema("id", "string", ""),
-        new FieldSchema("details", structType, "")
-    );
+  Table createParquetPartitionedTable(
+          URI tableUri,
+          Schema schema,
+          String fieldType,
+          Object fieldData,
+          int version) throws Exception {
+    List<FieldSchema> columns = new ArrayList<>();
+    columns.add(new FieldSchema("id", "int", ""));
+    if (fieldType != null) {
+      columns.add(new FieldSchema("details", fieldType, ""));
+    }
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
     Table table = TestUtils
-        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
-            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
-            ParquetOutputFormat.class.getName());
-    URI partition = createData(tableUri, schema, Integer.toString(version), version, structData);
+            .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
+                    "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
+                    ParquetOutputFormat.class.getName());
+    URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldData);
     metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
-        Arrays.asList(Integer.toString(version)), partition)));
+            Arrays.asList(Integer.toString(version)), partition)));
     return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
   }
 
@@ -113,13 +115,21 @@ public class IntegrationTestHelper {
       Schema schema,
       String hour,
       int id,
-      Map<String, String> detailsStruct) throws IOException {
+      Object detailsData) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
-    Schema detailsSchema = schema.getField("details").schema();
-    GenericData.Record details = new GenericData.Record(detailsSchema);
-    detailsStruct.forEach(details::put);
     record.put("id", id);
-    record.put("details", details);
+
+    Schema.Field details = schema.getField("details");
+    if (details != null) {
+      Schema detailsSchema = details.schema();
+      if (detailsData instanceof Map) {
+        GenericData.Record detailsRecord = new GenericData.Record(detailsSchema);
+        ((Map<String, String>) detailsData).forEach(detailsRecord::put);
+        record.put("details", detailsRecord);
+      } else {
+        record.put("details", detailsData.toString());
+      }
+    }
 
     URI partition = URI.create(tableUri + "/hour=" + hour);
     String path = partition.getPath();

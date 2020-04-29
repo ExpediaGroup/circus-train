@@ -1426,7 +1426,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("name", "adam");
     structData.put("city", "blackpool");
 
-    Table replicaTable = replicaHelper.createParquetPartitionedTableWithStruct(
+    Table replicaTable = replicaHelper.createParquetPartitionedTable(
         toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
         schema,
         "struct<name:string, city:string>",
@@ -1462,7 +1462,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("city", "blackpool");
     structData.put("dob", "22/09/1992");
 
-    Table table = helper.createParquetPartitionedTableWithStruct(
+    Table table = helper.createParquetPartitionedTable(
         toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
         schemaV2,
         "struct<name:string, city:string, dob:string>",
