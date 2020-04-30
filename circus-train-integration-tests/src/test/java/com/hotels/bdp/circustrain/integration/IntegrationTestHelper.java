@@ -29,12 +29,15 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.serde2.avro.AvroObjectInspectorGenerator;
+import org.apache.hadoop.hive.serde2.avro.AvroSerDe;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetInputFormat;
 import org.apache.parquet.hadoop.ParquetOutputFormat;
@@ -49,6 +52,7 @@ import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 public class IntegrationTestHelper {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
+  protected static final String EVOLUTION_COLUMN = "to_evolve";
 
   public static final String DATABASE = "ct_database";
   public static final String PARTITIONED_TABLE = "ct_table_p";
@@ -91,20 +95,22 @@ public class IntegrationTestHelper {
   Table createParquetPartitionedTable(
           URI tableUri,
           Schema schema,
-          String fieldType,
+          String fieldName,
           Object fieldData,
           int version) throws Exception {
     List<FieldSchema> columns = new ArrayList<>();
-    columns.add(new FieldSchema("id", "int", ""));
-    if (fieldType != null) {
-      columns.add(new FieldSchema("details", fieldType, ""));
+    AvroObjectInspectorGenerator schemaInspector = new AvroObjectInspectorGenerator(schema);
+    for (int i = 0; i < schemaInspector.getColumnNames().size(); i++) {
+      columns.add(new FieldSchema(
+              schemaInspector.getColumnNames().get(i), schemaInspector.getColumnTypes().get(i).toString(), ""
+      ));
     }
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
     Table table = TestUtils
             .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
                     "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
                     ParquetOutputFormat.class.getName());
-    URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldData);
+    URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldName, fieldData);
     metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
             Arrays.asList(Integer.toString(version)), partition)));
     return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
@@ -115,19 +121,20 @@ public class IntegrationTestHelper {
       Schema schema,
       String hour,
       int id,
-      Object detailsData) throws IOException {
+      String fieldName,
+      Object data) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
     record.put("id", id);
 
-    Schema.Field details = schema.getField("details");
-    if (details != null) {
-      Schema detailsSchema = details.schema();
-      if (detailsData instanceof Map) {
-        GenericData.Record detailsRecord = new GenericData.Record(detailsSchema);
-        ((Map<String, String>) detailsData).forEach(detailsRecord::put);
-        record.put("details", detailsRecord);
-      } else {
-        record.put("details", detailsData.toString());
+    if (fieldName != null) {
+      Schema.Field field = schema.getField(fieldName);
+      Schema fieldSchema = field.schema();
+      if (data instanceof Map) {
+        GenericData.Record schemaRecord = new GenericData.Record(fieldSchema);
+        ((Map<String, String>) data).forEach(schemaRecord::put);
+        record.put(fieldName, schemaRecord);
+      } else if (data != null) {
+        record.put(fieldName, data);
       }
     }
 
