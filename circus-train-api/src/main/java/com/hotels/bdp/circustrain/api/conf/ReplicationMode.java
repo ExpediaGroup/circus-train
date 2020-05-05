@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ public enum ReplicationMode {
 
   FULL,
   METADATA_MIRROR,
-  METADATA_UPDATE;
+  METADATA_UPDATE,
+  FULL_OVERWRITE;
+
 
 }

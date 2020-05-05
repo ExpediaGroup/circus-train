@@ -20,6 +20,7 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL_OVERWRITE;
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_MIRROR;
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_UPDATE;
 import static com.hotels.hcommon.hive.metastore.util.LocationUtils.locationAsPath;
@@ -103,15 +104,15 @@ public class Replica extends HiveEndpoint {
    */
   @VisibleForTesting
   Replica(
-          ReplicaCatalog replicaCatalog,
-          HiveConf replicaHiveConf,
-          Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
-          ReplicaTableFactory replicaTableFactory,
-          HousekeepingListener housekeepingListener,
-          ReplicaCatalogListener replicaCatalogListener,
-          TableReplication tableReplication,
-          AlterTableService alterTableService,
-          int partitionBatchSize) {
+      ReplicaCatalog replicaCatalog,
+      HiveConf replicaHiveConf,
+      Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
+      ReplicaTableFactory replicaTableFactory,
+      HousekeepingListener housekeepingListener,
+      ReplicaCatalogListener replicaCatalogListener,
+      TableReplication tableReplication,
+      AlterTableService alterTableService,
+      int partitionBatchSize) {
     super(replicaCatalog.getName(), replicaHiveConf, replicaMetaStoreClientSupplier);
     this.replicaCatalogListener = replicaCatalogListener;
     tableFactory = replicaTableFactory;
@@ -302,7 +303,14 @@ public class Replica extends HiveEndpoint {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
+
+    // remove table here so the below doesnt give a table ?
+    if (replicationMode == FULL_OVERWRITE) {
+      dropReplicaTable(client, replicaDatabaseName, replicaTableName);
+    }
+
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
+
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
       try {
@@ -312,6 +320,7 @@ public class Replica extends HiveEndpoint {
         throw new MetaStoreClientException(
             "Unable to create replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
+
     } else {
       makeSureCanReplicate(oldReplicaTable.get(), replicaTable.getTable());
       LOG.debug("Existing replica table found, altering.");
@@ -323,6 +332,7 @@ public class Replica extends HiveEndpoint {
             "Unable to alter replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
     }
+
     return oldReplicaTable;
   }
 
@@ -346,12 +356,12 @@ public class Replica extends HiveEndpoint {
       Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
       if (oldReplicaTable.isPresent()) {
         LOG.debug("Existing table found, checking that it is a valid replica.");
-        determinValidityOfReplica(replicationMode, oldReplicaTable.get());
+        determineValidityOfReplica(replicationMode, oldReplicaTable.get());
       }
     }
   }
 
-  private void determinValidityOfReplica(ReplicationMode replicationMode, Table oldReplicaTable) {
+  private void determineValidityOfReplica(ReplicationMode replicationMode, Table oldReplicaTable) {
     // REPLICATION_MODE is a table parameter that was added later it might not be set, so we're checking the
     // REPLICATION_EVENT to determine if a table was created via CT.
     String previousEvent = oldReplicaTable.getParameters().get(REPLICATION_EVENT.parameterName());
@@ -379,7 +389,9 @@ public class Replica extends HiveEndpoint {
             + " a previously replicated table. This is not possible, rerun with a different table name or"
             + " change the replication mode to "
             + FULL.name()
-            + " or "
+            + ", "
+            + FULL_OVERWRITE.name()
+            + ", or "
             + METADATA_UPDATE.name()
             + ".");
       }
@@ -390,10 +402,13 @@ public class Replica extends HiveEndpoint {
           + " a previously replicated table. This is not possible, rerun with a different table name or"
           + " change the replication mode to "
           + FULL.name()
-          + " or "
+          + ", "
+          + FULL_OVERWRITE.name()
+          + ", or "
           + METADATA_UPDATE.name()
           + ".");
     }
+    LOG.debug("Replication modes are compatible.");
   }
 
   private void updateTableColumnStatistics(CloseableMetaStoreClient client, TableAndStatistics replicaTable)
@@ -415,8 +430,8 @@ public class Replica extends HiveEndpoint {
       String targetTableLocation,
       String eventId,
       SourceLocationManager sourceLocationManager) {
-    CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory.newInstance(eventId,
-        housekeepingListener, replicaCatalogListener, tableReplication);
+    CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory
+        .newInstance(eventId, housekeepingListener, replicaCatalogListener, tableReplication);
     return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
         cleanupLocationManager, replicaCatalogListener);
   }
@@ -426,4 +441,25 @@ public class Replica extends HiveEndpoint {
     return super.getTableAndStatistics(tableReplication.getReplicaDatabaseName(),
         tableReplication.getReplicaTableName());
   }
+
+  private void dropReplicaTable(CloseableMetaStoreClient client, String replicaDatabaseName, String replicaTableName) {
+    LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table.");
+    try {
+      if (client.tableExists(replicaDatabaseName, replicaTableName)) {
+        client.dropTable(replicaDatabaseName, replicaTableName);
+      } else {
+        throw new MetaStoreClientException("No replica table '"
+            + replicaDatabaseName
+            + "."
+            + replicaTableName
+            + "' found, cannot overwrite. Rerun with a different table name or change replication mode to "
+            + FULL.name()
+            + ".");
+      }
+    } catch (TException e) {
+      throw new MetaStoreClientException(
+          "Unable to replace replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
+    }
+  }
+
 }

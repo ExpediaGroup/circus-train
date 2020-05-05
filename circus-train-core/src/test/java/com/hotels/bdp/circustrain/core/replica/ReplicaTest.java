@@ -324,6 +324,24 @@ public class ReplicaTest {
   }
 
   @Test
+  public void validateReplicaTableMetadataMirrorOnExistingFullOverwriteReplicationTableFails()
+    throws TException, IOException {
+    try {
+      existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+      existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), ReplicationMode.FULL_OVERWRITE.name());
+      tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);
+      replica = newReplica(tableReplication);
+      replica.validateReplicaTable(DB_NAME, TABLE_NAME);
+      fail("Should have thrown InvalidReplicationModeException");
+    } catch (InvalidReplicationModeException e) {
+      // Check that nothing was written to the metastore
+      verify(mockMetaStoreClient).getTable(DB_NAME, TABLE_NAME);
+      verify(mockMetaStoreClient).close();
+      verifyNoMoreInteractions(mockMetaStoreClient);
+    }
+  }
+
+  @Test
   public void alteringExistingPartitionedReplicaTableSucceeds() throws TException, IOException {
     when(mockMetaStoreClient
         .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
