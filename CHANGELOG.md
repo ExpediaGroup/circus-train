@@ -2,6 +2,9 @@
 ### Changed
 * Changed version of `hive.version` to `2.3.7` (was `2.3.2`). This allows Circus Train to be used on JDK>=9.
 
+### Added
+* Replication mode `FULL_OVERWRITE` to overwrite a previously replicated table. Useful for incompatible schema changes. 
+
 ## [16.1.0] - 2020-03-18
 ### Changed
 * Updated S3S3Copier to have a configurable max number of threads to pass to TransferManager.

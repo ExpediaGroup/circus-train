@@ -304,13 +304,10 @@ public class Replica extends HiveEndpoint {
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
 
-    // remove table here so the below doesnt give a table ?
     if (replicationMode == FULL_OVERWRITE) {
       dropReplicaTable(client, replicaDatabaseName, replicaTableName);
     }
-
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
-
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
       try {
@@ -320,7 +317,6 @@ public class Replica extends HiveEndpoint {
         throw new MetaStoreClientException(
             "Unable to create replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
-
     } else {
       makeSureCanReplicate(oldReplicaTable.get(), replicaTable.getTable());
       LOG.debug("Existing replica table found, altering.");
@@ -332,7 +328,6 @@ public class Replica extends HiveEndpoint {
             "Unable to alter replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
     }
-
     return oldReplicaTable;
   }
 

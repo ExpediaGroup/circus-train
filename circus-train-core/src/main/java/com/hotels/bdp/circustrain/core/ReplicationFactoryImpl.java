@@ -107,7 +107,6 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       replication = new PartitionedTableMetadataMirrorReplication(sourceDatabaseName, sourceTableName,
           partitionPredicate, source, replica, eventIdFactory, replicaDatabaseName, replicaTableName);
       break;
-
     case FULL_OVERWRITE:
     case FULL:
       Map<String, Object> mergedCopierOptions = tableReplication
