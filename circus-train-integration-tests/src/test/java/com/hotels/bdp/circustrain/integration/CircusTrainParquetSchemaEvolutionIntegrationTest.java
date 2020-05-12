@@ -32,6 +32,8 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -43,26 +45,33 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fm.last.commons.test.file.ClassDataFolder;
 import fm.last.commons.test.file.DataFolder;
 
+import com.klarna.hiverunner.HiveShell;
+import com.klarna.hiverunner.StandaloneHiveRunner;
+import com.klarna.hiverunner.annotations.HiveSQL;
+
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
-import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
+import com.hotels.bdp.circustrain.integration.utils.ThriftMetastoreServerRuleExtension;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
+@RunWith(StandaloneHiveRunner.class)
 public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainParquetSchemaEvolutionIntegrationTest.class);
 
+  @HiveSQL(files = {}, autoStart = false)
+  private HiveShell shell;
+
   public @Rule ExpectedSystemExit exit = ExpectedSystemExit.none();
   public @Rule TemporaryFolder temporaryFolder = new TemporaryFolder();
   public @Rule DataFolder dataFolder = new ClassDataFolder();
-  public @Rule ThriftHiveMetaStoreJUnitRule sourceCatalog = new ThriftHiveMetaStoreJUnitRule(DATABASE);
-  public @Rule ThriftHiveMetaStoreJUnitRule replicaCatalog = new ThriftHiveMetaStoreJUnitRule(DATABASE);
   public @Rule ServerSocketRule serverSocketRule = new ServerSocketRule();
 
   private File sourceWarehouseUri;
@@ -72,15 +81,31 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
   private IntegrationTestHelper helper;
   private IntegrationTestHelper replicaHelper;
 
+  private ThriftMetastoreServerRuleExtension sourceThriftMetaStoreRule;
+  private ThriftMetastoreServerRuleExtension replicaThriftMetaStoreRule;
+  private HiveMetaStoreClient sourceClient;
+  private HiveMetaStoreClient replicaClient;
+
   @Before
-  public void init() throws Exception {
+  public void init() throws Throwable {
+    shell.start();
+
+    HiveConf hiveConf = shell.getHiveConf();
+    sourceThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(hiveConf);
+    sourceThriftMetaStoreRule.beforeTest();
+    sourceClient = sourceThriftMetaStoreRule.client();
+
+    replicaThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(hiveConf);
+    replicaThriftMetaStoreRule.beforeTest();
+    replicaClient = replicaThriftMetaStoreRule.client();
+
     sourceWarehouseUri = temporaryFolder.newFolder("source-warehouse");
     replicaWarehouseUri = temporaryFolder.newFolder("replica-warehouse");
     temporaryFolder.newFolder("db");
     housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
 
-    helper = new IntegrationTestHelper(sourceCatalog.client());
-    replicaHelper = new IntegrationTestHelper(replicaCatalog.client());
+    helper = new IntegrationTestHelper(sourceClient);
+    replicaHelper = new IntegrationTestHelper(replicaClient);
   }
 
   private String housekeepingDbJdbcUrl() throws ClassNotFoundException {
@@ -412,10 +437,10 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
             beforeEvolution.fieldName,
             beforeEvolution.data,
             1);
-    LOG.info(">>>> Table {} ", replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", replicaClient.getTable(DATABASE, PARTITIONED_TABLE));
 
     replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
-    replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
+    replicaClient.alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
 
     // Create the source table with the evolved schema
     Table sourceTable = helper.createParquetPartitionedTable(
@@ -424,20 +449,20 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
             afterEvolution.fieldName,
             afterEvolution.data,
             2);
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+    LOG.info(">>>> Table {} ", sourceClient.getTable(DATABASE, PARTITIONED_TABLE));
 
     // Create the original partition (with the original schema) and add to the source table
     URI partition = helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
             schema, Integer.toString(1), 1, beforeEvolution.fieldName, beforeEvolution.data);
-    sourceCatalog.client().add_partitions(Arrays.asList(
+    sourceClient.add_partitions(Arrays.asList(
             newTablePartition(sourceTable, Arrays.asList("1"), partition)
     ));
 
     CircusTrainRunner runner = CircusTrainRunner
             .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-            .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-                    sourceCatalog.driverClassName())
-            .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+            .sourceMetaStore(sourceThriftMetaStoreRule.getThriftConnectionUri(), sourceThriftMetaStoreRule.connectionURL(),
+                    sourceThriftMetaStoreRule.driverClassName())
+            .replicaMetaStore(replicaThriftMetaStoreRule.getThriftConnectionUri())
             .build();
 
     // Set up the asserts
@@ -451,18 +476,18 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
   private Assertion getAssertion(Schema schema) {
     return () -> {
-      assertTable(sourceCatalog, schema);
-      assertTable(replicaCatalog, schema);
+      assertTable(sourceClient, schema);
+      assertTable(replicaClient, schema);
     };
   }
 
-  private void assertTable(ThriftHiveMetaStoreJUnitRule catalog, Schema schema) throws Exception {
-    assertThat(catalog.client().getAllTables(DATABASE).size(), is(1));
-    Table table = catalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+  private void assertTable(HiveMetaStoreClient client, Schema schema) throws Exception {
+    assertThat(client.getAllTables(DATABASE).size(), is(1));
+    Table table = client.getTable(DATABASE, PARTITIONED_TABLE);
     List<FieldSchema> cols = table.getSd().getCols();
     assertThat(cols.size(), is(schema.getFields().size()));
     assertColumnSchema(schema, cols);
-    PartitionIterator partitionIterator = new PartitionIterator(catalog.client(), table, (short) 1000);
+    PartitionIterator partitionIterator = new PartitionIterator(client, table, (short) 1000);
     List<Partition> partitions = new ArrayList<>();
     while (partitionIterator.hasNext()) {
       Partition partition = partitionIterator.next();
