@@ -23,11 +23,14 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
+import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
+import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newTablePartition;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
 import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
 
@@ -35,11 +38,13 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.gaul.s3proxy.junit.S3ProxyRule;
@@ -101,6 +106,8 @@ public class CircusTrainS3S3IntegrationTest {
   private File replicaWarehouseUri;
   private File housekeepingDbLocation;
 
+  private IntegrationTestHelper helper;
+
   private String jceksLocation;
   private AmazonS3ClientFactory s3ClientFactory;
   private AmazonS3 s3Client;
@@ -111,6 +118,8 @@ public class CircusTrainS3S3IntegrationTest {
     replicaWarehouseUri = temporaryFolder.newFolder("replica-warehouse");
     temporaryFolder.newFolder("db");
     housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
+
+    helper = new IntegrationTestHelper(sourceCatalog.client());
 
     jceksLocation = String.format("jceks://file/%s/aws.jceks", dataFolder.getFolder().getAbsolutePath());
     Security security = new Security();
@@ -271,6 +280,141 @@ public class CircusTrainS3S3IntegrationTest {
       }
     });
     runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableFullOverwrite() throws Exception {
+    helper.createManagedPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE));
+    // adjusting the sourceTable, mimicking the change we want to update
+    Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
+    sourceTable.putToParameters("paramToUpdate", "updated");
+    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
+
+    final URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_PARTITIONED_TABLE);
+    TestUtils.createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_TABLE, replicaLocation);
+    Table replicaTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_TABLE);
+
+    // setting up parameters, additional columns and partitions
+    setupReplicaTable(replicaTable, true, replicaLocation);
+    replicaCatalog.client().alter_table(replicaTable.getDbName(), replicaTable.getTableName(), replicaTable);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-full-overwrite-replication.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .copierOption(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getUri().toString())
+        .sourceConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
+        .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_TABLE);
+        URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_PARTITIONED_TABLE);
+        assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
+        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctp-"));
+        assertThat(hiveTable.getParameters().get(REPLICATION_MODE.parameterName()), is("FULL_OVERWRITE"));
+        assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
+        assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
+
+        List<Partition> partitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) -1);
+        assertThat(partitions.size(), is(2));
+        assertThat(partitions.get(0).getValues(), is(Arrays.asList("Asia", "China")));
+        assertThat(partitions.get(1).getValues(), is(Arrays.asList("Europe", "UK")));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void unpartitionedTableFullOverwrite() throws Exception {
+    final URI sourceTableLocation = toUri("s3a://source/", DATABASE, UNPARTITIONED_TABLE);
+    TestUtils.createUnpartitionedTable(sourceCatalog.client(), DATABASE, UNPARTITIONED_TABLE, sourceTableLocation);
+    // adjusting the sourceTable, mimicking the change we want to update
+    Table sourceTable = sourceCatalog.client().getTable(DATABASE, UNPARTITIONED_TABLE);
+    sourceTable.putToParameters("paramToUpdate", "updated");
+    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
+
+    final File dataFile = temporaryFolder.newFile();
+    FileUtils.writeStringToFile(dataFile, "1\trob\tbristol\n2\tsam\ttoronto\n");
+    String fileKey = String.format("%s/%s/%s", DATABASE, UNPARTITIONED_TABLE, PART_00000);
+    s3Client.putObject("source", fileKey, dataFile);
+
+    // creating replicaTable
+    final URI replicaLocation = toUri("s3a://replica/", DATABASE, UNPARTITIONED_TABLE);
+    TestUtils.createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_TABLE, replicaLocation);
+    Table replicaTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_TABLE);
+    // setting up parameters and additional columns
+    setupReplicaTable(replicaTable, false, replicaLocation);
+    replicaCatalog.client().alter_table(replicaTable.getDbName(), replicaTable.getTableName(), replicaTable);
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("unpartitioned-single-table-full-overwrite-replication.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .copierOption(S3S3CopierOptions.Keys.S3_ENDPOINT_URI.keyName(), s3Proxy.getUri().toString())
+        .sourceConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ENDPOINT, s3Proxy.getUri().toString())
+        .replicaConfigurationProperty(ACCESS_KEY, s3Proxy.getAccessKey())
+        .replicaConfigurationProperty(SECRET_KEY, s3Proxy.getSecretKey())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_TABLE);
+        String eventId = hiveTable.getParameters().get(REPLICATION_EVENT.parameterName());
+        URI replicaLocation = toUri("s3a://replica/", DATABASE, TARGET_UNPARTITIONED_TABLE + "/" + eventId);
+        assertThat(hiveTable.getSd().getLocation(), is(replicaLocation.toString()));
+        assertThat(eventId, startsWith("ctt-"));
+        assertThat(hiveTable.getParameters().get(REPLICATION_MODE.parameterName()), is("FULL_OVERWRITE"));
+        assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
+        assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
+
+        // Assert files copied from source
+        List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
+        assertThat(replicaFiles.size(), is(1));
+        assertThat(replicaFiles.get(0).getSize(), is(dataFile.length()));
+        String fileKey = String
+            .format("%s/%s/%s/%s", DATABASE, TARGET_UNPARTITIONED_TABLE, eventId, PART_00000);
+        assertThat(replicaFiles.get(0).getKey(), is(fileKey));
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  private void setupReplicaTable(Table replicaTable, boolean partitioned, URI replicaLocation) throws Exception {
+    setupRelicaParameters(replicaTable);
+    if (partitioned) {
+      addPartitionsToReplica(replicaTable, replicaLocation);
+    }
+  }
+
+  private void setupRelicaParameters(Table replicaTable) {
+    List<FieldSchema> columns = replicaTable.getSd().getCols();
+    columns.add(new FieldSchema("age", "int", ""));
+    columns.add(new FieldSchema("colour", "string", ""));
+    replicaTable.getSd().setCols(columns);
+    replicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
+    replicaTable.putToParameters("paramToUpdate", "update-me");
+  }
+
+  private void addPartitionsToReplica(Table replicaTable, URI replicaLocation) throws Exception {
+    URI partitionAmerica = URI.create(replicaLocation + "/dummyEventID/continent=America");
+    final URI partitionMexico = URI.create(partitionAmerica + "/country=Mexico");
+    replicaCatalog
+        .client()
+        .add_partitions(
+            Arrays.asList(newTablePartition(replicaTable, Arrays.asList("America", "Mexico"), partitionMexico)));
   }
 
 }
