@@ -19,9 +19,9 @@ Caused by: java.lang.ClassNotFoundException: com.google.common.base.MoreObjects$
 This indicates that the shading and relocation (in the above example of a Guava class) hasn't been activated in the IDE. One solution to this is to 
 rebuild the entire project using Maven on the command line and then re-run the tests in the IDE. The following steps should achieve that: 
 
-1. Run `mvn -DskipTests install` in the top-level Circus Train parent project (this should repackage and relocate classes using the Maven 
-plugin and generate the correct class files in the produce jar artifacts).
-2. Refresh the project in the IDE (this should get the IDE to pick up the above classes via their artifacts).
+1. Run `mvn -DskipTests install` in the top-level Circus Train parent project (this will shade and relocate classes using the Maven 
+plugin into the packaged jar artifacts).
+2. Refresh the project in the IDE (this will get the IDE to pick up the above classes via their artifacts).
 3. Close the `circus-train-common-test` module project - this will get the IDE to use the jar file for this which contains the shaded classes 
    instead of the source code directly.
 4. Run the integration tests (which should now pass!)
