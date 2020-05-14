@@ -23,8 +23,17 @@ import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnitRule {
   private final HiveConf hiveConf;
 
-  public ThriftMetastoreServerRuleExtension(HiveConf hiveConf) {
+  public ThriftMetastoreServerRuleExtension(String database, HiveConf hiveConf) {
+    super(database, null);
     this.hiveConf = hiveConf;
+  }
+
+  public void before() throws Throwable {
+    super.before();
+  }
+
+  public void after() {
+    super.after();
   }
 
   @Override

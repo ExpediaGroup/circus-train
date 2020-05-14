@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.integration;
 
+import static org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore.exchange_partitions_args._Fields.SOURCE_DB;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -34,11 +35,13 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.avro.AvroObjectInspectorGenerator;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,6 +58,7 @@ import fm.last.commons.test.file.DataFolder;
 import com.klarna.hiverunner.HiveShell;
 import com.klarna.hiverunner.StandaloneHiveRunner;
 import com.klarna.hiverunner.annotations.HiveSQL;
+import com.sun.org.apache.regexp.internal.RE;
 
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
@@ -63,6 +67,11 @@ import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 @RunWith(StandaloneHiveRunner.class)
 public class CircusTrainParquetSchemaEvolutionIntegrationTest {
+
+  private static String SOURCE_DB = "source_db";
+  private static String SOURCE_TABLE = "source_table";
+  private static String REPLICA_DB = "replica_db";
+  private static String REPLICA_TABLE = "replica_table";
 
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrainParquetSchemaEvolutionIntegrationTest.class);
 
@@ -91,27 +100,28 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
     shell.start();
 
     HiveConf hiveConf = shell.getHiveConf();
-    sourceThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(hiveConf);
+    sourceThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(DATABASE, hiveConf);
     sourceThriftMetaStoreRule.beforeTest();
-    sourceClient = sourceThriftMetaStoreRule.client();
-
-    replicaThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(hiveConf);
+    replicaThriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(DATABASE, hiveConf);
     replicaThriftMetaStoreRule.beforeTest();
+
+    sourceClient = sourceThriftMetaStoreRule.client();
     replicaClient = replicaThriftMetaStoreRule.client();
+
+    shell.execute("CREATE DATABASE " + DATABASE);
 
     sourceWarehouseUri = temporaryFolder.newFolder("source-warehouse");
     replicaWarehouseUri = temporaryFolder.newFolder("replica-warehouse");
-    temporaryFolder.newFolder("db");
-    housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
-
     helper = new IntegrationTestHelper(sourceClient);
     replicaHelper = new IntegrationTestHelper(replicaClient);
+    temporaryFolder.newFolder("db");
+    housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
   }
 
-  private String housekeepingDbJdbcUrl() throws ClassNotFoundException {
-    Class.forName("org.h2.Driver");
-    String jdbcUrl = "jdbc:h2:" + housekeepingDbLocation.getAbsolutePath() + ";AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE";
-    return jdbcUrl;
+  @After
+  public void teardown() {
+    sourceThriftMetaStoreRule.after();
+    replicaThriftMetaStoreRule.after();
   }
 
   // TODO: assert original data in replica table
@@ -476,8 +486,8 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
   private Assertion getAssertion(Schema schema) {
     return () -> {
-      assertTable(sourceClient, schema);
-      assertTable(replicaClient, schema);
+      assertTable(sourceThriftMetaStoreRule.newClient(), schema);
+      assertTable(replicaThriftMetaStoreRule.newClient(), schema);
     };
   }
 
