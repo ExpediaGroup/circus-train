@@ -1,9 +1,0 @@
-table-replications:
-  - replication-mode: FULL_OVERWRITE
-    source-table:
-      database-name: ${circus-train-runner.database-name}
-      table-name: ct_table_p_managed
-      partition-filter: (continent='Europe' AND country='UK') OR (continent='Asia' AND country='China')
-    replica-table:
-      table-name: ct_table_p_managed_copy
-      table-location: ${circus-train-runner.replica-warehouse-uri}/${circus-train-runner.database-name}/ct_table_p_managed_copy

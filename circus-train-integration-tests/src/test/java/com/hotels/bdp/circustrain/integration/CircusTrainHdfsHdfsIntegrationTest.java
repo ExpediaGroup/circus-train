@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
-import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_ENCODED_TABLE;
@@ -849,123 +848,6 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       }
     });
     runner.run(config.getAbsolutePath());
-  }
-
-  @Test
-  public void partitionedTableFullOverwrite() throws Exception {
-    helper.createManagedPartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE));
-    // adjusting the sourceTable, mimicking the change we want to update
-    Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
-    sourceTable.putToParameters("paramToUpdate", "updated");
-    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-
-    // creating replicaTable with additional columns
-    final URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_PARTITIONED_TABLE);
-    TestUtils
-        .createPartitionedTable(replicaCatalog.client(), DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, replicaLocation);
-    Table replicaTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE);
-    // setting up parameters and additional columns
-    setupReplicaTable(replicaTable, false, replicaLocation);
-    replicaCatalog.client().alter_table(replicaTable.getDbName(), replicaTable.getTableName(), replicaTable);
-
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("partitioned-single-table-full-overwrite.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .build();
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE);
-        assertThat(hiveTable.getDbName(), is(DATABASE));
-        assertThat(hiveTable.getTableName(), is(TARGET_PARTITIONED_MANAGED_TABLE));
-        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctp-"));
-        assertThat(hiveTable.getParameters().get(REPLICATION_MODE.parameterName()), is("FULL_OVERWRITE"));
-        assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
-        assertThat(isExternalTable(hiveTable), is(true));
-        assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
-
-        List<Partition> partitions = replicaCatalog
-            .client()
-            .listPartitions(DATABASE, TARGET_PARTITIONED_MANAGED_TABLE, (short) 50);
-        assertThat(partitions.size(), is(2));
-        assertThat(partitions.get(0).getValues(), is(Arrays.asList("Asia", "China")));
-        assertThat(partitions.get(1).getValues(), is(Arrays.asList("Europe", "UK")));
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
-
-  @Test
-  public void unpartitionedTableFullOverwrite() throws Exception {
-    helper.createManagedUnpartitionedTable(toUri(sourceWarehouseUri, DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE));
-    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE));
-    // adjusting the sourceTable, mimicking the change we want to update
-    Table sourceTable = sourceCatalog.client().getTable(DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE);
-    sourceTable.putToParameters("paramToUpdate", "updated");
-    sourceCatalog.client().alter_table(sourceTable.getDbName(), sourceTable.getTableName(), sourceTable);
-
-    // creating replicaTable
-    final URI replicaLocation = toUri(replicaWarehouseUri, DATABASE, SOURCE_MANAGED_UNPARTITIONED_TABLE);
-    TestUtils
-        .createUnpartitionedTable(replicaCatalog.client(), DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE,
-            replicaLocation);
-    Table replicaTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
-    // setting up parameters and additional columns
-    setupReplicaTable(replicaTable, false, replicaLocation);
-    replicaCatalog.client().alter_table(replicaTable.getDbName(), replicaTable.getTableName(), replicaTable);
-
-    exit.expectSystemExitWithStatus(0);
-    File config = dataFolder.getFile("unpartitioned-single-table-full-overwrite.yml");
-    CircusTrainRunner runner = CircusTrainRunner
-        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
-        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
-            sourceCatalog.driverClassName())
-        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
-        .build();
-    exit.checkAssertionAfterwards(new Assertion() {
-      @Override
-      public void checkAssertion() throws Exception {
-        Table hiveTable = replicaCatalog.client().getTable(DATABASE, TARGET_UNPARTITIONED_MANAGED_TABLE);
-        assertThat(hiveTable.getDbName(), is(DATABASE));
-        assertThat(hiveTable.getTableName(), is(TARGET_UNPARTITIONED_MANAGED_TABLE));
-        assertThat(hiveTable.getParameters().get(REPLICATION_EVENT.parameterName()), startsWith("ctt-"));
-        assertThat(hiveTable.getParameters().get(REPLICATION_MODE.parameterName()), is("FULL_OVERWRITE"));
-        assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
-        assertThat(isExternalTable(hiveTable), is(true));
-        assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
-      }
-    });
-    runner.run(config.getAbsolutePath());
-  }
-
-  private void setupReplicaTable(Table replicaTable, boolean partitioned, URI replicaLocation) throws Exception {
-    setupRelicaParameters(replicaTable);
-    if (partitioned) {
-      addPartitionsToReplica(replicaTable, replicaLocation);
-    }
-  }
-
-  private void setupRelicaParameters(Table replicaTable) {
-    List<FieldSchema> columns = replicaTable.getSd().getCols();
-    columns.add(new FieldSchema("age", "int", ""));
-    columns.add(new FieldSchema("colour", "string", ""));
-    replicaTable.getSd().setCols(columns);
-    replicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "dummyEventID");
-    replicaTable.putToParameters("paramToUpdate", "update-me");
-  }
-
-  private void addPartitionsToReplica(Table replicaTable, URI replicaLocation) throws Exception {
-    URI partitionAmerica = URI.create(replicaLocation + "/dummyEventID/continent=America");
-    final URI partitionMexico = URI.create(partitionAmerica + "/country=Mexico");
-    replicaCatalog
-        .client()
-        .add_partitions(
-            Arrays.asList(newTablePartition(replicaTable, Arrays.asList("America", "Mexico"), partitionMexico)));
   }
 
   @Test

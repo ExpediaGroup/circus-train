@@ -89,7 +89,6 @@ import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
-import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTest {
@@ -362,23 +361,18 @@ public class ReplicaTest {
   }
 
   @Test
-  public void validateFullOverwriteReplicationWithoutExistingTableFails() throws MetaException, TException {
-    try {
+  public void validateFullOverwriteReplicationWithoutExistingTableSucceeds() throws TException {
     when(mockMetaStoreClient.tableExists(DB_NAME, TABLE_NAME)).thenReturn(false);
-
     tableReplication.setReplicationMode(FULL_OVERWRITE);
+
     replica
         .updateMetadata(EVENT_ID, tableAndStatistics,
             new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
                 Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
             DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-
-    } catch (MetaStoreClientException e) {
-      // Check that nothing was written to the metastore
-      verify(mockMetaStoreClient).getTable(DB_NAME, TABLE_NAME);
-      verify(mockMetaStoreClient).close();
-      verifyNoMoreInteractions(mockMetaStoreClient);
-    }
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
+    verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
 
   @Test

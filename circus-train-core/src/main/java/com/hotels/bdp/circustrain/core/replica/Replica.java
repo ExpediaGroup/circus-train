@@ -62,6 +62,7 @@ import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
+import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
@@ -305,7 +306,13 @@ public class Replica extends HiveEndpoint {
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
 
     if (replicationMode == FULL_OVERWRITE) {
-      dropReplicaTable(client, replicaDatabaseName, replicaTableName);
+      LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
+      DropTableService dropTableService = new DropTableService();
+      try {
+        dropTableService.removeTableParamsAndDrop(client, replicaDatabaseName, replicaTableName);
+      } catch (TException e) {
+        LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
+      }
     }
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
@@ -437,24 +444,25 @@ public class Replica extends HiveEndpoint {
         tableReplication.getReplicaTableName());
   }
 
-  private void dropReplicaTable(CloseableMetaStoreClient client, String replicaDatabaseName, String replicaTableName) {
-    LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table.");
-    try {
-      if (client.tableExists(replicaDatabaseName, replicaTableName)) {
-        client.dropTable(replicaDatabaseName, replicaTableName);
-      } else {
-        throw new MetaStoreClientException("No replica table '"
-            + replicaDatabaseName
-            + "."
-            + replicaTableName
-            + "' found, cannot overwrite. Rerun with a different table name or change replication mode to "
-            + FULL.name()
-            + ".");
-      }
-    } catch (TException e) {
-      throw new MetaStoreClientException(
-          "Unable to replace replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
-    }
-  }
+  // private void dropReplicaTable(CloseableMetaStoreClient client, String replicaDatabaseName, String replicaTableName)
+  // {
+  // LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table.");
+  // try {
+  // if (client.tableExists(replicaDatabaseName, replicaTableName)) {
+  // client.dropTable(replicaDatabaseName, replicaTableName);
+  // } else {
+  // throw new MetaStoreClientException("No replica table '"
+  // + replicaDatabaseName
+  // + "."
+  // + replicaTableName
+  // + "' found, cannot overwrite. Rerun with a different table name or change replication mode to "
+  // + FULL.name()
+  // + ".");
+  // }
+  // } catch (TException e) {
+  // throw new MetaStoreClientException(
+  // "Unable to replace replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
+  // }
+  // }
 
 }
