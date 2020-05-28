@@ -444,25 +444,4 @@ public class Replica extends HiveEndpoint {
         tableReplication.getReplicaTableName());
   }
 
-  // private void dropReplicaTable(CloseableMetaStoreClient client, String replicaDatabaseName, String replicaTableName)
-  // {
-  // LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table.");
-  // try {
-  // if (client.tableExists(replicaDatabaseName, replicaTableName)) {
-  // client.dropTable(replicaDatabaseName, replicaTableName);
-  // } else {
-  // throw new MetaStoreClientException("No replica table '"
-  // + replicaDatabaseName
-  // + "."
-  // + replicaTableName
-  // + "' found, cannot overwrite. Rerun with a different table name or change replication mode to "
-  // + FULL.name()
-  // + ".");
-  // }
-  // } catch (TException e) {
-  // throw new MetaStoreClientException(
-  // "Unable to replace replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
-  // }
-  // }
-
 }
