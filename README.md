@@ -291,7 +291,7 @@ Circus Train provides configurable replication modes which can be used to contro
 It has the following options:
 
 * `FULL`: Default behaviour, all metadata and data of the source table will be copied to the destination table and destination location. Metadata will be updated to point to the replicated data.
-* `FULL_OVERWRITE`: All metadata and data of the source table will be replicated in full, overwriting the existing replica. Any existing replica table will be dropped and its data will be deleted. If no replica table exists, this mode will behave as `FULL`.
+* `FULL_OVERWRITE`: All metadata and data of the source table will be replicated in full, overwriting the existing replica. Any existing replica table will be dropped. If no replica table exists, this mode will behave as `FULL`.
 * `METADATA_MIRROR`: Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location. NOTE: The replica table will be marked as `EXTERNAL`. This is done to prevent accidental data loss when dropping the replica. For example, this can be used for copying someone else's metadata into your Hive Metastore without copying the data or to replicate a view. You still need to have access to the data in order to query it.
 * `METADATA_UPDATE`: Metadata only update for a table that was previously fully replicated. No data will be copied but any metadata from the source will be copied and table/partition locations will keep pointing to previously replicated data. Example use case: Update the metadata of a Hive Table (for instance to change the Serde used) without having the overhead of re-replicating all the data.
 

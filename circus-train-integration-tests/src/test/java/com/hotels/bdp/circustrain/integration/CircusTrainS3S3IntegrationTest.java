@@ -101,8 +101,6 @@ public class CircusTrainS3S3IntegrationTest {
   private File replicaWarehouseUri;
   private File housekeepingDbLocation;
 
-  private IntegrationTestHelper helper;
-
   private String jceksLocation;
   private AmazonS3ClientFactory s3ClientFactory;
   private AmazonS3 s3Client;
@@ -113,8 +111,6 @@ public class CircusTrainS3S3IntegrationTest {
     replicaWarehouseUri = temporaryFolder.newFolder("replica-warehouse");
     temporaryFolder.newFolder("db");
     housekeepingDbLocation = new File(new File(temporaryFolder.getRoot(), "db"), "housekeeping");
-
-    helper = new IntegrationTestHelper(sourceCatalog.client());
 
     jceksLocation = String.format("jceks://file/%s/aws.jceks", dataFolder.getFolder().getAbsolutePath());
     Security security = new Security();
