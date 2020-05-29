@@ -52,6 +52,7 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
@@ -62,6 +63,7 @@ import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
+import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 import com.hotels.hcommon.hive.metastore.util.LocationUtils;
@@ -155,6 +157,7 @@ public class Replica extends HiveEndpoint {
       String replicaTableName,
       ReplicaLocationManager locationManager) {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
+
       updateTableMetadata(client, eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
           locationManager.getTableLocation(), replicationMode);
 
@@ -303,10 +306,21 @@ public class Replica extends HiveEndpoint {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
+    //
+    // TODO
+    // if (replicationMode == FULL_OVERWRITE) {
+    // LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
+    // DropTableService dropTableService = new DropTableService();
+    // try {
+    // dropTableService
+    // .dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
+    // } catch (TException e) {
+    // LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
+    // }
+    // }
 
-    if (replicationMode == FULL_OVERWRITE) {
-      dropReplicaTable(client, replicaDatabaseName, replicaTableName);
-    }
+    System.out.println(">>>>>>> Where the drop table used to happen!");
+
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
@@ -437,23 +451,24 @@ public class Replica extends HiveEndpoint {
         tableReplication.getReplicaTableName());
   }
 
-  private void dropReplicaTable(CloseableMetaStoreClient client, String replicaDatabaseName, String replicaTableName) {
-    LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table.");
-    try {
-      if (client.tableExists(replicaDatabaseName, replicaTableName)) {
-        client.dropTable(replicaDatabaseName, replicaTableName);
-      } else {
-        throw new MetaStoreClientException("No replica table '"
-            + replicaDatabaseName
-            + "."
-            + replicaTableName
-            + "' found, cannot overwrite. Rerun with a different table name or change replication mode to "
-            + FULL.name()
-            + ".");
+  // initialiseFullOverwrite
+  // fullOverwriteReplicationCheck
+  public void checkIfReplicaCleanupRequired(
+      String replicaDatabaseName,
+      String replicaTableName,
+      DataManipulationClient dataManipulationClient) {
+
+    try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
+
+    if (replicationMode == FULL_OVERWRITE) {
+      LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
+      DropTableService dropTableService = new DropTableService();
+      try {
+        dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
+        } catch (Exception e) {
+        LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
       }
-    } catch (TException e) {
-      throw new MetaStoreClientException(
-          "Unable to replace replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
+    }
     }
   }
 

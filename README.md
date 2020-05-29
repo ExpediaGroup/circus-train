@@ -63,7 +63,7 @@ Although it's not necessary, we recommend exporting the environment variable `CI
 
     export CIRCUS_TRAIN_HOME=/<foo>/<bar>/circus-train-<version>
     
-Refer to the [configuration](#configuration) section below on what is needed to customise the configuration files before continuing.
+Refer to the [configuration](#configuration-reference) section below on what is needed to customise the configuration files before continuing.
 
 ## Usage
 To run Circus Train you just need to execute the `bin/circus-train.sh` script in the installation directory and pass the configuration file which includes the replication configurations: 

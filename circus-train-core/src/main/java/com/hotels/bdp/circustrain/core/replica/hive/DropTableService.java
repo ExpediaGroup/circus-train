@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.core.replica.hive;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class DropTableService {
@@ -36,16 +38,37 @@ public class DropTableService {
   /**
    * Removes all parameters from a table before dropping the table.
    */
-  public void removeTableParamsAndDrop(
-      CloseableMetaStoreClient client,
-      String databaseName,
-      String tableName) throws TException {
+  public void removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
+    throws TException {
     Table table;
     try {
-       table = client.getTable(databaseName, tableName);
+      table = client.getTable(databaseName, tableName);
     } catch (NoSuchObjectException e) {
       return;
     }
+    dropTable(client, table, databaseName, tableName);
+  }
+
+  public void dropTableAndData(
+      CloseableMetaStoreClient client,
+      String databaseName,
+      String tableName,
+      DataManipulationClient dataManipulationClient)
+    throws TException {
+
+    Table table;
+    try {
+      table = client.getTable(databaseName, tableName);
+    } catch (NoSuchObjectException e) {
+      return;
+    }
+    dropTable(client, table, databaseName, tableName);
+    deleteData(dataManipulationClient, table);
+  }
+
+  private void dropTable(CloseableMetaStoreClient client, Table table, String databaseName, String tableName)
+    throws TException {
+    LOG.debug("Attempting to drop table {}.{}", databaseName, tableName);
     Map<String, String> tableParameters = table.getParameters();
     if (tableParameters != null && !tableParameters.isEmpty()) {
       if (isExternal(tableParameters)) {
@@ -55,9 +78,19 @@ public class DropTableService {
       }
       client.alter_table(databaseName, tableName, table);
     }
-    LOG
-        .info("Dropping table '{}.{}'.", table.getDbName(), table.getTableName());
+    LOG.info("Dropping table '{}.{}'.", table.getDbName(), table.getTableName());
     client.dropTable(table.getDbName(), table.getTableName(), false, true);
+  }
+
+  private void deleteData(DataManipulationClient dataManipulationClient, Table table) {
+    // TESTING TO SEE IF IT WORKS WITH THE FOLDER BIT
+    String replicaTableLocation = table.getSd().getLocation();
+    System.out.println(">>>> Attempting to drop data. Location: " + replicaTableLocation);
+    try {
+      dataManipulationClient.delete(replicaTableLocation);
+    } catch (IOException e) {
+      LOG.info("Could not drop replica table data at location:{}.", replicaTableLocation);
+    }
   }
 
   private boolean isExternal(Map<String, String> tableParameters) {

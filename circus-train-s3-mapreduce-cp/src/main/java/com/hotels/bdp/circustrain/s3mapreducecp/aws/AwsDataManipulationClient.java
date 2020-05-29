@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.copier;
+package com.hotels.bdp.circustrain.s3mapreducecp.aws;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3URI;
+
 import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
-public interface Copier {
+public class AwsDataManipulationClient implements DataManipulationClient {
 
-  Metrics copy() throws CircusTrainException;
+  private AmazonS3 s3Client;
 
-  DataManipulationClient getClient();
+  public AwsDataManipulationClient(AmazonS3 s3Client) {
+    this.s3Client = s3Client;
+  }
 
-  void shutdown();
+  @Override
+  public void delete(String path) {
+    AmazonS3URI uri = new AmazonS3URI(path);
+    s3Client.deleteObject(uri.getBucket(), uri.getKey());
+  }
 
 }

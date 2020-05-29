@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.copier;
+package com.hotels.bdp.circustrain.api.conf;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import java.io.IOException;
 
-public interface Copier {
+public interface DataManipulationClient {
 
-  Metrics copy() throws CircusTrainException;
-
-  DataManipulationClient getClient();
-
-  void shutdown();
+  void delete(String path) throws IOException;
 
 }

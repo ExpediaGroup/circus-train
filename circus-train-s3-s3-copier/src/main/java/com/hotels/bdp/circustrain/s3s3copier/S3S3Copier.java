@@ -45,9 +45,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
+import com.hotels.bdp.circustrain.s3s3copier.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
@@ -138,7 +140,7 @@ public class S3S3Copier implements Copier {
   @Override
   public Metrics copy() throws CircusTrainException {
     registerRunningMetrics(bytesReplicated);
-    try {
+    // try {
       try {
         initialiseAllCopyRequests();
         processAllCopyJobs();
@@ -146,11 +148,19 @@ public class S3S3Copier implements Copier {
       } catch (AmazonClientException e) {
         throw new CircusTrainException("Error in S3S3Copier:", e);
       }
-    } finally {
-      // cancel any running tasks
-      if (transferManager != null) {
-        transferManager.shutdownNow();
-      }
+//    } finally {
+//      // cancel any running tasks
+//      if (transferManager != null) {
+//        transferManager.shutdownNow();
+//      }
+    // }
+  }
+
+  @Override
+  public void shutdown() {
+    // cancel any running tasks
+    if (transferManager != null) {
+      transferManager.shutdownNow();
     }
   }
 
@@ -319,5 +329,10 @@ public class S3S3Copier implements Copier {
     Gauge<Long> gauge = new AtomicLongGauge(bytesReplicated);
     registry.remove(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name());
     registry.register(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name(), gauge);
+  }
+
+  @Override
+  public DataManipulationClient getClient() {
+    return new AwsDataManipulationClient(targetClient);
   }
 }

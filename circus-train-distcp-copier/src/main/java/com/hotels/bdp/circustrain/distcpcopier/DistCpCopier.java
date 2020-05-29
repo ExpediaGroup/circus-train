@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.FileSystemCounter;
 import org.apache.hadoop.mapreduce.Job;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
@@ -62,6 +62,8 @@ public class DistCpCopier implements Copier {
   private final Path replicaDataLocation;
   private final Map<String, Object> copierOptions;
   private final DistCpExecutor executor;
+
+  private final HdfsDataManipulationClient client;
 
   private final MetricRegistry registry;
 
@@ -91,6 +93,8 @@ public class DistCpCopier implements Copier {
     this.sourceDataLocations = sourceDataLocations;
     this.replicaDataLocation = replicaDataLocation;
     this.copierOptions = copierOptions;
+
+    this.client = new HdfsDataManipulationClient(this.conf);
   }
 
   private DistCpOptions parseCopierOptions(Map<String, Object> copierOptions) {
@@ -134,6 +138,7 @@ public class DistCpCopier implements Copier {
     }
   }
 
+
   private void registerRunningJobMetrics(final Job job, final String counter) {
     registry.remove(RunningMetrics.DIST_CP_BYTES_REPLICATED.name());
     registry
@@ -143,10 +148,21 @@ public class DistCpCopier implements Copier {
 
   private void cleanUpReplicaDataLocation() {
     try {
-      FileSystem fs = replicaDataLocation.getFileSystem(conf);
-      fs.delete(replicaDataLocation, true);
+      client.delete(replicaDataLocation);
+      // FileSystem fs = replicaDataLocation.getFileSystem(conf);
+      // fs.delete(replicaDataLocation, true);
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
+  }
+
+  @Override
+  public DataManipulationClient getClient() {
+    return client;
+  }
+
+  @Override
+  public void shutdown() {
+    // TODO Auto-generated method stub
   }
 }

@@ -28,6 +28,7 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
@@ -121,12 +122,21 @@ class PartitionedTableReplication implements Replication {
             .newInstance(eventId, sourceBaseLocation, sourceSubLocations, replicaPartitionBaseLocation, copierOptions);
         copierListener.copierStart(copier.getClass().getName());
         try {
+
+          // after the copy happens the transfer manager (for s3s3copier) gets shutdown, which I assume will also shut
+          // down the client
+          DataManipulationClient dataManipulationClient = copier.getClient();
+          replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, dataManipulationClient);
+
+          System.out.println(">>>>>>>>>>>>>> Cleaned up replica, starting copy...");
+
           metrics = copier.copy();
         } finally {
           copierListener.copierEnd(metrics);
         }
 
         sourceLocationManager.cleanUpLocations();
+
 
         replica
             .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, replicaDatabaseName,

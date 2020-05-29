@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 public class CompositeCopierFactory implements CopierFactory {
@@ -52,6 +53,17 @@ public class CompositeCopierFactory implements CopierFactory {
         metrics = metricsMerger.merge(metrics, copierMetrics);
       }
       return metrics;
+    }
+
+    // TODO
+    @Override
+    public DataManipulationClient getClient() {
+      return null;
+    }
+
+    @Override
+    public void shutdown() {
+      // TODO Auto-generated method stub
     }
 
   }
