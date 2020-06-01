@@ -249,11 +249,6 @@ public class CircusTrainTest {
       return null;
     }
 
-    @Override
-    public void shutdown() {
-      // TODO Auto-generated method stub
-    }
-
   }
 
 }

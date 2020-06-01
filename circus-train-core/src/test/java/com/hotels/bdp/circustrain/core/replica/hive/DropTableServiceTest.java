@@ -23,12 +23,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
 import org.junit.Before;
@@ -39,6 +41,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,9 +49,13 @@ public class DropTableServiceTest {
 
   private static final String TABLE_NAME = "table";
   private static final String DB_NAME = "db";
+  private static final String LOCATION = "table_location";
 
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
+
+  private @Mock DataManipulationClient dataManipulationClient;
+  private @Mock StorageDescriptor storageDescriptor;
 
   private DropTableService service;
   private Table table = new Table();
@@ -59,6 +66,10 @@ public class DropTableServiceTest {
     table.setTableName(TABLE_NAME);
     table.setDbName(DB_NAME);
     when(client.getTable(DB_NAME, TABLE_NAME)).thenReturn(table);
+
+    storageDescriptor = new StorageDescriptor();
+    storageDescriptor.setLocation(LOCATION);
+    table.setSd(storageDescriptor);
   }
 
   @Test
@@ -132,4 +143,30 @@ public class DropTableServiceTest {
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
   }
+
+  @Test
+  public void dropTableAndDataSuccess() throws TException, IOException {
+    table.setParameters(Collections.emptyMap());
+
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
+
+    verify(dataManipulationClient).delete(LOCATION);
+    verifyNoMoreInteractions(client);
+    verifyNoMoreInteractions(dataManipulationClient);
+  }
+
+  @Test
+  public void dropTableAndDataTableDoesNotExist() throws TException {
+    doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
+
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verifyNoMoreInteractions(client);
+    verifyNoMoreInteractions(dataManipulationClient);
+  }
+
 }

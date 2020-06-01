@@ -306,20 +306,6 @@ public class Replica extends HiveEndpoint {
     LOG.info("Updating replica table metadata.");
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
-    //
-    // TODO
-    // if (replicationMode == FULL_OVERWRITE) {
-    // LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
-    // DropTableService dropTableService = new DropTableService();
-    // try {
-    // dropTableService
-    // .dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
-    // } catch (TException e) {
-    // LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
-    // }
-    // }
-
-    System.out.println(">>>>>>> Where the drop table used to happen!");
 
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
@@ -451,25 +437,23 @@ public class Replica extends HiveEndpoint {
         tableReplication.getReplicaTableName());
   }
 
-  // initialiseFullOverwrite
-  // fullOverwriteReplicationCheck
   public void checkIfReplicaCleanupRequired(
       String replicaDatabaseName,
       String replicaTableName,
       DataManipulationClient dataManipulationClient) {
 
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
-
-    if (replicationMode == FULL_OVERWRITE) {
-      LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
-      DropTableService dropTableService = new DropTableService();
-      try {
-        dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
+      if (replicationMode == FULL_OVERWRITE) {
+        LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
+        DropTableService dropTableService = new DropTableService();
+        try {
+          dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
         } catch (Exception e) {
-        LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
+          LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
+        }
       }
     }
-    }
+
   }
 
 }

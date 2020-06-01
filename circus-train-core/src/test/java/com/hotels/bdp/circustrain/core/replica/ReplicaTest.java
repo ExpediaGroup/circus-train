@@ -32,6 +32,7 @@ import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATI
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL_OVERWRITE;
 import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_MIRROR;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_UPDATE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ import com.google.common.collect.Lists;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
+import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
@@ -88,8 +90,8 @@ import com.hotels.bdp.circustrain.api.metadata.TableTransformation;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
+import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
-import com.hotels.hcommon.hive.metastore.exception.MetaStoreClientException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicaTest {
@@ -124,6 +126,8 @@ public class ReplicaTest {
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
   private @Mock AlterTableService alterTableService;
+  private @Mock DataManipulationClient dataManipulationClient;
+  private @Mock DropTableService dropTableService;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
       TableTransformation.IDENTITY, PartitionTransformation.IDENTITY, ColumnStatisticsTransformation.IDENTITY);
@@ -350,35 +354,53 @@ public class ReplicaTest {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
     tableReplication.setReplicationMode(FULL_OVERWRITE);
+    replica = newReplica(tableReplication);
 
-    replica
-        .updateMetadata(EVENT_ID, tableAndStatistics,
-            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
-                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
-            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
-    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
-    verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
-    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    verify(mockMetaStoreClient).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void validateFullOverwriteReplicationWithoutExistingTableFails() throws MetaException, TException {
-    try {
-    when(mockMetaStoreClient.tableExists(DB_NAME, TABLE_NAME)).thenReturn(false);
-
+  public void validateFullOverwriteReplicationWithoutExistingTableIsNotDropped() throws MetaException, TException {
+    when(mockMetaStoreClient.getTable(DB_NAME, TABLE_NAME)).thenReturn(null);
     tableReplication.setReplicationMode(FULL_OVERWRITE);
-    replica
-        .updateMetadata(EVENT_ID, tableAndStatistics,
-            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
-                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
-            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    replica = newReplica(tableReplication);
 
-    } catch (MetaStoreClientException e) {
-      // Check that nothing was written to the metastore
-      verify(mockMetaStoreClient).getTable(DB_NAME, TABLE_NAME);
-      verify(mockMetaStoreClient).close();
-      verifyNoMoreInteractions(mockMetaStoreClient);
-    }
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
+  }
+
+  @Test
+  public void validateExistingReplicaNotDroppedForFullReplicationType() throws TException {
+    existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+    existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
+    tableReplication.setReplicationMode(FULL);
+    replica = newReplica(tableReplication);
+
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
+  }
+
+  @Test
+  public void validateExistingReplicaNotDroppedForMetadataMirrorReplicationType() throws TException {
+    existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+    existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
+    tableReplication.setReplicationMode(METADATA_MIRROR);
+    replica = newReplica(tableReplication);
+
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
+  }
+
+  @Test
+  public void validateExistingReplicaNotDroppedForMetadataUpdateReplicationType() throws TException {
+    existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+    existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
+    tableReplication.setReplicationMode(METADATA_UPDATE);
+    replica = newReplica(tableReplication);
+
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test

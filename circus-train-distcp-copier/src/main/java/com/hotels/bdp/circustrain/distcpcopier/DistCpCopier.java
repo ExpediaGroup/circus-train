@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.FileSystemCounter;
 import org.apache.hadoop.mapreduce.Job;
@@ -63,8 +64,6 @@ public class DistCpCopier implements Copier {
   private final Map<String, Object> copierOptions;
   private final DistCpExecutor executor;
 
-  private final HdfsDataManipulationClient client;
-
   private final MetricRegistry registry;
 
   public DistCpCopier(
@@ -93,8 +92,6 @@ public class DistCpCopier implements Copier {
     this.sourceDataLocations = sourceDataLocations;
     this.replicaDataLocation = replicaDataLocation;
     this.copierOptions = copierOptions;
-
-    this.client = new HdfsDataManipulationClient(this.conf);
   }
 
   private DistCpOptions parseCopierOptions(Map<String, Object> copierOptions) {
@@ -148,9 +145,8 @@ public class DistCpCopier implements Copier {
 
   private void cleanUpReplicaDataLocation() {
     try {
-      client.delete(replicaDataLocation);
-      // FileSystem fs = replicaDataLocation.getFileSystem(conf);
-      // fs.delete(replicaDataLocation, true);
+      FileSystem fs = replicaDataLocation.getFileSystem(conf);
+      fs.delete(replicaDataLocation, true);
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
@@ -158,11 +154,7 @@ public class DistCpCopier implements Copier {
 
   @Override
   public DataManipulationClient getClient() {
-    return client;
+    return new HdfsDataManipulationClient(conf);
   }
 
-  @Override
-  public void shutdown() {
-    // TODO Auto-generated method stub
-  }
 }

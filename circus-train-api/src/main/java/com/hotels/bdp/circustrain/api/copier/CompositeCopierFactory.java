@@ -55,15 +55,13 @@ public class CompositeCopierFactory implements CopierFactory {
       return metrics;
     }
 
-    // TODO
     @Override
     public DataManipulationClient getClient() {
-      return null;
-    }
-
-    @Override
-    public void shutdown() {
-      // TODO Auto-generated method stub
+      List<DataManipulationClient> clients = new ArrayList<>();
+      for (Copier copier : copiers) {
+        clients.add(copier.getClient());
+      }
+      return new CompositeDataManipulationClient(clients);
     }
 
   }

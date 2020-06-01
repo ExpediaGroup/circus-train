@@ -139,6 +139,22 @@ public class ReplicationFactoryImplTest {
   }
 
   @Test
+  public void partitionedTableFullOverwriteReplication() throws Exception {
+    when(table.getPartitionKeys()).thenReturn(Arrays.asList(new FieldSchema()));
+    tableReplication.setReplicationMode(ReplicationMode.FULL_OVERWRITE);
+    Replication replication = factory.newInstance(tableReplication);
+    assertEquals(PartitionedTableReplication.class, replication.getClass());
+  }
+
+  @Test
+  public void unpartitionedTableFullOverwriteReplication() throws Exception {
+    when(table.getPartitionKeys()).thenReturn(null);
+    tableReplication.setReplicationMode(ReplicationMode.FULL_OVERWRITE);
+    Replication replication = factory.newInstance(tableReplication);
+    assertEquals(UnpartitionedTableReplication.class, replication.getClass());
+  }
+
+  @Test
   public void partitionedTableMirrorReplication() throws Exception {
     when(table.getPartitionKeys()).thenReturn(Arrays.asList(new FieldSchema()));
     tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);

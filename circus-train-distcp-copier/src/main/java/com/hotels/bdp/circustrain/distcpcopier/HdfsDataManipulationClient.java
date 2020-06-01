@@ -36,16 +36,18 @@ public class HdfsDataManipulationClient implements DataManipulationClient {
   }
 
   @Override
-  public void delete(String path) throws IOException {
-    delete(new Path(path));
+  public boolean delete(String path) throws IOException {
+    return delete(new Path(path));
   }
 
-  public void delete(Path path) throws IOException {
+  private boolean delete(Path path) throws IOException {
     try {
-    FileSystem fs = path.getFileSystem(conf);
-    fs.delete(path, true);
+      LOG.info("Deleting all data at location: {}", path);
+      FileSystem fs = path.getFileSystem(conf);
+      return fs.delete(path, true);
     } catch (IOException e) {
-      LOG.info("Unable to delete path:{}", path);
+      LOG.info("Unable to delete data at location: {}", path);
+      return false;
     }
   }
 

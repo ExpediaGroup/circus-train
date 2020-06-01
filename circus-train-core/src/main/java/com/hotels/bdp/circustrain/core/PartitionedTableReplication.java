@@ -122,21 +122,14 @@ class PartitionedTableReplication implements Replication {
             .newInstance(eventId, sourceBaseLocation, sourceSubLocations, replicaPartitionBaseLocation, copierOptions);
         copierListener.copierStart(copier.getClass().getName());
         try {
+          metrics = copier.copy();
 
-          // after the copy happens the transfer manager (for s3s3copier) gets shutdown, which I assume will also shut
-          // down the client
           DataManipulationClient dataManipulationClient = copier.getClient();
           replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, dataManipulationClient);
-
-          System.out.println(">>>>>>>>>>>>>> Cleaned up replica, starting copy...");
-
-          metrics = copier.copy();
         } finally {
           copierListener.copierEnd(metrics);
         }
-
         sourceLocationManager.cleanUpLocations();
-
 
         replica
             .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, replicaDatabaseName,

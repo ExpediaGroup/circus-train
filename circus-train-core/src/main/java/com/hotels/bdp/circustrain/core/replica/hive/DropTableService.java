@@ -38,15 +38,16 @@ public class DropTableService {
   /**
    * Removes all parameters from a table before dropping the table.
    */
-  public void removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
+  public Table removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
     throws TException {
     Table table;
     try {
       table = client.getTable(databaseName, tableName);
     } catch (NoSuchObjectException e) {
-      return;
+      return null;
     }
     dropTable(client, table, databaseName, tableName);
+    return table;
   }
 
   public void dropTableAndData(
@@ -56,19 +57,15 @@ public class DropTableService {
       DataManipulationClient dataManipulationClient)
     throws TException {
 
-    Table table;
-    try {
-      table = client.getTable(databaseName, tableName);
-    } catch (NoSuchObjectException e) {
-      return;
+    LOG.debug("Dropping table {}.{} and its data.", databaseName, tableName);
+    Table table = removeTableParamsAndDrop(client, databaseName, tableName);
+    if (table != null) {
+      deleteData(dataManipulationClient, table);
     }
-    dropTable(client, table, databaseName, tableName);
-    deleteData(dataManipulationClient, table);
   }
 
   private void dropTable(CloseableMetaStoreClient client, Table table, String databaseName, String tableName)
     throws TException {
-    LOG.debug("Attempting to drop table {}.{}", databaseName, tableName);
     Map<String, String> tableParameters = table.getParameters();
     if (tableParameters != null && !tableParameters.isEmpty()) {
       if (isExternal(tableParameters)) {
@@ -78,15 +75,14 @@ public class DropTableService {
       }
       client.alter_table(databaseName, tableName, table);
     }
-    LOG.info("Dropping table '{}.{}'.", table.getDbName(), table.getTableName());
-    client.dropTable(table.getDbName(), table.getTableName(), false, true);
+    LOG.info("Dropping table '{}.{}'.", databaseName, tableName);
+    client.dropTable(databaseName, tableName, false, true);
   }
 
   private void deleteData(DataManipulationClient dataManipulationClient, Table table) {
-    // TESTING TO SEE IF IT WORKS WITH THE FOLDER BIT
     String replicaTableLocation = table.getSd().getLocation();
-    System.out.println(">>>> Attempting to drop data. Location: " + replicaTableLocation);
     try {
+      LOG.info("Dropping table data from location: {}", replicaTableLocation);
       dataManipulationClient.delete(replicaTableLocation);
     } catch (IOException e) {
       LOG.info("Could not drop replica table data at location:{}.", replicaTableLocation);

@@ -36,11 +36,13 @@ import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
+import com.hotels.bdp.circustrain.s3mapreducecp.aws.AwsS3ClientFactory;
 import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
 
 public class S3MapReduceCpCopier implements Copier {
@@ -185,13 +187,7 @@ public class S3MapReduceCpCopier implements Copier {
 
   @Override
   public DataManipulationClient getClient() {
-    // AmazonS3 client = ((S3MapReduceCpExecutor) executor).getS3MapReduceCp().get
-    return null;
-  }
-
-  @Override
-  public void shutdown() {
-    // TODO Auto-generated method stub
+    return new AwsDataManipulationClient(new AwsS3ClientFactory().newInstance(conf));
   }
 
 }

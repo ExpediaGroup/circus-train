@@ -48,8 +48,8 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
-import com.hotels.bdp.circustrain.s3s3copier.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
 
@@ -115,6 +115,7 @@ public class S3S3Copier implements Copier {
   private long totalBytesToReplicate = 0;
   private AtomicLong bytesReplicated = new AtomicLong(0);
   private AmazonS3 targetClient;
+  private AmazonS3URI targetBase;
 
   private AmazonS3 srcClient;
 
@@ -140,7 +141,7 @@ public class S3S3Copier implements Copier {
   @Override
   public Metrics copy() throws CircusTrainException {
     registerRunningMetrics(bytesReplicated);
-    // try {
+    try {
       try {
         initialiseAllCopyRequests();
         processAllCopyJobs();
@@ -148,27 +149,19 @@ public class S3S3Copier implements Copier {
       } catch (AmazonClientException e) {
         throw new CircusTrainException("Error in S3S3Copier:", e);
       }
-//    } finally {
-//      // cancel any running tasks
-//      if (transferManager != null) {
-//        transferManager.shutdownNow();
-//      }
-    // }
-  }
-
-  @Override
-  public void shutdown() {
-    // cancel any running tasks
-    if (transferManager != null) {
-      transferManager.shutdownNow();
+    } finally {
+      // cancel any running tasks
+      if (transferManager != null) {
+        transferManager.shutdownNow();
+      }
     }
   }
 
   private void initialiseAllCopyRequests() {
-    LOG
-        .info("Initialising all copy jobs");
+    LOG.info("Initialising all copy jobs");
+
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
-    AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
+    targetBase = toAmazonS3URI(replicaLocation.toUri());
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
 
     if (sourceSubLocations.isEmpty()) {
@@ -185,7 +178,8 @@ public class S3S3Copier implements Copier {
 
     int totalCopyJobs = copyJobRequests.size();
     LOG.info("Finished initialising {} copy job(s)", totalCopyJobs);
-    s3s3CopierOptions.setMaxThreadPoolSize(determineThreadPoolSize(totalCopyJobs, s3s3CopierOptions.getMaxThreadPoolSize()));
+    s3s3CopierOptions
+        .setMaxThreadPoolSize(determineThreadPoolSize(totalCopyJobs, s3s3CopierOptions.getMaxThreadPoolSize()));
     targetClient = s3ClientFactory.newInstance(targetBase, s3s3CopierOptions);
     transferManager = transferManagerFactory.newInstance(targetClient, s3s3CopierOptions);
   }
@@ -247,21 +241,18 @@ public class S3S3Copier implements Copier {
     List<CopyJobRequest> copyJobsToSubmit = copyJobRequests;
     int maxCopyAttempts = s3s3CopierOptions.getMaxCopyAttempts();
     for (int copyAttempt = 1; copyAttempt <= maxCopyAttempts; copyAttempt++) {
-      LOG
-          .info("Submitting {} copy job(s), attempt {}/{}", copyJobsToSubmit.size(), copyAttempt, maxCopyAttempts);
+      LOG.info("Submitting {} copy job(s), attempt {}/{}", copyJobsToSubmit.size(), copyAttempt, maxCopyAttempts);
       copyJobsToSubmit = submitAndGatherCopyJobs(copyJobsToSubmit);
       if (copyJobsToSubmit.isEmpty()) {
-        LOG
-            .info("Successfully gathered all copy jobs on attempt {}/{}", copyAttempt, maxCopyAttempts);
+        LOG.info("Successfully gathered all copy jobs on attempt {}/{}", copyAttempt, maxCopyAttempts);
         return;
       }
       if (copyAttempt == maxCopyAttempts) {
-        throw new CircusTrainException(copyJobsToSubmit.size() + " job(s) failed the maximum number of copy attempts, " + maxCopyAttempts);
+        throw new CircusTrainException(
+            copyJobsToSubmit.size() + " job(s) failed the maximum number of copy attempts, " + maxCopyAttempts);
       }
       LOG
-          .info("Finished gathering jobs on attempt {}/{}. Retrying {} failed job(s).",
-              copyAttempt,
-              maxCopyAttempts,
+          .info("Finished gathering jobs on attempt {}/{}. Retrying {} failed job(s).", copyAttempt, maxCopyAttempts,
               copyJobsToSubmit.size());
     }
   }
@@ -279,13 +270,15 @@ public class S3S3Copier implements Copier {
   private Copy submitCopyJob(CopyJobRequest copyJob) {
     CopyObjectRequest copyObjectRequest = copyJob.getCopyObjectRequest();
     LOG
-        .info("Copying object from '{}/{}' to '{}/{}'", copyObjectRequest.getSourceBucketName(), copyObjectRequest.getSourceKey(),
-            copyObjectRequest.getDestinationBucketName(), copyObjectRequest.getDestinationKey());
+        .info("Copying object from '{}/{}' to '{}/{}'", copyObjectRequest.getSourceBucketName(),
+            copyObjectRequest.getSourceKey(), copyObjectRequest.getDestinationBucketName(),
+            copyObjectRequest.getDestinationKey());
     return transferManager.copy(copyObjectRequest, srcClient, copyJob.getTransferStateChangeListener());
   }
 
   /**
    * Waits for all running copy jobs to complete and updates overall progress.
+   * 
    * @param copyJobs A list of copy jobs which have been submitted
    * @return A list of failed copy job requests
    */
@@ -305,11 +298,9 @@ public class S3S3Copier implements Copier {
         } catch (AmazonClientException e) {
           CopyObjectRequest copyObjectRequest = copyJob.getCopyJobRequest().getCopyObjectRequest();
           LOG
-              .info("Copying '{}/{}' failed, adding to retry list.",
-                  copyObjectRequest.getSourceBucketName(),
+              .info("Copying '{}/{}' failed, adding to retry list.", copyObjectRequest.getSourceBucketName(),
                   copyObjectRequest.getSourceKey());
-          LOG
-              .warn("Copy failed with exception:", e);
+          LOG.warn("Copy failed with exception:", e);
           failedCopyJobRequests.add(copyJob.getCopyJobRequest());
         }
       } catch (InterruptedException e) {
@@ -333,6 +324,6 @@ public class S3S3Copier implements Copier {
 
   @Override
   public DataManipulationClient getClient() {
-    return new AwsDataManipulationClient(targetClient);
+    return new AwsDataManipulationClient(s3ClientFactory.newInstance(targetBase, s3s3CopierOptions));
   }
 }

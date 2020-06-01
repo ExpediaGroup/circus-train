@@ -18,9 +18,8 @@ package com.hotels.bdp.circustrain.api.conf;
 public enum ReplicationMode {
 
   FULL,
+  FULL_OVERWRITE,
   METADATA_MIRROR,
-  METADATA_UPDATE,
-  FULL_OVERWRITE;
-
+  METADATA_UPDATE;
 
 }

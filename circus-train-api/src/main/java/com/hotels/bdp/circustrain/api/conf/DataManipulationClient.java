@@ -19,6 +19,10 @@ import java.io.IOException;
 
 public interface DataManipulationClient {
 
-  void delete(String path) throws IOException;
+  /**
+   * Returns boolean stating whether the deletion was successful or not
+   * 
+   */
+  boolean delete(String path) throws IOException;
 
 }

@@ -25,6 +25,4 @@ public interface Copier {
 
   DataManipulationClient getClient();
 
-  void shutdown();
-
 }

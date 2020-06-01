@@ -100,22 +100,12 @@ class UnpartitionedTableReplication implements Replication {
       try {
         metrics = copier.copy();
         
-        System.out.println(">>>>>>>>>>>>>> Finished copy, cleaning up replica");
         DataManipulationClient dataManipulationClient = copier.getClient();
         replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, dataManipulationClient);
-
-        
-        copier.shutdown();
-
       } finally {
         copierListener.copierEnd(metrics);
       }
       sourceLocationManager.cleanUpLocations();
-
-      // ******
-//      DataManipulationClient dataManipulationClient = copier.getClient();
-//      replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, dataManipulationClient);
-      // ******
 
       replica
           .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
