@@ -449,7 +449,7 @@ public class Replica extends HiveEndpoint {
         try {
           dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
         } catch (Exception e) {
-          LOG.info("No replica table '" + replicaDatabaseName + "." + replicaTableName + "' found. Nothing to delete.");
+          LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
         }
       }
     }

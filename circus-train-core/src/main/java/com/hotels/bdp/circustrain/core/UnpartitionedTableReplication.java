@@ -26,7 +26,6 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
@@ -99,9 +98,7 @@ class UnpartitionedTableReplication implements Replication {
       copierListener.copierStart(copier.getClass().getName());
       try {
         metrics = copier.copy();
-        
-        DataManipulationClient dataManipulationClient = copier.getClient();
-        replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, dataManipulationClient);
+        replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, copier.getClient());
       } finally {
         copierListener.copierEnd(metrics);
       }

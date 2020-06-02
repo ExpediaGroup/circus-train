@@ -50,6 +50,7 @@ public class AwsDataManipulationClient implements DataManipulationClient {
       String bucket = uri.getBucket();
 
       List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
+      LOG.debug("Deleting keys: {}", keysToDelete.toString());
 
       DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
       return successfulDeletion(result, keysToDelete.size());
@@ -67,7 +68,6 @@ public class AwsDataManipulationClient implements DataManipulationClient {
     List<KeyVersion> keysToDelete = keys.stream().map(k -> new KeyVersion(k)).collect(Collectors.toList());
 
     if (!listing.isTruncated()) {
-      LOG.debug("Deleting keys: {}", keys);
       return keysToDelete;
     }
     listing.setNextMarker(listing.getNextMarker());

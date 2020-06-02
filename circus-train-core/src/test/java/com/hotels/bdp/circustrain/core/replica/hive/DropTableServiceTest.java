@@ -152,7 +152,6 @@ public class DropTableServiceTest {
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-
     verify(dataManipulationClient).delete(LOCATION);
     verifyNoMoreInteractions(client);
     verifyNoMoreInteractions(dataManipulationClient);

@@ -245,7 +245,6 @@ public class CircusTrainTest {
 
     @Override
     public DataManipulationClient getClient() {
-      // TODO Auto-generated method stub
       return null;
     }
 

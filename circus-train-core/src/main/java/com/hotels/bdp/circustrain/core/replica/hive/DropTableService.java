@@ -44,6 +44,7 @@ public class DropTableService {
     try {
       table = client.getTable(databaseName, tableName);
     } catch (NoSuchObjectException e) {
+      LOG.info("No replica table '" + databaseName + "." + tableName + "' found. Nothing to delete.");
       return null;
     }
     dropTable(client, table, databaseName, tableName);
@@ -83,7 +84,8 @@ public class DropTableService {
     String replicaTableLocation = table.getSd().getLocation();
     try {
       LOG.info("Dropping table data from location: {}", replicaTableLocation);
-      dataManipulationClient.delete(replicaTableLocation);
+      boolean dataDeleted = dataManipulationClient.delete(replicaTableLocation);
+      LOG.info("Data deleted: {}", dataDeleted);
     } catch (IOException e) {
       LOG.info("Could not drop replica table data at location:{}.", replicaTableLocation);
     }
