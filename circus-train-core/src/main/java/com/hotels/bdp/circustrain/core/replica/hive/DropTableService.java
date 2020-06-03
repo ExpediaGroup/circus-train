@@ -44,6 +44,7 @@ public class DropTableService {
     try {
        table = client.getTable(databaseName, tableName);
     } catch (NoSuchObjectException e) {
+      LOG.info("Replica table {}.{} does not exist.", databaseName, tableName);
       return;
     }
     Map<String, String> tableParameters = table.getParameters();
