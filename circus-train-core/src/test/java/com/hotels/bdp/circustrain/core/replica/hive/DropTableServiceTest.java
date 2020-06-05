@@ -41,7 +41,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,6 +55,7 @@ public class DropTableServiceTest {
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
+  private @Mock DataManipulationClientFactoryManager clientFactoryManager;
   private @Mock DataManipulationClient dataManipulationClient;
   private @Mock StorageDescriptor storageDescriptor;
 
@@ -70,6 +72,8 @@ public class DropTableServiceTest {
     storageDescriptor = new StorageDescriptor();
     storageDescriptor.setLocation(LOCATION);
     table.setSd(storageDescriptor);
+
+    when(clientFactoryManager.getClientForPath(LOCATION)).thenReturn(dataManipulationClient);
   }
 
   @Test
@@ -147,25 +151,25 @@ public class DropTableServiceTest {
   @Test
   public void dropTableAndDataSuccess() throws TException, IOException {
     table.setParameters(Collections.emptyMap());
-
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactoryManager);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(dataManipulationClient).delete(LOCATION);
+    verify(clientFactoryManager).getClientForPath(LOCATION);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(dataManipulationClient);
+    verifyNoMoreInteractions(clientFactoryManager);
   }
 
   @Test
   public void dropTableAndDataTableDoesNotExist() throws TException {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactoryManager);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(dataManipulationClient);
+    verifyNoMoreInteractions(clientFactoryManager);
   }
 
 }

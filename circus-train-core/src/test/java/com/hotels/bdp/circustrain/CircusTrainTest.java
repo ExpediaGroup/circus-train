@@ -48,7 +48,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
@@ -241,11 +240,6 @@ public class CircusTrainTest {
     @Override
     public Metrics copy() throws CircusTrainException {
       return Metrics.NULL_VALUE;
-    }
-
-    @Override
-    public DataManipulationClient getClient() {
-      return null;
     }
 
   }

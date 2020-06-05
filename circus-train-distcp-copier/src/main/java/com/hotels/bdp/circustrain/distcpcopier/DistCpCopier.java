@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
@@ -149,11 +148,6 @@ public class DistCpCopier implements Copier {
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
-  }
-
-  @Override
-  public DataManipulationClient getClient() {
-    return new HdfsDataManipulationClient(conf);
   }
 
 }

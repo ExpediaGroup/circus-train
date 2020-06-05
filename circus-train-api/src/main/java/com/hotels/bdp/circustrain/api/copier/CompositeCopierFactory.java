@@ -27,7 +27,6 @@ import org.apache.hadoop.fs.Path;
 import com.google.common.collect.ImmutableList;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 public class CompositeCopierFactory implements CopierFactory {
@@ -53,15 +52,6 @@ public class CompositeCopierFactory implements CopierFactory {
         metrics = metricsMerger.merge(metrics, copierMetrics);
       }
       return metrics;
-    }
-
-    @Override
-    public DataManipulationClient getClient() {
-      List<DataManipulationClient> clients = new ArrayList<>();
-      for (Copier copier : copiers) {
-        clients.add(copier.getClient());
-      }
-      return new CompositeDataManipulationClient(clients);
     }
 
   }

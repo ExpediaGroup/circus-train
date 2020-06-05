@@ -30,7 +30,7 @@ import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
 
 public class AwsDataManipulationClient implements DataManipulationClient {
 
@@ -44,19 +44,15 @@ public class AwsDataManipulationClient implements DataManipulationClient {
 
   @Override
   public boolean delete(String path) {
-    if (path.toLowerCase().startsWith("s3://")) {
-      LOG.info("Deleting all data at location: {}", path);
-      AmazonS3URI uri = new AmazonS3URI(path);
-      String bucket = uri.getBucket();
+    LOG.info("Deleting all data at location: {}", path);
+    AmazonS3URI uri = new AmazonS3URI(path);
+    String bucket = uri.getBucket();
 
-      List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
-      LOG.debug("Deleting keys: {}", keysToDelete.toString());
+    List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
+    LOG.debug("Deleting keys: {}", keysToDelete.toString());
 
-      DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
-      return successfulDeletion(result, keysToDelete.size());
-    }
-    LOG.info("Can't delete data at location: {} using AWS client", path);
-    return false;
+    DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
+    return successfulDeletion(result, keysToDelete.size());
   }
 
   private List<KeyVersion> getKeysToDelete(String bucket, String key) {

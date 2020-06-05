@@ -46,6 +46,7 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.TableType;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -75,6 +76,7 @@ public class PartitionedTableReplicationTest {
   private @Mock ReplicaLocationManager replicaLocationManager;
   private @Mock CopierListener listener;
   private @Mock PartitionPredicate partitionPredicate;
+  private @Mock DataManipulationClientFactoryManager clientFactoryManager;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
@@ -117,7 +119,7 @@ public class PartitionedTableReplicationTest {
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
         source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener);
+        listener, clientFactoryManager);
     replication.replicate();
 
     verifyZeroInteractions(copier);
@@ -136,7 +138,7 @@ public class PartitionedTableReplicationTest {
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
         source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener);
+        listener, clientFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -167,7 +169,7 @@ public class PartitionedTableReplicationTest {
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
         source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, MAPPED_DATABASE, MAPPED_TABLE,
-        copierOptions, listener);
+        copierOptions, listener, clientFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -197,7 +199,7 @@ public class PartitionedTableReplicationTest {
 
     PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
         source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener);
+        listener, clientFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");

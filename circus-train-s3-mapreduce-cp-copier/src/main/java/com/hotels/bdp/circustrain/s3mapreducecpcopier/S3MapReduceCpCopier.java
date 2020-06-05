@@ -32,17 +32,14 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.metrics.JobCounterGauge;
 import com.hotels.bdp.circustrain.metrics.JobMetrics;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCp;
 import com.hotels.bdp.circustrain.s3mapreducecp.S3MapReduceCpOptions;
 import com.hotels.bdp.circustrain.s3mapreducecp.SimpleCopyListing;
-import com.hotels.bdp.circustrain.s3mapreducecp.aws.AwsS3ClientFactory;
 import com.hotels.bdp.circustrain.s3mapreducecp.mapreduce.Counter;
 
 public class S3MapReduceCpCopier implements Copier {
@@ -50,23 +47,13 @@ public class S3MapReduceCpCopier implements Copier {
   interface S3MapReduceCpExecutor {
 
     static final S3MapReduceCpExecutor DEFAULT = new S3MapReduceCpExecutor() {
-
-      private S3MapReduceCp s3MapReduceCp;
       @Override
       public Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception {
-        this.s3MapReduceCp = new S3MapReduceCp(conf, options);
-        return s3MapReduceCp.execute();
-      }
-
-      public S3MapReduceCp getS3MapReduceCp() {
-        return s3MapReduceCp;
+        return new S3MapReduceCp(conf, options).execute();
       }
     };
 
     Job exec(Configuration conf, S3MapReduceCpOptions options) throws Exception;
-
-    S3MapReduceCp getS3MapReduceCp(); // ?????????????????
-
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(S3MapReduceCpCopier.class);
@@ -183,11 +170,6 @@ public class S3MapReduceCpCopier implements Copier {
     } catch (Exception e) {
       LOG.error("Unable to clean up replica data location {} after DistCp failure", replicaDataLocation.toUri(), e);
     }
-  }
-
-  @Override
-  public DataManipulationClient getClient() {
-    return new AwsDataManipulationClient(new AwsS3ClientFactory().newInstance(conf));
   }
 
 }

@@ -52,7 +52,6 @@ import com.google.common.collect.Lists;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
@@ -61,6 +60,7 @@ import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
@@ -440,14 +440,16 @@ public class Replica extends HiveEndpoint {
   public void checkIfReplicaCleanupRequired(
       String replicaDatabaseName,
       String replicaTableName,
-      DataManipulationClient dataManipulationClient) {
+      DataManipulationClientFactoryManager dataManipulationClientFactoryManager) {
 
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
       if (replicationMode == FULL_OVERWRITE) {
         LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
         DropTableService dropTableService = new DropTableService();
         try {
-          dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClient);
+          // DataManipulationClientFactory dataManipulationClientFactory = dataManipulationClientFactoryManager.get
+          dropTableService
+              .dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulationClientFactoryManager);
         } catch (Exception e) {
           LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
         }

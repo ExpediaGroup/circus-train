@@ -63,6 +63,7 @@ import com.hotels.bdp.circustrain.core.PartitionPredicateFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactoryImpl;
 import com.hotels.bdp.circustrain.core.StrategyBasedReplicationFactory;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
 import com.hotels.bdp.circustrain.core.event.CompositeCopierListener;
 import com.hotels.bdp.circustrain.core.event.CompositeLocomotiveListener;
@@ -242,12 +243,12 @@ public class CircusTrain {
       Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,
-      ReplicaCatalogListener replicaCatalogListener) {
+      ReplicaCatalogListener replicaCatalogListener,
+      DataManipulationClientFactoryManager clientFactoryManager) {
     ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
-        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions);
+        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions, clientFactoryManager);
     return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
         replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
-
   }
 
   @Profile({ Modules.REPLICATION })

@@ -23,13 +23,14 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
 
 public class HdfsDataManipulationClient implements DataManipulationClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(HdfsDataManipulationClient.class);
 
   private Configuration conf;
+  private FileSystem fs;
 
   public HdfsDataManipulationClient(Configuration conf) {
     this.conf = conf;
@@ -43,7 +44,7 @@ public class HdfsDataManipulationClient implements DataManipulationClient {
   private boolean delete(Path path) throws IOException {
     try {
       LOG.info("Deleting all data at location: {}", path);
-      FileSystem fs = path.getFileSystem(conf);
+      fs = path.getFileSystem(conf);
       return fs.delete(path, true);
     } catch (IOException e) {
       LOG.info("Unable to delete data at location: {}", path);

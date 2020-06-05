@@ -26,7 +26,8 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class DropTableService {
@@ -55,13 +56,13 @@ public class DropTableService {
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName,
-      DataManipulationClient dataManipulationClient)
+      DataManipulationClientFactoryManager dataManipulationClientFactoryManager)
     throws TException {
 
     LOG.debug("Dropping table {}.{} and its data.", databaseName, tableName);
     Table table = removeTableParamsAndDrop(client, databaseName, tableName);
     if (table != null) {
-      deleteData(dataManipulationClient, table);
+      deleteData(dataManipulationClientFactoryManager, table);
     }
   }
 
@@ -80,11 +81,16 @@ public class DropTableService {
     client.dropTable(databaseName, tableName, false, true);
   }
 
-  private void deleteData(DataManipulationClient dataManipulationClient, Table table) {
+  private void deleteData(DataManipulationClientFactoryManager dataManipulationClientFactoryManager, Table table) {
     String replicaTableLocation = table.getSd().getLocation();
+
     try {
       LOG.info("Dropping table data from location: {}", replicaTableLocation);
-      boolean dataDeleted = dataManipulationClient.delete(replicaTableLocation);
+
+      DataManipulationClient client = dataManipulationClientFactoryManager
+          .getClientForPath(replicaTableLocation);
+
+      boolean dataDeleted = client.delete(replicaTableLocation);
       LOG.info("Data deleted: {}", dataDeleted);
     } catch (IOException e) {
       LOG.info("Could not drop replica table data at location:{}.", replicaTableLocation);

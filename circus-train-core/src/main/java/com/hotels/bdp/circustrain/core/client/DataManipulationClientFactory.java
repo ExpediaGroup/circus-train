@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.conf;
+package com.hotels.bdp.circustrain.core.client;
 
-import java.io.IOException;
+import java.util.Map;
 
-public interface DataManipulationClient {
+public interface DataManipulationClientFactory {
 
-  /**
-   * Returns boolean stating whether the deletion was successful or not
-   * 
-   */
-  boolean delete(String path) throws IOException;
+  DataManipulationClient newInstance(String path);
+
+  boolean supportsDeletion(String sourceLocation, String targetLocation);
+
+  void withCopierOptions(Map<String, Object> copierOptions);
 
 }

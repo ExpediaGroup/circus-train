@@ -45,10 +45,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.conf.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.ListObjectsRequestFactory;
 import com.hotels.bdp.circustrain.s3s3copier.aws.TransferManagerFactory;
@@ -115,7 +113,6 @@ public class S3S3Copier implements Copier {
   private long totalBytesToReplicate = 0;
   private AtomicLong bytesReplicated = new AtomicLong(0);
   private AmazonS3 targetClient;
-  private AmazonS3URI targetBase;
 
   private AmazonS3 srcClient;
 
@@ -161,7 +158,7 @@ public class S3S3Copier implements Copier {
     LOG.info("Initialising all copy jobs");
 
     AmazonS3URI sourceBase = toAmazonS3URI(sourceBaseLocation.toUri());
-    targetBase = toAmazonS3URI(replicaLocation.toUri());
+    AmazonS3URI targetBase = toAmazonS3URI(replicaLocation.toUri());
     srcClient = s3ClientFactory.newInstance(sourceBase, s3s3CopierOptions);
 
     if (sourceSubLocations.isEmpty()) {
@@ -322,8 +319,4 @@ public class S3S3Copier implements Copier {
     registry.register(RunningMetrics.S3S3_CP_BYTES_REPLICATED.name(), gauge);
   }
 
-  @Override
-  public DataManipulationClient getClient() {
-    return new AwsDataManipulationClient(s3ClientFactory.newInstance(targetBase, s3s3CopierOptions));
-  }
 }
