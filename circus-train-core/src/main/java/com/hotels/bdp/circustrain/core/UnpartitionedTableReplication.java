@@ -32,7 +32,7 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.api.util.DotJoiner;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.TableType;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -53,7 +53,7 @@ class UnpartitionedTableReplication implements Replication {
   private Metrics metrics = Metrics.NULL_VALUE;
   private final Map<String, Object> copierOptions;
   private final CopierListener copierListener;
-  private final DataManipulationClientFactoryManager clientFactoryManager;
+  private final DefaultDataManipulationClientFactoryManager clientFactoryManager;
 
   UnpartitionedTableReplication(
       String database,
@@ -67,7 +67,7 @@ class UnpartitionedTableReplication implements Replication {
       String replicaTableName,
       Map<String, Object> copierOptions,
       CopierListener copierListener,
-      DataManipulationClientFactoryManager clientFactoryManager) {
+      DefaultDataManipulationClientFactoryManager clientFactoryManager) {
     this.database = database;
     this.table = table;
     this.source = source;
@@ -104,7 +104,9 @@ class UnpartitionedTableReplication implements Replication {
 
         clientFactoryManager.withCopierOptions(copierOptions);
         clientFactoryManager.withSourceLocation(sourceLocation);
-        replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, clientFactoryManager);
+        replica
+            .checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName,
+                clientFactoryManager);
       } finally {
         copierListener.copierEnd(metrics);
       }

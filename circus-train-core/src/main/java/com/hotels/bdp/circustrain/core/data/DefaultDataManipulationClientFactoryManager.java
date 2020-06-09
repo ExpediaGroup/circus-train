@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.core.client;
+package com.hotels.bdp.circustrain.core.data;
 
 import java.util.List;
 import java.util.Map;
@@ -30,20 +30,23 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
 
 @Profile({ Modules.REPLICATION })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class DataManipulationClientFactoryManager {
+public class DefaultDataManipulationClientFactoryManager implements DataManipulationClientFactoryManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DataManipulationClientFactoryManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultDataManipulationClientFactoryManager.class);
 
   private List<DataManipulationClientFactory> clientFactories;
   private Map<String, Object> copierOptions;
   private String sourceLocation;
 
   @Autowired
-  public DataManipulationClientFactoryManager(List<DataManipulationClientFactory> clientFactories) {
+  public DefaultDataManipulationClientFactoryManager(List<DataManipulationClientFactory> clientFactories) {
     this.clientFactories = clientFactories;
   }
 

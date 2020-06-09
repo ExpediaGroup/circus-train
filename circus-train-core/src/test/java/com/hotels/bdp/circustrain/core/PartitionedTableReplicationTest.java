@@ -46,7 +46,7 @@ import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.TableType;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -76,7 +76,7 @@ public class PartitionedTableReplicationTest {
   private @Mock ReplicaLocationManager replicaLocationManager;
   private @Mock CopierListener listener;
   private @Mock PartitionPredicate partitionPredicate;
-  private @Mock DataManipulationClientFactoryManager clientFactoryManager;
+  private @Mock DefaultDataManipulationClientFactoryManager clientFactoryManager;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");

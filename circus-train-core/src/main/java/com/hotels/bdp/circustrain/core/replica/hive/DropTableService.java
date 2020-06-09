@@ -16,8 +16,11 @@
 package com.hotels.bdp.circustrain.core.replica.hive;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
@@ -26,8 +29,8 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 public class DropTableService {
@@ -39,31 +42,50 @@ public class DropTableService {
   /**
    * Removes all parameters from a table before dropping the table.
    */
-  public Table removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
+  public void removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
     throws TException {
-    Table table;
-    try {
-      table = client.getTable(databaseName, tableName);
-    } catch (NoSuchObjectException e) {
-      LOG.info("No replica table '" + databaseName + "." + tableName + "' found. Nothing to delete.");
-      return null;
+    Table table = getTable(client, databaseName, tableName);
+    if (table != null) {
+      dropTable(client, table, databaseName, tableName);
     }
-    dropTable(client, table, databaseName, tableName);
-    return table;
   }
 
+  /**
+   * Drops the table and its associated data. If the table is unpartitioned the table location is used. If the table is
+   * partitioned then the data will be dropped from each partition location.
+   */
   public void dropTableAndData(
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName,
-      DataManipulationClientFactoryManager dataManipulationClientFactoryManager)
+      DefaultDataManipulationClientFactoryManager dataManipulationClientFactoryManager)
     throws TException {
-
     LOG.debug("Dropping table {}.{} and its data.", databaseName, tableName);
-    Table table = removeTableParamsAndDrop(client, databaseName, tableName);
+    Table table = getTable(client, databaseName, tableName);
     if (table != null) {
-      deleteData(dataManipulationClientFactoryManager, table);
+      String replicaLocation = table.getSd().getLocation();
+      if (table.getPartitionKeysSize() == 0) {
+        deleteData(dataManipulationClientFactoryManager, replicaLocation);
+      } else {
+        List<String> partitionLocations = getPartitionLocations(client, databaseName, tableName);
+        if (partitionLocations.size() > 0) {
+          deletePartitionData(dataManipulationClientFactoryManager, replicaLocation, partitionLocations);
+        } else {
+          LOG.info("No partitions to delete.");
+        }
+      }
+      dropTable(client, table, databaseName, tableName);
     }
+  }
+
+  private Table getTable(CloseableMetaStoreClient client, String databaseName, String tableName) throws TException {
+    Table table = null;
+    try {
+      table = client.getTable(databaseName, tableName);
+    } catch (NoSuchObjectException e) {
+      LOG.info("No replica table '" + databaseName + "." + tableName + "' found. Nothing to delete.");
+    }
+    return table;
   }
 
   private void dropTable(CloseableMetaStoreClient client, Table table, String databaseName, String tableName)
@@ -81,24 +103,53 @@ public class DropTableService {
     client.dropTable(databaseName, tableName, false, true);
   }
 
-  private void deleteData(DataManipulationClientFactoryManager dataManipulationClientFactoryManager, Table table) {
-    String replicaTableLocation = table.getSd().getLocation();
-
+  private void deleteData(
+      DefaultDataManipulationClientFactoryManager dataManipulationClientFactoryManager,
+      String replicaDataLocation) {
     try {
-      LOG.info("Dropping table data from location: {}", replicaTableLocation);
-
-      DataManipulationClient client = dataManipulationClientFactoryManager
-          .getClientForPath(replicaTableLocation);
-
-      boolean dataDeleted = client.delete(replicaTableLocation);
-      LOG.info("Data deleted: {}", dataDeleted);
+      LOG.info("Dropping table data from location: {}.", replicaDataLocation);
+      DataManipulationClient client = dataManipulationClientFactoryManager.getClientForPath(replicaDataLocation);
+      boolean dataDeleted = client.delete(replicaDataLocation);
+      LOG.info("Data deleted: {}.", dataDeleted);
     } catch (IOException e) {
-      LOG.info("Could not drop replica table data at location:{}.", replicaTableLocation);
+      LOG.info("Could not drop replica table data at location:{}.", replicaDataLocation);
+    }
+  }
+
+  private void deletePartitionData(
+      DefaultDataManipulationClientFactoryManager dataManipulationClientFactoryManager,
+      String replicaTableLocation,
+      List<String> replicaPartitionLocations) {
+    try {
+      LOG.info("Dropping partition data from base location: {}.", replicaTableLocation);
+      DataManipulationClient client = dataManipulationClientFactoryManager.getClientForPath(replicaTableLocation);
+      for (String location : replicaPartitionLocations) {
+        boolean deleted = client.delete(location);
+        LOG.debug("Attempted to delete data from location: {}. Successful deletion = {}.", location, deleted);
+      }
+    } catch (IOException e) {
+      LOG.info("Could not drop replica partition data at location:{}.", replicaTableLocation);
+    } catch (UnsupportedOperationException e) {
+      LOG.info(e.getMessage());
     }
   }
 
   private boolean isExternal(Map<String, String> tableParameters) {
     CaseInsensitiveMap caseInsensitiveParams = new CaseInsensitiveMap(tableParameters);
     return IS_EXTERNAL.equalsIgnoreCase((String) caseInsensitiveParams.get(EXTERNAL_KEY));
+  }
+
+  private List<String> getPartitionLocations(CloseableMetaStoreClient client, String databaseName, String tableName) {
+    List<String> locations = new ArrayList<>();
+    try {
+      locations = client
+          .listPartitions(databaseName, tableName, (short) -1)
+          .stream()
+          .map(partition -> partition.getSd().getLocation())
+          .collect(Collectors.toList());
+    } catch (TException e) {
+      LOG.info("Could not list partitions for {}.{}.", databaseName, tableName);
+    }
+    return locations;
   }
 }

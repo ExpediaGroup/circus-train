@@ -29,7 +29,7 @@ import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -44,7 +44,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
   private final CopierListener copierListener;
   private final PartitionPredicateFactory partitionPredicateFactory;
   private final CopierOptions copierOptions;
-  private final DataManipulationClientFactoryManager clientFactoryManager;
+  private final DefaultDataManipulationClientFactoryManager clientFactoryManager;
 
   public ReplicationFactoryImpl(
       SourceFactory sourceFactory,
@@ -53,7 +53,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
       CopierOptions copierOptions,
-      DataManipulationClientFactoryManager clientFactoryManager) {
+      DefaultDataManipulationClientFactoryManager clientFactoryManager) {
     this.sourceFactory = sourceFactory;
     this.replicaFactory = replicaFactory;
     this.copierFactoryManager = copierFactoryManager;

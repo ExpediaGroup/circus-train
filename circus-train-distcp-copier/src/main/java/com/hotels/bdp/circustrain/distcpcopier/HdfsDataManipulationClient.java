@@ -23,7 +23,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 
 public class HdfsDataManipulationClient implements DataManipulationClient {
 

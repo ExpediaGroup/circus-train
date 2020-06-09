@@ -41,8 +41,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +55,7 @@ public class DropTableServiceTest {
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
-  private @Mock DataManipulationClientFactoryManager clientFactoryManager;
+  private @Mock DefaultDataManipulationClientFactoryManager clientFactoryManager;
   private @Mock DataManipulationClient dataManipulationClient;
   private @Mock StorageDescriptor storageDescriptor;
 

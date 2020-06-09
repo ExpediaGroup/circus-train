@@ -13,55 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.s3s3copier.aws;
+package com.hotels.bdp.circustrain.s3mapreducecp.aws;
 
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.s3.AmazonS3URI;
-
 import com.hotels.bdp.circustrain.api.Modules;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Profile({ Modules.REPLICATION })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
-public class AwsDataManipulationClientFactory implements DataManipulationClientFactory {
+public class AwsMapreduceDataManipulationClientFactory implements DataManipulationClientFactory {
 
-  private AmazonS3ClientFactory s3ClientFactory;
+  private AwsS3ClientFactory s3ClientFactory;
 
   private final String S3_LOCATION = "s3";
-  private Map<String, Object> copierOptions;
+  private final String HDFS_LOCATION = "hdfs";
+
+  private Configuration conf;
 
   @Autowired
-  public AwsDataManipulationClientFactory(AmazonS3ClientFactory s3ClientFactory) {
-    this.s3ClientFactory = s3ClientFactory;
+  public AwsMapreduceDataManipulationClientFactory(@Value("#{replicaHiveConf}") Configuration conf) {
+    this.conf = conf;
+    s3ClientFactory = new AwsS3ClientFactory();
   }
 
-  public AwsDataManipulationClient newInstance(String replicaLocation) {
-    S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(copierOptions);
-    AmazonS3URI replicaLocationUri = new AmazonS3URI(replicaLocation);
-    return new AwsDataManipulationClient(s3ClientFactory.newInstance(replicaLocationUri, s3s3CopierOptions));
+  // The hdfs -> s3 client doesn't need to use the path for the client
+  @Override
+  public DataManipulationClient newInstance(String path) {
+    return new AwsDataManipulationClient(s3ClientFactory.newInstance(conf));
   }
 
   /**
-   * Checks that the source and replica locations are both S3 locations.
+   * Checks that the source is an hdfs location and replica location is in S3.
    */
   @Override
   public boolean supportsDeletion(String source, String replica) {
-    return (source.toLowerCase().startsWith(S3_LOCATION) && replica.toLowerCase().startsWith(S3_LOCATION));
+    return (source.toLowerCase().startsWith(HDFS_LOCATION) && replica.toLowerCase().startsWith(S3_LOCATION));
   }
 
+  // The hdfs -> s3 client doesn't need to use the copier options
   @Override
-  public void withCopierOptions(Map<String, Object> copierOptions) {
-    this.copierOptions = copierOptions;
-  }
+  public void withCopierOptions(Map<String, Object> copierOptions) {}
 
 }

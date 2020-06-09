@@ -15,6 +15,9 @@
  */
 package com.hotels.bdp.circustrain.aws;
 
+import static com.hotels.bdp.circustrain.aws.AmazonS3URIs.toAmazonS3URI;
+
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +33,7 @@ import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 
 public class AwsDataManipulationClient implements DataManipulationClient {
 
@@ -45,11 +48,11 @@ public class AwsDataManipulationClient implements DataManipulationClient {
   @Override
   public boolean delete(String path) {
     LOG.info("Deleting all data at location: {}", path);
-    AmazonS3URI uri = new AmazonS3URI(path);
+    AmazonS3URI uri = toAmazonS3URI(URI.create(path));
     String bucket = uri.getBucket();
 
     List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
-    LOG.debug("Deleting keys: {}", keysToDelete.toString());
+    LOG.debug("Deleting keys: {}", keysToDelete.stream().map(k -> k.getKey()).collect(Collectors.toList()));
 
     DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
     return successfulDeletion(result, keysToDelete.size());

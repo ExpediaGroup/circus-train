@@ -15,7 +15,7 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier;
 
-import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
+import static com.hotels.bdp.circustrain.aws.AmazonS3URIs.toAmazonS3URI;
 
 import java.util.ArrayList;
 import java.util.List;

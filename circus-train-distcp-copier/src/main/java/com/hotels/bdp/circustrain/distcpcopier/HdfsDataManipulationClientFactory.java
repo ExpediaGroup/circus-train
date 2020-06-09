@@ -19,14 +19,15 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClient;
-import com.hotels.bdp.circustrain.core.client.DataManipulationClientFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 
 @Profile({ Modules.REPLICATION })
 @Component
@@ -38,7 +39,7 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
   private final String HDFS_LOCATION = "hdfs";
 
   @Autowired
-  public HdfsDataManipulationClientFactory(Configuration conf) {
+  public HdfsDataManipulationClientFactory(@Value("#{replicaHiveConf}") Configuration conf) {
     this.conf = conf;
   }
 
@@ -49,11 +50,12 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
   }
 
   /**
-   * Checks that the source and replica locations are both hdfs locations.
+   * Checks that the replica location is are an hdfs location. This will delete replica data whether it is been
+   * replicated from s3 or hdfs.
    */
   @Override
   public boolean supportsDeletion(String source, String replica) {
-    return (source.toLowerCase().startsWith(HDFS_LOCATION) && replica.toLowerCase().startsWith(HDFS_LOCATION));
+    return (replica.toLowerCase().startsWith(HDFS_LOCATION));
   }
 
   // The HDFS client doesn't need to use the copier options
