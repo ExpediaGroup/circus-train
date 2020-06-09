@@ -86,15 +86,13 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
     "com.hotels.bdp.circustrain.aws",
     "com.hotels.bdp.circustrain.context",
     "com.hotels.bdp.circustrain.core",
-    "com.hotels.bdp.circustrain.core.client",
     "com.hotels.bdp.circustrain.distcpcopier",
     "com.hotels.bdp.circustrain.gcp",
     "com.hotels.bdp.circustrain.hive.view.transformation",
     "com.hotels.bdp.circustrain.housekeeping",
     "com.hotels.bdp.circustrain.metrics.conf",
     "com.hotels.bdp.circustrain.s3mapreducecpcopier",
-    "com.hotels.bdp.circustrain.s3s3copier",
-    "com.hotels.bdp.circustrain.s3mapreducecp" })
+    "com.hotels.bdp.circustrain.s3s3copier" })
 public class CircusTrain {
   private static final Logger LOG = LoggerFactory.getLogger(CircusTrain.class);
 
