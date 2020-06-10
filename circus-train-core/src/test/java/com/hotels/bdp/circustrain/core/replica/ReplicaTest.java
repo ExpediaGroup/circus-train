@@ -29,6 +29,9 @@ import static org.mockito.Mockito.when;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_MODE;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.FULL_OVERWRITE;
+import static com.hotels.bdp.circustrain.api.conf.ReplicationMode.METADATA_MIRROR;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -321,6 +324,55 @@ public class ReplicaTest {
       verify(mockMetaStoreClient).close();
       verifyNoMoreInteractions(mockMetaStoreClient);
     }
+  }
+
+  @Test
+  public void validateReplicaTableMetadataMirrorOnExistingFullOverwriteReplicationTableFails()
+    throws TException, IOException {
+    try {
+      existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+      existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL_OVERWRITE.name());
+      tableReplication.setReplicationMode(METADATA_MIRROR);
+      replica = newReplica(tableReplication);
+      replica.validateReplicaTable(DB_NAME, TABLE_NAME);
+      fail("Should have thrown InvalidReplicationModeException");
+    } catch (InvalidReplicationModeException e) {
+      // Check that nothing was written to the metastore
+      verify(mockMetaStoreClient).getTable(DB_NAME, TABLE_NAME);
+      verify(mockMetaStoreClient).close();
+      verifyNoMoreInteractions(mockMetaStoreClient);
+    }
+  }
+
+  @Test
+  public void validateFullOverwriteReplicationOnExistingTableSucceeds() throws TException {
+    existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
+    existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
+    tableReplication.setReplicationMode(FULL_OVERWRITE);
+
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
+    verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+  }
+
+  @Test
+  public void validateFullOverwriteReplicationWithoutExistingTableSucceeds() throws TException {
+    when(mockMetaStoreClient.tableExists(DB_NAME, TABLE_NAME)).thenReturn(false);
+    tableReplication.setReplicationMode(FULL_OVERWRITE);
+
+    replica
+        .updateMetadata(EVENT_ID, tableAndStatistics,
+            new PartitionsAndStatistics(sourceTable.getPartitionKeys(), Collections.<Partition>emptyList(),
+                Collections.<String, List<ColumnStatisticsObj>>emptyMap()),
+            DB_NAME, TABLE_NAME, mockReplicaLocationManager);
+    verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
+    verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
   }
 
   @Test
