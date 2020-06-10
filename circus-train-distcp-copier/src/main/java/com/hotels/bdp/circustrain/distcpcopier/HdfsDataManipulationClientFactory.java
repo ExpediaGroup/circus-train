@@ -50,7 +50,7 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
   }
 
   /**
-   * Checks that the replica location is an hdfs location. This will delete replica data whether it is been replicated
+   * Checks that the replica location is an hdfs location. This will delete replica data whether it has been replicated
    * from s3 or hdfs.
    */
   @Override
