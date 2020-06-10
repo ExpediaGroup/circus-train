@@ -62,6 +62,15 @@ public class HdfsDataManipulationClientFactoryTest {
   }
 
   @Test
+  public void checkSupportsS3ToHdfs() {
+    sourceLocation = s3Path;
+    replicaLocation = hdfsPath;
+
+    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    assertTrue(support);
+  }
+
+  @Test
   public void checkDoesntSupportS3() {
     sourceLocation = s3Path;
     replicaLocation = s3Path;
@@ -70,14 +79,6 @@ public class HdfsDataManipulationClientFactoryTest {
     assertFalse(support);
   }
 
-  @Test
-  public void checkDoesntSupportS3ToHdfs() {
-    sourceLocation = s3Path;
-    replicaLocation = hdfsPath;
-
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
-    assertFalse(support);
-  }
 
   @Test
   public void checkDoesntSupportHdfsToS3() {

@@ -107,7 +107,6 @@ public class DataManipulationClientFactoryManagerTest {
 
     @Override
     public boolean supportsDeletion(String sourceLocation, String targetLocation) {
-      System.out.println("Checking if supported");
       if (isS3ToS3(sourceLocation, targetLocation) && isS3S3Client) {
         return true;
       }
