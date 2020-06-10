@@ -48,7 +48,7 @@ public class AwsMapreduceDataManipulationClientFactory implements DataManipulati
     s3ClientFactory = new AwsS3ClientFactory();
   }
 
-  // The hdfs -> s3 client doesn't need to use the path for the client
+  // The hdfs -> s3 client doesn't need to use the path for the client.
   @Override
   public DataManipulationClient newInstance(String path) {
     return new AwsDataManipulationClient(s3ClientFactory.newInstance(conf));
@@ -62,7 +62,7 @@ public class AwsMapreduceDataManipulationClientFactory implements DataManipulati
     return (source.toLowerCase().startsWith(HDFS_LOCATION) && replica.toLowerCase().startsWith(S3_LOCATION));
   }
 
-  // The hdfs -> s3 client doesn't need to use the copier options
+  // The hdfs -> s3 client doesn't need to use the copier options.
   @Override
   public void withCopierOptions(Map<String, Object> copierOptions) {}
 

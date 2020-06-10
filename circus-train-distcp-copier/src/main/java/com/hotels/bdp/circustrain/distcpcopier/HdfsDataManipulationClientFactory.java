@@ -43,22 +43,22 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
     this.conf = conf;
   }
 
-  // The HDFS client doesn't need to use the path
+  // The HDFS client doesn't need to use the path.
   @Override
   public DataManipulationClient newInstance(String path) {
     return new HdfsDataManipulationClient(conf);
   }
 
   /**
-   * Checks that the replica location is are an hdfs location. This will delete replica data whether it is been
-   * replicated from s3 or hdfs.
+   * Checks that the replica location is an hdfs location. This will delete replica data whether it is been replicated
+   * from s3 or hdfs.
    */
   @Override
   public boolean supportsDeletion(String source, String replica) {
     return (replica.toLowerCase().startsWith(HDFS_LOCATION));
   }
 
-  // The HDFS client doesn't need to use the copier options
+  // The HDFS client doesn't need to use the copier options.
   @Override
   public void withCopierOptions(Map<String, Object> copierOptions) {}
 
