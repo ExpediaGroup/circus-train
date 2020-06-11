@@ -371,6 +371,11 @@ public class ReplicaTest {
   }
 
   @Test
+  public void what() {
+
+  }
+
+  @Test
   public void validateExistingReplicaNotDroppedForFullReplicationType() throws TException {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());

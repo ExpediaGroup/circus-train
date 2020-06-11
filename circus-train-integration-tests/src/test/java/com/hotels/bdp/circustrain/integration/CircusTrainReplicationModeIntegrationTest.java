@@ -45,7 +45,6 @@ import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
-import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
 import org.gaul.s3proxy.junit.S3ProxyRule;
@@ -249,14 +248,6 @@ public class CircusTrainReplicationModeIntegrationTest {
         assertThat(hiveTable.getParameters().get(REPLICATION_MODE.parameterName()), is("FULL_OVERWRITE"));
         assertThat(hiveTable.getParameters().get("paramToUpdate"), is("updated"));
         assertThat(hiveTable.getSd().getCols(), is(DATA_COLUMNS));
-
-        // check partitions
-        List<Partition> partitions = replicaCatalog
-            .client()
-            .listPartitions(DATABASE, TARGET_PARTITIONED_TABLE, (short) -1);
-        assertThat(partitions.size(), is(2));
-        assertThat(partitions.get(0).getValues(), is(Arrays.asList("Asia", "China")));
-        assertThat(partitions.get(1).getValues(), is(Arrays.asList("Europe", "UK")));
 
         // Assert files have been copied from source and replica file is deleted
         List<S3ObjectSummary> replicaFiles = TestUtils.listObjects(s3Client, "replica");
