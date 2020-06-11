@@ -24,12 +24,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
+import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.thrift.TException;
@@ -42,7 +46,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,12 +54,13 @@ public class DropTableServiceTest {
 
   private static final String TABLE_NAME = "table";
   private static final String DB_NAME = "db";
-  private static final String LOCATION = "table_location";
+  private static final String REPLICA_LOCATION = "replica_table_location";
+  private static final String PARTITION_LOCATION = "partition_location";
 
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
-  private @Mock DefaultDataManipulationClientFactoryManager clientFactoryManager;
+  private @Mock DataManipulationClientFactory clientFactory;
   private @Mock DataManipulationClient dataManipulationClient;
   private @Mock StorageDescriptor storageDescriptor;
 
@@ -70,10 +75,10 @@ public class DropTableServiceTest {
     when(client.getTable(DB_NAME, TABLE_NAME)).thenReturn(table);
 
     storageDescriptor = new StorageDescriptor();
-    storageDescriptor.setLocation(LOCATION);
+    storageDescriptor.setLocation(REPLICA_LOCATION);
     table.setSd(storageDescriptor);
 
-    when(clientFactoryManager.getClientForPath(LOCATION)).thenReturn(dataManipulationClient);
+    when(clientFactory.newInstance(REPLICA_LOCATION)).thenReturn(dataManipulationClient);
   }
 
   @Test
@@ -151,25 +156,98 @@ public class DropTableServiceTest {
   @Test
   public void dropTableAndDataSuccess() throws TException, IOException {
     table.setParameters(Collections.emptyMap());
-    
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactoryManager);
+
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(clientFactoryManager).getClientForPath(LOCATION);
+    verify(clientFactory).newInstance(REPLICA_LOCATION);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(clientFactoryManager);
+    verifyNoMoreInteractions(clientFactory);
   }
 
   @Test
   public void dropTableAndDataTableDoesNotExist() throws TException {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactoryManager);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(clientFactoryManager);
+    verifyNoMoreInteractions(clientFactory);
+  }
+
+  @Test
+  public void dropPartitionedTableSuccess() throws TException, IOException {
+    List<String> partitionNames = Arrays.asList("name", "surname");
+    List<Partition> partitions = createPartitions(partitionNames.size());
+
+    when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, partitionNames)).thenReturn(partitions);
+    table.setPartitionKeys(createFieldSchemaList(partitionNames));
+
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
+    verify(clientFactory).newInstance(REPLICA_LOCATION);
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
+  }
+
+  @Test
+  public void dropPartitionedTableMultipleBatches() throws TException, IOException {
+    List<String> partitionNames = new ArrayList<>();
+    List<String> batch1 = Arrays
+        .asList("title", "name", "middle", "surname", "streetname", "postcode", "county", "country", "continent",
+            "colour");
+    List<String> batch2 = Arrays.asList("other");
+    partitionNames.addAll(batch1);
+    partitionNames.addAll(batch2);
+
+    List<Partition> partitionBatch1 = createPartitions(partitionNames.size());
+    Partition partitionBatch2 = partitionBatch1.remove(partitionBatch1.size() - 1);
+    when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch1)).thenReturn(partitionBatch1);
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch2)).thenReturn(Arrays.asList(partitionBatch2));
+    
+    table.setPartitionKeys(createFieldSchemaList(partitionNames));
+
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+
+    verify(client).getTable(DB_NAME, TABLE_NAME);
+    verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
+    verify(clientFactory).newInstance(REPLICA_LOCATION);
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "3");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "4");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "5");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "6");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "7");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "8");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "9");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "10");
+    verify(dataManipulationClient).delete(PARTITION_LOCATION + "11");
+  }
+
+  private List<Partition> createPartitions(int count) {
+    List<Partition> partitions = new ArrayList<>();
+    for (int i = 1; i < count + 1; i++) {
+      Partition partition = new Partition();
+      partition.setSd(new StorageDescriptor());
+      partition.getSd().setLocation(PARTITION_LOCATION + i);
+      partitions.add(partition);
+    }
+    return partitions;
+  }
+
+  private List<FieldSchema> createFieldSchemaList(List<String> names) {
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    for (String name : names) {
+      fieldSchemas.add(new FieldSchema(name, "String", ""));
+    }
+    return fieldSchemas;
   }
 
 }

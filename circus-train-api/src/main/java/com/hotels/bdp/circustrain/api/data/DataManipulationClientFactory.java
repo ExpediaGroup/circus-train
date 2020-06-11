@@ -21,7 +21,7 @@ public interface DataManipulationClientFactory {
 
   DataManipulationClient newInstance(String path);
 
-  boolean supportsDeletion(String sourceLocation, String targetLocation);
+  boolean supportsSchemes(String sourceScheme, String replicaScheme);
 
   void withCopierOptions(Map<String, Object> copierOptions);
 

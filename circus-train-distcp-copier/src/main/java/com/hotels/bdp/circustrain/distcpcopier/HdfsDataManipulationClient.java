@@ -42,14 +42,9 @@ public class HdfsDataManipulationClient implements DataManipulationClient {
   }
 
   private boolean delete(Path path) throws IOException {
-    try {
-      LOG.info("Deleting all data at location: {}", path);
-      fs = path.getFileSystem(conf);
-      return fs.delete(path, true);
-    } catch (IOException e) {
-      LOG.info("Unable to delete data at location: {}", path);
-      return false;
-    }
+    LOG.info("Deleting all data at location: {}", path);
+    fs = path.getFileSystem(conf);
+    return fs.delete(path, true);
   }
 
 }

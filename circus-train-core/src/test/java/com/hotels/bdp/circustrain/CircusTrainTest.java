@@ -255,8 +255,8 @@ public class CircusTrainTest {
     }
 
     @Override
-    public boolean supportsDeletion(String sourceLocation, String targetLocation) {
-      return false;
+    public boolean supportsSchemes(String sourceLocation, String targetLocation) {
+      return true;
     }
 
     @Override
@@ -268,7 +268,7 @@ public class CircusTrainTest {
 
     @Override
     public boolean delete(String path) throws IOException {
-      return false;
+      return true;
     }
   }
 

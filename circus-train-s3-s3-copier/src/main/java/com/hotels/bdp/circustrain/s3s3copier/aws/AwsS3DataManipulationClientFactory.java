@@ -31,6 +31,7 @@ import com.amazonaws.services.s3.AmazonS3URI;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
+import com.hotels.bdp.circustrain.aws.S3Schemes;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Profile({ Modules.REPLICATION })
@@ -58,8 +59,8 @@ public class AwsS3DataManipulationClientFactory implements DataManipulationClien
    * Checks that the source and replica locations are both S3 locations.
    */
   @Override
-  public boolean supportsDeletion(String source, String replica) {
-    return (source.toLowerCase().startsWith(S3_LOCATION) && replica.toLowerCase().startsWith(S3_LOCATION));
+  public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
+    return S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
   }
 
   @Override

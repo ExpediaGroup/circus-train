@@ -15,7 +15,14 @@
  */
 package com.hotels.bdp.circustrain.api.data;
 
+import java.util.Map;
+
+import org.apache.hadoop.fs.Path;
+
 public interface DataManipulationClientFactoryManager {
 
-  public DataManipulationClient getClientForPath(String replicaLocation);
+  public DataManipulationClientFactory getClientForPath(
+      Path sourceLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions);
 }

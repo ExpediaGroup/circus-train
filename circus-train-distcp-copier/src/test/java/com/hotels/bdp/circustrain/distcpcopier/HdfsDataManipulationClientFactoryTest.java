@@ -15,7 +15,6 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.hadoop.conf.Configuration;
@@ -43,12 +42,14 @@ public class HdfsDataManipulationClientFactoryTest {
     clientFactory = new HdfsDataManipulationClientFactory(conf);
   }
 
+  // This client factory will technically support all schemes including replicating to and from s3. However the s3
+  // client factories take higher precedence so this client factory wont be used for s3.
   @Test
   public void checkSupportsHdfs() {
     sourceLocation = hdfsPath;
     replicaLocation = hdfsPath;
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
     assertTrue(support);
   }
 
@@ -57,7 +58,7 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = hdfsPath.toUpperCase();
     replicaLocation = hdfsPath.toUpperCase();
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
     assertTrue(support);
   }
 
@@ -66,35 +67,34 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = s3Path;
     replicaLocation = hdfsPath;
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
     assertTrue(support);
   }
 
   @Test
-  public void checkDoesntSupportS3() {
+  public void checkSupportsS3() {
     sourceLocation = s3Path;
     replicaLocation = s3Path;
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
-    assertFalse(support);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
+    assertTrue(support);
   }
 
-
   @Test
-  public void checkDoesntSupportHdfsToS3() {
+  public void checkSupportsHdfsToS3() {
     sourceLocation = hdfsPath;
     replicaLocation = s3Path;
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
-    assertFalse(support);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
+    assertTrue(support);
   }
 
   @Test
-  public void checkDoesntSupportRandomPaths() {
+  public void checkSupportsRandomPaths() {
     sourceLocation = "<path>";
     replicaLocation = "<path>";
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
-    assertFalse(support);
+    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
+    assertTrue(support);
   }
 }

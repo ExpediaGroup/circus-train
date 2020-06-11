@@ -29,10 +29,11 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.api.util.DotJoiner;
-import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.TableType;
 import com.hotels.bdp.circustrain.core.source.Source;
@@ -53,7 +54,7 @@ class UnpartitionedTableReplication implements Replication {
   private Metrics metrics = Metrics.NULL_VALUE;
   private final Map<String, Object> copierOptions;
   private final CopierListener copierListener;
-  private final DefaultDataManipulationClientFactoryManager clientFactoryManager;
+  private final DataManipulationClientFactoryManager clientFactoryManager;
 
   UnpartitionedTableReplication(
       String database,
@@ -67,7 +68,7 @@ class UnpartitionedTableReplication implements Replication {
       String replicaTableName,
       Map<String, Object> copierOptions,
       CopierListener copierListener,
-      DefaultDataManipulationClientFactoryManager clientFactoryManager) {
+      DataManipulationClientFactoryManager clientFactoryManager) {
     this.database = database;
     this.table = table;
     this.source = source;
@@ -102,11 +103,9 @@ class UnpartitionedTableReplication implements Replication {
       try {
         metrics = copier.copy();
 
-        clientFactoryManager.withCopierOptions(copierOptions);
-        clientFactoryManager.withSourceLocation(sourceLocation);
-        replica
-            .checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName,
-                clientFactoryManager);
+        DataManipulationClientFactory clientFactory = clientFactoryManager
+            .getClientForPath(sourceLocation, replicaLocation, copierOptions);
+        replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, clientFactory);
       } finally {
         copierListener.copierEnd(metrics);
       }

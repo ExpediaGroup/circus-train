@@ -19,6 +19,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +29,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsDataManipulationClientFactoryTest {
 
-  private String sourceLocation;
-  private String replicaLocation;
+  private Path sourceLocation;
+  private Path replicaLocation;
+
+  private String sourceScheme;
+  private String replicaScheme;
 
   private final String s3Path = "s3://<path>";
   private final String hdfsPath = "hdfs://<path>";
@@ -46,55 +50,69 @@ public class AwsDataManipulationClientFactoryTest {
 
   @Test
   public void checkSupportsS3ToS3() {
-    sourceLocation = s3Path;
-    replicaLocation = s3Path;
+    sourceLocation = new Path(s3Path);
+    replicaLocation = new Path(s3Path);
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
     assertTrue(support);
   }
 
   @Test
   public void checkSupportsHdfsToS3UpperCase() {
-    sourceLocation = s3Path.toUpperCase();
-    replicaLocation = s3Path.toUpperCase();
+    sourceLocation = new Path(s3Path.toUpperCase());
+    replicaLocation = new Path(s3Path.toUpperCase());
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
+
     assertTrue(support);
   }
 
   @Test
   public void checkDoesntSupportHdfs() {
-    sourceLocation = hdfsPath;
-    replicaLocation = hdfsPath;
+    sourceLocation = new Path(hdfsPath);
+    replicaLocation = new Path(hdfsPath);
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
     assertFalse(support);
   }
 
   @Test
   public void checkDoesntSupportHdfsToS3() {
-    sourceLocation = hdfsPath;
-    replicaLocation = s3Path;
+    sourceLocation = new Path(hdfsPath);
+    replicaLocation = new Path(s3Path);
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
     assertFalse(support);
   }
   
   @Test
   public void checkDoesntSupportS3ToHdfs() {
-    sourceLocation = s3Path;
-    replicaLocation = hdfsPath;
-    
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    sourceLocation = new Path(s3Path);
+    replicaLocation = new Path(hdfsPath);
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
+
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
     assertFalse(support);
   }
 
   @Test
   public void checkDoesntSupportRandomPaths() {
-    sourceLocation = "<path>";
-    replicaLocation = "<path>";
+    sourceLocation = new Path("<path>");
+    replicaLocation = new Path("<path>");
 
-    boolean support = clientFactory.supportsDeletion(sourceLocation, replicaLocation);
+    sourceScheme = sourceLocation.toUri().getScheme();
+    replicaScheme = replicaLocation.toUri().getScheme();
+
+    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
     assertFalse(support);
   }
 

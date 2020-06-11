@@ -30,7 +30,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
 
@@ -42,8 +41,6 @@ public class DefaultDataManipulationClientFactoryManager implements DataManipula
   private static final Logger LOG = LoggerFactory.getLogger(DefaultDataManipulationClientFactoryManager.class);
 
   private List<DataManipulationClientFactory> clientFactories;
-  private Map<String, Object> copierOptions;
-  private String sourceLocation;
 
   @Autowired
   public DefaultDataManipulationClientFactoryManager(List<DataManipulationClientFactory> clientFactories) {
@@ -58,25 +55,24 @@ public class DefaultDataManipulationClientFactoryManager implements DataManipula
     }
   }
 
-  public DataManipulationClient getClientForPath(String replicaLocation) {
+  @Override
+  public DataManipulationClientFactory getClientForPath(
+      Path sourceTableLocation,
+      Path replicaTableLocation,
+      Map<String, Object> copierOptions) {
+    String replicaLocation = replicaTableLocation.toUri().getScheme();
+    String sourceLocation = sourceTableLocation.toUri().getScheme();
     for (DataManipulationClientFactory clientFactory : clientFactories) {
-      if (clientFactory.supportsDeletion(sourceLocation, replicaLocation)) {
+      if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
         LOG
             .debug("Found client factory {} for cleanup at location {}.", clientFactory.getClass().getName(),
                 replicaLocation);
         clientFactory.withCopierOptions(copierOptions);
-        return clientFactory.newInstance(replicaLocation);
+        return clientFactory;
       }
     }
     throw new UnsupportedOperationException(
         "No DataManipulationClient found which can delete the data at location: " + replicaLocation);
   }
 
-  public void withCopierOptions(Map<String, Object> copierOptions) {
-    this.copierOptions = copierOptions;
-  }
-
-  public void withSourceLocation(Path sourceLocation) {
-    this.sourceLocation = sourceLocation.toString();
-  }
 }

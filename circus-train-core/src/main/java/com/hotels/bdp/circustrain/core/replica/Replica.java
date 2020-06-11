@@ -55,12 +55,12 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
 import com.hotels.bdp.circustrain.core.PartitionsAndStatistics;
 import com.hotels.bdp.circustrain.core.TableAndStatistics;
-import com.hotels.bdp.circustrain.core.data.DefaultDataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.core.event.EventUtils;
 import com.hotels.bdp.circustrain.core.replica.hive.AlterTableService;
 import com.hotels.bdp.circustrain.core.replica.hive.DropTableService;
@@ -440,7 +440,7 @@ public class Replica extends HiveEndpoint {
   public void checkIfReplicaCleanupRequired(
       String replicaDatabaseName,
       String replicaTableName,
-      DefaultDataManipulationClientFactoryManager dataManipulationClientFactoryManager) {
+      DataManipulationClientFactory dataManipulationClientFactory) {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
       if (replicationMode == FULL_OVERWRITE) {
         LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
@@ -448,7 +448,7 @@ public class Replica extends HiveEndpoint {
         try {
             dropTableService
               .dropTableAndData(client, replicaDatabaseName, replicaTableName,
-                  dataManipulationClientFactoryManager);
+                  dataManipulationClientFactory);
         } catch (Exception e) {
           LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
         }

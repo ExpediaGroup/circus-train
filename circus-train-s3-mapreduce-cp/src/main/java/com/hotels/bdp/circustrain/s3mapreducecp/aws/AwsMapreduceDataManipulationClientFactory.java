@@ -29,16 +29,14 @@ import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
+import com.hotels.bdp.circustrain.aws.S3Schemes;
 
 @Profile({ Modules.REPLICATION })
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE - 10)
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
 public class AwsMapreduceDataManipulationClientFactory implements DataManipulationClientFactory {
 
   private AwsS3ClientFactory s3ClientFactory;
-
-  private final String S3_LOCATION = "s3";
-  private final String HDFS_LOCATION = "hdfs";
 
   private Configuration conf;
 
@@ -55,11 +53,15 @@ public class AwsMapreduceDataManipulationClientFactory implements DataManipulati
   }
 
   /**
-   * Checks that the source is an hdfs location and replica location is in S3.
+   * Supports copying from hdfs/ a file to s3.
    */
   @Override
-  public boolean supportsDeletion(String source, String replica) {
-    return (source.toLowerCase().startsWith(HDFS_LOCATION) && replica.toLowerCase().startsWith(S3_LOCATION));
+  public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
+
+    System.out.println("source is s3: " + S3Schemes.isS3Scheme(sourceScheme));
+    System.out.println("replica is s3: " + S3Schemes.isS3Scheme(replicaScheme));
+
+    return !S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
   }
 
   // The hdfs -> s3 client doesn't need to use the copier options.

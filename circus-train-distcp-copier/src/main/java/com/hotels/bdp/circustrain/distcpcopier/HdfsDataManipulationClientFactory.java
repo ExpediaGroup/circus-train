@@ -31,12 +31,10 @@ import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 
 @Profile({ Modules.REPLICATION })
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE - 10)
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class HdfsDataManipulationClientFactory implements DataManipulationClientFactory {
 
   private Configuration conf;
-
-  private final String HDFS_LOCATION = "hdfs";
 
   @Autowired
   public HdfsDataManipulationClientFactory(@Value("#{replicaHiveConf}") Configuration conf) {
@@ -50,12 +48,11 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
   }
 
   /**
-   * Checks that the replica location is an hdfs location. This will delete replica data whether it has been replicated
-   * from s3 or hdfs.
+   * This will delete replica data whether it has been replicated from s3 or hdfs.
    */
   @Override
-  public boolean supportsDeletion(String source, String replica) {
-    return (replica.toLowerCase().startsWith(HDFS_LOCATION));
+  public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
+    return true;
   }
 
   // The HDFS client doesn't need to use the copier options.
