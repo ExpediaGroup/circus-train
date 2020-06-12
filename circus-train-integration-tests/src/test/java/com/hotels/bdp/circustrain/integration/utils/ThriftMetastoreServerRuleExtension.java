@@ -23,8 +23,7 @@ import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnitRule {
   private final HiveConf hiveConf;
 
-  public ThriftMetastoreServerRuleExtension(String database, HiveConf hiveConf) {
-    super(database, null);
+  public ThriftMetastoreServerRuleExtension(HiveConf hiveConf) {
     this.hiveConf = hiveConf;
   }
 
@@ -39,10 +38,10 @@ public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnit
   @Override
   public void beforeTest() throws Throwable {
     // Override with values given in the hiveConf.
-    conf().setVar(ConfVars.METASTORECONNECTURLKEY, hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
-    conf().setVar(ConfVars.METASTORE_CONNECTION_DRIVER, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
-    conf().setVar(ConfVars.METASTORE_CONNECTION_USER_NAME, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
-    conf().setVar(ConfVars.METASTOREPWD, hiveConf.getVar(ConfVars.METASTOREPWD));
+    core.setHiveVar(ConfVars.METASTORECONNECTURLKEY, hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
+    core.setHiveVar(ConfVars.METASTORE_CONNECTION_DRIVER, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
+    core.setHiveVar(ConfVars.METASTORE_CONNECTION_USER_NAME, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
+    core.setHiveVar(ConfVars.METASTOREPWD, hiveConf.getVar(ConfVars.METASTOREPWD));
     super.beforeTest();
   }
 

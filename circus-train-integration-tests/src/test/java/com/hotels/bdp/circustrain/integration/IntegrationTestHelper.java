@@ -35,6 +35,8 @@ import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat;
+import org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat;
 import org.apache.hadoop.hive.serde2.avro.AvroObjectInspectorGenerator;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetInputFormat;
@@ -92,6 +94,8 @@ public class IntegrationTestHelper {
 
   Table createParquetPartitionedTable(
           URI tableUri,
+          String database,
+          String table,
           Schema schema,
           String fieldName,
           Object fieldData,
@@ -104,14 +108,14 @@ public class IntegrationTestHelper {
       ));
     }
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
-    Table table = TestUtils
-            .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
-                    "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
-                    ParquetOutputFormat.class.getName());
+    Table parquetTable = TestUtils
+            .createPartitionedTable(metaStoreClient, database, table, tableUri, columns, partitionKeys,
+                    "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", MapredParquetInputFormat.class.getName(),
+                    MapredParquetOutputFormat.class.getName());
     URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldName, fieldData);
-    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
+    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(parquetTable,
             Arrays.asList(Integer.toString(version)), partition)));
-    return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+    return metaStoreClient.getTable(database, table);
   }
 
   URI createData(

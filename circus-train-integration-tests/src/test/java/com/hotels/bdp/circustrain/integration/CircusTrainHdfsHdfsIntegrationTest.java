@@ -1429,6 +1429,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
     Table replicaTable = replicaHelper.createParquetPartitionedTable(
         toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        DATABASE,
+        PARTITIONED_TABLE,
         schema,
         EVOLUTION_COLUMN,
         structData,
@@ -1464,6 +1466,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
 
     Table table = helper.createParquetPartitionedTable(
         toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        DATABASE,
+        PARTITIONED_TABLE,
         schemaV2,
         EVOLUTION_COLUMN,
         structData,
