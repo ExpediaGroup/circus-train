@@ -17,12 +17,12 @@ package com.hotels.bdp.circustrain.api.data;
 
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
+
 public interface DataManipulationClientFactory {
 
-  DataManipulationClient newInstance(String path);
+  DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions);
 
   boolean supportsSchemes(String sourceScheme, String replicaScheme);
-
-  void withCopierOptions(Map<String, Object> copierOptions);
 
 }

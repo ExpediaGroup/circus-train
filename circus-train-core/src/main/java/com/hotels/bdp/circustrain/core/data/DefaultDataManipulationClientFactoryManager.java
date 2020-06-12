@@ -39,6 +39,7 @@ import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
 public class DefaultDataManipulationClientFactoryManager implements DataManipulationClientFactoryManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultDataManipulationClientFactoryManager.class);
+  private static final String CLIENT_MANIPULATION_FACTORY_CLASS = "client-manipulation-factory-class";
 
   private List<DataManipulationClientFactory> clientFactories;
 
@@ -56,19 +57,33 @@ public class DefaultDataManipulationClientFactoryManager implements DataManipula
   }
 
   @Override
-  public DataManipulationClientFactory getClientForPath(
+  public DataManipulationClientFactory getClientFactory(
       Path sourceTableLocation,
       Path replicaTableLocation,
       Map<String, Object> copierOptions) {
+    System.out.println("here");
     String replicaLocation = replicaTableLocation.toUri().getScheme();
     String sourceLocation = sourceTableLocation.toUri().getScheme();
-    for (DataManipulationClientFactory clientFactory : clientFactories) {
-      if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
-        LOG
-            .debug("Found client factory {} for cleanup at location {}.", clientFactory.getClass().getName(),
-                replicaLocation);
-        clientFactory.withCopierOptions(copierOptions);
-        return clientFactory;
+
+    // check to see if client factory option has been overridden in the copier options
+    System.out.println("copier options: " + copierOptions);
+    if (copierOptions.containsKey(CLIENT_MANIPULATION_FACTORY_CLASS)) {
+      System.out.println("checking");
+      for (DataManipulationClientFactory clientFactory : clientFactories) {
+        final String clientFactoryClassName = clientFactory.getClass().getName();
+        if (clientFactoryClassName.equals(copierOptions.get(CLIENT_MANIPULATION_FACTORY_CLASS).toString())) {
+          LOG.debug("Found ClientFactory '{}' using config", clientFactoryClassName);
+          return clientFactory;
+        }
+      }
+    } else {
+      for (DataManipulationClientFactory clientFactory : clientFactories) {
+        if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
+          LOG
+              .debug("Found client factory {} for cleanup at location {}.", clientFactory.getClass().getName(),
+                  replicaLocation);
+          return clientFactory;
+        }
       }
     }
     throw new UnsupportedOperationException(

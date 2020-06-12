@@ -81,7 +81,7 @@ import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
@@ -126,7 +126,7 @@ public class ReplicaTest {
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
   private @Mock AlterTableService alterTableService;
-  private @Mock DataManipulationClientFactory clientFactory;
+  private @Mock DataManipulationClient dataManipulationClient;
   private @Mock DropTableService dropTableService;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
@@ -356,7 +356,7 @@ public class ReplicaTest {
     tableReplication.setReplicationMode(FULL_OVERWRITE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, clientFactory);
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
     verify(mockMetaStoreClient).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
@@ -366,7 +366,7 @@ public class ReplicaTest {
     tableReplication.setReplicationMode(FULL_OVERWRITE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, clientFactory);
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
@@ -382,7 +382,7 @@ public class ReplicaTest {
     tableReplication.setReplicationMode(FULL);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, clientFactory);
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
@@ -393,7 +393,7 @@ public class ReplicaTest {
     tableReplication.setReplicationMode(METADATA_MIRROR);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, clientFactory);
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
@@ -404,7 +404,7 @@ public class ReplicaTest {
     tableReplication.setReplicationMode(METADATA_UPDATE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, clientFactory);
+    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 

@@ -250,7 +250,7 @@ public class CircusTrainTest {
   static class TestDataManipulationClientFactory implements DataManipulationClientFactory {
 
     @Override
-    public DataManipulationClient newInstance(String path) {
+    public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
       return new TestDataManipulationClient();
     }
 
@@ -258,9 +258,6 @@ public class CircusTrainTest {
     public boolean supportsSchemes(String sourceLocation, String targetLocation) {
       return true;
     }
-
-    @Override
-    public void withCopierOptions(Map<String, Object> copierOptions) {}
 
   }
 

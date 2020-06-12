@@ -31,6 +31,7 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
@@ -129,8 +130,9 @@ class PartitionedTableReplication implements Replication {
           metrics = copier.copy();
 
           DataManipulationClientFactory clientFactory = clientFactoryManager
-              .getClientForPath(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
-          replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, clientFactory);
+              .getClientFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
+          DataManipulationClient client = clientFactory.newInstance(replicaPartitionBaseLocation, copierOptions);
+          replica.checkIfReplicaCleanupRequired(replicaDatabaseName, replicaTableName, client);
         } finally {
           copierListener.copierEnd(metrics);
         }

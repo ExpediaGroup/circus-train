@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.distcpcopier;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -41,9 +42,9 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
     this.conf = conf;
   }
 
-  // The HDFS client doesn't need to use the path.
+  // The HDFS client doesn't need to use the path or copierOptions.
   @Override
-  public DataManipulationClient newInstance(String path) {
+  public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
     return new HdfsDataManipulationClient(conf);
   }
 
@@ -54,9 +55,5 @@ public class HdfsDataManipulationClientFactory implements DataManipulationClient
   public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
     return true;
   }
-
-  // The HDFS client doesn't need to use the copier options.
-  @Override
-  public void withCopierOptions(Map<String, Object> copierOptions) {}
 
 }

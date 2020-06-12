@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
@@ -59,15 +58,13 @@ public class DropTableService {
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName,
-      DataManipulationClientFactory dataManipulationClientFactory)
+      DataManipulationClient dataManipulationClient)
     throws TException {
     LOG.debug("Dropping table {}.{} and its data.", databaseName, tableName);
     Table table = getTable(client, databaseName, tableName);
 
     if (table != null) {
       String replicaLocation = table.getSd().getLocation();
-      DataManipulationClient dataManipulationClient = dataManipulationClientFactory.newInstance(replicaLocation);
-
       if (table.getPartitionKeysSize() == 0) {
         deleteData(dataManipulationClient, replicaLocation);
       } else {

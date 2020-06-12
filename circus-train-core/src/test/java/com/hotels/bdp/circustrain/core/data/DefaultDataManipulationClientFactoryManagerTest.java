@@ -15,6 +15,8 @@
  */
 package com.hotels.bdp.circustrain.core.data;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,7 +67,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   @Test
   public void awsClientReturnedForS3S3Copy() {
     replicaLocation = new Path(s3Path);
-    clientFactory = manager.getClientForPath(sourceLocation, replicaLocation, copierOptions);
+    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
     Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isS3S3Client());
   }
@@ -74,7 +76,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   public void awsMapReduceClientReturnedForS3S3Copy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(s3Path);
-    clientFactory = manager.getClientForPath(sourceLocation, replicaLocation, copierOptions);
+    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
     Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isS3MapreduceClient());
   }
@@ -83,15 +85,27 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   public void hdfsClientReturnedForS3S3Copy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(hdfsPath);
-    clientFactory = manager.getClientForPath(sourceLocation, replicaLocation, copierOptions);
+    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
     Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isHdfsClient());
+  }
+
+  @Test
+  public void clientReturnedForCopierOption() {
+    replicaLocation = new Path(hdfsPath);
+    TestDataManipulationClientFactory testFactory = new TestDataManipulationClientFactory();
+    manager = new DefaultDataManipulationClientFactoryManager(Arrays.asList(testFactory));
+    copierOptions.put("client-manipulation-factory-class", testFactory.getClass().getName());
+
+    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+
+    assertEquals(clientFactory, testFactory);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void noSupportingFactory() {
     replicaLocation = new Path("<path>");
-    clientFactory = manager.getClientForPath(sourceLocation, replicaLocation, copierOptions);
+    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
     Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isHdfsClient());
   }
@@ -106,7 +120,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     private final String HDFS_LOCATION = "hdfs";
 
     @Override
-    public DataManipulationClient newInstance(String path) {
+    public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
       return new TestDataManipulationClient();
     }
 
@@ -127,9 +141,6 @@ public class DefaultDataManipulationClientFactoryManagerTest {
       }
       return false;
     }
-
-    @Override
-    public void withCopierOptions(Map<String, Object> copierOptions) {}
 
     private boolean supportsS3ToS3(String sourceLocation, String targetLocation) {
       return sourceLocation.toLowerCase().startsWith(S3_LOCATION)
@@ -169,6 +180,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     public boolean isHdfsClient() {
       return isHdfsClient;
     }
+
   }
 
   class TestDataManipulationClient implements DataManipulationClient {

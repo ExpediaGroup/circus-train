@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
@@ -46,7 +47,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,13 +54,12 @@ public class DropTableServiceTest {
 
   private static final String TABLE_NAME = "table";
   private static final String DB_NAME = "db";
-  private static final String REPLICA_LOCATION = "replica_table_location";
+  private static final Path REPLICA_LOCATION = new Path("replica_table_location");
   private static final String PARTITION_LOCATION = "partition_location";
 
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
-  private @Mock DataManipulationClientFactory clientFactory;
   private @Mock DataManipulationClient dataManipulationClient;
   private @Mock StorageDescriptor storageDescriptor;
 
@@ -75,10 +74,8 @@ public class DropTableServiceTest {
     when(client.getTable(DB_NAME, TABLE_NAME)).thenReturn(table);
 
     storageDescriptor = new StorageDescriptor();
-    storageDescriptor.setLocation(REPLICA_LOCATION);
+    storageDescriptor.setLocation(REPLICA_LOCATION.toString());
     table.setSd(storageDescriptor);
-
-    when(clientFactory.newInstance(REPLICA_LOCATION)).thenReturn(dataManipulationClient);
   }
 
   @Test
@@ -157,24 +154,21 @@ public class DropTableServiceTest {
   public void dropTableAndDataSuccess() throws TException, IOException {
     table.setParameters(Collections.emptyMap());
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(clientFactory).newInstance(REPLICA_LOCATION);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(clientFactory);
   }
 
   @Test
   public void dropTableAndDataTableDoesNotExist() throws TException {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
-    verifyNoMoreInteractions(clientFactory);
   }
 
   @Test
@@ -186,11 +180,10 @@ public class DropTableServiceTest {
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, partitionNames)).thenReturn(partitions);
     table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(clientFactory).newInstance(REPLICA_LOCATION);
     verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
     verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
   }
@@ -213,11 +206,10 @@ public class DropTableServiceTest {
     
     table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, clientFactory);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(clientFactory).newInstance(REPLICA_LOCATION);
     verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
     verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
     verify(dataManipulationClient).delete(PARTITION_LOCATION + "3");

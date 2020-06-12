@@ -20,6 +20,7 @@ import static com.hotels.bdp.circustrain.aws.AmazonS3URIs.toAmazonS3URI;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
@@ -41,17 +42,15 @@ public class AwsS3DataManipulationClientFactory implements DataManipulationClien
 
   private AmazonS3ClientFactory s3ClientFactory;
 
-  private final String S3_LOCATION = "s3";
-  private Map<String, Object> copierOptions;
-
   @Autowired
   public AwsS3DataManipulationClientFactory(AmazonS3ClientFactory s3ClientFactory) {
     this.s3ClientFactory = s3ClientFactory;
   }
 
-  public AwsDataManipulationClient newInstance(String replicaLocation) {
+  @Override
+  public AwsDataManipulationClient newInstance(Path replicaLocation, Map<String, Object> copierOptions) {
     S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(copierOptions);
-    AmazonS3URI replicaLocationUri = toAmazonS3URI(URI.create(replicaLocation));
+    AmazonS3URI replicaLocationUri = toAmazonS3URI(URI.create(replicaLocation.toString()));
     return new AwsDataManipulationClient(s3ClientFactory.newInstance(replicaLocationUri, s3s3CopierOptions));
   }
 
@@ -63,9 +62,5 @@ public class AwsS3DataManipulationClientFactory implements DataManipulationClien
     return S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
   }
 
-  @Override
-  public void withCopierOptions(Map<String, Object> copierOptions) {
-    this.copierOptions = copierOptions;
-  }
 
 }

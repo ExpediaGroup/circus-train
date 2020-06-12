@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.s3mapreducecp.aws;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -48,7 +49,7 @@ public class AwsMapreduceDataManipulationClientFactory implements DataManipulati
 
   // The hdfs -> s3 client doesn't need to use the path for the client.
   @Override
-  public DataManipulationClient newInstance(String path) {
+  public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
     return new AwsDataManipulationClient(s3ClientFactory.newInstance(conf));
   }
 
@@ -57,15 +58,7 @@ public class AwsMapreduceDataManipulationClientFactory implements DataManipulati
    */
   @Override
   public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
-
-    System.out.println("source is s3: " + S3Schemes.isS3Scheme(sourceScheme));
-    System.out.println("replica is s3: " + S3Schemes.isS3Scheme(replicaScheme));
-
     return !S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
   }
-
-  // The hdfs -> s3 client doesn't need to use the copier options.
-  @Override
-  public void withCopierOptions(Map<String, Object> copierOptions) {}
 
 }

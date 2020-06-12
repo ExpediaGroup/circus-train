@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsDataManipulationClientFactoryTest {
+public class AwsMapreduceDataManipulationClientFactoryTest {
 
   private Path sourceLocation;
   private Path replicaLocation;
@@ -55,7 +55,6 @@ public class AwsDataManipulationClientFactoryTest {
     replicaScheme = replicaLocation.toUri().getScheme();
 
     boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    System.out.println(support);
     assertTrue(support);
   }
 
