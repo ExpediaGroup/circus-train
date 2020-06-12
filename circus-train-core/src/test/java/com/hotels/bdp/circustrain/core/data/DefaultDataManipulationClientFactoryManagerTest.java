@@ -73,7 +73,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   }
 
   @Test
-  public void awsMapReduceClientReturnedForS3S3Copy() {
+  public void awsMapReduceClientReturnedForHdfsS3Copy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(s3Path);
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
@@ -82,7 +82,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   }
 
   @Test
-  public void hdfsClientReturnedForS3S3Copy() {
+  public void hdfsClientReturnedForHdfsCopy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(hdfsPath);
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
@@ -91,7 +91,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
   }
 
   @Test
-  public void clientReturnedForCopierOption() {
+  public void clientReturnedFromCopierOption() {
     replicaLocation = new Path(hdfsPath);
     TestDataManipulationClientFactory testFactory = new TestDataManipulationClientFactory();
     manager = new DefaultDataManipulationClientFactoryManager(Arrays.asList(testFactory));

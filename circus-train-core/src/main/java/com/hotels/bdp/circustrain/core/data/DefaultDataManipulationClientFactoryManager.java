@@ -61,14 +61,10 @@ public class DefaultDataManipulationClientFactoryManager implements DataManipula
       Path sourceTableLocation,
       Path replicaTableLocation,
       Map<String, Object> copierOptions) {
-    System.out.println("here");
     String replicaLocation = replicaTableLocation.toUri().getScheme();
     String sourceLocation = sourceTableLocation.toUri().getScheme();
 
-    // check to see if client factory option has been overridden in the copier options
-    System.out.println("copier options: " + copierOptions);
     if (copierOptions.containsKey(CLIENT_MANIPULATION_FACTORY_CLASS)) {
-      System.out.println("checking");
       for (DataManipulationClientFactory clientFactory : clientFactories) {
         final String clientFactoryClassName = clientFactory.getClass().getName();
         if (clientFactoryClassName.equals(copierOptions.get(CLIENT_MANIPULATION_FACTORY_CLASS).toString())) {
