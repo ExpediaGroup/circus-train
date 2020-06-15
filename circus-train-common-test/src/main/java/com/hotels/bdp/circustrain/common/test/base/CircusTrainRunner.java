@@ -113,7 +113,7 @@ public class CircusTrainRunner {
     }
 
     public Builder replicaDatabaseName(String replicaDatabaseName) {
-      replicaDatabaseName = replicaDatabaseName;
+      this.replicaDatabaseName = replicaDatabaseName;
       return this;
     }
 
