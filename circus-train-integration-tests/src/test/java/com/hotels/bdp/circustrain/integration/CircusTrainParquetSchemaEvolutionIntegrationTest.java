@@ -442,6 +442,38 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
     runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
   }
 
+  //NOT SUPPORTED
+  @Test
+  public void demoteDoubleToLong() throws Exception {
+    Schema schema = getSchemaFieldAssembler().requiredDouble(EVOLUTION_COLUMN)
+        .endRecord();
+    Schema evolvedSchema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
+        .endRecord();
+    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 1d);
+    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 2l);
+    List<String> expectedData = Lists.newArrayList(
+        "1\t1.0\t1",
+        "2\t2.0\t2"
+    );
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+  }
+
+  //NOT SUPPORTED
+  @Test
+  public void demoteFloatToLong() throws Exception {
+    Schema schema = getSchemaFieldAssembler().requiredFloat(EVOLUTION_COLUMN)
+        .endRecord();
+    Schema evolvedSchema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
+        .endRecord();
+    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 1f);
+    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 2l);
+    List<String> expectedData = Lists.newArrayList(
+        "1\t1.0\t1",
+        "2\t2.0\t2"
+    );
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+  }
+
   @Test
   public void addValueToEnum() throws Exception {
     Schema schema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
