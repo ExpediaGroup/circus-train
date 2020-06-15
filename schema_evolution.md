@@ -10,16 +10,16 @@ Broadly, if your schema change is backwards compatible, Circus Train is likely t
 ## Supported Evolutions (Parquet table format)
 
 Schema Evolution|Supported by Circus Train|Note
-|----|----|----|----|
+|----|----|----|
 Additional field|Yes||
 Removed field|Yes||
 Renamed field|Yes|Replication will succeed, but previous data will remain in the original column name|
 Add default value to field|Yes||
 Remove default value from field|Yes||
 Make field nullable|Yes||
-Make field union|Unknown|_union type not supported by Parquet_|
-Add type to union|Unknown|_union type not supported by Parquet_|
-Remove type from union|Unknown|_union type not supported by Parquet_|
+Make field union|Unknown|<em>union type not supported by Parquet</em>|
+Add type to union|Unknown|<em>union type not supported by Parquet</em>|
+Remove type from union|Unknown|<em>union type not supported by Parquet</em>|
 Promote int to long, float or double |Yes||
 Promote long to float or double |Yes||
 Promote float to double |Yes||
