@@ -27,7 +27,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -42,7 +44,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -120,7 +121,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tNULL\t1",
         "2\tafter\t2"
     );
-    runTest(schema, evolvedSchema, new FieldDataWrapper(), afterEvolution, getAssertion(evolvedSchema, expectedData));
+    runTest(schema, evolvedSchema, new FieldDataWrapper(), afterEvolution);
   }
 
   @Test
@@ -133,7 +134,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1",
         "2\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, new FieldDataWrapper(), getAssertion(evolvedSchema, expectedData));
+    runTest(schema, evolvedSchema, beforeEvolution, new FieldDataWrapper());
   }
 
   // Replication success - old expectedData not "renamed" too
@@ -149,7 +150,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tbefore\t1",
         "2\tafter\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+    
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -164,7 +167,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tbefore\t1",
         "2\tafter\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -179,7 +184,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tbefore\t1",
         "2\tafter\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -198,94 +205,112 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tbefore\t1",
         "2\tNULL\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //Can't read uniontype
   @Test
-  public void makeFieldUnion() throws Exception {
+  public void makeFieldStruct() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredString(EVOLUTION_COLUMN)
         .endRecord();
     Schema evolvedSchema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
         .type()
-        .unionOf()
-        .stringType()
-        .and()
-        .booleanType()
-        .endUnion()
+        .record(EVOLUTION_COLUMN + "_struct")
+        .fields()
+        .requiredString("after_col")
+        .endRecord()
         .noDefault()
         .endRecord();
     FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, "before");
-    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, true);
+    Map<String, String> after = new HashMap<>();
+    after.put("after_col", "after");
+    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, after);
     List<String> expectedData = Lists.newArrayList(
         "1\tbefore\t1",
         "2\ttrue\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //Can't read uniontype
   @Test
-  public void addTypeToUnion() throws Exception {
+  public void addColumnToStruct() throws Exception {
     Schema schema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
         .type()
-        .unionOf()
-        .stringType()
-        .and()
-        .booleanType()
-        .endUnion()
+        .record(EVOLUTION_COLUMN + "_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .endRecord()
         .noDefault()
         .endRecord();
     Schema evolvedSchema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
         .type()
-        .unionOf()
-        .stringType()
-        .and()
-        .booleanType()
-        .and()
-        .intType()
-        .endUnion()
+        .record(EVOLUTION_COLUMN + "_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .requiredString("dob")
+        .endRecord()
         .noDefault()
         .endRecord();
-    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, "before");
-    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 1);
+    Map<String, String> before = new HashMap<>();
+    before.put("name", "lisa");
+    before.put("city", "blackpool");
+    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, before);
+    Map<String, String> after = new HashMap<>();
+    after.put("name", "adam");
+    after.put("city", "london");
+    after.put("dob", "22/09/1992");
+    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, after);
     List<String> expectedData = Lists.newArrayList(
-        "1\tbefore\t1",
-        "2\t1\t2"
+        "1\t{\"name\":\"lisa\",\"city\":\"blackpool\",\"dob\":null}\t1",
+        "2\t{\"name\":\"adam\",\"city\":\"london\",\"dob\":\"22/09/1992\"}\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //Can't read uniontype
   @Test
-  public void removeTypeFromUnion() throws Exception {
+  public void removeColumnFromStruct() throws Exception {
     Schema schema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
         .type()
-        .unionOf()
-        .stringType()
-        .and()
-        .booleanType()
-        .and()
-        .intType()
-        .endUnion()
+        .record(EVOLUTION_COLUMN + "_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .requiredString("dob")
+        .endRecord()
         .noDefault()
         .endRecord();
     Schema evolvedSchema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
         .type()
-        .unionOf()
-        .stringType()
-        .and()
-        .booleanType()
-        .endUnion()
+        .record(EVOLUTION_COLUMN + "_struct")
+        .fields()
+        .requiredString("name")
+        .requiredString("city")
+        .endRecord()
         .noDefault()
         .endRecord();
-    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, 1);
-    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, "after");
+    Map<String, String> before = new HashMap<>();
+    before.put("name", "lisa");
+    before.put("city", "blackpool");
+    before.put("dob", "22/09/1992");
+    FieldDataWrapper beforeEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, before);
+    Map<String, String> after = new HashMap<>();
+    after.put("name", "adam");
+    after.put("city", "london");
+    FieldDataWrapper afterEvolution = new FieldDataWrapper(EVOLUTION_COLUMN, after);
     List<String> expectedData = Lists.newArrayList(
-        "1\t1\t1",
-        "2\tafter\t2"
+        "1\t{\"name\":\"lisa\",\"city\":\"blackpool\"}\t1",
+        "2\t{\"name\":\"adam\",\"city\":\"london\"}\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -300,7 +325,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -315,7 +342,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -330,7 +359,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -345,7 +376,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -360,7 +393,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -375,11 +410,12 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteLongToInt() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
         .endRecord();
@@ -391,11 +427,13 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1\t1",
         "2\t2\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteDoubleToFloat() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
         .endRecord();
@@ -407,11 +445,12 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteDoubleToInt() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
         .endRecord();
@@ -423,11 +462,12 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1\t1",
         "2\t2\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteFloatToInt() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredLong(EVOLUTION_COLUMN)
         .endRecord();
@@ -439,11 +479,12 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1\t1",
         "2\t2\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteDoubleToLong() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredDouble(EVOLUTION_COLUMN)
         .endRecord();
@@ -455,11 +496,12 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  //NOT SUPPORTED
-  @Test
+  @Test(expected = Exception.class)
   public void demoteFloatToLong() throws Exception {
     Schema schema = getSchemaFieldAssembler().requiredFloat(EVOLUTION_COLUMN)
         .endRecord();
@@ -471,7 +513,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\t1.0\t1",
         "2\t2.0\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -494,10 +538,11 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tFIRST\t1",
         "2\tSECOND\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
-  // Seems to still allow removed enum value to be inserted
   @Test
   public void removeValueFromEnum() throws Exception {
     Schema schema = getSchemaFieldAssembler().name(EVOLUTION_COLUMN)
@@ -518,7 +563,9 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tSECOND\t1",
         "2\tFIRST\t2"
     );
-    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution, getAssertion(evolvedSchema, expectedData));
+
+    runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   private static class FieldDataWrapper {
@@ -547,8 +594,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
       Schema schema,
       Schema evolvedSchema,
       FieldDataWrapper beforeEvolution,
-      FieldDataWrapper afterEvolution,
-      Assertion assertion) throws Exception {
+      FieldDataWrapper afterEvolution) throws Exception {
     // Create initial replica table with the original schema (setting a Circus Train event id manually).
     Table replicaTable = helper.createParquetPartitionedTable(
         toUri(replicaWarehouseUri, REPLICA_DB, TABLE),
@@ -591,18 +637,19 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
     // Set up the asserts
     exit.expectSystemExitWithStatus(0);
-    exit.checkAssertionAfterwards(assertion);
 
     // Do the replication
     File config = dataFolder.getFile("partitioned-single-table-one-partition.yml");
     runner.run(config.getAbsolutePath());
   }
 
-  private Assertion getAssertion(Schema schema, List<String> expectedData) {
-    return () -> {
+  private void runDataChecks(Schema schema, List<String> expectedData) throws Exception {
+    try {
       assertTable(thriftMetaStoreRule.newClient(), schema, SOURCE_DB, TABLE, expectedData);
       assertTable(thriftMetaStoreRule.newClient(), schema, REPLICA_DB, TABLE, expectedData);
-    };
+    } catch (Exception e) {
+      throw new Exception("Test failed", e);
+    }
   }
 
   private void assertTable(HiveMetaStoreClient client, Schema schema, String database, String table,
@@ -622,10 +669,6 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
     assertThat(partitions.size(), is(2));
     List<String> data = shell.executeQuery("select * from " + database + "." + table);
     assertThat(data.size(), is(expectedData.size()));
-    System.out.println("DATA: ");
-    System.out.println(Arrays.toString(data.toArray()));
-    System.out.println("EXPECTED DATA: ");
-    System.out.println(Arrays.toString(expectedData.toArray()));
     assertThat(data.containsAll(expectedData), is(true));
   }
 
