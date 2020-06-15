@@ -636,6 +636,7 @@ This feature is a part of Circus Train and no further configuration is required.
 * You will need to have the relevant permissions to create snapshots on the source if you have this feature enabled.
 * Removal of partitions is not replicated - i.e. if you remove a partition on the source it will remain on the replica.
 * If replicating to/from AWS ensure that the EMR master node is in your 'known_hosts' file.
+* Circus Train generally supports backwards compatible schema evolutions, for more information on how Circus Train handles schema evolution see this [readme](SCHEMA_EVOLUTION.md).
 
 ### Notes on Hadoop S3 FileSystems
 The Hadoop S3 `FileSystem` landscape is chaotic and confusing. What truths apply in a vanilla Apache Hadoop cluster do not necessarily hold in an EMR cluster. Protocols map to different implementations in different environments, and implementations can lack necessary features. For Circus Train we are interested in the following properties:
