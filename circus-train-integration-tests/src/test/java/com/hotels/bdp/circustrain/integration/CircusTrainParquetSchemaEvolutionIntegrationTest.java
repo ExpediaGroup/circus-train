@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -60,9 +61,11 @@ import com.klarna.hiverunner.annotations.HiveSQL;
 
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
+import com.hotels.bdp.circustrain.integration.utils.SchemaEvolution;
 import com.hotels.bdp.circustrain.integration.utils.ThriftMetastoreServerRuleExtension;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
+@Category(SchemaEvolution.class)
 @RunWith(StandaloneHiveRunner.class)
 public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 

@@ -28,3 +28,9 @@ Demote double or float to long|No*|Replication will succeed, but a `ClassCastExc
 Demote double to float |No*|Replication will succeed, but a `ClassCastException` will be thrown when reading the data|
 Add value to enum |Yes||
 Remove value from enum |Yes*|This seems to still allow the removed enum to be inserted in to the table|
+
+## Tests
+
+A series of integration tests support the findings above. Maven does not run them by default. To run the tests, activate the `schema-evolution` group from within the `circus-train-integration-tests` package:
+
+    mvn clean test -Pschema-evolution
