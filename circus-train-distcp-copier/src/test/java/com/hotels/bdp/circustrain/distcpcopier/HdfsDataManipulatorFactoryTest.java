@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HdfsDataManipulationClientFactoryTest {
+public class HdfsDataManipulatorFactoryTest {
 
   private String sourceLocation;
   private String replicaLocation;
@@ -35,22 +35,21 @@ public class HdfsDataManipulationClientFactoryTest {
 
   private @Mock Configuration conf;
 
-  private HdfsDataManipulationClientFactory clientFactory;
+  private HdfsDataManipulatorFactory dataManipulatorFactory;
 
   @Before
   public void setup() {
-    clientFactory = new HdfsDataManipulationClientFactory(conf);
+    dataManipulatorFactory = new HdfsDataManipulatorFactory(conf);
   }
 
-  // This client factory will technically support all schemes including replicating to and from s3. However the s3
-  // client factories take higher precedence so this client factory wont be used for s3.
+  // This manipulator factory will technically support all schemes including replicating to and from s3. However the s3
+  // manipulator factories take higher precedence so this client factory wont be used for s3.
   @Test
   public void checkSupportsHdfs() {
     sourceLocation = hdfsPath;
     replicaLocation = hdfsPath;
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 
   @Test
@@ -58,8 +57,7 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = hdfsPath.toUpperCase();
     replicaLocation = hdfsPath.toUpperCase();
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 
   @Test
@@ -67,8 +65,7 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = s3Path;
     replicaLocation = hdfsPath;
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 
   @Test
@@ -76,8 +73,7 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = s3Path;
     replicaLocation = s3Path;
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 
   @Test
@@ -85,8 +81,7 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = hdfsPath;
     replicaLocation = s3Path;
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 
   @Test
@@ -94,7 +89,6 @@ public class HdfsDataManipulationClientFactoryTest {
     sourceLocation = "<path>";
     replicaLocation = "<path>";
 
-    boolean support = clientFactory.supportsSchemes(sourceLocation, replicaLocation);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceLocation, replicaLocation));
   }
 }

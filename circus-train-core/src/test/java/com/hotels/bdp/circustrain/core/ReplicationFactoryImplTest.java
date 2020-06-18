@@ -45,7 +45,7 @@ import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
@@ -76,7 +76,7 @@ public class ReplicationFactoryImplTest {
   private @Mock ReplicaFactory replicaFactory;
   private @Mock SourceFactory sourceFactory;
   private @Mock CopierOptions copierOptions;
-  private @Mock DataManipulationClientFactoryManager clientFactoryManager;
+  private @Mock DataManipulatorFactoryManager clientFactoryManager;
   private TableReplication tableReplication;
   private ReplicationFactory factory;
 

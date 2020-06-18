@@ -81,7 +81,7 @@ import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.api.metadata.ColumnStatisticsTransformation;
@@ -126,7 +126,7 @@ public class ReplicaTest {
   private @Mock HousekeepingListener houseKeepingListener;
   private @Mock ReplicaCatalogListener replicaCatalogListener;
   private @Mock AlterTableService alterTableService;
-  private @Mock DataManipulationClient dataManipulationClient;
+  private @Mock DataManipulator dataManipulator;
   private @Mock DropTableService dropTableService;
 
   private final ReplicaTableFactory tableFactory = new ReplicaTableFactory(SOURCE_META_STORE_URIS,
@@ -192,7 +192,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaTableSucceeds() throws TException, IOException {
+  public void alteringExistingUnpartitionedReplicaTableSucceeds() throws Exception, IOException {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
@@ -201,7 +201,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaTableWithNoStatsSucceeds() throws TException, IOException {
+  public void alteringExistingUnpartitionedReplicaTableWithNoStatsSucceeds() throws Exception, IOException {
     tableAndStatistics = new TableAndStatistics(sourceTable, null);
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
@@ -211,7 +211,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaViewSucceeds() throws TException, IOException {
+  public void alteringExistingUnpartitionedReplicaViewSucceeds() throws Exception, IOException {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
@@ -350,61 +350,61 @@ public class ReplicaTest {
   }
 
   @Test
-  public void validateFullOverwriteReplicationOnExistingTableSucceeds() throws TException {
+  public void validateFullOverwriteReplicationOnExistingTableSucceeds() throws Exception {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
     tableReplication.setReplicationMode(FULL_OVERWRITE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    replica.cleanupReplicaTableIfRequired(DB_NAME, TABLE_NAME, dataManipulator);
     verify(mockMetaStoreClient).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void validateFullOverwriteReplicationWithoutExistingTableIsNotDropped() throws MetaException, TException {
+  public void validateFullOverwriteReplicationWithoutExistingTableIsNotDropped() throws MetaException, Exception {
     when(mockMetaStoreClient.getTable(DB_NAME, TABLE_NAME)).thenReturn(null);
     tableReplication.setReplicationMode(FULL_OVERWRITE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    replica.cleanupReplicaTableIfRequired(DB_NAME, TABLE_NAME, dataManipulator);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void validateExistingReplicaNotDroppedForFullReplicationType() throws TException {
+  public void validateExistingReplicaNotDroppedForFullReplicationType() throws Exception {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
     tableReplication.setReplicationMode(FULL);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    replica.cleanupReplicaTableIfRequired(DB_NAME, TABLE_NAME, dataManipulator);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void validateExistingReplicaNotDroppedForMetadataMirrorReplicationType() throws TException {
+  public void validateExistingReplicaNotDroppedForMetadataMirrorReplicationType() throws Exception {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
     tableReplication.setReplicationMode(METADATA_MIRROR);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    replica.cleanupReplicaTableIfRequired(DB_NAME, TABLE_NAME, dataManipulator);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void validateExistingReplicaNotDroppedForMetadataUpdateReplicationType() throws TException {
+  public void validateExistingReplicaNotDroppedForMetadataUpdateReplicationType() throws Exception {
     existingReplicaTable.putToParameters(REPLICATION_EVENT.parameterName(), "previousEventId");
     existingReplicaTable.putToParameters(REPLICATION_MODE.parameterName(), FULL.name());
     tableReplication.setReplicationMode(METADATA_UPDATE);
     replica = newReplica(tableReplication);
 
-    replica.checkIfReplicaCleanupRequired(DB_NAME, TABLE_NAME, dataManipulationClient);
+    replica.cleanupReplicaTableIfRequired(DB_NAME, TABLE_NAME, dataManipulator);
     verify(mockMetaStoreClient, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableSucceeds() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableSucceeds() throws Exception, IOException {
     when(mockMetaStoreClient
         .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
             .thenReturn(Arrays.asList(existingPartition));
@@ -420,7 +420,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaViewSucceeds() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaViewSucceeds() throws Exception, IOException {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
     when(mockMetaStoreClient
@@ -477,7 +477,9 @@ public class ReplicaTest {
   }
 
   private void alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(
-          int numTestAlterPartitions, int numTestAddPartitions) throws TException, IOException {
+      int numTestAlterPartitions,
+      int numTestAddPartitions)
+    throws IOException, Exception {
     List<Partition> existingPartitions = new ArrayList<>();
     List<Partition> newPartitions = new ArrayList<>();
     List<ColumnStatistics> modifiedPartitionStatisticsList = new ArrayList<>();
@@ -616,42 +618,49 @@ public class ReplicaTest {
 
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_0() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_0()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(0,0);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_1() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_0_1()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(0,1);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_0() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_0()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(1,0);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_1() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_1_1()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(1,1);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_boundaries() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_boundaries()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(TEST_PARTITION_BATCH_SIZE,TEST_PARTITION_BATCH_SIZE);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_many() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_many()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(17,28);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_lots() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaTableWithNewPartitionsInBatchesSucceeds_lots()
+    throws Exception, IOException {
     alterExistingPartitionedReplicaTableWithNewPartitionsInBatches(172,333);
   }
 
   @Test
-  public void alteringExistingPartitionedReplicaViewWithPartitionsSucceeds() throws TException, IOException {
+  public void alteringExistingPartitionedReplicaViewWithPartitionsSucceeds() throws Exception, IOException {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
     Partition newPartition = newPartition("three", "four");
@@ -719,7 +728,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void updateMetadataCalledWithoutPartitionsDoesNotCleanUpLocations() throws TException, IOException {
+  public void updateMetadataCalledWithoutPartitionsDoesNotCleanUpLocations() throws Exception, IOException {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));

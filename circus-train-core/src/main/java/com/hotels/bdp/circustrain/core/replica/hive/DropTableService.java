@@ -16,9 +16,7 @@
 package com.hotels.bdp.circustrain.core.replica.hive;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.CaseInsensitiveMap;
@@ -28,68 +26,64 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 public class DropTableService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DropTableService.class);
+  private static final Logger log = LoggerFactory.getLogger(DropTableService.class);
   private static final String EXTERNAL_KEY = "EXTERNAL";
   private static final String IS_EXTERNAL = "TRUE";
   private static final short BATCH_SIZE = (short) 10;
 
   /**
    * Removes all parameters from a table before dropping the table.
+   * 
+   * @throws Exception if the table can't be deleted.
    */
-  public void removeTableParamsAndDrop(CloseableMetaStoreClient client, String databaseName, String tableName)
-    throws TException {
+  public void dropTable(CloseableMetaStoreClient client, String databaseName, String tableName) throws Exception {
     Table table = getTable(client, databaseName, tableName);
     if (table != null) {
-      dropTable(client, table, databaseName, tableName);
+      removeTableParamsAndDrop(client, table, databaseName, tableName);
     }
   }
 
   /**
    * Drops the table and its associated data. If the table is unpartitioned the table location is used. If the table is
    * partitioned then the data will be dropped from each partition location.
+   * 
+   * @throws Exception if the table or its data can't be deleted.
    */
   public void dropTableAndData(
       CloseableMetaStoreClient client,
       String databaseName,
       String tableName,
-      DataManipulationClient dataManipulationClient)
-    throws TException {
-    LOG.debug("Dropping table {}.{} and its data.", databaseName, tableName);
+      DataManipulator dataManipulator)
+    throws Exception
+  {
+    log.debug("Dropping table {}.{} and its data.", databaseName, tableName);
     Table table = getTable(client, databaseName, tableName);
 
     if (table != null) {
       String replicaLocation = table.getSd().getLocation();
       if (table.getPartitionKeysSize() == 0) {
-        deleteData(dataManipulationClient, replicaLocation);
+        deleteData(dataManipulator, replicaLocation);
       } else {
-        List<String> partitionLocations = getPartitionLocations(client, table);
-        if (partitionLocations.size() > 0) {
-          deletePartitionData(dataManipulationClient, replicaLocation, partitionLocations);
-        } else {
-          LOG.info("No partitions to delete.");
-        }
+        deletePartitionData(client, table, dataManipulator);
       }
-      dropTable(client, table, databaseName, tableName);
+      removeTableParamsAndDrop(client, table, databaseName, tableName);
     }
   }
 
-  private Table getTable(CloseableMetaStoreClient client, String databaseName, String tableName) throws TException {
-    Table table = null;
-    try {
-      table = client.getTable(databaseName, tableName);
-    } catch (NoSuchObjectException e) {
-      LOG.info("No replica table '" + databaseName + "." + tableName + "' found. Nothing to delete.");
-    }
-    return table;
-  }
-
-  private void dropTable(CloseableMetaStoreClient client, Table table, String databaseName, String tableName)
+  /**
+   * Removes all parameters from a table before dropping the table.
+   */
+  private void removeTableParamsAndDrop(
+      CloseableMetaStoreClient client,
+      Table table,
+      String databaseName,
+      String tableName)
     throws TException {
     Map<String, String> tableParameters = table.getParameters();
     if (tableParameters != null && !tableParameters.isEmpty()) {
@@ -100,35 +94,38 @@ public class DropTableService {
       }
       client.alter_table(databaseName, tableName, table);
     }
-    LOG.info("Dropping table '{}.{}'.", databaseName, tableName);
+    log.info("Dropping table '{}.{}'.", databaseName, tableName);
     client.dropTable(databaseName, tableName, false, true);
   }
 
-  private void deleteData(DataManipulationClient dataManipulationClient, String replicaDataLocation) {
+  private void deleteData(DataManipulator dataManipulator, String replicaDataLocation) throws Exception {
     try {
-      LOG.info("Dropping table data from location: {}.", replicaDataLocation);
-      boolean dataDeleted = dataManipulationClient.delete(replicaDataLocation);
-      LOG.info("Data deleted: {}.", dataDeleted);
+      log.debug("Deleting table data from location: {}.", replicaDataLocation);
+      dataManipulator.delete(replicaDataLocation);
     } catch (IOException e) {
-      LOG.info("Could not drop replica table data at location:{}.", replicaDataLocation);
+      throw new Exception("Error deleting data for existing replica table.", e);
     }
   }
 
-  private void deletePartitionData(
-      DataManipulationClient dataManipulationClient,
-      String replicaTableLocation,
-      List<String> replicaPartitionLocations) {
-    try {
-      LOG.info("Dropping partition data from base location: {}.", replicaTableLocation);
-      for (String location : replicaPartitionLocations) {
-        boolean deleted = dataManipulationClient.delete(location);
-        LOG.debug("Attempted to delete data from location: {}. Successful deletion = {}.", location, deleted);
-      }
-    } catch (IOException e) {
-      LOG.info("Could not drop replica partition data at location:{}.", replicaTableLocation);
-    } catch (UnsupportedOperationException e) {
-      LOG.info(e.getMessage());
+  private void deletePartitionData(CloseableMetaStoreClient client, Table table, DataManipulator dataManipulator)
+    throws Exception {
+    String location;
+    PartitionIterator partitionIterator = new PartitionIterator(client, table, BATCH_SIZE);
+    while (partitionIterator.hasNext()) {
+      location = partitionIterator.next().getSd().getLocation();
+      deleteData(dataManipulator, location);
     }
+  }
+
+  private Table getTable(CloseableMetaStoreClient client, String databaseName, String tableName)
+    throws Exception {
+    Table table = null;
+    try {
+      table = client.getTable(databaseName, tableName);
+    } catch (NoSuchObjectException e) {
+      log.info("No replica table '" + databaseName + "." + tableName + "' found. Nothing to delete.");
+    }
+    return table;
   }
 
   private boolean isExternal(Map<String, String> tableParameters) {
@@ -136,16 +133,4 @@ public class DropTableService {
     return IS_EXTERNAL.equalsIgnoreCase((String) caseInsensitiveParams.get(EXTERNAL_KEY));
   }
 
-  private List<String> getPartitionLocations(CloseableMetaStoreClient client, Table table) {
-    List<String> locations = new ArrayList<>();
-    try {
-      PartitionIterator partitionIterator = new PartitionIterator(client, table, BATCH_SIZE);
-      while (partitionIterator.hasNext()) {
-        locations.add(partitionIterator.next().getSd().getLocation());
-      }
-    } catch (TException e) {
-      LOG.info("Could not list partitions for {}.{}.", table.getDbName(), table.getTableName());
-    }
-    return locations;
-  }
 }

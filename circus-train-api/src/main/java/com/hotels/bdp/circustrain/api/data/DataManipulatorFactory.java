@@ -19,9 +19,9 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 
-public interface DataManipulationClientFactory {
+public interface DataManipulatorFactory {
 
-  DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions);
+  DataManipulator newInstance(Path path, Map<String, Object> copierOptions);
 
   boolean supportsSchemes(String sourceScheme, String replicaScheme);
 

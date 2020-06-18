@@ -50,8 +50,8 @@ import com.google.common.io.Files;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 import com.hotels.test.extension.TestLocomotiveListener;
@@ -247,11 +247,11 @@ public class CircusTrainTest {
   }
 
   @Component
-  static class TestDataManipulationClientFactory implements DataManipulationClientFactory {
+  static class TestDataManipulatorFactory implements DataManipulatorFactory {
 
     @Override
-    public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
-      return new TestDataManipulationClient();
+    public DataManipulator newInstance(Path path, Map<String, Object> copierOptions) {
+      return new TestDataManipulator();
     }
 
     @Override
@@ -261,7 +261,7 @@ public class CircusTrainTest {
 
   }
 
-  static class TestDataManipulationClient implements DataManipulationClient {
+  static class TestDataManipulator implements DataManipulator {
 
     @Override
     public boolean delete(String path) throws IOException {

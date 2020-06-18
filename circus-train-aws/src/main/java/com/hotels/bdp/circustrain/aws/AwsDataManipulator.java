@@ -33,26 +33,26 @@ import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 
-public class AwsDataManipulationClient implements DataManipulationClient {
+public class AwsDataManipulator implements DataManipulator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AwsDataManipulationClient.class);
+  private static final Logger log = LoggerFactory.getLogger(AwsDataManipulator.class);
 
   private AmazonS3 s3Client;
 
-  public AwsDataManipulationClient(AmazonS3 s3Client) {
+  public AwsDataManipulator(AmazonS3 s3Client) {
     this.s3Client = s3Client;
   }
 
   @Override
   public boolean delete(String path) {
-    LOG.info("Deleting all data at location: {}", path);
+    log.info("Deleting all data at location: {}", path);
     AmazonS3URI uri = toAmazonS3URI(URI.create(path));
     String bucket = uri.getBucket();
 
     List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
-    LOG.debug("Deleting keys: {}", keysToDelete.stream().map(k -> k.getKey()).collect(Collectors.toList()));
+    log.debug("Deleting keys: {}", keysToDelete.stream().map(k -> k.getKey()).collect(Collectors.toList()));
 
     DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
     return successfulDeletion(result, keysToDelete.size());

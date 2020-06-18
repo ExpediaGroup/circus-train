@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsDataManipulationClientFactoryTest {
+public class AwsDataManipulatorFactoryTest {
 
   private Path sourceLocation;
   private Path replicaLocation;
@@ -41,11 +41,11 @@ public class AwsDataManipulationClientFactoryTest {
   private @Mock Configuration conf;
   private @Mock AmazonS3ClientFactory s3ClientFactory;
 
-  private AwsS3DataManipulationClientFactory clientFactory;
+  private AwsS3DataManipulatorFactory dataManipulatorFactory;
 
   @Before
   public void setup() {
-    clientFactory = new AwsS3DataManipulationClientFactory(s3ClientFactory);
+    dataManipulatorFactory = new AwsS3DataManipulatorFactory(s3ClientFactory);
   }
 
   @Test
@@ -55,8 +55,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -66,9 +65,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -78,8 +75,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -89,8 +85,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
   
   @Test
@@ -100,8 +95,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -112,8 +106,7 @@ public class AwsDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
 }

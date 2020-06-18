@@ -38,8 +38,9 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.core.replica.Replica;
@@ -80,9 +81,11 @@ public class UnpartitionedTableReplicationTest {
   @Mock
   private CopierListener listener;
   @Mock
-  private DataManipulationClientFactoryManager clientFactoryManager;
+  private DataManipulatorFactoryManager dataManipulatorFactoryManager;
   @Mock
-  private DataManipulationClientFactory clientFactory;
+  private DataManipulatorFactory dataManipulatorFactory;
+  @Mock
+  private DataManipulator dataManipulator;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
@@ -100,8 +103,9 @@ public class UnpartitionedTableReplicationTest {
     when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copier);
     when(replicaLocationManager.getTableLocation()).thenReturn(replicaTableLocation);
-    when(clientFactoryManager.getClientFactory(sourceTableLocation, replicaTableLocation, copierOptions))
-        .thenReturn(clientFactory);
+    when(dataManipulatorFactoryManager.getClientFactory(sourceTableLocation, replicaTableLocation, copierOptions))
+        .thenReturn(dataManipulatorFactory);
+    when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
   }
 
   @Test
@@ -110,7 +114,7 @@ public class UnpartitionedTableReplicationTest {
         .thenReturn(replicaLocationManager);
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
-        clientFactoryManager);
+        dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -139,7 +143,7 @@ public class UnpartitionedTableReplicationTest {
 
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, MAPPED_DATABASE, MAPPED_TABLE, copierOptions,
-        listener, clientFactoryManager);
+        listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -168,7 +172,7 @@ public class UnpartitionedTableReplicationTest {
 
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
-        clientFactoryManager);
+        dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");

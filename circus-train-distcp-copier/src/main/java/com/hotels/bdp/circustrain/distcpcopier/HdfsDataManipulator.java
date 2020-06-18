@@ -23,26 +23,31 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 
-public class HdfsDataManipulationClient implements DataManipulationClient {
+public class HdfsDataManipulator implements DataManipulator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HdfsDataManipulationClient.class);
+  private static final Logger log = LoggerFactory.getLogger(HdfsDataManipulator.class);
 
   private Configuration conf;
   private FileSystem fs;
 
-  public HdfsDataManipulationClient(Configuration conf) {
+  public HdfsDataManipulator(Configuration conf) {
     this.conf = conf;
   }
 
+  /**
+   * @param path to be deleted.
+   * @return true is the path was successfully deleted, or false if not.
+   * @throws IOException Occurs if there is a problem getting the file system object which owns the path.
+   */
   @Override
   public boolean delete(String path) throws IOException {
     return delete(new Path(path));
   }
 
   private boolean delete(Path path) throws IOException {
-    LOG.info("Deleting all data at location: {}", path);
+    log.info("Deleting all data at location: {}", path);
     fs = path.getFileSystem(conf);
     return fs.delete(path, true);
   }

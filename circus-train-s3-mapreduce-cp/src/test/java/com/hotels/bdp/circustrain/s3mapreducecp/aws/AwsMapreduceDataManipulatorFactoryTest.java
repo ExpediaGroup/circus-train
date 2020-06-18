@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsMapreduceDataManipulationClientFactoryTest {
+public class AwsMapreduceDataManipulatorFactoryTest {
 
   private Path sourceLocation;
   private Path replicaLocation;
@@ -40,11 +40,11 @@ public class AwsMapreduceDataManipulationClientFactoryTest {
 
   private @Mock Configuration conf;
 
-  private AwsMapreduceDataManipulationClientFactory clientFactory;
+  private AwsMapreduceDataManipulatorFactory dataManipulatorFactory;
 
   @Before
   public void setup() {
-    clientFactory = new AwsMapreduceDataManipulationClientFactory(conf);
+    dataManipulatorFactory = new AwsMapreduceDataManipulatorFactory(conf);
   }
 
   @Test
@@ -54,8 +54,7 @@ public class AwsMapreduceDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertTrue(support);
+    assertTrue(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -65,8 +64,7 @@ public class AwsMapreduceDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -76,8 +74,7 @@ public class AwsMapreduceDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
   @Test
@@ -87,8 +84,7 @@ public class AwsMapreduceDataManipulationClientFactoryTest {
     sourceScheme = sourceLocation.toUri().getScheme();
     replicaScheme = replicaLocation.toUri().getScheme();
 
-    boolean support = clientFactory.supportsSchemes(sourceScheme, replicaScheme);
-    assertFalse(support);
+    assertFalse(dataManipulatorFactory.supportsSchemes(sourceScheme, replicaScheme));
   }
 
 }

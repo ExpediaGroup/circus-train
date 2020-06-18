@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.s3mapreducecp.aws;
+package com.hotels.bdp.circustrain.distcpcopier;
 
 import java.util.Map;
 
@@ -27,38 +27,33 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
-import com.hotels.bdp.circustrain.aws.S3Schemes;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
 
 @Profile({ Modules.REPLICATION })
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class AwsMapreduceDataManipulationClientFactory implements DataManipulationClientFactory {
-
-  private AwsS3ClientFactory s3ClientFactory;
+@Order(Ordered.LOWEST_PRECEDENCE)
+public class HdfsDataManipulatorFactory implements DataManipulatorFactory {
 
   private Configuration conf;
 
   @Autowired
-  public AwsMapreduceDataManipulationClientFactory(@Value("#{replicaHiveConf}") Configuration conf) {
+  public HdfsDataManipulatorFactory(@Value("#{replicaHiveConf}") Configuration conf) {
     this.conf = conf;
-    s3ClientFactory = new AwsS3ClientFactory();
   }
 
-  // The hdfs -> s3 client doesn't need to use the path for the client.
+  // Doesn't need to use the path or copierOptions.
   @Override
-  public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
-    return new AwsDataManipulationClient(s3ClientFactory.newInstance(conf));
+  public DataManipulator newInstance(Path path, Map<String, Object> copierOptions) {
+    return new HdfsDataManipulator(conf);
   }
 
   /**
-   * Supports copying from hdfs/ a file to s3.
+   * This will delete replica data whether it has been replicated from s3 or hdfs.
    */
   @Override
   public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
-    return !S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
+    return true;
   }
 
 }

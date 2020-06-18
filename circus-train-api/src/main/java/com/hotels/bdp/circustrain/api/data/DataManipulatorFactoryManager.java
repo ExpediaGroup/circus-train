@@ -15,13 +15,14 @@
  */
 package com.hotels.bdp.circustrain.api.data;
 
-import java.io.IOException;
+import java.util.Map;
 
-public interface DataManipulationClient {
+import org.apache.hadoop.fs.Path;
 
-  /**
-   * Returns boolean stating whether the deletion was successful or not.
-   */
-  boolean delete(String path) throws IOException;
+public interface DataManipulatorFactoryManager {
 
+  public DataManipulatorFactory getClientFactory(
+      Path sourceLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions);
 }

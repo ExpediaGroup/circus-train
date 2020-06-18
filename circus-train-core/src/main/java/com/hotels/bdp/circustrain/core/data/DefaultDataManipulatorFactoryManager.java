@@ -30,52 +30,52 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 
 @Profile({ Modules.REPLICATION })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class DefaultDataManipulationClientFactoryManager implements DataManipulationClientFactoryManager {
+public class DefaultDataManipulatorFactoryManager implements DataManipulatorFactoryManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultDataManipulationClientFactoryManager.class);
-  private static final String CLIENT_MANIPULATION_FACTORY_CLASS = "client-manipulation-factory-class";
+  private static final Logger log = LoggerFactory.getLogger(DefaultDataManipulatorFactoryManager.class);
+  private static final String DATA_MANIPULATION_FACTORY_CLASS = "data-manipulation-factory-class";
 
-  private List<DataManipulationClientFactory> clientFactories;
+  private List<DataManipulatorFactory> clientFactories;
 
   @Autowired
-  public DefaultDataManipulationClientFactoryManager(List<DataManipulationClientFactory> clientFactories) {
+  public DefaultDataManipulatorFactoryManager(List<DataManipulatorFactory> clientFactories) {
     this.clientFactories = clientFactories;
   }
 
   @PostConstruct
   void postConstruct() {
-    LOG.debug("Initialized with {} DataManipulationClientFactories", clientFactories.size());
-    for (DataManipulationClientFactory clientFactory : clientFactories) {
-      LOG.debug("ClientFactory class {}", clientFactory.getClass().getName());
+    log.debug("Initialized with {} DataManipulationClientFactories", clientFactories.size());
+    for (DataManipulatorFactory clientFactory : clientFactories) {
+      log.debug("ClientFactory class {}", clientFactory.getClass().getName());
     }
   }
 
   @Override
-  public DataManipulationClientFactory getClientFactory(
+  public DataManipulatorFactory getClientFactory(
       Path sourceTableLocation,
       Path replicaTableLocation,
       Map<String, Object> copierOptions) {
     String replicaLocation = replicaTableLocation.toUri().getScheme();
     String sourceLocation = sourceTableLocation.toUri().getScheme();
 
-    if (copierOptions.containsKey(CLIENT_MANIPULATION_FACTORY_CLASS)) {
-      for (DataManipulationClientFactory clientFactory : clientFactories) {
+    if (copierOptions.containsKey(DATA_MANIPULATION_FACTORY_CLASS)) {
+      for (DataManipulatorFactory clientFactory : clientFactories) {
         final String clientFactoryClassName = clientFactory.getClass().getName();
-        if (clientFactoryClassName.equals(copierOptions.get(CLIENT_MANIPULATION_FACTORY_CLASS).toString())) {
-          LOG.debug("Found ClientFactory '{}' using config", clientFactoryClassName);
+        if (clientFactoryClassName.equals(copierOptions.get(DATA_MANIPULATION_FACTORY_CLASS).toString())) {
+          log.debug("Found ClientFactory '{}' using config", clientFactoryClassName);
           return clientFactory;
         }
       }
     } else {
-      for (DataManipulationClientFactory clientFactory : clientFactories) {
+      for (DataManipulatorFactory clientFactory : clientFactories) {
         if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
-          LOG
+          log
               .debug("Found client factory {} for cleanup at location {}.", clientFactory.getClass().getName(),
                   replicaLocation);
           return clientFactory;

@@ -55,7 +55,7 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
@@ -323,7 +323,7 @@ public class Replica extends HiveEndpoint {
       try {
         alterTableService.alterTable(client, oldReplicaTable.get(), replicaTable.getTable());
         updateTableColumnStatistics(client, replicaTable);
-      } catch (TException e) {
+      } catch (Exception e) {
         throw new MetaStoreClientException(
             "Unable to alter replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
@@ -427,6 +427,9 @@ public class Replica extends HiveEndpoint {
       SourceLocationManager sourceLocationManager) {
     CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory
         .newInstance(eventId, housekeepingListener, replicaCatalogListener, tableReplication);
+
+    sourceLocationManager.getTableLocation();
+
     return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
         cleanupLocationManager, replicaCatalogListener);
   }
@@ -437,21 +440,21 @@ public class Replica extends HiveEndpoint {
         tableReplication.getReplicaTableName());
   }
 
-  public void checkIfReplicaCleanupRequired(
+  public void cleanupReplicaTableIfRequired(
       String replicaDatabaseName,
       String replicaTableName,
-      DataManipulationClient dataManipulationClient) {
-    try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
-      if (replicationMode == FULL_OVERWRITE) {
-        LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
+      DataManipulator dataManipulator)
+    throws Exception {
+    if (replicationMode == FULL_OVERWRITE) {
+      LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
+      try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
         DropTableService dropTableService = new DropTableService();
-        try {
-            dropTableService
-              .dropTableAndData(client, replicaDatabaseName, replicaTableName,
-                  dataManipulationClient);
-        } catch (Exception e) {
-          LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
-        }
+        // try {
+          dropTableService
+              .dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulator);
+        // } catch (Exception e) {
+        // LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
+        // }
       }
     }
   }

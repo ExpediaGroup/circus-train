@@ -15,10 +15,12 @@
  */
 package com.hotels.bdp.circustrain.core.replica.hive;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -46,7 +48,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,7 +62,7 @@ public class DropTableServiceTest {
   private @Mock CloseableMetaStoreClient client;
   private @Captor ArgumentCaptor<Table> tableCaptor;
 
-  private @Mock DataManipulationClient dataManipulationClient;
+  private @Mock DataManipulator dataManipulator;
   private @Mock StorageDescriptor storageDescriptor;
 
   private DropTableService service;
@@ -73,14 +75,13 @@ public class DropTableServiceTest {
     table.setDbName(DB_NAME);
     when(client.getTable(DB_NAME, TABLE_NAME)).thenReturn(table);
 
-    storageDescriptor = new StorageDescriptor();
     storageDescriptor.setLocation(REPLICA_LOCATION.toString());
     table.setSd(storageDescriptor);
   }
 
   @Test
-  public void removeParamsAndDropNullParams() throws TException {
-    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+  public void removeParamsAndDropNullParams() throws Exception {
+    service.dropTable(client, DB_NAME, TABLE_NAME);
 
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
     verify(client).getTable(DB_NAME, TABLE_NAME);
@@ -88,10 +89,10 @@ public class DropTableServiceTest {
   }
 
   @Test
-  public void removeParamsAndDropEmptyParams() throws TException {
+  public void removeParamsAndDropEmptyParams() throws Exception {
     table.setParameters(Collections.emptyMap());
 
-    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.dropTable(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
@@ -99,14 +100,14 @@ public class DropTableServiceTest {
   }
 
   @Test
-  public void removeParamsAndDrop() throws TException {
+  public void removeParamsAndDrop() throws Exception {
     Map<String, String> params = new HashMap<>();
     params.put("key1", "value");
     params.put("key2", "value");
     params.put("EXTERNAL", "true");
     table.setParameters(params);
 
-    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.dropTable(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).alter_table(eq(DB_NAME), eq(TABLE_NAME), tableCaptor.capture());
@@ -120,14 +121,14 @@ public class DropTableServiceTest {
   }
 
   @Test
-  public void removeParamsAndDropCaseInsensitiveExternalTable() throws TException {
+  public void removeParamsAndDropCaseInsensitiveExternalTable() throws Exception {
     Map<String, String> params = new HashMap<>();
     params.put("key1", "value");
     params.put("key2", "value");
     params.put("external", "TRUE");
     table.setParameters(params);
 
-    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.dropTable(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).alter_table(eq(DB_NAME), eq(TABLE_NAME), tableCaptor.capture());
@@ -141,20 +142,20 @@ public class DropTableServiceTest {
   }
 
   @Test
-  public void removeParamsAndDropTableDoesNotExist() throws TException {
+  public void removeParamsAndDropTableDoesNotExist() throws Exception {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.removeTableParamsAndDrop(client, DB_NAME, TABLE_NAME);
+    service.dropTable(client, DB_NAME, TABLE_NAME);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
   }
 
   @Test
-  public void dropTableAndDataSuccess() throws TException, IOException {
+  public void dropTableAndDataSuccess() throws Exception {
     table.setParameters(Collections.emptyMap());
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
@@ -162,17 +163,17 @@ public class DropTableServiceTest {
   }
 
   @Test
-  public void dropTableAndDataTableDoesNotExist() throws TException {
+  public void dropTableAndDataTableDoesNotExist() throws Exception {
     doThrow(new NoSuchObjectException()).when(client).getTable(DB_NAME, TABLE_NAME);
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verifyNoMoreInteractions(client);
   }
 
   @Test
-  public void dropPartitionedTableSuccess() throws TException, IOException {
+  public void dropPartitionedTableSuccess() throws Exception {
     List<String> partitionNames = Arrays.asList("name", "surname");
     List<Partition> partitions = createPartitions(partitionNames.size());
 
@@ -180,16 +181,16 @@ public class DropTableServiceTest {
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, partitionNames)).thenReturn(partitions);
     table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
+    verify(dataManipulator).delete(PARTITION_LOCATION + "1");
+    verify(dataManipulator).delete(PARTITION_LOCATION + "2");
   }
 
   @Test
-  public void dropPartitionedTableMultipleBatches() throws TException, IOException {
+  public void dropPartitionedTableMultipleBatches() throws Exception {
     List<String> partitionNames = new ArrayList<>();
     List<String> batch1 = Arrays
         .asList("title", "name", "middle", "surname", "streetname", "postcode", "county", "country", "continent",
@@ -203,24 +204,38 @@ public class DropTableServiceTest {
     when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch1)).thenReturn(partitionBatch1);
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch2)).thenReturn(Arrays.asList(partitionBatch2));
-    
+
     table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
-    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulationClient);
+    service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "1");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "2");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "3");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "4");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "5");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "6");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "7");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "8");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "9");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "10");
-    verify(dataManipulationClient).delete(PARTITION_LOCATION + "11");
+
+    for (int i = 1; i < partitionNames.size() + 1; i++) {
+      verify(dataManipulator).delete(PARTITION_LOCATION + i);
+    }
+  }
+
+  @Test
+  public void failToDeleteData() throws Exception {
+    List<String> partitionNames = Arrays.asList("name", "surname");
+    List<Partition> partitions = createPartitions(partitionNames.size());
+
+    when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, partitionNames)).thenReturn(partitions);
+    when(dataManipulator.delete(PARTITION_LOCATION + "1")).thenThrow(new IOException());
+    table.setPartitionKeys(createFieldSchemaList(partitionNames));
+
+    try {
+      service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
+      fail("Expected exception should be caught and thrown");
+    } catch (Exception e) {
+      verify(client).getTable(DB_NAME, TABLE_NAME);
+      verify(client, never()).dropTable(DB_NAME, TABLE_NAME, false, true);
+      verify(dataManipulator).delete(PARTITION_LOCATION + "1");
+      verifyNoMoreInteractions(dataManipulator);
+    }
   }
 
   private List<Partition> createPartitions(int count) {

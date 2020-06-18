@@ -69,7 +69,7 @@ public class RenameTableOperationTest {
     fromTable.setTableName(TO_TABLE_NAME);
     verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
     verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-    verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+    verify(dropTableService).dropTable(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
   }
 
   @Test
@@ -87,7 +87,7 @@ public class RenameTableOperationTest {
       verify(client).getTable(TO_DB_NAME, TO_TABLE_NAME);
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
-      verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+      verify(dropTableService).dropTable(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }
@@ -109,7 +109,7 @@ public class RenameTableOperationTest {
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
       verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
-      verify(dropTableService).removeTableParamsAndDrop(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
+      verify(dropTableService).dropTable(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));
     }

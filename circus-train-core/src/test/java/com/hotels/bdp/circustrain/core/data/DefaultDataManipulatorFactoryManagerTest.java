@@ -16,6 +16,11 @@
 package com.hotels.bdp.circustrain.core.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.HDFS;
+import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.S3_MAPREDUCE;
+import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.S3_S3;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,25 +28,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.hotels.bdp.circustrain.api.data.DataManipulationClient;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultDataManipulationClientFactoryManagerTest {
+public class DefaultDataManipulatorFactoryManagerTest {
 
-  private DataManipulationClientFactory s3s3ClientFactory;
-  private DataManipulationClientFactory s3MapReduceClientFactory;
-  private DataManipulationClientFactory hdfsClientFactory;
+  private DataManipulatorFactory s3s3DataManipulatorFactory = new TestDataManipulatorFactory(S3_S3);;
+  private DataManipulatorFactory s3MapReduceDataManipulatorFactory = new TestDataManipulatorFactory(S3_MAPREDUCE);;
+  private DataManipulatorFactory hdfsDataManipulatorFactory = new TestDataManipulatorFactory(HDFS);;
 
-  private DataManipulationClientFactoryManager manager;
-  private DataManipulationClientFactory clientFactory;
+  private DataManipulatorFactoryManager manager;
+  private DataManipulatorFactory clientFactory;
   private Path sourceLocation;
   private Path replicaLocation;
   private final String s3Path = "s3://<path>";
@@ -50,17 +54,8 @@ public class DefaultDataManipulationClientFactoryManagerTest {
 
   @Before
   public void setup() {
-    s3s3ClientFactory = new TestDataManipulationClientFactory();
-    ((TestDataManipulationClientFactory) s3s3ClientFactory).setS3Client();
-
-    s3MapReduceClientFactory = new TestDataManipulationClientFactory();
-    ((TestDataManipulationClientFactory) s3MapReduceClientFactory).setS3MapreduceClient();
-
-    hdfsClientFactory = new TestDataManipulationClientFactory();
-    ((TestDataManipulationClientFactory) hdfsClientFactory).setHdfsClient();
-
-    manager = new DefaultDataManipulationClientFactoryManager(
-        Arrays.asList(s3s3ClientFactory, s3MapReduceClientFactory, hdfsClientFactory));
+    manager = new DefaultDataManipulatorFactoryManager(
+        Arrays.asList(s3s3DataManipulatorFactory, s3MapReduceDataManipulatorFactory, hdfsDataManipulatorFactory));
     sourceLocation = new Path(s3Path);
   }
 
@@ -69,7 +64,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     replicaLocation = new Path(s3Path);
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
-    Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isS3S3Client());
+    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == S3_S3);
   }
 
   @Test
@@ -78,7 +73,7 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     replicaLocation = new Path(s3Path);
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
-    Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isS3MapreduceClient());
+    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == S3_MAPREDUCE);
   }
 
   @Test
@@ -87,14 +82,14 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     replicaLocation = new Path(hdfsPath);
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
-    Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isHdfsClient());
+    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == HDFS);
   }
 
   @Test
   public void clientReturnedFromCopierOption() {
     replicaLocation = new Path(hdfsPath);
-    TestDataManipulationClientFactory testFactory = new TestDataManipulationClientFactory();
-    manager = new DefaultDataManipulationClientFactoryManager(Arrays.asList(testFactory));
+    TestDataManipulatorFactory testFactory = new TestDataManipulatorFactory(HDFS);
+    manager = new DefaultDataManipulatorFactoryManager(Arrays.asList(testFactory));
     copierOptions.put("client-manipulation-factory-class", testFactory.getClass().getName());
 
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
@@ -107,21 +102,29 @@ public class DefaultDataManipulationClientFactoryManagerTest {
     replicaLocation = new Path("<path>");
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
-    Assert.assertTrue(((TestDataManipulationClientFactory) clientFactory).isHdfsClient());
+    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == HDFS);
   }
 
-  class TestDataManipulationClientFactory implements DataManipulationClientFactory {
+  public enum DataManipulatorType {
+    S3_S3,
+    S3_MAPREDUCE,
+    HDFS
+  }
 
-    private boolean isS3S3Client = false;
-    private boolean isHdfsClient = false;
-    private boolean isS3MapreduceClient = false;
+  class TestDataManipulatorFactory implements DataManipulatorFactory {
 
     private final String S3_LOCATION = "s3";
     private final String HDFS_LOCATION = "hdfs";
+    
+    private final DataManipulatorType dataManipulatorType;
+
+    public TestDataManipulatorFactory(DataManipulatorType dataManipulatorType) {
+      this.dataManipulatorType = dataManipulatorType;
+    }
 
     @Override
-    public DataManipulationClient newInstance(Path path, Map<String, Object> copierOptions) {
-      return new TestDataManipulationClient();
+    public DataManipulator newInstance(Path path, Map<String, Object> copierOptions) {
+      return new TestDataManipulator();
     }
 
     @Override
@@ -130,13 +133,13 @@ public class DefaultDataManipulationClientFactoryManagerTest {
         return false;
       }
 
-      if (supportsS3ToS3(sourceLocation, targetLocation) && isS3S3Client) {
+      if (supportsS3ToS3(sourceLocation, targetLocation) && dataManipulatorType == S3_S3) {
         return true;
       }
-      if (supportsHdfsToS3(sourceLocation, targetLocation) && isS3MapreduceClient) {
+      if (supportsHdfsToS3(sourceLocation, targetLocation) && dataManipulatorType == S3_MAPREDUCE) {
         return true;
       }
-      if (supportsHdfsToHdfs(sourceLocation, targetLocation) && isHdfsClient) {
+      if (supportsHdfsToHdfs(sourceLocation, targetLocation) && dataManipulatorType == HDFS) {
         return true;
       }
       return false;
@@ -157,34 +160,12 @@ public class DefaultDataManipulationClientFactoryManagerTest {
       return true;
     }
 
-    public void setS3Client() {
-      isS3S3Client = true;
+    public DataManipulatorType getType() {
+      return dataManipulatorType;
     }
-
-    public void setS3MapreduceClient() {
-      isS3MapreduceClient = true;
-    }
-
-    public void setHdfsClient() {
-      isHdfsClient = true;
-    }
-
-    public boolean isS3S3Client() {
-      return isS3S3Client;
-    }
-
-    public boolean isS3MapreduceClient() {
-      return isS3MapreduceClient;
-    }
-
-    public boolean isHdfsClient() {
-      return isHdfsClient;
-    }
-
   }
 
-  class TestDataManipulationClient implements DataManipulationClient {
-
+  class TestDataManipulator implements DataManipulator {
     @Override
     public boolean delete(String path) throws IOException {
       return false;

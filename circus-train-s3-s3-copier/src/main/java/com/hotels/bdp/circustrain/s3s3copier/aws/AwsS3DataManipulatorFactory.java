@@ -30,28 +30,28 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.s3.AmazonS3URI;
 
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.data.DataManipulationClientFactory;
-import com.hotels.bdp.circustrain.aws.AwsDataManipulationClient;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.aws.AwsDataManipulator;
 import com.hotels.bdp.circustrain.aws.S3Schemes;
 import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Profile({ Modules.REPLICATION })
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
-public class AwsS3DataManipulationClientFactory implements DataManipulationClientFactory {
+public class AwsS3DataManipulatorFactory implements DataManipulatorFactory {
 
   private AmazonS3ClientFactory s3ClientFactory;
 
   @Autowired
-  public AwsS3DataManipulationClientFactory(AmazonS3ClientFactory s3ClientFactory) {
+  public AwsS3DataManipulatorFactory(AmazonS3ClientFactory s3ClientFactory) {
     this.s3ClientFactory = s3ClientFactory;
   }
 
   @Override
-  public AwsDataManipulationClient newInstance(Path replicaLocation, Map<String, Object> copierOptions) {
+  public AwsDataManipulator newInstance(Path replicaLocation, Map<String, Object> copierOptions) {
     S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(copierOptions);
     AmazonS3URI replicaLocationUri = toAmazonS3URI(URI.create(replicaLocation.toString()));
-    return new AwsDataManipulationClient(s3ClientFactory.newInstance(replicaLocationUri, s3s3CopierOptions));
+    return new AwsDataManipulator(s3ClientFactory.newInstance(replicaLocationUri, s3s3CopierOptions));
   }
 
   /**
