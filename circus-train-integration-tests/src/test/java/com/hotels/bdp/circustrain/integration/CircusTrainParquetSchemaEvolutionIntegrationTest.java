@@ -73,7 +73,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
   private static String TABLE = "ct_table_p";
   private static String REPLICA_DB = "replica_db";
 
-  private static final Logger LOG = LoggerFactory.getLogger(CircusTrainParquetSchemaEvolutionIntegrationTest.class);
+  private static final Logger log = LoggerFactory.getLogger(CircusTrainParquetSchemaEvolutionIntegrationTest.class);
 
   @HiveSQL(files = {}, autoStart = false)
   private HiveShell shell;
@@ -153,7 +153,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "1\tbefore\t1",
         "2\tafter\t2"
     );
-    
+
     runTest(schema, evolvedSchema, beforeEvolution, afterEvolution);
     runDataChecks(evolvedSchema, expectedData);
   }
@@ -607,7 +607,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         beforeEvolution.fieldName,
         beforeEvolution.expectedData,
         1);
-    LOG.info(">>>> Table {} ", metaStoreClient.getTable(REPLICA_DB, TABLE));
+    log.info(">>>> Table {} ", metaStoreClient.getTable(REPLICA_DB, TABLE));
 
     replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
     metaStoreClient.alter_table(REPLICA_DB, TABLE, replicaTable);
@@ -621,7 +621,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         afterEvolution.fieldName,
         afterEvolution.expectedData,
         2);
-    LOG.info(">>>> Table {} ", metaStoreClient.getTable(SOURCE_DB, TABLE));
+    log.info(">>>> Table {} ", metaStoreClient.getTable(SOURCE_DB, TABLE));
 
     // Create the original partition (with the original schema) and add to the source table
     URI partition = helper.createData(toUri(sourceWarehouseUri, SOURCE_DB, TABLE),
@@ -647,12 +647,8 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
   }
 
   private void runDataChecks(Schema schema, List<String> expectedData) throws Exception {
-    try {
-      assertTable(thriftMetaStoreRule.newClient(), schema, SOURCE_DB, TABLE, expectedData);
-      assertTable(thriftMetaStoreRule.newClient(), schema, REPLICA_DB, TABLE, expectedData);
-    } catch (Exception e) {
-      throw new Exception("Test failed", e);
-    }
+    assertTable(thriftMetaStoreRule.newClient(), schema, SOURCE_DB, TABLE, expectedData);
+    assertTable(thriftMetaStoreRule.newClient(), schema, REPLICA_DB, TABLE, expectedData);
   }
 
   private void assertTable(HiveMetaStoreClient client, Schema schema, String database, String table,

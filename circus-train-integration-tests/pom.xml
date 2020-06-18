@@ -15,7 +15,7 @@
     <hadoop.version>2.8.1</hadoop.version>
     <!-- override for hadoop-common dependency that is used in this test -->
     <guava.version>17.0</guava.version>
-    <schema-evolution.test.group>com.hotels.bdp.circustrain.integration.utils.SchemaEvolution</schema-evolution.test.group>
+    <surefire.excluded.groups>com.hotels.bdp.circustrain.integration.utils.SchemaEvolution</surefire.excluded.groups>
   </properties>
 
   <dependencies>
@@ -241,21 +241,6 @@
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>typical</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>schema-evolution</id>
-      <properties>
-        <groups>${schema-evolution.test.group}</groups>
-      </properties>
-    </profile>
-  </profiles>
-
   <build>
     <plugins>
       <plugin>
@@ -264,7 +249,7 @@
         <configuration>
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
-          <groups>${groups}</groups>
+          <excludedGroups>${surefire.excluded.groups}</excludedGroups>
         </configuration>
       </plugin>
     </plugins>

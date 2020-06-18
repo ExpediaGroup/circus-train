@@ -31,6 +31,6 @@ Remove value from enum |Yes*|This seems to still allow the removed enum to be in
 
 ## Tests
 
-A series of integration tests support the findings above. Maven does not run them by default. To run the tests, activate the `schema-evolution` group from within the `circus-train-integration-tests` package:
+A series of integration tests support the findings above. Maven does not run them by default. To run the tests, override the excluded groups property from within the `circus-train-integration-tests` package:
 
-    mvn clean test -Pschema-evolution
+    mvn clean test -Dsurefire.excluded.groups=""
