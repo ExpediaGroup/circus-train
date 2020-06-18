@@ -449,12 +449,7 @@ public class Replica extends HiveEndpoint {
       LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
       try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
         DropTableService dropTableService = new DropTableService();
-        // try {
-          dropTableService
-              .dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulator);
-        // } catch (Exception e) {
-        // LOG.info("Replica table '" + replicaDatabaseName + "." + replicaTableName + "' was not dropped.");
-        // }
+        dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulator);
       }
     }
   }

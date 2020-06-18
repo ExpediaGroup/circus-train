@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
@@ -184,4 +185,26 @@ public class UnpartitionedTableReplicationTest {
       replicationOrder.verify(listener).copierEnd(any(Metrics.class));
     }
   }
+
+  @Test
+  public void replicationFailsOnDeleteTableException() throws Exception {
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
+    doThrow(new Exception()).when(replica).cleanupReplicaTableIfRequired(DATABASE, TABLE, dataManipulator);
+
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
+        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
+        dataManipulatorFactoryManager);
+    try {
+      replication.replicate();
+      fail("Copy exception should be caught and rethrown");
+    } catch (CircusTrainException e) {
+      InOrder replicationOrder = inOrder(copier, listener);
+      replicationOrder.verify(listener).copierStart(anyString());
+      replicationOrder.verify(copier).copy();
+      // Still called
+      replicationOrder.verify(listener).copierEnd(any(Metrics.class));
+    }
+  }
+
 }
