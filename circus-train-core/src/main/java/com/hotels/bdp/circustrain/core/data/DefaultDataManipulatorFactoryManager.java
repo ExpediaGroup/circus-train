@@ -39,20 +39,20 @@ import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 public class DefaultDataManipulatorFactoryManager implements DataManipulatorFactoryManager {
 
   private static final Logger log = LoggerFactory.getLogger(DefaultDataManipulatorFactoryManager.class);
-  private static final String DATA_MANIPULATION_FACTORY_CLASS = "data-manipulation-factory-class";
+  static final String DATA_MANIPULATOR_FACTORY_CLASS = "data-manipulator-factory-class";
 
-  private List<DataManipulatorFactory> clientFactories;
+  private List<DataManipulatorFactory> dataManipulatorFactories;
 
   @Autowired
-  public DefaultDataManipulatorFactoryManager(List<DataManipulatorFactory> clientFactories) {
-    this.clientFactories = clientFactories;
+  public DefaultDataManipulatorFactoryManager(List<DataManipulatorFactory> factories) {
+    this.dataManipulatorFactories = factories;
   }
 
   @PostConstruct
   void postConstruct() {
-    log.debug("Initialized with {} DataManipulationClientFactories", clientFactories.size());
-    for (DataManipulatorFactory clientFactory : clientFactories) {
-      log.debug("ClientFactory class {}", clientFactory.getClass().getName());
+    log.debug("Initialized with {} DataManipulatorFactories", dataManipulatorFactories.size());
+    for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
+      log.debug("DataManipulatorFactory class {}", clientFactory.getClass().getName());
     }
   }
 
@@ -64,26 +64,26 @@ public class DefaultDataManipulatorFactoryManager implements DataManipulatorFact
     String replicaLocation = replicaTableLocation.toUri().getScheme();
     String sourceLocation = sourceTableLocation.toUri().getScheme();
 
-    if (copierOptions.containsKey(DATA_MANIPULATION_FACTORY_CLASS)) {
-      for (DataManipulatorFactory clientFactory : clientFactories) {
+    if (copierOptions.containsKey(DATA_MANIPULATOR_FACTORY_CLASS)) {
+      for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
         final String clientFactoryClassName = clientFactory.getClass().getName();
-        if (clientFactoryClassName.equals(copierOptions.get(DATA_MANIPULATION_FACTORY_CLASS).toString())) {
+        if (clientFactoryClassName.equals(copierOptions.get(DATA_MANIPULATOR_FACTORY_CLASS).toString())) {
           log.debug("Found ClientFactory '{}' using config", clientFactoryClassName);
           return clientFactory;
         }
       }
     } else {
-      for (DataManipulatorFactory clientFactory : clientFactories) {
+      for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
         if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
           log
-              .debug("Found client factory {} for cleanup at location {}.", clientFactory.getClass().getName(),
+              .debug("Found DataManipulatorFactory {} for cleanup at location {}.", clientFactory.getClass().getName(),
                   replicaLocation);
           return clientFactory;
         }
       }
     }
     throw new UnsupportedOperationException(
-        "No DataManipulationClient found which can delete the data at location: " + replicaLocation);
+        "No DataManipulator found which can delete the data at location: " + replicaLocation);
   }
 
 }

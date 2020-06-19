@@ -60,11 +60,8 @@ public class DropTableService {
       String databaseName,
       String tableName,
       DataManipulator dataManipulator)
-    throws Exception
-  {
-    log.debug("Dropping table {}.{} and its data.", databaseName, tableName);
+    throws Exception {
     Table table = getTable(client, databaseName, tableName);
-
     if (table != null) {
       String replicaLocation = table.getSd().getLocation();
       if (table.getPartitionKeysSize() == 0) {
@@ -94,7 +91,7 @@ public class DropTableService {
       }
       client.alter_table(databaseName, tableName, table);
     }
-    log.info("Dropping table '{}.{}'.", databaseName, tableName);
+    log.info("Dropping replica table '{}.{}'.", databaseName, tableName);
     client.dropTable(databaseName, tableName, false, true);
   }
 

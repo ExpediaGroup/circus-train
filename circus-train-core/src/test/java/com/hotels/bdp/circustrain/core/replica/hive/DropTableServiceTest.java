@@ -198,14 +198,13 @@ public class DropTableServiceTest {
     List<String> batch2 = Arrays.asList("other");
     partitionNames.addAll(batch1);
     partitionNames.addAll(batch2);
+    table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
     List<Partition> partitionBatch1 = createPartitions(partitionNames.size());
     Partition partitionBatch2 = partitionBatch1.remove(partitionBatch1.size() - 1);
     when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch1)).thenReturn(partitionBatch1);
     when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch2)).thenReturn(Arrays.asList(partitionBatch2));
-
-    table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
     service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 

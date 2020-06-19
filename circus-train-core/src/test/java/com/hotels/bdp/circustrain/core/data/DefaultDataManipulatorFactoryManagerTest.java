@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManager.DATA_MANIPULATOR_FACTORY_CLASS;
 import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.HDFS;
 import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.S3_MAPREDUCE;
 import static com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManagerTest.DataManipulatorType.S3_S3;
@@ -90,7 +91,7 @@ public class DefaultDataManipulatorFactoryManagerTest {
     replicaLocation = new Path(hdfsPath);
     TestDataManipulatorFactory testFactory = new TestDataManipulatorFactory(HDFS);
     manager = new DefaultDataManipulatorFactoryManager(Arrays.asList(testFactory));
-    copierOptions.put("client-manipulation-factory-class", testFactory.getClass().getName());
+    copierOptions.put(DATA_MANIPULATOR_FACTORY_CLASS, testFactory.getClass().getName());
 
     clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
 
