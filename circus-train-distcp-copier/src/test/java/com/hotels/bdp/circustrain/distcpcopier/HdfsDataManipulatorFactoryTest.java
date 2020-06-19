@@ -42,8 +42,8 @@ public class HdfsDataManipulatorFactoryTest {
     dataManipulatorFactory = new HdfsDataManipulatorFactory(conf);
   }
 
-  // This manipulator factory will technically support all schemes including replicating to and from s3. However the s3
-  // manipulator factories take higher precedence so this client factory wont be used for s3.
+  // This manipulator factory will technically support all schemes including replicating to and from S3. However the S3
+  // manipulator factories take higher precedence so this factory wont be used.
   @Test
   public void checkSupportsHdfs() {
     sourceLocation = hdfsPath;

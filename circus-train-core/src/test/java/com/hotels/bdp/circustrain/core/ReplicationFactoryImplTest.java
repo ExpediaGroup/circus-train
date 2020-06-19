@@ -76,7 +76,7 @@ public class ReplicationFactoryImplTest {
   private @Mock ReplicaFactory replicaFactory;
   private @Mock SourceFactory sourceFactory;
   private @Mock CopierOptions copierOptions;
-  private @Mock DataManipulatorFactoryManager clientFactoryManager;
+  private @Mock DataManipulatorFactoryManager dataManipulatorFactoryManager;
   private TableReplication tableReplication;
   private ReplicationFactory factory;
 
@@ -108,7 +108,7 @@ public class ReplicationFactoryImplTest {
     when(replicaFactory.newInstance(tableReplication)).thenReturn(replica);
 
     factory = new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager, copierListener,
-        partitionPredicateFactory, copierOptions, clientFactoryManager);
+        partitionPredicateFactory, copierOptions, dataManipulatorFactoryManager);
   }
 
   @Test

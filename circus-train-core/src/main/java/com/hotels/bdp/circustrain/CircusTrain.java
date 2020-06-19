@@ -45,6 +45,7 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -64,7 +65,6 @@ import com.hotels.bdp.circustrain.core.ReplicationFactory;
 import com.hotels.bdp.circustrain.core.ReplicationFactoryImpl;
 import com.hotels.bdp.circustrain.core.StrategyBasedReplicationFactory;
 import com.hotels.bdp.circustrain.core.conf.SpringExpressionParser;
-import com.hotels.bdp.circustrain.core.data.DefaultDataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.core.event.CompositeCopierListener;
 import com.hotels.bdp.circustrain.core.event.CompositeLocomotiveListener;
 import com.hotels.bdp.circustrain.core.event.CompositeReplicaCatalogListener;
@@ -244,9 +244,9 @@ public class CircusTrain {
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,
       ReplicaCatalogListener replicaCatalogListener,
-      DefaultDataManipulatorFactoryManager clientFactoryManager) {
+      DataManipulatorFactoryManager dataManipulatorFactoryManager) {
     ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
-        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions, clientFactoryManager);
+        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions, dataManipulatorFactoryManager);
     return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
         replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
   }
