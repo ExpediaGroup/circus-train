@@ -35,7 +35,7 @@ public class DropTableService {
   private static final Logger log = LoggerFactory.getLogger(DropTableService.class);
   private static final String EXTERNAL_KEY = "EXTERNAL";
   private static final String IS_EXTERNAL = "TRUE";
-  private static final short BATCH_SIZE = (short) 10;
+  private static final short BATCH_SIZE = (short) 1000;
 
   /**
    * Removes all parameters from a table before dropping the table.
