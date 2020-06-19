@@ -159,7 +159,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>${log4j-api.version}</version>
+      <version>2.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
