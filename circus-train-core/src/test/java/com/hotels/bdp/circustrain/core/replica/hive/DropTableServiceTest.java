@@ -191,27 +191,32 @@ public class DropTableServiceTest {
 
   @Test
   public void dropPartitionedTableMultipleBatches() throws Exception {
-    List<String> partitionNames = new ArrayList<>();
-    List<String> batch1 = Arrays
-        .asList("title", "name", "middle", "surname", "streetname", "postcode", "county", "country", "continent",
-            "colour");
+    int count = 1001;
+    List<Partition> partitionsBatch1 = createPartitions(count);
+    List<Partition> partitionsBatch2 = Arrays.asList(partitionsBatch1.remove(count - 1));
+
+    List<String> batch1 = new ArrayList<String>();
     List<String> batch2 = Arrays.asList("other");
+    for (int i = 1; i < count; i++) {
+      batch1.add("name");
+    }
+
+    List<String> partitionNames = new ArrayList<>();
     partitionNames.addAll(batch1);
     partitionNames.addAll(batch2);
+
     table.setPartitionKeys(createFieldSchemaList(partitionNames));
 
-    List<Partition> partitionBatch1 = createPartitions(partitionNames.size());
-    Partition partitionBatch2 = partitionBatch1.remove(partitionBatch1.size() - 1);
     when(client.listPartitionNames(DB_NAME, TABLE_NAME, (short) -1)).thenReturn(partitionNames);
-    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch1)).thenReturn(partitionBatch1);
-    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch2)).thenReturn(Arrays.asList(partitionBatch2));
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch1)).thenReturn(partitionsBatch1);
+    when(client.getPartitionsByNames(DB_NAME, TABLE_NAME, batch2)).thenReturn(partitionsBatch2);
 
     service.dropTableAndData(client, DB_NAME, TABLE_NAME, dataManipulator);
 
     verify(client).getTable(DB_NAME, TABLE_NAME);
     verify(client).dropTable(DB_NAME, TABLE_NAME, false, true);
 
-    for (int i = 1; i < partitionNames.size() + 1; i++) {
+    for (int i = 1; i < count + 1; i++) {
       verify(dataManipulator).delete(PARTITION_LOCATION + i);
     }
   }
