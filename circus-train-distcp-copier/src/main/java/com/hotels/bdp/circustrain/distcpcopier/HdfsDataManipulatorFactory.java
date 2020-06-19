@@ -49,7 +49,7 @@ public class HdfsDataManipulatorFactory implements DataManipulatorFactory {
   }
 
   /**
-   * This will delete replica data whether it has been replicated from s3 or hdfs.
+   * This will delete replica data whether it has been replicated from S3 or HDFS.
    */
   @Override
   public boolean supportsSchemes(String sourceScheme, String replicaScheme) {

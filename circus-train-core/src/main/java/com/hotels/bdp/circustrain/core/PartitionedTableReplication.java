@@ -113,7 +113,7 @@ class PartitionedTableReplication implements Replication {
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
       DataManipulatorFactory dataManipulatorFactory = dataManipulatorFactoryManager
-          .getClientFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
+          .getFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
       DataManipulator dataManipulator = dataManipulatorFactory.newInstance(replicaPartitionBaseLocation, copierOptions);
 
       if (sourcePartitions.isEmpty()) {

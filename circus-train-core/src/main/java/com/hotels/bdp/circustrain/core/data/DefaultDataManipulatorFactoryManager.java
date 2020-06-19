@@ -51,13 +51,13 @@ public class DefaultDataManipulatorFactoryManager implements DataManipulatorFact
   @PostConstruct
   void postConstruct() {
     log.debug("Initialized with {} DataManipulatorFactories", dataManipulatorFactories.size());
-    for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
-      log.debug("DataManipulatorFactory class {}", clientFactory.getClass().getName());
+    for (DataManipulatorFactory factory : dataManipulatorFactories) {
+      log.debug("DataManipulatorFactory class {}", factory.getClass().getName());
     }
   }
 
   @Override
-  public DataManipulatorFactory getClientFactory(
+  public DataManipulatorFactory getFactory(
       Path sourceTableLocation,
       Path replicaTableLocation,
       Map<String, Object> copierOptions) {
@@ -65,20 +65,20 @@ public class DefaultDataManipulatorFactoryManager implements DataManipulatorFact
     String sourceLocation = sourceTableLocation.toUri().getScheme();
 
     if (copierOptions.containsKey(DATA_MANIPULATOR_FACTORY_CLASS)) {
-      for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
-        final String clientFactoryClassName = clientFactory.getClass().getName();
-        if (clientFactoryClassName.equals(copierOptions.get(DATA_MANIPULATOR_FACTORY_CLASS).toString())) {
-          log.debug("Found ClientFactory '{}' using config", clientFactoryClassName);
-          return clientFactory;
+      for (DataManipulatorFactory factory : dataManipulatorFactories) {
+        final String factoryClassName = factory.getClass().getName();
+        if (factoryClassName.equals(copierOptions.get(DATA_MANIPULATOR_FACTORY_CLASS).toString())) {
+          log.debug("Found DataManipulatorFactory '{}' using config", factoryClassName);
+          return factory;
         }
       }
     } else {
-      for (DataManipulatorFactory clientFactory : dataManipulatorFactories) {
-        if (clientFactory.supportsSchemes(sourceLocation, replicaLocation)) {
+      for (DataManipulatorFactory factory : dataManipulatorFactories) {
+        if (factory.supportsSchemes(sourceLocation, replicaLocation)) {
           log
-              .debug("Found DataManipulatorFactory {} for cleanup at location {}.", clientFactory.getClass().getName(),
+              .debug("Found DataManipulatorFactory {} for cleanup at location {}.", factory.getClass().getName(),
                   replicaLocation);
-          return clientFactory;
+          return factory;
         }
       }
     }

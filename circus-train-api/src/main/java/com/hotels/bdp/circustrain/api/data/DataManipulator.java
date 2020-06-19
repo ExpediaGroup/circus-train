@@ -20,8 +20,9 @@ import java.io.IOException;
 public interface DataManipulator {
 
   /**
-   * Returns boolean stating whether the deletion was successful or not. May through an error while attempting to delete
-   * if path does not exist or could not be deleted.
+   * @param path to be deleted
+   * @return boolean stating whether the deletion was successful or not
+   * @throws IOException May be thrown while attempting to delete if path does not exist or could not be deleted.
    */
   boolean delete(String path) throws IOException;
 

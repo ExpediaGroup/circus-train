@@ -427,9 +427,6 @@ public class Replica extends HiveEndpoint {
       SourceLocationManager sourceLocationManager) {
     CleanupLocationManager cleanupLocationManager = CleanupLocationManagerFactory
         .newInstance(eventId, housekeepingListener, replicaCatalogListener, tableReplication);
-
-    sourceLocationManager.getTableLocation();
-
     return new FullReplicationReplicaLocationManager(sourceLocationManager, targetTableLocation, eventId, tableType,
         cleanupLocationManager, replicaCatalogListener);
   }

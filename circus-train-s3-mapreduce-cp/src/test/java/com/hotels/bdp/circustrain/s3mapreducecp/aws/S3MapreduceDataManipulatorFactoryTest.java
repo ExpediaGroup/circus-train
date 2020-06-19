@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsMapreduceDataManipulatorFactoryTest {
+public class S3MapreduceDataManipulatorFactoryTest {
 
   private Path sourceLocation;
   private Path replicaLocation;
@@ -40,11 +40,11 @@ public class AwsMapreduceDataManipulatorFactoryTest {
 
   private @Mock Configuration conf;
 
-  private AwsMapreduceDataManipulatorFactory dataManipulatorFactory;
+  private S3MapreduceDataManipulatorFactory dataManipulatorFactory;
 
   @Before
   public void setup() {
-    dataManipulatorFactory = new AwsMapreduceDataManipulatorFactory(conf);
+    dataManipulatorFactory = new S3MapreduceDataManipulatorFactory(conf);
   }
 
   @Test

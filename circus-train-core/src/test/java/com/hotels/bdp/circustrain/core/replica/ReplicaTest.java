@@ -192,7 +192,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaTableSucceeds() throws Exception, IOException {
+  public void alteringExistingUnpartitionedReplicaTableSucceeds() throws Exception {
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
     verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
@@ -201,7 +201,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaTableWithNoStatsSucceeds() throws Exception, IOException {
+  public void alteringExistingUnpartitionedReplicaTableWithNoStatsSucceeds() throws Exception {
     tableAndStatistics = new TableAndStatistics(sourceTable, null);
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
@@ -211,7 +211,7 @@ public class ReplicaTest {
   }
 
   @Test
-  public void alteringExistingUnpartitionedReplicaViewSucceeds() throws Exception, IOException {
+  public void alteringExistingUnpartitionedReplicaViewSucceeds() throws Exception {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
@@ -221,21 +221,21 @@ public class ReplicaTest {
   }
 
   @Test(expected = CircusTrainException.class)
-  public void tryToReplaceExistingUnpartitionedReplicaTableWithView() throws TException, IOException {
+  public void tryToReplaceExistingUnpartitionedReplicaTableWithView() throws TException {
     convertSourceTableToView();
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
   }
 
   @Test(expected = CircusTrainException.class)
-  public void tryToReplaceExistingUnpartitionedReplicaViewWithTable() throws TException, IOException {
+  public void tryToReplaceExistingUnpartitionedReplicaViewWithTable() throws TException {
     convertExistingReplicaTableToView();
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica.updateMetadata(EVENT_ID, tableAndStatistics, DB_NAME, TABLE_NAME, mockReplicaLocationManager);
   }
 
   @Test(expected = DestinationNotReplicaException.class)
-  public void validateReplicaTableOnNonReplicicatedTableFails() throws TException, IOException {
+  public void validateReplicaTableOnNonReplicicatedTableFails() throws TException {
     try {
       replica.validateReplicaTable(DB_NAME, TABLE_NAME);
     } catch (DestinationNotReplicaException e) {

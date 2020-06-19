@@ -3,6 +3,7 @@
 .settings
 .project
 .springBeans
+*/metastore_db/
 
 # Checkstyle, findbugs and other eclipse plugins
 */.checkstyle

@@ -109,7 +109,7 @@ class UnpartitionedTableReplication implements Replication {
       sourceLocationManager.cleanUpLocations();
 
       DataManipulatorFactory dataManipulatorFactory = dataManipulatorFactoryManager
-          .getClientFactory(sourceLocation, replicaLocation, copierOptions);
+          .getFactory(sourceLocation, replicaLocation, copierOptions);
       DataManipulator dataManipulator = dataManipulatorFactory.newInstance(replicaLocation, copierOptions);
       replica.cleanupReplicaTableIfRequired(replicaDatabaseName, replicaTableName, dataManipulator);
       replica

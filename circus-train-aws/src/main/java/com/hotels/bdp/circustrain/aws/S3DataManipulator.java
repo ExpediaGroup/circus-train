@@ -35,13 +35,13 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import com.hotels.bdp.circustrain.api.data.DataManipulator;
 
-public class AwsDataManipulator implements DataManipulator {
+public class S3DataManipulator implements DataManipulator {
 
-  private static final Logger log = LoggerFactory.getLogger(AwsDataManipulator.class);
+  private static final Logger log = LoggerFactory.getLogger(S3DataManipulator.class);
 
   private AmazonS3 s3Client;
 
-  public AwsDataManipulator(AmazonS3 s3Client) {
+  public S3DataManipulator(AmazonS3 s3Client) {
     this.s3Client = s3Client;
   }
 

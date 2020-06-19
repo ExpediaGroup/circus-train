@@ -41,12 +41,12 @@ import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultDataManipulatorFactoryManagerTest {
 
-  private DataManipulatorFactory s3s3DataManipulatorFactory = new TestDataManipulatorFactory(S3_S3);;
-  private DataManipulatorFactory s3MapReduceDataManipulatorFactory = new TestDataManipulatorFactory(S3_MAPREDUCE);;
-  private DataManipulatorFactory hdfsDataManipulatorFactory = new TestDataManipulatorFactory(HDFS);;
+  private DataManipulatorFactory s3s3DataManipulatorFactory = new TestDataManipulatorFactory(S3_S3);
+  private DataManipulatorFactory s3MapReduceDataManipulatorFactory = new TestDataManipulatorFactory(S3_MAPREDUCE);
+  private DataManipulatorFactory hdfsDataManipulatorFactory = new TestDataManipulatorFactory(HDFS);
 
   private DataManipulatorFactoryManager manager;
-  private DataManipulatorFactory clientFactory;
+  private DataManipulatorFactory dataManipulatorFactory;
   private Path sourceLocation;
   private Path replicaLocation;
   private final String s3Path = "s3://<path>";
@@ -61,58 +61,59 @@ public class DefaultDataManipulatorFactoryManagerTest {
   }
 
   @Test
-  public void awsClientReturnedForS3S3Copy() {
+  public void s3ManipulatorReturnedForS3S3Copy() {
     replicaLocation = new Path(s3Path);
-    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+    dataManipulatorFactory = manager.getFactory(sourceLocation, replicaLocation, copierOptions);
 
-    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == S3_S3);
+    assertEquals(S3_S3, ((TestDataManipulatorFactory) dataManipulatorFactory).getType());
   }
 
   @Test
-  public void awsMapReduceClientReturnedForHdfsS3Copy() {
+  public void awsMapReduceManipulatorReturnedForHdfsS3Copy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(s3Path);
-    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+    dataManipulatorFactory = manager.getFactory(sourceLocation, replicaLocation, copierOptions);
 
-    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == S3_MAPREDUCE);
+    assertEquals(S3_MAPREDUCE, ((TestDataManipulatorFactory) dataManipulatorFactory).getType());
+
   }
 
   @Test
-  public void hdfsClientReturnedForHdfsCopy() {
+  public void hdfsManipulatorReturnedForHdfsCopy() {
     sourceLocation = new Path(hdfsPath);
     replicaLocation = new Path(hdfsPath);
-    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+    dataManipulatorFactory = manager.getFactory(sourceLocation, replicaLocation, copierOptions);
 
-    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == HDFS);
+    assertEquals(HDFS, ((TestDataManipulatorFactory) dataManipulatorFactory).getType());
   }
 
   @Test
-  public void clientReturnedFromCopierOption() {
+  public void dataManipulatorReturnedFromCopierOption() {
     replicaLocation = new Path(hdfsPath);
     TestDataManipulatorFactory testFactory = new TestDataManipulatorFactory(HDFS);
     manager = new DefaultDataManipulatorFactoryManager(Arrays.asList(testFactory));
     copierOptions.put(DATA_MANIPULATOR_FACTORY_CLASS, testFactory.getClass().getName());
 
-    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+    dataManipulatorFactory = manager.getFactory(sourceLocation, replicaLocation, copierOptions);
 
-    assertEquals(clientFactory, testFactory);
+    assertEquals(dataManipulatorFactory, testFactory);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void noSupportingFactory() {
     replicaLocation = new Path("<path>");
-    clientFactory = manager.getClientFactory(sourceLocation, replicaLocation, copierOptions);
+    dataManipulatorFactory = manager.getFactory(sourceLocation, replicaLocation, copierOptions);
 
-    assertTrue(((TestDataManipulatorFactory) clientFactory).getType() == HDFS);
+    assertTrue(((TestDataManipulatorFactory) dataManipulatorFactory).getType() == HDFS);
   }
 
-  public enum DataManipulatorType {
+  enum DataManipulatorType {
     S3_S3,
     S3_MAPREDUCE,
     HDFS
   }
 
-  class TestDataManipulatorFactory implements DataManipulatorFactory {
+  private class TestDataManipulatorFactory implements DataManipulatorFactory {
 
     private final String S3_LOCATION = "s3";
     private final String HDFS_LOCATION = "hdfs";

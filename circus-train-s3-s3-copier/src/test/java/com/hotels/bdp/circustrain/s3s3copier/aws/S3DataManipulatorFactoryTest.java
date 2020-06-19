@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsDataManipulatorFactoryTest {
+public class S3DataManipulatorFactoryTest {
 
   private Path sourceLocation;
   private Path replicaLocation;
@@ -41,11 +41,11 @@ public class AwsDataManipulatorFactoryTest {
   private @Mock Configuration conf;
   private @Mock AmazonS3ClientFactory s3ClientFactory;
 
-  private AwsS3DataManipulatorFactory dataManipulatorFactory;
+  private S3DataManipulatorFactory dataManipulatorFactory;
 
   @Before
   public void setup() {
-    dataManipulatorFactory = new AwsS3DataManipulatorFactory(s3ClientFactory);
+    dataManipulatorFactory = new S3DataManipulatorFactory(s3ClientFactory);
   }
 
   @Test

@@ -13,52 +13,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.s3mapreducecp.aws;
+package com.hotels.bdp.circustrain.s3s3copier.aws;
 
+import static com.hotels.bdp.circustrain.aws.AmazonS3URIs.toAmazonS3URI;
+
+import java.net.URI;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.s3.AmazonS3URI;
+
 import com.hotels.bdp.circustrain.api.Modules;
-import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
-import com.hotels.bdp.circustrain.aws.AwsDataManipulator;
+import com.hotels.bdp.circustrain.aws.S3DataManipulator;
 import com.hotels.bdp.circustrain.aws.S3Schemes;
+import com.hotels.bdp.circustrain.s3s3copier.S3S3CopierOptions;
 
 @Profile({ Modules.REPLICATION })
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class AwsMapreduceDataManipulatorFactory implements DataManipulatorFactory {
+@Order(Ordered.LOWEST_PRECEDENCE - 10)
+public class S3DataManipulatorFactory implements DataManipulatorFactory {
 
-  private AwsS3ClientFactory s3ClientFactory;
-
-  private Configuration conf;
+  private AmazonS3ClientFactory s3ClientFactory;
 
   @Autowired
-  public AwsMapreduceDataManipulatorFactory(@Value("#{replicaHiveConf}") Configuration conf) {
-    this.conf = conf;
-    s3ClientFactory = new AwsS3ClientFactory();
+  public S3DataManipulatorFactory(AmazonS3ClientFactory s3ClientFactory) {
+    this.s3ClientFactory = s3ClientFactory;
   }
 
-  // The hdfs -> s3 data manipulator doesn't need to use the path for the client.
   @Override
-  public DataManipulator newInstance(Path path, Map<String, Object> copierOptions) {
-    return new AwsDataManipulator(s3ClientFactory.newInstance(conf));
+  public S3DataManipulator newInstance(Path replicaLocation, Map<String, Object> copierOptions) {
+    S3S3CopierOptions s3s3CopierOptions = new S3S3CopierOptions(copierOptions);
+    AmazonS3URI replicaLocationUri = toAmazonS3URI(URI.create(replicaLocation.toString()));
+    return new S3DataManipulator(s3ClientFactory.newInstance(replicaLocationUri, s3s3CopierOptions));
   }
 
   /**
-   * Supports copying from hdfs/ a file to s3.
+   * Checks that the source and replica locations are both S3 locations.
    */
   @Override
   public boolean supportsSchemes(String sourceScheme, String replicaScheme) {
-    return !S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
+    return S3Schemes.isS3Scheme(sourceScheme) && S3Schemes.isS3Scheme(replicaScheme);
   }
+
 
 }

@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.Path;
 
 public interface DataManipulatorFactoryManager {
 
-  public DataManipulatorFactory getClientFactory(
+  public DataManipulatorFactory getFactory(
       Path sourceLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions);

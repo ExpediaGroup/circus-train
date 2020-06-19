@@ -110,7 +110,7 @@ public class PartitionedTableReplicationTest {
     when(copierOptions.get("task-count")).thenReturn(Integer.valueOf(2));
     when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
     when(partitionPredicate.getPartitionPredicateLimit()).thenReturn(MAX_PARTITIONS);
-    when(dataManipulatorFactoryManager.getClientFactory(sourceTableLocation, replicaTableLocation, copierOptions))
+    when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(dataManipulatorFactory);
     when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
   }

@@ -104,7 +104,7 @@ public class UnpartitionedTableReplicationTest {
     when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copier);
     when(replicaLocationManager.getTableLocation()).thenReturn(replicaTableLocation);
-    when(dataManipulatorFactoryManager.getClientFactory(sourceTableLocation, replicaTableLocation, copierOptions))
+    when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(dataManipulatorFactory);
     when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
   }

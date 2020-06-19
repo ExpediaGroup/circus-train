@@ -254,14 +254,14 @@ public class CircusTrainReplicationModeIntegrationTest {
         assertThat(replicaFiles.size(), is(2));
 
         String partitionAsia = "continent=Asia/country=China";
-        String asiafileKey = String
+        String asiaFileKey = String
             .format("%s/%s/%s/%s/%s", DATABASE, TARGET_PARTITIONED_TABLE, eventId, partitionAsia, PART_00000);
-        assertThat(replicaFiles.get(0).getKey(), is(asiafileKey));
+        assertThat(replicaFiles.get(0).getKey(), is(asiaFileKey));
 
         String partitionEurope = "continent=Europe/country=UK";
-        String europefileKey = String
+        String europeFileKey = String
             .format("%s/%s/%s/%s/%s", DATABASE, TARGET_PARTITIONED_TABLE, eventId, partitionEurope, PART_00000);
-        assertThat(replicaFiles.get(1).getKey(), is(europefileKey));
+        assertThat(replicaFiles.get(1).getKey(), is(europeFileKey));
       }
     });
     runner.run(config.getAbsolutePath());
