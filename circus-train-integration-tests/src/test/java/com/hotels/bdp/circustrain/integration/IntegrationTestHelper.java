@@ -21,6 +21,7 @@ import static com.hotels.bdp.circustrain.integration.utils.TestUtils.newViewPart
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +35,10 @@ import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat;
+import org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat;
+import org.apache.hadoop.hive.serde2.avro.AvroObjectInspectorGenerator;
 import org.apache.parquet.avro.AvroParquetWriter;
-import org.apache.parquet.hadoop.ParquetInputFormat;
-import org.apache.parquet.hadoop.ParquetOutputFormat;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,7 @@ import com.hotels.bdp.circustrain.integration.utils.TestUtils;
 public class IntegrationTestHelper {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestHelper.class);
+  protected static final String EVOLUTION_COLUMN = "to_evolve";
 
   public static final String DATABASE = "ct_database";
   public static final String PARTITIONED_TABLE = "ct_table_p";
@@ -87,25 +90,30 @@ public class IntegrationTestHelper {
                         newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
   }
 
-  Table createParquetPartitionedTableWithStruct(
-      URI tableUri,
-      Schema schema,
-      String structType,
-      Map<String, String> structData,
-      int version) throws Exception {
-    List<FieldSchema> columns = Arrays.asList(
-        new FieldSchema("id", "string", ""),
-        new FieldSchema("details", structType, "")
-    );
+  Table createParquetPartitionedTable(
+          URI tableUri,
+          String database,
+          String table,
+          Schema schema,
+          String fieldName,
+          Object fieldData,
+          int version) throws Exception {
+    List<FieldSchema> columns = new ArrayList<>();
+    AvroObjectInspectorGenerator schemaInspector = new AvroObjectInspectorGenerator(schema);
+    for (int i = 0; i < schemaInspector.getColumnNames().size(); i++) {
+      columns.add(new FieldSchema(
+              schemaInspector.getColumnNames().get(i), schemaInspector.getColumnTypes().get(i).toString(), ""
+      ));
+    }
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
-    Table table = TestUtils
-        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, tableUri, columns, partitionKeys,
-            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", ParquetInputFormat.class.getName(),
-            ParquetOutputFormat.class.getName());
-    URI partition = createData(tableUri, schema, Integer.toString(version), version, structData);
-    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(table,
-        Arrays.asList(Integer.toString(version)), partition)));
-    return metaStoreClient.getTable(DATABASE, PARTITIONED_TABLE);
+    Table parquetTable = TestUtils
+            .createPartitionedTable(metaStoreClient, database, table, tableUri, columns, partitionKeys,
+                    "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", MapredParquetInputFormat.class.getName(),
+                    MapredParquetOutputFormat.class.getName());
+    URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldName, fieldData);
+    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(parquetTable,
+            Arrays.asList(Integer.toString(version)), partition)));
+    return metaStoreClient.getTable(database, table);
   }
 
   URI createData(
@@ -113,13 +121,22 @@ public class IntegrationTestHelper {
       Schema schema,
       String hour,
       int id,
-      Map<String, String> detailsStruct) throws IOException {
+      String fieldName,
+      Object data) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
-    Schema detailsSchema = schema.getField("details").schema();
-    GenericData.Record details = new GenericData.Record(detailsSchema);
-    detailsStruct.forEach(details::put);
     record.put("id", id);
-    record.put("details", details);
+
+    if (fieldName != null) {
+      Schema.Field field = schema.getField(fieldName);
+      Schema fieldSchema = field.schema();
+      if (data instanceof Map) {
+        GenericData.Record schemaRecord = new GenericData.Record(fieldSchema);
+        ((Map<String, String>) data).forEach(schemaRecord::put);
+        record.put(fieldName, schemaRecord);
+      } else if (data != null) {
+        record.put(fieldName, data);
+      }
+    }
 
     URI partition = URI.create(tableUri + "/hour=" + hour);
     String path = partition.getPath();

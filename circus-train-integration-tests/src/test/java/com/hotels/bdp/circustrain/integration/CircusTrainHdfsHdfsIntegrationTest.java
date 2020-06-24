@@ -29,6 +29,7 @@ import static org.junit.Assert.fail;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.EVOLUTION_COLUMN;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_ENCODED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_PARTITIONED_TABLE;
@@ -1412,9 +1413,9 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         .record(PARTITIONED_TABLE)
         .fields()
         .requiredInt("id")
-        .name("details")
+        .name(EVOLUTION_COLUMN)
         .type()
-        .record("details_struct")
+        .record(EVOLUTION_COLUMN + "_struct")
         .fields()
         .requiredString("name")
         .requiredString("city")
@@ -1426,10 +1427,12 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("name", "adam");
     structData.put("city", "blackpool");
 
-    Table replicaTable = replicaHelper.createParquetPartitionedTableWithStruct(
+    Table replicaTable = replicaHelper.createParquetPartitionedTable(
         toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        DATABASE,
+        PARTITIONED_TABLE,
         schema,
-        "struct<name:string, city:string>",
+        EVOLUTION_COLUMN,
         structData,
         1);
     LOG.info(">>>> Table {} ", replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
@@ -1437,18 +1440,17 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
     replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
 
-    // Create the source partition with the original struct.
-    helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, structData);
-
     // Create the source table with an additional column in the struct.
+    helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, EVOLUTION_COLUMN, structData);
+
     Schema schemaV2 = SchemaBuilder
         .builder("name.space")
         .record(PARTITIONED_TABLE)
         .fields()
         .requiredInt("id")
-        .name("details")
+        .name(EVOLUTION_COLUMN)
         .type()
-        .record("details_struct")
+        .record( EVOLUTION_COLUMN + "_struct")
         .fields()
         .requiredString("name")
         .requiredString("city")
@@ -1462,14 +1464,17 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("city", "blackpool");
     structData.put("dob", "22/09/1992");
 
-    Table table = helper.createParquetPartitionedTableWithStruct(
+    Table table = helper.createParquetPartitionedTable(
         toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
+        DATABASE,
+        PARTITIONED_TABLE,
         schemaV2,
-        "struct<name:string, city:string, dob:string>",
+        EVOLUTION_COLUMN,
         structData,
         2);
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
+    // Create the source partition with the original struct.
     URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
     sourceCatalog.client().add_partitions(Arrays.asList(
         newTablePartition(table, Arrays.asList("1"), partition)
@@ -1490,13 +1495,13 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(sourceCatalog.client().getAllTables(DATABASE).size(), is(1));
         Table sourceTable = sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         List<FieldSchema> cols = sourceTable.getSd().getCols();
-        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
-        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        assertThat(cols.get(0), is(new FieldSchema("id", "int", "")));
+        assertThat(cols.get(1), is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
         PartitionIterator partitionIterator = new PartitionIterator(sourceCatalog.client(), sourceTable, (short) 1000);
         List<Partition> partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
           Partition partition = partitionIterator.next();
-          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string,city:string,dob:string>"));
           partitions.add(partition);
         }
         assertThat(partitions.size(), is(2));
@@ -1504,13 +1509,13 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         assertThat(replicaCatalog.client().getAllTables(DATABASE).size(), is(1));
         Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         cols = replicaTable.getSd().getCols();
-        assertThat(cols.get(0), is(new FieldSchema("id", "string", "")));
-        assertThat(cols.get(1), is(new FieldSchema("details", "struct<name:string, city:string, dob:string>", "")));
+        assertThat(cols.get(0), is(new FieldSchema("id", "int", "")));
+        assertThat(cols.get(1), is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
         partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
         partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
           Partition partition = partitionIterator.next();
-          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string, city:string, dob:string>"));
+          assertThat(partition.getSd().getCols().get(1).getType(), is("struct<name:string,city:string,dob:string>"));
           partitions.add(partition);
         }
         assertThat(partitions.size(), is(2));

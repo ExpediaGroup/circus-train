@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
@@ -36,6 +38,7 @@ import com.hotels.bdp.circustrain.common.test.xml.HiveXml;
 public class CircusTrainRunner {
 
   private final String databaseName;
+  private final String replicaDatabaseName;
   private final File sourceWarehouseUri;
   private final File replicaWarehouseUri;
   private final String replicaConnectionUri;
@@ -50,6 +53,7 @@ public class CircusTrainRunner {
 
   public static class Builder {
     private final String databaseName;
+    private String replicaDatabaseName = "";
     private final File sourceWarehouseUri;
     private final File replicaWarehouseUri;
     private final File housekeepingDbLocation;
@@ -108,6 +112,11 @@ public class CircusTrainRunner {
       return this;
     }
 
+    public Builder replicaDatabaseName(String replicaDatabaseName) {
+      this.replicaDatabaseName = replicaDatabaseName;
+      return this;
+    }
+
     public CircusTrainRunner build() {
       checkArgument(!isNullOrEmpty(databaseName));
       checkArgument(sourceWarehouseUri != null);
@@ -115,12 +124,16 @@ public class CircusTrainRunner {
       checkArgument(housekeepingDbLocation != null);
       checkArgument(!isNullOrEmpty(replicaConnectionUri));
 
+      if (StringUtils.isBlank(replicaDatabaseName)) {
+        replicaDatabaseName = databaseName;
+      }
+
       HiveXml hiveXml = new HiveXml(sourceThriftConnectionUri, sourceConnectionURL, sourceDriverClassName);
       hiveXml.create();
 
-      CircusTrainRunner ctRunner = new CircusTrainRunner(databaseName, hiveXml, sourceWarehouseUri, replicaWarehouseUri,
-          replicaConnectionUri, sourceConfigurationProperties, replicaConfigurationProperties, copierOptions,
-          graphiteUri, housekeepingDbLocation);
+      CircusTrainRunner ctRunner = new CircusTrainRunner(databaseName, replicaDatabaseName, hiveXml,
+          sourceWarehouseUri, replicaWarehouseUri, replicaConnectionUri, sourceConfigurationProperties,
+          replicaConfigurationProperties, copierOptions, graphiteUri, housekeepingDbLocation);
 
       return ctRunner;
     }
@@ -136,6 +149,7 @@ public class CircusTrainRunner {
 
   private CircusTrainRunner(
       String databaseName,
+      String replicaDatabaseName,
       HiveXml hiveXml,
       File sourceWarehouseUri,
       File replicaWarehouseUri,
@@ -146,6 +160,7 @@ public class CircusTrainRunner {
       String graphiteUri,
       File housekeepingDbLocation) {
     this.databaseName = databaseName;
+    this.replicaDatabaseName = replicaDatabaseName;
     this.sourceWarehouseUri = sourceWarehouseUri;
     this.replicaWarehouseUri = replicaWarehouseUri;
     this.replicaConnectionUri = replicaConnectionUri;
