@@ -4,6 +4,7 @@
 
 ### Added
 * Replication mode `FULL_OVERWRITE` to overwrite a previously replicated table and delete its data. Useful for incompatible schema changes. 
+* A `DEVELOPERS.md` file with some notes on the inner workings of the project. 
 
 ## [16.1.0] - 2020-03-18
 ### Changed
