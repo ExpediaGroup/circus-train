@@ -11,17 +11,17 @@ These notes are meant as a helpful developers guide into Circus Train's code and
 
 ## README.md
 
-First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train) file. It is pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
+First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train) file. It is a pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
 
 ## Classes
 **Locomotive**
 
 * This is where it all begins.
-* A new `Replication` object is created using the `ReplicationFactory` and *replicate* on it.
+* A new `Replication` object is created using the `ReplicationFactory` and *replicate* is called on it.
 
 **ReplicationFactory**
 
-* Returns a `Replication` object, the type depends on whether the source table is partitioned or not and the replication mode specified in the configuration file.
+* Returns a `Replication` object. The type depends on whether the source table is partitioned or not, and the replication mode specified in the configuration file.
 
 **Replication**
 
@@ -35,11 +35,11 @@ First and foremost, its worth having a read through the [README.md](https://gith
    * HDFS or S3 → HDFS, uses `DistCpCopier`
    * HDFS → S3, uses `S3MapreduceCpCopier`
    * S3 → S3,  uses `S3S3Copier`
-* The data is copied over first (if its not a metadata mirror/update).
+* The data is copied over first (if the mode is `FULL` or `FULL_OVERWRITE`).
 * Then the metadata of the table is updated.
 
 ## Types of replication
-There are four types of replication which CircusTrain can handle:
+There are four types of replication which Circus Train can handle:
 
 * `FULL` ← default
 * `FULL_OVERWRITE`
@@ -48,8 +48,6 @@ There are four types of replication which CircusTrain can handle:
 
 
 ### Full Replication
-This can be partitioned or unpartitioned. 
-
 **Partitioned**
 
 If the source table has partitions then these and the corresponding data will be copied over to the replica table. After this, the metadata of the table will be updated. 
@@ -62,11 +60,11 @@ All data from the source is copied over to the replica table, then the metadata 
 
 
 ### Full Overwrite Replication
-This replication mode behaves in the same was as `FULL` however, any existing replica table and its underlying data will be deleted, and replaced with the source. 
+This replication mode behaves in the same was as `FULL` however, any existing replica table and its underlying data will first be deleted before being replaced with the source table and data. 
 
 This mode is useful in the early stages of lifecycle when incompatible schema changes are made. 
 
-A `DataManipulator` is used to handle the deleting of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will give a suitable `DataManipulatorFactory` that will return a suitable `DataManipulator` object. 
+A `DataManipulator` is used to handle the deleting of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will give a suitable `DataManipulatorFactory` that will return a `DataManipulator` object. 
 
 ### Metadata Mirror Replication 
 Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location.
@@ -94,31 +92,31 @@ There is an order of precedence, which means the `CopierFactories` will be check
 * `S3MapreduceCpCopier`, 
 * and then falls down to `DistCpCopier` if the above factories don't support the replication.
 
-The copiers which use s3 will create clients that allow access and give permissions to perform actions on s3 buckets. In some cases an assume role is needed, if data is being transferred across accounts. 
+The copiers which use S3 will create clients that allow access and give permissions to perform actions on S3 buckets. In some cases an IAM role is needed, if data is being transferred across S3 accounts. 
 
 ### Types of copier
 **S3S3Copier**
 
-*Replication: s3 → s3* 
+*Replication: S3 → S3* 
 
-This copier uses two `AwsS3Clients` - a source client and a replica client. There is an `AwsS3ClientFactory` which will create the necessary clients with permissions to perform actions on s3 buckets
+This copier uses two `AwsS3Clients` - a source client and a replica client. There is an `AwsS3ClientFactory` which will create clients with the necessary permissions to perform actions on S3 buckets
 
 One of these client factories is `JceksAmazonS3ClientFactory`, which creates a client with the necessary credentials required. It does this using a credential provider chain, which will create (as the name states) a chain of credential providers which will be tried in order, until one is successful. One of the credentials in this chain is the `AssumeRoleCredentialProvider` which uses a role provided in the copier options to be able to replicate across S3 accounts.
 
 The replication is handled by a `TransferManager` which uses the target S3 client and the `S3S3CopierOptions`. The `TransferManager` will be given the the source client to replicate from. 
 
-The `S3S3CopierOptions` which will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and wont be used by the other copiers. 
+The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and wont be used by the other copiers. 
 
 
 **S3MapreduceCpCopier**
 
-*Replication: hdfs → s3* 
+*Replication: HDFS → S3* 
 
 Has its own `AwsS3ClientFactory` which creates a client with the necessary credentials, based on the given configuration. 
 
 
 **DistCpCopier**
 
-*Replication: hdfs or s3 → hdfs* 
+*Replication: HDFS or S3 → HDFS* 
 
 This is the default copier which will be used if the two previous copiers do not support replication between the source and target.
