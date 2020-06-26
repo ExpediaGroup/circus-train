@@ -55,6 +55,7 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.conf.ReplicaCatalog;
 import com.hotels.bdp.circustrain.api.conf.ReplicationMode;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
 import com.hotels.bdp.circustrain.api.listener.HousekeepingListener;
 import com.hotels.bdp.circustrain.core.HiveEndpoint;
@@ -156,6 +157,7 @@ public class Replica extends HiveEndpoint {
       String replicaTableName,
       ReplicaLocationManager locationManager) {
     try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
+
       updateTableMetadata(client, eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
           locationManager.getTableLocation(), replicationMode);
 
@@ -305,16 +307,6 @@ public class Replica extends HiveEndpoint {
     TableAndStatistics replicaTable = tableFactory
         .newReplicaTable(eventId, sourceTable, replicaDatabaseName, replicaTableName, tableLocation, replicationMode);
 
-    if (replicationMode == FULL_OVERWRITE) {
-      LOG.debug("Replication mode: FULL_OVERWRITE. Dropping existing replica table and its data.");
-      DropTableService dropTableService = new DropTableService();
-      try {
-        dropTableService.removeTableParamsAndDrop(client, replicaDatabaseName, replicaTableName);
-      } catch (TException e) {
-        throw new MetaStoreClientException(
-            "Unable to remove existing replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
-      }
-    }
     Optional<Table> oldReplicaTable = getTable(client, replicaDatabaseName, replicaTableName);
     if (!oldReplicaTable.isPresent()) {
       LOG.debug("No existing replica table found, creating.");
@@ -331,7 +323,7 @@ public class Replica extends HiveEndpoint {
       try {
         alterTableService.alterTable(client, oldReplicaTable.get(), replicaTable.getTable());
         updateTableColumnStatistics(client, replicaTable);
-      } catch (TException e) {
+      } catch (Exception e) {
         throw new MetaStoreClientException(
             "Unable to alter replica table '" + replicaDatabaseName + "." + replicaTableName + "'", e);
       }
@@ -443,6 +435,20 @@ public class Replica extends HiveEndpoint {
   public TableAndStatistics getTableAndStatistics(TableReplication tableReplication) {
     return super.getTableAndStatistics(tableReplication.getReplicaDatabaseName(),
         tableReplication.getReplicaTableName());
+  }
+
+  public void cleanupReplicaTableIfRequired(
+      String replicaDatabaseName,
+      String replicaTableName,
+      DataManipulator dataManipulator)
+    throws Exception {
+    if (replicationMode == FULL_OVERWRITE) {
+      LOG.debug("Replication mode: FULL_OVERWRITE. Checking for existing replica table.");
+      try (CloseableMetaStoreClient client = getMetaStoreClientSupplier().get()) {
+        DropTableService dropTableService = new DropTableService();
+        dropTableService.dropTableAndData(client, replicaDatabaseName, replicaTableName, dataManipulator);
+      }
+    }
   }
 
 }

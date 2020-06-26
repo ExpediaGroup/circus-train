@@ -63,7 +63,7 @@ Although it's not necessary, we recommend exporting the environment variable `CI
 
     export CIRCUS_TRAIN_HOME=/<foo>/<bar>/circus-train-<version>
     
-Refer to the [configuration](#configuration) section below on what is needed to customise the configuration files before continuing.
+Refer to the [configuration](#configuration-reference) section below on what is needed to customise the configuration files before continuing.
 
 ## Usage
 To run Circus Train you just need to execute the `bin/circus-train.sh` script in the installation directory and pass the configuration file which includes the replication configurations: 
@@ -291,7 +291,7 @@ Circus Train provides configurable replication modes which can be used to contro
 It has the following options:
 
 * `FULL`: Default behaviour, all metadata and data of the source table will be copied to the destination table and destination location. Metadata will be updated to point to the replicated data.
-* `FULL_OVERWRITE`: All metadata and data of the source table will be replicated in full, overwriting the existing replica. Any existing replica table will be dropped. If no replica table exists, this mode will behave as `FULL`.
+* `FULL_OVERWRITE`: All metadata and data of the source table will be replicated in full, overwriting the existing replica. Any existing replica table will be dropped and its data deleted.. If no replica table exists, this mode will behave as `FULL`.
 * `METADATA_MIRROR`: Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location. NOTE: The replica table will be marked as `EXTERNAL`. This is done to prevent accidental data loss when dropping the replica. For example, this can be used for copying someone else's metadata into your Hive Metastore without copying the data or to replicate a view. You still need to have access to the data in order to query it.
 * `METADATA_UPDATE`: Metadata only update for a table that was previously fully replicated. No data will be copied but any metadata from the source will be copied and table/partition locations will keep pointing to previously replicated data. Example use case: Update the metadata of a Hive Table (for instance to change the Serde used) without having the overhead of re-replicating all the data.
 
@@ -328,6 +328,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
             skip-crc: false
             ssl-configuration-file: /foo/bar/ssl-config
             copier-factory-class: com.hotels.bdp.circustrain.distcpcopier.DistCpCopier
+            data-manipulator-factory-class: com.hotels.bdp.circustrain.distcpcopier.HdfsDataManipulatorFactory
 
 |Property|Required|Description|
 |----|----|----|
@@ -344,6 +345,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
 |`copier-options.ssl-configuration-file`|No|Path to the SSL configuration file to use for `hftps://`. Defaults to `null`.|
 |`copier-options.ignore-missing-partition-folder-errors`|No|Boolean flag, if set to `true` will ignore errors from DistCp that normally fail the replication. DistCp normally fails when a partition is found in the metadata that is missing on HDFS (Default DistCp behavior). Defaults to `false` (so replication will fail).|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+|`copier-options.data-manipulator-factory-class`|No|Controls which data manipulator is used to drop replica table data when using the `FULL_OVERWRITE` replication mode.|
 
 ##### S3MapReduceCp copier options
 If data is being replicated from HDFS to S3 then Circus Train will use a customized, improved version of DistCp to copy the data. The options are summarised below.
@@ -362,6 +364,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
             ignore-failures: false
             log-path:
             copier-factory-class: com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpCopier
+            data-manipulator-factory-class: com.hotels.bdp.circustrain.s3mapreducecp.aws.AwsMapreduceDataManipulatorFactory
 
 | Property|Required|Description|
 |----|----|----|
@@ -383,6 +386,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
 | `copier-options.upload-buffer-size`|No|Size of the buffer used to upload the stream of data. If the value is `0` the upload will use the value of the HDFS property `io.file.buffer.size` to configure the buffer. Defaults to `0`|
 | `copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3MapReduceCp` will not specify any canned ACL.|
 | `copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+|`copier-options.data-manipulator-factory-class`|No|Controls which data manipulator is used to drop replica table data when using the `FULL_OVERWRITE` replication mode.|
 | `copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target replica. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials.|
 
 ##### S3 to S3 copier options
@@ -396,6 +400,7 @@ If data is being replicated from S3 to S3 then Circus Train will use the AWS S3 
 |`copier-options.s3-server-side-encryption`|No|Whether to enable server side encryption. Defaults to `false`.|
 |`copier-options.canned-acl`|No|AWS Canned ACL name. See [Access Control List (ACL) Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) for possible values. If not specified `S3S3Copier` will not specify any canned ACL.|
 |`copier-options.copier-factory-class`|No|Controls which copier is used for replication if provided.|
+|`copier-options.data-manipulator-factory-class`|No|Controls which data manipulator is used to drop replica table data when using the `FULL_OVERWRITE` replication mode.|
 |`copier-options.s3s3-retry-max-copy-attempts`|No|Controls the maximum number of attempts if AWS throws an error during copy. Default value is 3.|
 |`copier-options.s3s3-max-thread-pool-size`|No|Max number of threads to use for the transferManager thread pool. Default value is 10.|
 |`copier-options.assume-role`|No|ARN of an IAM role to assume when writing S3 data to the target S3 location. Useful when the target is in a different AWS account than Circus Train is running in. Note that if JCEKS is also configured, JCEKS credentials will be used instead of assuming a role. If `assume-role` is not specified, the copier will use instance credentials. The role provided must have read access to the S3 source and write access to the S3 target.|

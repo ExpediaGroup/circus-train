@@ -31,6 +31,9 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.api.util.DotJoiner;
@@ -55,6 +58,7 @@ class PartitionedTableReplication implements Replication {
   private Metrics metrics = Metrics.NULL_VALUE;
   private final Map<String, Object> copierOptions;
   private final CopierListener copierListener;
+  private final DataManipulatorFactoryManager dataManipulatorFactoryManager;
 
   PartitionedTableReplication(
       String database,
@@ -68,7 +72,8 @@ class PartitionedTableReplication implements Replication {
       String replicaDatabaseName,
       String replicaTableName,
       Map<String, Object> copierOptions,
-      CopierListener copierListener) {
+      CopierListener copierListener,
+      DataManipulatorFactoryManager dataManipulatorFactoryManager) {
     this.database = database;
     this.table = table;
     this.partitionPredicate = partitionPredicate;
@@ -80,6 +85,7 @@ class PartitionedTableReplication implements Replication {
     this.replicaTableName = replicaTableName;
     this.copierOptions = copierOptions;
     this.copierListener = copierListener;
+    this.dataManipulatorFactoryManager = dataManipulatorFactoryManager;
     eventId = eventIdFactory.newEventId(EventIdPrefix.CIRCUS_TRAIN_PARTITIONED_TABLE.getPrefix());
   }
 
@@ -106,8 +112,13 @@ class PartitionedTableReplication implements Replication {
           .getLocationManager(TableType.PARTITIONED, targetTableLocation, eventId, sourceLocationManager);
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
+      DataManipulatorFactory dataManipulatorFactory = dataManipulatorFactoryManager
+          .getFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
+      DataManipulator dataManipulator = dataManipulatorFactory.newInstance(replicaPartitionBaseLocation, copierOptions);
+
       if (sourcePartitions.isEmpty()) {
         LOG.debug("Update table {}.{} metadata only", database, table);
+        replica.cleanupReplicaTableIfRequired(replicaDatabaseName, replicaTableName, dataManipulator);
         replica
             .updateMetadata(eventId, sourceTableAndStatistics, replicaDatabaseName, replicaTableName,
                 replicaLocationManager);
@@ -125,9 +136,9 @@ class PartitionedTableReplication implements Replication {
         } finally {
           copierListener.copierEnd(metrics);
         }
-
         sourceLocationManager.cleanUpLocations();
 
+        replica.cleanupReplicaTableIfRequired(replicaDatabaseName, replicaTableName, dataManipulator);
         replica
             .updateMetadata(eventId, sourceTableAndStatistics, sourcePartitionsAndStatistics, replicaDatabaseName,
                 replicaTableName, replicaLocationManager);

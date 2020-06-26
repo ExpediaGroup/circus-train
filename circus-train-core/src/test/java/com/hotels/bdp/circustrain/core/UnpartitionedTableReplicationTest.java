@@ -18,6 +18,7 @@ package com.hotels.bdp.circustrain.core;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +39,9 @@ import com.hotels.bdp.circustrain.api.SourceLocationManager;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.bdp.circustrain.core.replica.Replica;
@@ -77,6 +81,12 @@ public class UnpartitionedTableReplicationTest {
   private ReplicaLocationManager replicaLocationManager;
   @Mock
   private CopierListener listener;
+  @Mock
+  private DataManipulatorFactoryManager dataManipulatorFactoryManager;
+  @Mock
+  private DataManipulatorFactory dataManipulatorFactory;
+  @Mock
+  private DataManipulator dataManipulator;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
@@ -94,6 +104,9 @@ public class UnpartitionedTableReplicationTest {
     when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copier);
     when(replicaLocationManager.getTableLocation()).thenReturn(replicaTableLocation);
+    when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
+        .thenReturn(dataManipulatorFactory);
+    when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
   }
 
   @Test
@@ -101,7 +114,8 @@ public class UnpartitionedTableReplicationTest {
     when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener);
+        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
+        dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -130,7 +144,7 @@ public class UnpartitionedTableReplicationTest {
 
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
         copierFactoryManager, eventIdFactory, targetTableLoation, MAPPED_DATABASE, MAPPED_TABLE, copierOptions,
-        listener);
+        listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -158,7 +172,8 @@ public class UnpartitionedTableReplicationTest {
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
 
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener);
+        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
+        dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");
@@ -170,4 +185,26 @@ public class UnpartitionedTableReplicationTest {
       replicationOrder.verify(listener).copierEnd(any(Metrics.class));
     }
   }
+
+  @Test
+  public void replicationFailsOnDeleteTableException() throws Exception {
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+        .thenReturn(replicaLocationManager);
+    doThrow(new Exception()).when(replica).cleanupReplicaTableIfRequired(DATABASE, TABLE, dataManipulator);
+
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
+        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
+        dataManipulatorFactoryManager);
+    try {
+      replication.replicate();
+      fail("Copy exception should be caught and rethrown");
+    } catch (CircusTrainException e) {
+      InOrder replicationOrder = inOrder(copier, listener);
+      replicationOrder.verify(listener).copierStart(anyString());
+      replicationOrder.verify(copier).copy();
+      // Still called
+      replicationOrder.verify(listener).copierEnd(any(Metrics.class));
+    }
+  }
+
 }

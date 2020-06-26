@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hotels.bdp.circustrain.api.copier;
+package com.hotels.bdp.circustrain.api.data;
 
-import com.hotels.bdp.circustrain.api.CircusTrainException;
-import com.hotels.bdp.circustrain.api.metrics.Metrics;
+import java.io.IOException;
 
-public interface Copier {
+public interface DataManipulator {
 
-  Metrics copy() throws CircusTrainException;
+  /**
+   * @param path to be deleted
+   * @return boolean stating whether the deletion was successful or not
+   * @throws IOException May be thrown while attempting to delete if path does not exist or could not be deleted.
+   */
+  boolean delete(String path) throws IOException;
 
 }

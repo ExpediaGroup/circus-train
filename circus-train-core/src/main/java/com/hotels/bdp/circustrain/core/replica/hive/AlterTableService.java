@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class AlterTableService {
     this.renameTableOperation = renameTableOperation;
   }
 
-  public void alterTable(CloseableMetaStoreClient client, Table oldTable, Table newTable) throws TException {
+  public void alterTable(CloseableMetaStoreClient client, Table oldTable, Table newTable) throws Exception {
     List<FieldSchema> oldColumns = oldTable.getSd().getCols();
     List<FieldSchema> newColumns = newTable.getSd().getCols();
     if (hasAnyChangedColumns(oldColumns, newColumns)) {
@@ -60,7 +59,7 @@ public class AlterTableService {
         copyPartitionsOperation.execute(client, newTable, tempTable);
         renameTableOperation.execute(client, tempTable, newTable);
       } finally {
-        dropTableService.removeTableParamsAndDrop(client, tempTable.getDbName(), tempName);
+        dropTableService.dropTable(client, tempTable.getDbName(), tempName);
       }
     } else {
       client.alter_table(newTable.getDbName(), newTable.getTableName(), newTable);

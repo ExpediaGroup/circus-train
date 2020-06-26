@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ import com.google.common.io.Files;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
+import com.hotels.bdp.circustrain.api.data.DataManipulator;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactory;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 import com.hotels.test.extension.TestLocomotiveListener;
@@ -242,6 +244,29 @@ public class CircusTrainTest {
       return Metrics.NULL_VALUE;
     }
 
+  }
+
+  @Component
+  static class TestDataManipulatorFactory implements DataManipulatorFactory {
+
+    @Override
+    public DataManipulator newInstance(Path path, Map<String, Object> copierOptions) {
+      return new TestDataManipulator();
+    }
+
+    @Override
+    public boolean supportsSchemes(String sourceLocation, String targetLocation) {
+      return true;
+    }
+
+  }
+
+  static class TestDataManipulator implements DataManipulator {
+
+    @Override
+    public boolean delete(String path) throws IOException {
+      return true;
+    }
   }
 
 }

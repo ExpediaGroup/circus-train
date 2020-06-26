@@ -28,6 +28,7 @@ import com.hotels.bdp.circustrain.api.conf.SourceTable;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.core.replica.Replica;
 import com.hotels.bdp.circustrain.core.replica.ReplicaFactory;
@@ -43,6 +44,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
   private final CopierListener copierListener;
   private final PartitionPredicateFactory partitionPredicateFactory;
   private final CopierOptions copierOptions;
+  private final DataManipulatorFactoryManager dataManipulatorFactoryManager;
 
   public ReplicationFactoryImpl(
       SourceFactory sourceFactory,
@@ -50,13 +52,15 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
       CopierFactoryManager copierFactoryManager,
       CopierListener copierListener,
       PartitionPredicateFactory partitionPredicateFactory,
-      CopierOptions copierOptions) {
+      CopierOptions copierOptions,
+      DataManipulatorFactoryManager dataManipulatorFactoryManager) {
     this.sourceFactory = sourceFactory;
     this.replicaFactory = replicaFactory;
     this.copierFactoryManager = copierFactoryManager;
     this.copierListener = copierListener;
     this.partitionPredicateFactory = partitionPredicateFactory;
     this.copierOptions = copierOptions;
+    this.dataManipulatorFactoryManager = dataManipulatorFactoryManager;
   }
 
   /*
@@ -113,7 +117,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
           .getMergedCopierOptions(copierOptions.getCopierOptions());
       replication = new PartitionedTableReplication(sourceDatabaseName, sourceTableName, partitionPredicate, source,
           replica, copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
-          mergedCopierOptions, copierListener);
+          mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
       break;
     case METADATA_UPDATE:
       replication = new PartitionedTableMetadataUpdateReplication(sourceDatabaseName, sourceTableName,
@@ -148,7 +152,7 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
           .getMergedCopierOptions(copierOptions.getCopierOptions());
       replication = new UnpartitionedTableReplication(sourceDatabaseName, sourceTableName, source, replica,
           copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
-          mergedCopierOptions, copierListener);
+          mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
       break;
     case METADATA_UPDATE:
       replication = new UnpartitionedTableMetadataUpdateReplication(sourceDatabaseName, sourceTableName, source,

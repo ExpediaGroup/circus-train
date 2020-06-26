@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.core.replica.hive;
 
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ public class RenameTableOperation {
    * Renames tables 'from' table into 'to' table, at the end of the operation 'from' will be gone and 'to' will be
    * renamed.
    */
-  public void execute(CloseableMetaStoreClient client, Table from, Table to) throws TException {
+  public void execute(CloseableMetaStoreClient client, Table from, Table to) throws Exception {
     LOG
         .info("Renaming table {}.{} to {}.{}", from.getDbName(), from.getTableName(), to.getDbName(),
             to.getTableName());
@@ -55,7 +54,7 @@ public class RenameTableOperation {
       client.alter_table(toTable.getDbName(), toTableName, toTable);
       client.alter_table(fromTable.getDbName(), fromTableName, fromTable);
     } finally {
-      dropTableService.removeTableParamsAndDrop(client, toTable.getDbName(), toDelete);
+      dropTableService.dropTable(client, toTable.getDbName(), toDelete);
     }
   }
 }

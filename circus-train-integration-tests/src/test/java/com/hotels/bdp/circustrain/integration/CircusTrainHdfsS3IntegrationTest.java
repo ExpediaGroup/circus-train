@@ -24,13 +24,13 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATION_EVENT;
+import static com.hotels.bdp.circustrain.aws.AmazonS3URIs.toAmazonS3URI;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.UNPARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.DATA_COLUMNS;
 import static com.hotels.bdp.circustrain.integration.utils.TestUtils.toUri;
-import static com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3URIs.toAmazonS3URI;
 
 import java.io.File;
 import java.net.URI;

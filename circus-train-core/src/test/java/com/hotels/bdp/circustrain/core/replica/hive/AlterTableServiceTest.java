@@ -66,7 +66,7 @@ public class AlterTableServiceTest {
   }
 
   @Test
-  public void typicalAlterTable() throws TException {
+  public void typicalAlterTable() throws Exception {
     oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
     newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
 
@@ -77,7 +77,7 @@ public class AlterTableServiceTest {
   }
 
   @Test
-  public void alterTableColumnChange() throws TException {
+  public void alterTableColumnChange() throws Exception {
     oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
     newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
@@ -86,14 +86,14 @@ public class AlterTableServiceTest {
     service.alterTable(client, oldTable, newTable);
 
     verify(client).createTable(tempTable);
-    verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+    verify(dropTableService).dropTable(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
     verify(copyPartitionsOperation).execute(client, newTable, tempTable);
     verify(renameTableOperation).execute(client, tempTable, newTable);
     verifyNoMoreInteractions(client);
   }
 
   @Test
-  public void alterTableCopyPartitionsFails() throws TException {
+  public void alterTableCopyPartitionsFails() throws Exception {
     oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
     newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
@@ -106,7 +106,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+      verify(dropTableService).dropTable(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verifyZeroInteractions(renameTableOperation);
       verifyNoMoreInteractions(client);
@@ -115,7 +115,7 @@ public class AlterTableServiceTest {
   }
 
   @Test
-  public void alterTableRenameTableFails() throws TException {
+  public void alterTableRenameTableFails() throws Exception {
     oldTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "string", "some comment"))));
     newTable.setSd(createStorageDescriptor(Arrays.asList(new FieldSchema("colA", "int", "some comment"))));
     Table tempTable = new Table(newTable);
@@ -128,7 +128,7 @@ public class AlterTableServiceTest {
       fail("Should have thrown exception.");
     } catch (Exception e) {
       verify(client).createTable(tempTable);
-      verify(dropTableService).removeTableParamsAndDrop(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
+      verify(dropTableService).dropTable(client, NEW_DB_NAME, NEW_TABLE_NAME_TEMP);
       verify(copyPartitionsOperation).execute(client, newTable, tempTable);
       verify(renameTableOperation).execute(client, tempTable, newTable);
       verifyNoMoreInteractions(client);

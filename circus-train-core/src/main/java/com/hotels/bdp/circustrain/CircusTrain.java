@@ -45,6 +45,7 @@ import com.google.common.base.Supplier;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
+import com.hotels.bdp.circustrain.api.data.DataManipulatorFactoryManager;
 import com.hotels.bdp.circustrain.api.event.CopierListener;
 import com.hotels.bdp.circustrain.api.event.LocomotiveListener;
 import com.hotels.bdp.circustrain.api.event.ReplicaCatalogListener;
@@ -242,12 +243,12 @@ public class CircusTrain {
       Supplier<CloseableMetaStoreClient> sourceMetaStoreClientSupplier,
       Supplier<CloseableMetaStoreClient> replicaMetaStoreClientSupplier,
       HousekeepingListener housekeepingListener,
-      ReplicaCatalogListener replicaCatalogListener) {
+      ReplicaCatalogListener replicaCatalogListener,
+      DataManipulatorFactoryManager dataManipulatorFactoryManager) {
     ReplicationFactoryImpl upsertReplicationFactory = new ReplicationFactoryImpl(sourceFactory, replicaFactory,
-        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions);
+        copierFactoryManager, copierListener, partitionPredicateFactory, copierOptions, dataManipulatorFactoryManager);
     return new StrategyBasedReplicationFactory(upsertReplicationFactory, sourceMetaStoreClientSupplier,
         replicaMetaStoreClientSupplier, housekeepingListener, replicaCatalogListener);
-
   }
 
   @Profile({ Modules.REPLICATION })
