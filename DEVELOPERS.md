@@ -35,6 +35,7 @@ First and foremost, its worth having a read through the [README.md](https://gith
    * HDFS or S3 → HDFS, uses `DistCpCopier`
    * HDFS → S3, uses `S3MapreduceCpCopier`
    * S3 → S3,  uses `S3S3Copier`
+      * Note: If you are replicating S3 → S3 cross account, *and* you want to assume a role in the target account (see `copier-options.assume-role` in `README.md`), then you must use `S3MapreduceCpCopier`.
 * The data is copied over first (if the mode is `FULL` or `FULL_OVERWRITE`).
 * Then the metadata of the table is updated.
 
@@ -60,7 +61,7 @@ All data from the source is copied over to the replica table, then the metadata 
 
 
 ### Full Overwrite Replication
-This replication mode behaves in the same was as `FULL` however, any existing replica table and its underlying data will first be deleted before being replaced with the source table and data. 
+This replication mode behaves in the same was as `FULL`; however, any existing replica table and its underlying data will first be deleted before being replaced with the source table and data. 
 
 This mode is useful in the early stages of lifecycle when incompatible schema changes are made. 
 
@@ -105,7 +106,7 @@ One of these client factories is `JceksAmazonS3ClientFactory`, which creates a c
 
 The replication is handled by a `TransferManager` which uses the target S3 client and the `S3S3CopierOptions`. The `TransferManager` will be given the the source client to replicate from. 
 
-The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and wont be used by the other copiers. 
+The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and won't be used by the other copiers. 
 
 
 **S3MapreduceCpCopier**
