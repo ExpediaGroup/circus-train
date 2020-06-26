@@ -5,36 +5,36 @@
 ## Overview
 
 This document is a collection of notes on Circus Train which have been put together to outline what some of the main classes do and how they link together. The project is pretty large and if you haven't worked on it for a while its easy to get lost! 
-These notes are meant as a helpful developers guide into Circus Train's code and how it works, but it not completely exhaustive of all the inner workings of the project. 
 
-Do feel free to update these notes with more information or detail. 
+
+These notes are meant as a helpful developers guide into Circus Train's code and how it works, but it not completely exhaustive of all the inner workings of the project. Do feel free to add more information or detail. 
 
 ## README.md
 
-First and foremost, the first point of call for this project is the [README.md](https://github.com/HotelsDotCom/circus-train) file. It is pretty extensive with a lot of info on the project, including how to run it and all the different configurations which can be used. 
+First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train) file. It is pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
 
 ## Classes
 **Locomotive**
 
 * This is where it all begins.
-* Creates a new `Replication` object using the `ReplicationFactory` and calls replicate on it.
+* A new `Replication` object is created using the `ReplicationFactory` and *replicate* on it.
 
 **ReplicationFactory**
 
-* Returns a `Replication` object, the type depends on whether the source table is partitioned or not and the replication mode specified in the config.
+* Returns a `Replication` object, the type depends on whether the source table is partitioned or not and the replication mode specified in the configuration file.
 
 **Replication**
 
 * Either partitioned or unpartitioned.
-* There are 4 replication modes that the replication will be:
+* There are 4 replication modes:
    * `FULL` ← default
    * `FULL_OVERWRITE`
    * `METADATA_MIRROR`
    * `METADATA_UPDATE`
 * Uses a copier based on where the data is coming from and going to:
-   * hdfs → hdfs, uses distcp-copier
-   * hdfs → s3, uses s3-mapreduce copier
-   * s3 → s3,  uses s3s3 copier
+   * HDFS or S3 → HDFS, uses `DistCpCopier`
+   * HDFS → S3, uses `S3MapreduceCpCopier`
+   * S3 → S3,  uses `S3S3Copier`
 * The data is copied over first (if its not a metadata mirror/update).
 * Then the metadata of the table is updated.
 
@@ -66,7 +66,7 @@ This replication mode behaves in the same was as `FULL` however, any existing re
 
 This mode is useful in the early stages of lifecycle when incompatible schema changes are made. 
 
-A `DataManipulator` is used to handle the deleting of data. Determining which manipulator to use is handled in the same manner as the Copier, in that there is a `DataManipulatorFactoryManager` which will give a suitable `DataManipulatorFactory` that will return a suitable `DataManipulator` object. 
+A `DataManipulator` is used to handle the deleting of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will give a suitable `DataManipulatorFactory` that will return a suitable `DataManipulator` object. 
 
 ### Metadata Mirror Replication 
 Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location.
@@ -110,13 +110,11 @@ The replication is handled by a `TransferManager` which uses the target S3 clien
 The `S3S3CopierOptions` which will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and wont be used by the other copiers. 
 
 
-
 **S3MapreduceCpCopier**
 
 *Replication: hdfs → s3* 
 
 Has its own `AwsS3ClientFactory` which creates a client with the necessary credentials, based on the given configuration. 
-
 
 
 **DistCpCopier**
