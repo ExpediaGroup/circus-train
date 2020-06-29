@@ -121,3 +121,8 @@ Has its own `AwsS3ClientFactory` which creates a client with the necessary crede
 *Replication: HDFS or S3 → HDFS* 
 
 This is the default copier which will be used if the two previous copiers do not support replication between the source and target.
+
+### Roles
+
+When trying to replicate across different S3 accounts an IAM role will need to be assumed by the client, in order to have the correct permissions to perform the replication. 
+The role provided in the copier options needs to have access to the target bucket, and it needs to be able to be assumed by another role, i.e. the client needs to temporarily pretend it is this role. 
