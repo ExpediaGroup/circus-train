@@ -591,10 +591,10 @@ The configuration options for Graphite are:
 
 |Property|Required|Default/Example|Description|
 |----|----|----|----|
-|`graphite.config`|No|e.g. hdfs:///foo/bar/cluster.properties|Specifies where to pick up the default Graphite properties from. By default it picks up the `host` and `prefix` from the cluster.properties file on HDFS.|
+|`graphite.config`|No|e.g. `hdfs:///foo/bar/cluster.properties`|The path to a Java Properties file containing the properties described below (i.e. you can set them in a separate file or directly in the configuration here).|
 |`graphite.host`|No|`hostname`:`port`|The hostname and port of the Graphite server. By default this is picked up from the `config` if provided.|
 |`graphite.prefix`|No|e.g. `dev`|All metrics are prefixed with `prefix.namespace`. By default this is picked up from the `config` if provided.|
-| `graphite.namespace`|Yes|e.g. `com.company.team.circus-train.application`|All metrics are prefixed with `prefix.namespace`. Formatting of this is important for reporting from Graphite.|
+|`graphite.namespace`|Yes|e.g. `com.company.team.circus-train.application`|All metrics are prefixed with `prefix.namespace`. Formatting of this is important for reporting from Graphite.|
 
 ### Metadata transformations
 Circus Train can transform the metadata of a newly created replica table by adding table parameters during the replication.
