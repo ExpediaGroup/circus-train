@@ -1,4 +1,4 @@
-## [16.2.0] - 2020-06-29
+## [16.2.0] - 2020-06-30
 ### Changed
 * Changed version of `hive.version` to `2.3.7` (was `2.3.2`). This allows Circus Train to be used on JDK>=9.
 
