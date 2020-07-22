@@ -1,10 +1,13 @@
+## [16.2.1] - TBD
+### Added
+* A `DEVELOPERS.md` file with some notes on the inner workings of the project. 
+
 ## [16.2.0] - 2020-07-01
 ### Changed
 * Changed version of `hive.version` to `2.3.7` (was `2.3.2`). This allows Circus Train to be used on JDK>=9.
 
 ### Added
 * Replication mode `FULL_OVERWRITE` to overwrite a previously replicated table and delete its data. Useful for incompatible schema changes. 
-* A `DEVELOPERS.md` file with some notes on the inner workings of the project. 
 
 ## [16.1.0] - 2020-03-18
 ### Changed
