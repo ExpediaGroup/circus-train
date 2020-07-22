@@ -5,9 +5,7 @@
 ## Overview
 
 This document is a collection of notes on Circus Train which have been put together to outline what some of the main classes do and how they link together. The project is pretty large and if you haven't worked on it for a while its easy to get lost! 
-
-
-These notes are meant as a helpful developers guide into Circus Train's code and how it works, but it not completely exhaustive of all the inner workings of the project. Do feel free to add more information or detail. 
+These notes are meant as a helpful developers guide into Circus Train's code and how it works, but they are not completely exhaustive of all the inner workings of the project. Do feel free to add more information or detail. 
 
 ## README.md
 
@@ -61,11 +59,11 @@ All data from the source is copied over to the replica table, then the metadata 
 
 
 ### Full Overwrite Replication
-This replication mode behaves in the same was as `FULL`; however, any existing replica table and its underlying data will first be deleted before being replaced with the source table and data. 
+This replication mode behaves in the same way as `FULL`; however, the corresponding existing replica table, if any, and its underlying data will first be deleted before being replaced with the source table and data. 
 
-This mode is useful in the early stages of lifecycle when incompatible schema changes are made. 
+This mode is useful in the early stages of the development lifecycle when incompatible schema changes are being made constantly. 
 
-A `DataManipulator` is used to handle the deleting of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will give a suitable `DataManipulatorFactory` that will return a `DataManipulator` object. 
+A `DataManipulator` is used to handle the deletion of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will generate a suitable `DataManipulatorFactory` that returns a `DataManipulator` object. 
 
 ### Metadata Mirror Replication 
 Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location.
@@ -82,9 +80,9 @@ No data will be copied but any metadata from the source will be copied and table
 Example use case: Update the metadata of a Hive Table (for instance to change the Serde used) without having the overhead of re-replicating all the data.
 
 ## Copiers
-The copiers are the classes which do the actual copying of the data. 
+The copiers are the classes which perform the actual copying of the data. 
 
-There is a `CopierFactoryManager` which determines which type of copier will be used. The `DefaultCopierFactoryManager` is an implementation of this, and has a list of `CopierFactories` auto-wired into it. Spring will find all beans which are implementations of the `CopierFactory` and pass these into the constructor for the `DefaultCopierFactoryManager`. 
+There is a `CopierFactoryManager` which determines which type of copier will be used. The `DefaultCopierFactoryManager` is an implementation of this, and has a list of `CopierFactories` auto-wired into it. Spring will find all beans which implement `CopierFactory` and pass these on to the constructor for the `DefaultCopierFactoryManager`. 
 
 There is an optional copier option available to set which `CopierFactory` to use, if this value is set this copier factory class will be used. If this value is not set the `DefaultCopierFactoryManager` will check all `CopierFactories` in the list and return the first which supports replication between the SourceLocation and ReplicaLocation provided. 
 
@@ -100,7 +98,7 @@ The copiers which use S3 will create clients that allow access and give permissi
 
 *Replication: S3 → S3* 
 
-This copier uses two `AwsS3Clients` - a source client and a replica client. There is an `AwsS3ClientFactory` which will create clients with the necessary permissions to perform actions on S3 buckets
+This copier uses two `AwsS3Clients` - a source client and a replica client. There is an `AwsS3ClientFactory` which will create clients to perform actions on S3 buckets. 
 
 One of these client factories is `JceksAmazonS3ClientFactory`, which creates a client with the necessary credentials required. It does this using a credential provider chain, which will create (as the name states) a chain of credential providers which will be tried in order, until one is successful. One of the credentials in this chain is the `AssumeRoleCredentialProvider` which uses a role provided in the copier options to be able to replicate across S3 accounts.
 
@@ -108,6 +106,14 @@ The replication is handled by a `TransferManager` which uses the target S3 clien
 
 The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and won't be used by the other copiers. 
 
+*Cross-account Replication*
+
+As mentioned above, if you want to replicate from one S3 account to another S3 account you will need to make use of `roles`. 
+In the config file for the replication an `assume-role` will need to be included which will be used by Circus Train to perform the replication. In order for this to work this role will need to have the following permissions:
+* Read access to the source account, 
+* Read and write access to the target account. 
+
+Its important that the role has read access to the source so the data can be read before it is replicated to the target. 
 
 **S3MapreduceCpCopier**
 
