@@ -9,7 +9,7 @@ These notes are meant as a helpful developer's guide into Circus Train's code an
 
 ## README.md
 
-First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train) file. It is a pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
+First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train/blob/master/README.md) file. It is a pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
 
 ## Classes
 **Locomotive**
@@ -112,8 +112,6 @@ As mentioned above, if you want to replicate from one S3 account to another S3 a
 In the config file for the replication an `assume-role` will need to be included which will be used by Circus Train to perform the replication. In order for this to work this role will need to have the following permissions:
 * Read access to the source account, 
 * Read and write access to the target account. 
-
-Its important that the role has read access to the source so the data can be read before it is replicated to the target. 
 
 **S3MapreduceCpCopier**
 
