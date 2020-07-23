@@ -5,7 +5,7 @@
 ## Overview
 
 This document is a collection of notes on Circus Train which have been put together to outline what some of the main classes do and how they link together. The project is pretty large and if you haven't worked on it for a while its easy to get lost! 
-These notes are meant as a helpful developers guide into Circus Train's code and how it works, but they are not completely exhaustive of all the inner workings of the project. Do feel free to add more information or detail. 
+These notes are meant as a helpful developer's guide into Circus Train's code and how it works, but they are not completely exhaustive of all the inner workings of the project. Do feel free to add more information or detail. 
 
 ## README.md
 
@@ -49,9 +49,9 @@ There are four types of replication which Circus Train can handle:
 ### Full Replication
 **Partitioned**
 
-If the source table has partitions then these and the corresponding data will be copied over to the replica table. After this, the metadata of the table will be updated. 
+If the source table has partitions containing data then these and the corresponding data will be copied over to the replica table. After this, the metadata of the table will be updated. 
 
-Otherwise, if the source table has no partitions only the metadata of the table will be updated. 
+Otherwise, if the source table is partitioned but has no partitions containing data only the metadata of the table will be updated. 
 
 **Unpartitioned** 
 
@@ -61,16 +61,16 @@ All data from the source is copied over to the replica table, then the metadata 
 ### Full Overwrite Replication
 This replication mode behaves in the same way as `FULL`; however, the corresponding existing replica table, if any, and its underlying data will first be deleted before being replaced with the source table and data. 
 
-This mode is useful in the early stages of the development lifecycle when incompatible schema changes are being made constantly. 
+This mode is useful in the early stages of the development lifecycle if incompatible schema changes are being made frequently so one doesn't have to manually remove data that is no longer valid. 
 
 A `DataManipulator` is used to handle the deletion of data. Determining which manipulator to use is handled in the same manner as the [Copier](#copiers), in that there is a `DataManipulatorFactoryManager` which will generate a suitable `DataManipulatorFactory` that returns a `DataManipulator` object. 
 
 ### Metadata Mirror Replication 
-Only metadata will be copied (mirrored) from the source to the replica. Replica metadata will not be modified so your source and replica will have the same data location.
+Only metadata will be copied (mirrored) from the source to the replica. Unlike the replication modes above, locations in the replica metadata will not be modified so your source and replica will have the same data locations.
 
 *NOTE:* The replica table will be marked as `EXTERNAL`. This is done to prevent accidental data loss when dropping the replica. 
 
-For example, this can be used for copying someone else's metadata into your Hive Metastore without copying the data or to replicate a view. You still need to have access to the data in order to query it.
+Example use case:  this can be used for copying someone else's metadata into your Hive Metastore without copying the data or to replicate a view. You still need to have access to the data in order to query it.
 
 ### Metadata Update Replication
 This will update the metadata only for a table that was previously fully replicated.
@@ -84,14 +84,14 @@ The copiers are the classes which perform the actual copying of the data.
 
 There is a `CopierFactoryManager` which determines which type of copier will be used. The `DefaultCopierFactoryManager` is an implementation of this, and has a list of `CopierFactories` auto-wired into it. Spring will find all beans which implement `CopierFactory` and pass these on to the constructor for the `DefaultCopierFactoryManager`. 
 
-There is an optional copier option available to set which `CopierFactory` to use, if this value is set this copier factory class will be used. If this value is not set the `DefaultCopierFactoryManager` will check all `CopierFactories` in the list and return the first which supports replication between the SourceLocation and ReplicaLocation provided. 
+There is an optional copier option available to specify which `CopierFactory` to use, if this value is set then this copier factory class will be used. If this value is not set the `DefaultCopierFactoryManager` will check all `CopierFactories` in the list and return the first which supports replication between the SourceLocation and ReplicaLocation provided. 
 
-There is an order of precedence, which means the `CopierFactories` will be checked in the following order to see if the replication is supported:
+The following is the order of precedence which the `CopierFactories` will be checked in to see if the replication is supported:
 * `S3S3Copier`,
 * `S3MapreduceCpCopier`, 
-* and then falls down to `DistCpCopier` if the above factories don't support the replication.
+* `DistCpCopier` (i.e. this is used if all the above factories don't support the replication).
 
-The copiers which use S3 will create clients that allow access and give permissions to perform actions on S3 buckets. In some cases an IAM role is needed, if data is being transferred across S3 accounts. 
+The copiers which use S3 will create clients that allow access and give permissions to perform actions on S3 buckets. In some cases an IAM role is needed (e.g. if data is being transferred across S3 accounts).
 
 ### Types of copier
 **S3S3Copier**
@@ -100,11 +100,11 @@ The copiers which use S3 will create clients that allow access and give permissi
 
 This copier uses two `AwsS3Clients` - a source client and a replica client. There is an `AwsS3ClientFactory` which will create clients to perform actions on S3 buckets. 
 
-One of these client factories is `JceksAmazonS3ClientFactory`, which creates a client with the necessary credentials required. It does this using a credential provider chain, which will create (as the name states) a chain of credential providers which will be tried in order, until one is successful. One of the credentials in this chain is the `AssumeRoleCredentialProvider` which uses a role provided in the copier options to be able to replicate across S3 accounts.
+One of these client factories is `JceksAmazonS3ClientFactory`, which creates a client with the necessary credentials. It does this using a credential provider chain, which will create (as the name states) a chain of credential providers that will be tried in order, until one is successful. One of the credentials in this chain is the `AssumeRoleCredentialProvider` which uses a role provided in the copier options to be able to replicate across S3 accounts.
 
 The replication is handled by a `TransferManager` which uses the target S3 client and the `S3S3CopierOptions`. The `TransferManager` will be given the the source client to replicate from. 
 
-The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific s3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and won't be used by the other copiers. 
+The `S3S3CopierOptions` will take the `CopierOptions` provided and change them into more specific S3 options. For example it will have the options `s3-server-side-encryption` and `assume-role`, which are specific to S3 clients and won't be used by the other copiers. 
 
 *Cross-account Replication*
 
