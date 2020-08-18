@@ -75,10 +75,6 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
     String sourceDatabaseName = sourceTable.getDatabaseName();
     String sourceTableName = sourceTable.getTableName();
 
-    String replicaDatabaseName = tableReplication.getReplicaDatabaseName();
-    String replicaTableName = tableReplication.getReplicaTableName();
-    String replicaTableLocation = tableReplication.getReplicaTable().getTableLocation();
-
     Source source = sourceFactory.newInstance(tableReplication);
     validate(tableReplication, source, replica);
     TableAndStatistics tableAndStatistics = source.getTableAndStatistics(sourceDatabaseName, sourceTableName);
