@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,8 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -32,6 +28,7 @@ import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 
 @Profile({ Modules.REPLICATION })
@@ -54,23 +51,16 @@ public class DistCpCopierFactory implements CopierFactory {
   }
 
   @Override
-  public Copier newInstance(
-      String eventId,
-      Path sourceBaseLocation,
-      List<Path> sourceSubLocations,
-      Path replicaLocation,
-      Map<String, Object> copierOptions) {
-    return new DistCpCopier(conf, sourceBaseLocation, sourceSubLocations, replicaLocation, copierOptions,
-        runningMetricsRegistry);
+  public Copier newInstance(CopierContext copierContext) {
+    return new DistCpCopier(conf, copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(),
+        copierContext.getReplicaLocation(), copierContext.getCopierOptions(), runningMetricsRegistry);
   }
 
-  @Override
-  public Copier newInstance(
-      String eventId,
-      Path sourceBaseLocation,
-      Path replicaLocation,
-      Map<String, Object> copierOptions) {
-    return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
-  }
+  // TODO: difference between null and Collections.<Path>emptyList() for sourceSubLocations
+  /*
+   * @Override public Copier newInstance( String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String,
+   * Object> copierOptions) { return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(),
+   * replicaLocation, copierOptions); }
+   */
 
 }

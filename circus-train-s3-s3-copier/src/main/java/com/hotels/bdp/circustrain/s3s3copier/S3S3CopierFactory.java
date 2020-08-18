@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
@@ -30,6 +26,7 @@ import com.codahale.metrics.MetricRegistry;
 
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.aws.S3Schemes;
 import com.hotels.bdp.circustrain.s3s3copier.aws.AmazonS3ClientFactory;
@@ -64,24 +61,19 @@ public class S3S3CopierFactory implements CopierFactory {
   }
 
   @Override
-  public Copier newInstance(
-      String eventId,
-      Path sourceBaseLocation,
-      List<Path> sourceSubLocations,
-      Path replicaLocation,
-      Map<String, Object> copierOptions) {
-    return new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, clientFactory,
+  public Copier newInstance(CopierContext copierContext) {
+    return new S3S3Copier(copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(), clientFactory,
         transferManagerFactory, listObjectsRequestFactory, runningMetricsRegistry,
-        new S3S3CopierOptions(copierOptions));
+        new S3S3CopierOptions(copierContext.getCopierOptions()));
   }
 
-  @Override
+ /* @Override
   public Copier newInstance(
       String eventId,
       Path sourceBaseLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
     return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
-  }
+  }*/
 
 }

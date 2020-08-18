@@ -86,11 +86,9 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
 
     Replication replication = null;
     if (partitionKeys == null || partitionKeys.isEmpty()) {
-      replication = createUnpartitionedTableReplication(tableReplication, source, replica, sourceDatabaseName,
-          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation);
+      replication = createUnpartitionedTableReplication(tableReplication, source, replica);
     } else {
-      replication = createPartitionedTableReplication(tableReplication, source, replica, sourceDatabaseName,
-          sourceTableName, replicaDatabaseName, replicaTableName, replicaTableLocation);
+      replication = createPartitionedTableReplication(tableReplication, source, replica);
     }
     return replication;
   }
@@ -98,31 +96,30 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
   private Replication createPartitionedTableReplication(
       TableReplication tableReplication,
       Source source,
-      Replica replica,
-      String sourceDatabaseName,
-      String sourceTableName,
-      String replicaDatabaseName,
-      String replicaTableName,
-      String replicaTableLocation) {
+      Replica replica) {
     Replication replication = null;
     PartitionPredicate partitionPredicate = partitionPredicateFactory.newInstance(tableReplication);
     switch (tableReplication.getReplicationMode()) {
     case METADATA_MIRROR:
-      replication = new PartitionedTableMetadataMirrorReplication(sourceDatabaseName, sourceTableName,
-          partitionPredicate, source, replica, eventIdFactory, replicaDatabaseName, replicaTableName);
+      replication = new PartitionedTableMetadataMirrorReplication(tableReplication.getSourceTable().getDatabaseName(),
+          tableReplication.getSourceTable().getTableName(), partitionPredicate, source, replica, eventIdFactory,
+          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
       break;
     case FULL_OVERWRITE:
     case FULL:
       Map<String, Object> mergedCopierOptions = tableReplication
           .getMergedCopierOptions(copierOptions.getCopierOptions());
-      replication = new PartitionedTableReplication(sourceDatabaseName, sourceTableName, partitionPredicate, source,
-          replica, copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
-          mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
+      replication = new PartitionedTableReplication(tableReplication.getSourceTable().getDatabaseName(),
+          tableReplication.getSourceTable().getTableName(), partitionPredicate, source, replica, copierFactoryManager,
+          eventIdFactory, tableReplication.getReplicaTable().getTableLocation(),
+          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName(), mergedCopierOptions,
+          copierListener, dataManipulatorFactoryManager);
       break;
     case METADATA_UPDATE:
-      replication = new PartitionedTableMetadataUpdateReplication(sourceDatabaseName, sourceTableName,
-          partitionPredicate, source, replica, eventIdFactory, replicaTableLocation, replicaDatabaseName,
-          replicaTableName);
+      replication = new PartitionedTableMetadataUpdateReplication(tableReplication.getSourceTable().getDatabaseName(),
+          tableReplication.getSourceTable().getTableName(), partitionPredicate, source, replica, eventIdFactory,
+          tableReplication.getReplicaTable().getTableLocation(), tableReplication.getReplicaDatabaseName(),
+          tableReplication.getReplicaTableName());
       break;
     default:
       throw new CircusTrainException(
@@ -134,29 +131,25 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
   private Replication createUnpartitionedTableReplication(
       TableReplication tableReplication,
       Source source,
-      Replica replica,
-      String sourceDatabaseName,
-      String sourceTableName,
-      String replicaDatabaseName,
-      String replicaTableName,
-      String replicaTableLocation) {
+      Replica replica) {
     Replication replication = null;
     switch (tableReplication.getReplicationMode()) {
     case METADATA_MIRROR:
-      replication = new UnpartitionedTableMetadataMirrorReplication(sourceDatabaseName, sourceTableName, source,
-          replica, eventIdFactory, replicaDatabaseName, replicaTableName);
+      replication = new UnpartitionedTableMetadataMirrorReplication(tableReplication.getSourceTable().getDatabaseName(),
+          tableReplication.getSourceTable().getTableName(), source, replica, eventIdFactory,
+          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
       break;
     case FULL_OVERWRITE:
     case FULL:
       Map<String, Object> mergedCopierOptions = tableReplication
           .getMergedCopierOptions(copierOptions.getCopierOptions());
-      replication = new UnpartitionedTableReplication(sourceDatabaseName, sourceTableName, source, replica,
-          copierFactoryManager, eventIdFactory, replicaTableLocation, replicaDatabaseName, replicaTableName,
-          mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
+      replication = new UnpartitionedTableReplication(tableReplication, source, replica, copierFactoryManager,
+          eventIdFactory, mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
       break;
     case METADATA_UPDATE:
-      replication = new UnpartitionedTableMetadataUpdateReplication(sourceDatabaseName, sourceTableName, source,
-          replica, eventIdFactory, replicaDatabaseName, replicaTableName);
+      replication = new UnpartitionedTableMetadataUpdateReplication(tableReplication.getSourceTable().getDatabaseName(),
+          tableReplication.getSourceTable().getTableName(), source, replica, eventIdFactory,
+          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName());
       break;
     default:
       throw new CircusTrainException(

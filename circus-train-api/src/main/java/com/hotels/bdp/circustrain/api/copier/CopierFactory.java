@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  */
 package com.hotels.bdp.circustrain.api.copier;
 
-import java.util.List;
-import java.util.Map;
 
-import org.apache.hadoop.fs.Path;
 
 public interface CopierFactory {
 
   boolean supportsSchemes(String sourceScheme, String replicaScheme);
 
+  //TODO: copier context builder which checks that the below are filled in as they are required
+  
+  Copier newInstance(CopierContext copierContext);
+  
   /**
    * @param eventId
    * @param sourceBaseLocation
@@ -32,12 +33,12 @@ public interface CopierFactory {
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
-  Copier newInstance(
-      String eventId,
-      Path sourceBaseLocation,
-      List<Path> sourceSubLocations,
-      Path replicaLocation,
-      Map<String, Object> copierOptions);
+//  Copier newInstance(
+//      String eventId,
+//      Path sourceBaseLocation,
+//      List<Path> sourceSubLocations,
+//      Path replicaLocation,
+//      Map<String, Object> copierOptions);
 
   /**
    * @param eventId
@@ -46,6 +47,6 @@ public interface CopierFactory {
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
-  Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);
+  //Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);
 
 }
