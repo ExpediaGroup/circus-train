@@ -41,6 +41,13 @@ public class CopierContext {
     this.replicaLocation = replicaLocation;
     this.copierOptions = copierOptions;
   }
+  
+  public CopierContext(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions) {
+    this.eventId = eventId;
+    this.sourceBaseLocation = sourceBaseLocation;
+    this.replicaLocation = replicaLocation;
+    this.copierOptions = copierOptions;
+  }
   public String getEventId() {
     return eventId;
   }

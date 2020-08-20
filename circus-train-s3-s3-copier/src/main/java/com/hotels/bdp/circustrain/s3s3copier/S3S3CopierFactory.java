@@ -15,7 +15,10 @@
  */
 package com.hotels.bdp.circustrain.s3s3copier;
 
+import java.util.List;
+import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
@@ -62,18 +65,31 @@ public class S3S3CopierFactory implements CopierFactory {
 
   @Override
   public Copier newInstance(CopierContext copierContext) {
-    return new S3S3Copier(copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(), clientFactory,
-        transferManagerFactory, listObjectsRequestFactory, runningMetricsRegistry,
-        new S3S3CopierOptions(copierContext.getCopierOptions()));
+    return new S3S3Copier(copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(),
+        copierContext.getReplicaLocation(), clientFactory, transferManagerFactory, listObjectsRequestFactory,
+        runningMetricsRegistry, new S3S3CopierOptions(copierContext.getCopierOptions()));
   }
 
- /* @Override
+  @Override
   public Copier newInstance(
       String eventId,
       Path sourceBaseLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
-    return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
-  }*/
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, replicaLocation, copierOptions);
+    return newInstance(copierContext);
+  }
+
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, sourceSubLocations, replicaLocation,
+        copierOptions);
+    return newInstance(copierContext);
+  }
 
 }

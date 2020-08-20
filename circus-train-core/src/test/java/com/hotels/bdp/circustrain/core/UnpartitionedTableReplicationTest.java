@@ -36,6 +36,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
+import com.hotels.bdp.circustrain.api.conf.SourceTable;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
@@ -90,7 +93,7 @@ public class UnpartitionedTableReplicationTest {
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
-  private final String targetTableLoation = "targetTableLocation";
+  private final String targetTableLocation = "targetTableLocation";
 
   @Before
   public void injectMocks() throws Exception {
@@ -109,13 +112,36 @@ public class UnpartitionedTableReplicationTest {
     when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
   }
 
+  private TableReplication createTypicalTableReplication() {
+    return createTableReplication(DATABASE, TABLE, DATABASE, TABLE);
+  }
+
+  private TableReplication createTableReplication(
+      String sourceDatabaseName,
+      String sourceTableName,
+      String replicaDatabaseName,
+      String replicateTableName) {
+    TableReplication tableReplication = new TableReplication();
+    ReplicaTable replicaTable = new ReplicaTable();
+    replicaTable.setDatabaseName(replicaDatabaseName);
+    replicaTable.setTableName(replicateTableName);
+    replicaTable.setTableLocation(targetTableLocation);
+    tableReplication.setReplicaTable(replicaTable);
+    SourceTable sourceTable = new SourceTable();
+    sourceTable.setDatabaseName(sourceDatabaseName);
+    sourceTable.setTableName(sourceTableName);
+    tableReplication.setSourceTable(sourceTable);
+    return tableReplication;
+  }
+
   @Test
   public void typical() throws Exception {
-    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
-    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
-        dataManipulatorFactoryManager);
+
+    TableReplication tableReplication = createTypicalTableReplication();
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(tableReplication, source, replica,
+        copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -139,12 +165,12 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void mappedNames() throws Exception {
-    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
 
-    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, MAPPED_DATABASE, MAPPED_TABLE, copierOptions,
-        listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTableReplication(DATABASE, TABLE, MAPPED_DATABASE, MAPPED_TABLE);
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(tableReplication, source, replica,
+        copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -166,14 +192,14 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void copierListenerCalledWhenException() throws Exception {
-    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
 
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
 
-    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
-        dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(tableReplication, source, replica,
+        copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");
@@ -188,13 +214,13 @@ public class UnpartitionedTableReplicationTest {
 
   @Test
   public void replicationFailsOnDeleteTableException() throws Exception {
-    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLoation, EVENT_ID, sourceLocationManager))
+    when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
     doThrow(new Exception()).when(replica).cleanupReplicaTableIfRequired(DATABASE, TABLE, dataManipulator);
 
-    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(DATABASE, TABLE, source, replica,
-        copierFactoryManager, eventIdFactory, targetTableLoation, DATABASE, TABLE, copierOptions, listener,
-        dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    UnpartitionedTableReplication replication = new UnpartitionedTableReplication(tableReplication, source, replica,
+        copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");

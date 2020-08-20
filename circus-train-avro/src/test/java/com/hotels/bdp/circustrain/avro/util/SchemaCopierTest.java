@@ -17,7 +17,9 @@ package com.hotels.bdp.circustrain.avro.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -36,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
@@ -70,7 +73,9 @@ public class SchemaCopierTest {
     copierOptionsMap.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
     when(copierFactoryManager.getCopierFactory(eq(source), eq(targetFile), eq(copierOptionsMap)))
         .thenReturn(copierFactory);
-    when(copierFactory.newInstance(eq(eventId), eq(source), eq(targetFile), eq(copierOptionsMap))).thenReturn(copier);
+    //when(copierFactory.newInstance(eq(eventId), eq(source), eq(targetFile), eq(copierOptionsMap))).thenReturn(copier);
+    //TODO: looks like above specifically returns the mock copier only on certain input, need to do the same based on the context
+    doReturn(copier).when(copierFactory.newInstance(any(CopierContext.class)));
     when(copier.copy()).thenReturn(metrics);
     when(metrics.getBytesReplicated()).thenReturn(123L);
     Path result = schemaCopier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);

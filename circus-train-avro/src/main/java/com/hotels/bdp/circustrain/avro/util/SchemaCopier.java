@@ -75,7 +75,6 @@ public class SchemaCopier {
     CopierFactory copierFactory = copierFactoryManager
         .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
     LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
-    //TODO: check but I don't think we care about now having db name, table name etc. for this copier
     CopierContext copierContext = new CopierContext(eventId, sourceLocation, null, destinationSchemaFile, mergedCopierOptions);
     Copier copier = copierFactory.newInstance(copierContext);
     Metrics metrics = copier.copy();

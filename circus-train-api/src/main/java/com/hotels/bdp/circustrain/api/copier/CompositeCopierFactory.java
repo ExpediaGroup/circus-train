@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 
@@ -85,35 +86,41 @@ public class CompositeCopierFactory implements CopierFactory {
     List<Copier> copiers = new ArrayList<>(delegates.size());
     int i = 0;
     for (CopierFactory delegate : delegates) {
-      CopierPathGeneratorParams copierPathGeneratorParams = CopierPathGeneratorParams.newParams(i++, copierContext.getEventId(),
-          copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(), copierContext.getCopierOptions());
+      CopierPathGeneratorParams copierPathGeneratorParams = CopierPathGeneratorParams
+          .newParams(i++, copierContext.getEventId(), copierContext.getSourceBaseLocation(),
+              copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(),
+              copierContext.getCopierOptions());
       Path newSourceBaseLocation = pathGenerator.generateSourceBaseLocation(copierPathGeneratorParams);
       Path newReplicaLocation = pathGenerator.generateReplicaLocation(copierPathGeneratorParams);
-      
-      CopierContext delegateContext = new CopierContext(copierContext.getEventId(), newSourceBaseLocation, copierContext.getSourceSubLocations(), newReplicaLocation, copierContext.getCopierOptions());
+
+      CopierContext delegateContext = new CopierContext(copierContext.getEventId(), newSourceBaseLocation,
+          copierContext.getSourceSubLocations(), newReplicaLocation, copierContext.getCopierOptions());
       Copier copier = delegate.newInstance(delegateContext);
       copiers.add(copier);
     }
     return new CompositeCopier(copiers, metricsMerger);
   }
-/*
+
   @Override
   public Copier newInstance(
       String eventId,
       Path sourceBaseLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
-    List<Copier> copiers = new ArrayList<>(delegates.size());
-    int i = 0;
-    for (CopierFactory delegatee : delegates) {
-      CopierPathGeneratorParams copierPathGeneratorParams = CopierPathGeneratorParams.newParams(i++, eventId,
-          sourceBaseLocation, null, replicaLocation, copierOptions);
-      Path newReplicaLocation = pathGenerator.generateReplicaLocation(copierPathGeneratorParams);
-      Path newSourceBaseLocation = pathGenerator.generateSourceBaseLocation(copierPathGeneratorParams);
-      Copier copier = delegatee.newInstance(eventId, newSourceBaseLocation, newReplicaLocation, copierOptions);
-      copiers.add(copier);
-    }
-    return new CompositeCopier(copiers, metricsMerger);
-  }*/
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, replicaLocation, copierOptions);
+    return newInstance(copierContext);
+  }
+
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, sourceSubLocations, replicaLocation,
+        copierOptions);
+    return newInstance(copierContext);
+  }
 
 }

@@ -15,8 +15,11 @@
  */
 package com.hotels.bdp.circustrain.s3mapreducecpcopier;
 
+import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -58,13 +61,26 @@ public class S3MapReduceCpCopierFactory implements CopierFactory {
         copierContext.getReplicaLocation(), copierContext.getCopierOptions(), runningMetricsRegistry);
   }
 
-  // @Override
-  // public Copier newInstance(
-  // String eventId,
-  // Path sourceBaseLocation,
-  // Path replicaLocation,
-  // Map<String, Object> copierOptions) {
-  // return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(), replicaLocation, copierOptions);
-  // }
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, replicaLocation, copierOptions);
+    return newInstance(copierContext);
+  }
+
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, sourceSubLocations, replicaLocation,
+        copierOptions);
+    return newInstance(copierContext);
+  }
 
 }

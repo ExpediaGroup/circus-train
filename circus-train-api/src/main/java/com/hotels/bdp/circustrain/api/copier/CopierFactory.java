@@ -15,17 +15,30 @@
  */
 package com.hotels.bdp.circustrain.api.copier;
 
+import java.util.List;
+import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 
 public interface CopierFactory {
 
   boolean supportsSchemes(String sourceScheme, String replicaScheme);
 
-  //TODO: copier context builder which checks that the below are filled in as they are required
-  
-  Copier newInstance(CopierContext copierContext);
-  
   /**
+   * Creates a new Copier.
+   * 
+   * @param copierContext Context object containing configuration values for the Copier.
+   * @return
+   */
+  default Copier newInstance(CopierContext copierContext) {
+    //TODO: this is only here for backwards compatibility with CopierFactorys using older versions of Circus Train, when the below
+    //deprecated methods are removed so should this default implementation
+    return newInstance(copierContext.getEventId(), copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(), 
+        copierContext.getCopierOptions());
+  }
+
+  /**
+   * @deprecated As of release 16.3.0, replaced by {@link #newInstance(CopierContext)}.
    * @param eventId
    * @param sourceBaseLocation
    * @param sourceSubLocations
@@ -33,20 +46,24 @@ public interface CopierFactory {
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
-//  Copier newInstance(
-//      String eventId,
-//      Path sourceBaseLocation,
-//      List<Path> sourceSubLocations,
-//      Path replicaLocation,
-//      Map<String, Object> copierOptions);
+  @Deprecated
+  Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions);
 
   /**
+   * @deprecated As of release 16.3.0, replaced by {@link #newInstance(CopierContext)}.
+   * 
    * @param eventId
    * @param sourceBaseLocation
    * @param replicaLocation
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
-  //Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);
+  @Deprecated
+  Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);
 
 }

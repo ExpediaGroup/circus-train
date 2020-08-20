@@ -15,8 +15,11 @@
  */
 package com.hotels.bdp.circustrain.distcpcopier;
 
+import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -57,10 +60,26 @@ public class DistCpCopierFactory implements CopierFactory {
   }
 
   // TODO: difference between null and Collections.<Path>emptyList() for sourceSubLocations
-  /*
-   * @Override public Copier newInstance( String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String,
-   * Object> copierOptions) { return newInstance(eventId, sourceBaseLocation, Collections.<Path>emptyList(),
-   * replicaLocation, copierOptions); }
-   */
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, replicaLocation, copierOptions);
+    return newInstance(copierContext);
+  }
+
+  @Override
+  public Copier newInstance(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, sourceSubLocations, replicaLocation,
+        copierOptions);
+    return newInstance(copierContext);
+  }
 
 }
