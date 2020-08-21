@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.api.copier;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,28 +27,35 @@ public class CopierContext {
 
   private String eventId;
   private Path sourceBaseLocation;
-  private List<Path> sourceSubLocations;
+  private List<Path> sourceSubLocations = Collections.<Path>emptyList();
   private Path replicaLocation;
   private Map<String, Object> copierOptions;
   private TableReplication tableReplication;
-  private String sourceDatabaseName;
-  private String sourceTableName;
-  
-  //TODO: below constructor added to make it easier to construct these based on how we used to do it, probably replace with a builder instead.
-  public CopierContext(String eventId, Path sourceBaseLocation, List<Path> sourceSubLocations, Path replicaLocation, Map<String, Object> copierOptions) {
+
+  public CopierContext(
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
     this.eventId = eventId;
     this.sourceBaseLocation = sourceBaseLocation;
     this.sourceSubLocations = sourceSubLocations;
     this.replicaLocation = replicaLocation;
     this.copierOptions = copierOptions;
   }
-  
-  public CopierContext(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions) {
+
+  public CopierContext(
+      String eventId,
+      Path sourceBaseLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
     this.eventId = eventId;
     this.sourceBaseLocation = sourceBaseLocation;
     this.replicaLocation = replicaLocation;
     this.copierOptions = copierOptions;
   }
+
   public String getEventId() {
     return eventId;
   }
@@ -88,18 +96,12 @@ public class CopierContext {
     this.copierOptions = copierOptions;
   }
 
-  //TODO: decide on this 
   public void setTableReplication(TableReplication tableReplication) {
     this.tableReplication = tableReplication;
   }
-  //OR
-  public void setSourceDatabaseName(String sourceDatabaseName) {
-    this.sourceDatabaseName = sourceDatabaseName;
-    
+
+  public TableReplication getTableReplication() {
+    return tableReplication;
   }
-  public void setSourceTableName(String sourceTableName) {
-    this.sourceTableName = sourceTableName;    
-  }
-  
 
 }

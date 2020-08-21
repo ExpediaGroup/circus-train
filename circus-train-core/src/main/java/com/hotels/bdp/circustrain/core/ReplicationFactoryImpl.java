@@ -105,11 +105,8 @@ public class ReplicationFactoryImpl implements ReplicationFactory {
     case FULL:
       Map<String, Object> mergedCopierOptions = tableReplication
           .getMergedCopierOptions(copierOptions.getCopierOptions());
-      replication = new PartitionedTableReplication(tableReplication.getSourceTable().getDatabaseName(),
-          tableReplication.getSourceTable().getTableName(), partitionPredicate, source, replica, copierFactoryManager,
-          eventIdFactory, tableReplication.getReplicaTable().getTableLocation(),
-          tableReplication.getReplicaDatabaseName(), tableReplication.getReplicaTableName(), mergedCopierOptions,
-          copierListener, dataManipulatorFactoryManager);
+      replication = new PartitionedTableReplication(tableReplication, partitionPredicate, source, replica,
+          copierFactoryManager, eventIdFactory, mergedCopierOptions, copierListener, dataManipulatorFactoryManager);
       break;
     case METADATA_UPDATE:
       replication = new PartitionedTableMetadataUpdateReplication(tableReplication.getSourceTable().getDatabaseName(),

@@ -98,11 +98,7 @@ class UnpartitionedTableReplication implements Replication {
           .getCopierFactory(sourceLocation, replicaLocation, copierOptions);
       
       CopierContext copierContext = new CopierContext(eventId, sourceLocation, null, replicaLocation, copierOptions);
-      //TODO: below which requires passing tableReplication around
       copierContext.setTableReplication(tableReplication);
-      //OR below which requires less messing around in the ReplicationFactoryImpl but is possibly more future proof
-      copierContext.setSourceDatabaseName(database);
-      copierContext.setSourceTableName(table);
       
       Copier copier = copierFactory.newInstance(copierContext);
       copierListener.copierStart(copier.getClass().getName());

@@ -36,10 +36,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
-import com.hotels.bdp.circustrain.api.conf.ReplicaTable;
-import com.hotels.bdp.circustrain.api.conf.SourceTable;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.data.DataManipulator;
@@ -104,8 +103,7 @@ public class UnpartitionedTableReplicationTest {
     when(sourceLocationManager.getTableLocation()).thenReturn(sourceTableLocation);
     when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copierFactory);
-    when(copierFactory.newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions))
-        .thenReturn(copier);
+    when(copierFactory.newInstance(any(CopierContext.class))).thenReturn(copier);
     when(replicaLocationManager.getTableLocation()).thenReturn(replicaTableLocation);
     when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(dataManipulatorFactory);
@@ -113,25 +111,7 @@ public class UnpartitionedTableReplicationTest {
   }
 
   private TableReplication createTypicalTableReplication() {
-    return createTableReplication(DATABASE, TABLE, DATABASE, TABLE);
-  }
-
-  private TableReplication createTableReplication(
-      String sourceDatabaseName,
-      String sourceTableName,
-      String replicaDatabaseName,
-      String replicateTableName) {
-    TableReplication tableReplication = new TableReplication();
-    ReplicaTable replicaTable = new ReplicaTable();
-    replicaTable.setDatabaseName(replicaDatabaseName);
-    replicaTable.setTableName(replicateTableName);
-    replicaTable.setTableLocation(targetTableLocation);
-    tableReplication.setReplicaTable(replicaTable);
-    SourceTable sourceTable = new SourceTable();
-    sourceTable.setDatabaseName(sourceDatabaseName);
-    sourceTable.setTableName(sourceTableName);
-    tableReplication.setSourceTable(sourceTable);
-    return tableReplication;
+    return TableReplicationUtils.createTableReplication(DATABASE, TABLE, DATABASE, TABLE, targetTableLocation);
   }
 
   @Test
@@ -150,9 +130,7 @@ public class UnpartitionedTableReplicationTest {
     replicationOrder
         .verify(copierFactoryManager)
         .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder
-        .verify(copierFactory)
-        .newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions);
+    replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(listener).copierStart(anyString());
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(listener).copierEnd(any(Metrics.class));
@@ -168,7 +146,8 @@ public class UnpartitionedTableReplicationTest {
     when(replica.getLocationManager(TableType.UNPARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
 
-    TableReplication tableReplication = createTableReplication(DATABASE, TABLE, MAPPED_DATABASE, MAPPED_TABLE);
+    TableReplication tableReplication = TableReplicationUtils
+        .createTableReplication(DATABASE, TABLE, MAPPED_DATABASE, MAPPED_TABLE, targetTableLocation);
     UnpartitionedTableReplication replication = new UnpartitionedTableReplication(tableReplication, source, replica,
         copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
@@ -179,9 +158,7 @@ public class UnpartitionedTableReplicationTest {
     replicationOrder
         .verify(copierFactoryManager)
         .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder
-        .verify(copierFactory)
-        .newInstance(EVENT_ID, sourceTableLocation, replicaTableLocation, copierOptions);
+    replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
