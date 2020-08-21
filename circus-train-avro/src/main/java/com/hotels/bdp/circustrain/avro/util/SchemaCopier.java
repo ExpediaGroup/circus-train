@@ -75,7 +75,7 @@ public class SchemaCopier {
     CopierFactory copierFactory = copierFactoryManager
         .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
     LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
-    CopierContext copierContext = new CopierContext(eventId, sourceLocation, null, destinationSchemaFile, mergedCopierOptions);
+    CopierContext copierContext = new CopierContext(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
     Copier copier = copierFactory.newInstance(copierContext);
     Metrics metrics = copier.copy();
 
