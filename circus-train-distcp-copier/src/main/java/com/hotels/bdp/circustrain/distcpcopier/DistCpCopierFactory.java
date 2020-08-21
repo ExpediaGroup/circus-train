@@ -59,7 +59,6 @@ public class DistCpCopierFactory implements CopierFactory {
         copierContext.getReplicaLocation(), copierContext.getCopierOptions(), runningMetricsRegistry);
   }
 
-  // TODO: difference between null and Collections.<Path>emptyList() for sourceSubLocations
   @Override
   public Copier newInstance(
       String eventId,

@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 
 public class CopierPathGeneratorParams {
 
-  //TODO: should we change this to take the CopierContext instead of the arguments after copierIndex?
   public static CopierPathGeneratorParams newParams(
       int copierIndex,
       String eventId,
