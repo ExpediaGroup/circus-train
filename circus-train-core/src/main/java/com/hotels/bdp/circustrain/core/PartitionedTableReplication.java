@@ -127,9 +127,8 @@ class PartitionedTableReplication implements Replication {
       } else {
         CopierFactory copierFactory = copierFactoryManager
             .getCopierFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
-        CopierContext copierContext = new CopierContext(eventId, sourceBaseLocation, sourceSubLocations,
+        CopierContext copierContext = new CopierContext(tableReplication, eventId, sourceBaseLocation, sourceSubLocations,
             replicaPartitionBaseLocation, copierOptions);
-        copierContext.setTableReplication(tableReplication);
         Copier copier = copierFactory.newInstance(copierContext);
         copierListener.copierStart(copier.getClass().getName());
         try {

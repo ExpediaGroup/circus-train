@@ -21,16 +21,45 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 
 public class CopierContext {
 
   private String eventId;
   private Path sourceBaseLocation;
-  private List<Path> sourceSubLocations = Collections.<Path>emptyList();
+  private List<Path> sourceSubLocations = ImmutableList.copyOf(Collections.<Path>emptyList());
   private Path replicaLocation;
   private Map<String, Object> copierOptions;
   private TableReplication tableReplication;
+
+  public CopierContext(
+      TableReplication tableReplication,
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    this.tableReplication = tableReplication;
+    this.eventId = eventId;
+    this.sourceBaseLocation = sourceBaseLocation;
+    if (sourceSubLocations != null) {
+      this.sourceSubLocations = ImmutableList.copyOf(sourceSubLocations);
+    }
+    this.replicaLocation = replicaLocation;
+    this.copierOptions = ImmutableMap.copyOf(copierOptions);
+  }
+
+  public CopierContext(
+      TableReplication tableReplication,
+      String eventId,
+      Path sourceLocation,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    this(tableReplication, eventId, sourceLocation, null, replicaLocation, copierOptions);
+  }
 
   public CopierContext(
       String eventId,
@@ -38,11 +67,7 @@ public class CopierContext {
       List<Path> sourceSubLocations,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
-    this.eventId = eventId;
-    this.sourceBaseLocation = sourceBaseLocation;
-    this.sourceSubLocations = sourceSubLocations;
-    this.replicaLocation = replicaLocation;
-    this.copierOptions = copierOptions;
+    this(null, eventId, sourceBaseLocation, sourceSubLocations, replicaLocation, copierOptions);
   }
 
   public CopierContext(
@@ -50,54 +75,27 @@ public class CopierContext {
       Path sourceBaseLocation,
       Path replicaLocation,
       Map<String, Object> copierOptions) {
-    this.eventId = eventId;
-    this.sourceBaseLocation = sourceBaseLocation;
-    this.replicaLocation = replicaLocation;
-    this.copierOptions = copierOptions;
+    this(null, eventId, sourceBaseLocation, null, replicaLocation, copierOptions);
   }
 
   public String getEventId() {
     return eventId;
   }
 
-  public void setEventId(String eventId) {
-    this.eventId = eventId;
-  }
-
   public Path getSourceBaseLocation() {
     return sourceBaseLocation;
-  }
-
-  public void setSourceBaseLocation(Path sourceBaseLocation) {
-    this.sourceBaseLocation = sourceBaseLocation;
   }
 
   public List<Path> getSourceSubLocations() {
     return sourceSubLocations;
   }
 
-  public void setSourceSubLocations(List<Path> sourceSubLocations) {
-    this.sourceSubLocations = sourceSubLocations;
-  }
-
   public Path getReplicaLocation() {
     return replicaLocation;
   }
 
-  public void setReplicaLocation(Path replicaLocation) {
-    this.replicaLocation = replicaLocation;
-  }
-
   public Map<String, Object> getCopierOptions() {
     return copierOptions;
-  }
-
-  public void setCopierOptions(Map<String, Object> copierOptions) {
-    this.copierOptions = copierOptions;
-  }
-
-  public void setTableReplication(TableReplication tableReplication) {
-    this.tableReplication = tableReplication;
   }
 
   public TableReplication getTableReplication() {
