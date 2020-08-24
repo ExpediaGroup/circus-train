@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 
-public class CopierContext {
+public final class CopierContext {
 
   private String eventId;
   private Path sourceBaseLocation;
