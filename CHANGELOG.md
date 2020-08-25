@@ -17,7 +17,7 @@
 * Fix AssumeRoleCredentialProvider not auto-renewing credentials on expiration.
 
 ### Fixed
-* Fixed issue where replication breaks if struct columns have changed. com.hotels.bdp.circustrain.api.copier.CopierFactory
+* Fixed issue where replication breaks if struct columns have changed. See [#173](https://github.com/HotelsDotCom/circus-train/issues/173).
 
 ## [16.0.0] - 2020-02-26
 ### Changed
