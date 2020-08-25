@@ -28,7 +28,9 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.data.DataManipulator;
@@ -52,37 +54,30 @@ class PartitionedTableReplication implements Replication {
   private final String eventId;
   private final CopierFactoryManager copierFactoryManager;
   private final PartitionPredicate partitionPredicate;
-  private final String targetTableLocation;
-  private final String replicaDatabaseName;
-  private final String replicaTableName;
   private Metrics metrics = Metrics.NULL_VALUE;
   private final Map<String, Object> copierOptions;
   private final CopierListener copierListener;
   private final DataManipulatorFactoryManager dataManipulatorFactoryManager;
 
+  private TableReplication tableReplication;
+
   PartitionedTableReplication(
-      String database,
-      String table,
+      TableReplication tableReplication,
       PartitionPredicate partitionPredicate,
       Source source,
       Replica replica,
       CopierFactoryManager copierFactoryManager,
       EventIdFactory eventIdFactory,
-      String targetTableLocation,
-      String replicaDatabaseName,
-      String replicaTableName,
       Map<String, Object> copierOptions,
       CopierListener copierListener,
       DataManipulatorFactoryManager dataManipulatorFactoryManager) {
-    this.database = database;
-    this.table = table;
+    this.tableReplication = tableReplication;
+    this.database = tableReplication.getSourceTable().getDatabaseName();
+    this.table = tableReplication.getSourceTable().getTableName();
     this.partitionPredicate = partitionPredicate;
     this.source = source;
     this.replica = replica;
     this.copierFactoryManager = copierFactoryManager;
-    this.targetTableLocation = targetTableLocation;
-    this.replicaDatabaseName = replicaDatabaseName;
-    this.replicaTableName = replicaTableName;
     this.copierOptions = copierOptions;
     this.copierListener = copierListener;
     this.dataManipulatorFactoryManager = dataManipulatorFactoryManager;
@@ -92,6 +87,9 @@ class PartitionedTableReplication implements Replication {
   @Override
   public void replicate() throws CircusTrainException {
     try {
+      String replicaDatabaseName = tableReplication.getReplicaDatabaseName();
+      String replicaTableName = tableReplication.getReplicaTableName();
+
       TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
       Table sourceTable = sourceTableAndStatistics.getTable();
 
@@ -109,7 +107,8 @@ class PartitionedTableReplication implements Replication {
       List<Path> sourceSubLocations = sourceLocationManager.getPartitionLocations();
 
       ReplicaLocationManager replicaLocationManager = replica
-          .getLocationManager(TableType.PARTITIONED, targetTableLocation, eventId, sourceLocationManager);
+          .getLocationManager(TableType.PARTITIONED, tableReplication.getReplicaTable().getTableLocation(), eventId,
+              sourceLocationManager);
       Path replicaPartitionBaseLocation = replicaLocationManager.getPartitionBaseLocation();
 
       DataManipulatorFactory dataManipulatorFactory = dataManipulatorFactoryManager
@@ -128,8 +127,9 @@ class PartitionedTableReplication implements Replication {
       } else {
         CopierFactory copierFactory = copierFactoryManager
             .getCopierFactory(sourceBaseLocation, replicaPartitionBaseLocation, copierOptions);
-        Copier copier = copierFactory
-            .newInstance(eventId, sourceBaseLocation, sourceSubLocations, replicaPartitionBaseLocation, copierOptions);
+        CopierContext copierContext = new CopierContext(tableReplication, eventId, sourceBaseLocation, sourceSubLocations,
+            replicaPartitionBaseLocation, copierOptions);
+        Copier copier = copierFactory.newInstance(copierContext);
         copierListener.copierStart(copier.getClass().getName());
         try {
           metrics = copier.copy();

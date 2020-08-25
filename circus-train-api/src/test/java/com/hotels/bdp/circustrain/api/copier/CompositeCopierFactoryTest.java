@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@ package com.hotels.bdp.circustrain.api.copier;
 
 import static java.util.Arrays.asList;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -31,7 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -66,14 +67,8 @@ public class CompositeCopierFactoryTest {
 
   @Before
   public void init() {
-    doReturn(firstCopier).when(firstCopierFactory).newInstance(anyString(), any(Path.class),
-        Matchers.<List<Path>> any(), any(Path.class), Matchers.<Map<String, Object>> any());
-    doReturn(firstCopier).when(firstCopierFactory).newInstance(anyString(), any(Path.class), any(Path.class),
-        Matchers.<Map<String, Object>> any());
-    doReturn(secondCopier).when(secondCopierFactory).newInstance(anyString(), any(Path.class),
-        Matchers.<List<Path>> any(), any(Path.class), Matchers.<Map<String, Object>> any());
-    doReturn(secondCopier).when(secondCopierFactory).newInstance(anyString(), any(Path.class), any(Path.class),
-        Matchers.<Map<String, Object>> any());
+    doReturn(firstCopier).when(firstCopierFactory).newInstance(any(CopierContext.class));
+    doReturn(secondCopier).when(secondCopierFactory).newInstance(any(CopierContext.class));
   }
 
   @Test
@@ -88,12 +83,22 @@ public class CompositeCopierFactoryTest {
             asList(firstReplicaLocation, secondReplicaLocation)),
         MetricsMerger.DEFAULT);
 
-    copierFactory.newInstance("eventId", sourceBaseLocation, sourceSubLocations, new Path("replicaLocation"),
-        overridingCopierOptions);
-    verify(firstCopierFactory).newInstance("eventId", sourceBaseLocation, sourceSubLocations, firstReplicaLocation,
-        overridingCopierOptions);
-    verify(secondCopierFactory).newInstance("eventId", firstReplicaLocation, sourceSubLocations, secondReplicaLocation,
-        overridingCopierOptions);
+    CopierContext copierContext = new CopierContext("eventId", sourceBaseLocation, sourceSubLocations,
+        new Path("replicaLocation"), overridingCopierOptions);
+    copierFactory.newInstance(copierContext);
+
+    ArgumentCaptor<CopierContext> argument = ArgumentCaptor.forClass(CopierContext.class);
+    verify(firstCopierFactory).newInstance(argument.capture());
+    CopierContext captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getSourceSubLocations(), is(sourceSubLocations));
+    assertThat(captured.getReplicaLocation(), is(firstReplicaLocation));
+
+    verify(secondCopierFactory).newInstance(argument.capture());
+    captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(firstReplicaLocation));
+    assertThat(captured.getSourceSubLocations(), is(sourceSubLocations));
+    assertThat(captured.getReplicaLocation(), is(secondReplicaLocation));
   }
 
   @Test
@@ -107,11 +112,19 @@ public class CompositeCopierFactoryTest {
             asList(firstReplicaLocation, secondReplicaLocation)),
         MetricsMerger.DEFAULT);
 
-    copierFactory.newInstance("eventId", sourceBaseLocation, new Path("replicaLocation"), overridingCopierOptions);
-    verify(firstCopierFactory).newInstance("eventId", sourceBaseLocation, firstReplicaLocation,
-        overridingCopierOptions);
-    verify(secondCopierFactory).newInstance("eventId", firstReplicaLocation, secondReplicaLocation,
-        overridingCopierOptions);
+    CopierContext copierContext = new CopierContext("eventId", sourceBaseLocation, new Path("replicaLocation"), overridingCopierOptions);
+    copierFactory.newInstance(copierContext);
+
+    ArgumentCaptor<CopierContext> argument = ArgumentCaptor.forClass(CopierContext.class);
+    verify(firstCopierFactory).newInstance(argument.capture());
+    CopierContext captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getReplicaLocation(), is(firstReplicaLocation));
+
+    verify(secondCopierFactory).newInstance(argument.capture());
+    captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(firstReplicaLocation));
+    assertThat(captured.getReplicaLocation(), is(secondReplicaLocation));
   }
 
   @Test
@@ -125,13 +138,23 @@ public class CompositeCopierFactoryTest {
         new DummyCopierPathGenerator(asList(sourceBaseLocation, sourceBaseLocation),
             asList(firstReplicaLocation, secondReplicaLocation)),
         MetricsMerger.DEFAULT);
+    
+    CopierContext copierContext = new CopierContext("eventId", sourceBaseLocation, sourceSubLocations,
+        new Path("replicaLocation"), overridingCopierOptions);
+    copierFactory.newInstance(copierContext);
 
-    copierFactory.newInstance("eventId", sourceBaseLocation, sourceSubLocations, new Path("replicaLocation"),
-        overridingCopierOptions);
-    verify(firstCopierFactory).newInstance("eventId", sourceBaseLocation, sourceSubLocations, firstReplicaLocation,
-        overridingCopierOptions);
-    verify(secondCopierFactory).newInstance("eventId", sourceBaseLocation, sourceSubLocations, secondReplicaLocation,
-        overridingCopierOptions);
+    ArgumentCaptor<CopierContext> argument = ArgumentCaptor.forClass(CopierContext.class);
+    verify(firstCopierFactory).newInstance(argument.capture());
+    CopierContext captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getSourceSubLocations(), is(sourceSubLocations));
+    assertThat(captured.getReplicaLocation(), is(firstReplicaLocation));
+
+    verify(secondCopierFactory).newInstance(argument.capture());
+    captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getSourceSubLocations(), is(sourceSubLocations));
+    assertThat(captured.getReplicaLocation(), is(secondReplicaLocation));
   }
 
   @Test
@@ -144,12 +167,20 @@ public class CompositeCopierFactoryTest {
         new DummyCopierPathGenerator(asList(sourceBaseLocation, sourceBaseLocation),
             asList(firstReplicaLocation, secondReplicaLocation)),
         MetricsMerger.DEFAULT);
+    CopierContext copierContext = new CopierContext("eventId", sourceBaseLocation, new Path("replicaLocation"),
+        overridingCopierOptions);
+    copierFactory.newInstance(copierContext);
 
-    copierFactory.newInstance("eventId", sourceBaseLocation, new Path("replicaLocation"), overridingCopierOptions);
-    verify(firstCopierFactory).newInstance("eventId", sourceBaseLocation, firstReplicaLocation,
-        overridingCopierOptions);
-    verify(secondCopierFactory).newInstance("eventId", sourceBaseLocation, secondReplicaLocation,
-        overridingCopierOptions);
+    ArgumentCaptor<CopierContext> argument = ArgumentCaptor.forClass(CopierContext.class);
+    verify(firstCopierFactory).newInstance(argument.capture());
+    CopierContext captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getReplicaLocation(), is(firstReplicaLocation));
+
+    verify(secondCopierFactory).newInstance(argument.capture());
+    captured = argument.getValue();
+    assertThat(captured.getSourceBaseLocation(), is(sourceBaseLocation));
+    assertThat(captured.getReplicaLocation(), is(secondReplicaLocation));
   }
 
 }

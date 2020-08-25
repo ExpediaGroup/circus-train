@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2020 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,20 @@ public interface CopierFactory {
   boolean supportsSchemes(String sourceScheme, String replicaScheme);
 
   /**
+   * Creates a new Copier.
+   * 
+   * @param copierContext Context object containing configuration values for the Copier.
+   * @return
+   */
+  default Copier newInstance(CopierContext copierContext) {
+    //TODO: this is only here for backwards compatibility with CopierFactorys using older versions of Circus Train, when the below
+    //deprecated methods are removed so should this default implementation
+    return newInstance(copierContext.getEventId(), copierContext.getSourceBaseLocation(), copierContext.getSourceSubLocations(), copierContext.getReplicaLocation(), 
+        copierContext.getCopierOptions());
+  }
+
+  /**
+   * @deprecated As of release 16.3.0, replaced by {@link #newInstance(CopierContext)}.
    * @param eventId
    * @param sourceBaseLocation
    * @param sourceSubLocations
@@ -32,6 +46,7 @@ public interface CopierFactory {
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
+  @Deprecated
   Copier newInstance(
       String eventId,
       Path sourceBaseLocation,
@@ -40,12 +55,15 @@ public interface CopierFactory {
       Map<String, Object> copierOptions);
 
   /**
+   * @deprecated As of release 16.3.0, replaced by {@link #newInstance(CopierContext)}.
+   * 
    * @param eventId
    * @param sourceBaseLocation
    * @param replicaLocation
    * @param copierOptions, contains both global and per table override configured options
    * @return
    */
+  @Deprecated
   Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);
 
 }

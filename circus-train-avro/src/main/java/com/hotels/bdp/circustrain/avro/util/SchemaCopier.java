@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.copier.CopierOptions;
@@ -74,7 +75,8 @@ public class SchemaCopier {
     CopierFactory copierFactory = copierFactoryManager
         .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
     LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
-    Copier copier = copierFactory.newInstance(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
+    CopierContext copierContext = new CopierContext(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
+    Copier copier = copierFactory.newInstance(copierContext);
     Metrics metrics = copier.copy();
 
     LOG

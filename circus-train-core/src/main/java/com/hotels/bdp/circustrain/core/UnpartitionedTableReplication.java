@@ -26,7 +26,9 @@ import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.Replication;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.data.DataManipulator;
@@ -49,35 +51,28 @@ class UnpartitionedTableReplication implements Replication {
   private final Replica replica;
   private final String eventId;
   private final CopierFactoryManager copierFactoryManager;
-  private final String targetTableLocation;
-  private final String replicaDatabaseName;
-  private final String replicaTableName;
   private Metrics metrics = Metrics.NULL_VALUE;
   private final Map<String, Object> copierOptions;
   private final CopierListener copierListener;
   private final DataManipulatorFactoryManager dataManipulatorFactoryManager;
 
+  private TableReplication tableReplication;
+
   UnpartitionedTableReplication(
-      String database,
-      String table,
+      TableReplication tableReplication,
       Source source,
       Replica replica,
       CopierFactoryManager copierFactoryManager,
       EventIdFactory eventIdFactory,
-      String targetTableLocation,
-      String replicaDatabaseName,
-      String replicaTableName,
       Map<String, Object> copierOptions,
       CopierListener copierListener,
       DataManipulatorFactoryManager dataManipulatorFactoryManager) {
-    this.database = database;
-    this.table = table;
+    this.tableReplication = tableReplication;
+    this.database = tableReplication.getSourceTable().getDatabaseName();
+    this.table = tableReplication.getSourceTable().getTableName();
     this.source = source;
     this.replica = replica;
     this.copierFactoryManager = copierFactoryManager;
-    this.targetTableLocation = targetTableLocation;
-    this.replicaDatabaseName = replicaDatabaseName;
-    this.replicaTableName = replicaTableName;
     this.copierOptions = copierOptions;
     this.copierListener = copierListener;
     this.dataManipulatorFactoryManager = dataManipulatorFactoryManager;
@@ -87,6 +82,8 @@ class UnpartitionedTableReplication implements Replication {
   @Override
   public void replicate() throws CircusTrainException {
     try {
+      String replicaDatabaseName = tableReplication.getReplicaDatabaseName();
+      String replicaTableName = tableReplication.getReplicaTableName();
       replica.validateReplicaTable(replicaDatabaseName, replicaTableName);
       TableAndStatistics sourceTableAndStatistics = source.getTableAndStatistics(database, table);
       Table sourceTable = sourceTableAndStatistics.getTable();
@@ -94,12 +91,14 @@ class UnpartitionedTableReplication implements Replication {
       Path sourceLocation = sourceLocationManager.getTableLocation();
 
       ReplicaLocationManager replicaLocationManager = replica
-          .getLocationManager(TableType.UNPARTITIONED, targetTableLocation, eventId, sourceLocationManager);
+          .getLocationManager(TableType.UNPARTITIONED, tableReplication.getReplicaTable().getTableLocation(), eventId, sourceLocationManager);
       Path replicaLocation = replicaLocationManager.getTableLocation();
 
       CopierFactory copierFactory = copierFactoryManager
           .getCopierFactory(sourceLocation, replicaLocation, copierOptions);
-      Copier copier = copierFactory.newInstance(eventId, sourceLocation, replicaLocation, copierOptions);
+      
+      CopierContext copierContext = new CopierContext(tableReplication, eventId, sourceLocation, replicaLocation, copierOptions);
+      Copier copier = copierFactory.newInstance(copierContext);
       copierListener.copierStart(copier.getClass().getName());
       try {
         metrics = copier.copy();

@@ -42,7 +42,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
 import com.hotels.bdp.circustrain.api.SourceLocationManager;
+import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
+import com.hotels.bdp.circustrain.api.copier.CopierContext;
 import com.hotels.bdp.circustrain.api.copier.CopierFactory;
 import com.hotels.bdp.circustrain.api.copier.CopierFactoryManager;
 import com.hotels.bdp.circustrain.api.data.DataManipulator;
@@ -103,9 +105,7 @@ public class PartitionedTableReplicationTest {
     when(replicaLocationManager.getPartitionBaseLocation()).thenReturn(replicaTableLocation);
     when(copierFactoryManager.getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(copierFactory);
-    when(copierFactory
-        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions))
-            .thenReturn(copier);
+    when(copierFactory.newInstance(any(CopierContext.class))).thenReturn(copier);
     when(partitionsAndStatistics.getPartitions()).thenReturn(sourcePartitions);
     when(copierOptions.get("task-count")).thenReturn(Integer.valueOf(2));
     when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
@@ -125,9 +125,9 @@ public class PartitionedTableReplicationTest {
     when(source.getLocationManager(sourceTable, Collections.<Partition>emptyList(), EVENT_ID, copierOptions))
         .thenReturn(sourceLocationManager);
 
-    PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
-        source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    PartitionedTableReplication replication = new PartitionedTableReplication(tableReplication, partitionPredicate,
+        source, replica, copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     verifyZeroInteractions(copier);
@@ -144,9 +144,9 @@ public class PartitionedTableReplicationTest {
         .thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
-    PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
-        source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    PartitionedTableReplication replication = new PartitionedTableReplication(tableReplication, partitionPredicate,
+        source, replica, copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -155,9 +155,7 @@ public class PartitionedTableReplicationTest {
     replicationOrder
         .verify(copierFactoryManager)
         .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder
-        .verify(copierFactory)
-        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions);
+    replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(listener).copierStart(anyString());
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(listener).copierEnd(any(Metrics.class));
@@ -169,15 +167,20 @@ public class PartitionedTableReplicationTest {
     replicationOrder.verify(replicaLocationManager).cleanUpLocations();
   }
 
+  private TableReplication createTypicalTableReplication() {
+    return TableReplicationUtils.createTableReplication(DATABASE, TABLE, DATABASE, TABLE, targetTableLocation);
+  }
+
   @Test
   public void mappedNames() throws Exception {
     when(replica.getLocationManager(TableType.PARTITIONED, targetTableLocation, EVENT_ID, sourceLocationManager))
         .thenReturn(replicaLocationManager);
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
-    PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
-        source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, MAPPED_DATABASE, MAPPED_TABLE,
-        copierOptions, listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = TableReplicationUtils
+        .createTableReplication(DATABASE, TABLE, MAPPED_DATABASE, MAPPED_TABLE, targetTableLocation);
+    PartitionedTableReplication replication = new PartitionedTableReplication(tableReplication, partitionPredicate,
+        source, replica, copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     replication.replicate();
 
     InOrder replicationOrder = inOrder(copierFactoryManager, copierFactory, copier, sourceLocationManager, replica,
@@ -186,9 +189,7 @@ public class PartitionedTableReplicationTest {
     replicationOrder
         .verify(copierFactoryManager)
         .getCopierFactory(sourceTableLocation, replicaTableLocation, copierOptions);
-    replicationOrder
-        .verify(copierFactory)
-        .newInstance(EVENT_ID, sourceTableLocation, sourcePartitionLocations, replicaTableLocation, copierOptions);
+    replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(copier).copy();
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
@@ -205,9 +206,9 @@ public class PartitionedTableReplicationTest {
     when(copier.copy()).thenThrow(new CircusTrainException("copy failed"));
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
 
-    PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
-        source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    PartitionedTableReplication replication = new PartitionedTableReplication(tableReplication, partitionPredicate,
+        source, replica, copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");
@@ -227,9 +228,9 @@ public class PartitionedTableReplicationTest {
     when(source.getPartitions(sourceTable, PARTITION_PREDICATE, MAX_PARTITIONS)).thenReturn(partitionsAndStatistics);
     doThrow(new Exception()).when(replica).cleanupReplicaTableIfRequired(DATABASE, TABLE, dataManipulator);
 
-    PartitionedTableReplication replication = new PartitionedTableReplication(DATABASE, TABLE, partitionPredicate,
-        source, replica, copierFactoryManager, eventIdFactory, targetTableLocation, DATABASE, TABLE, copierOptions,
-        listener, dataManipulatorFactoryManager);
+    TableReplication tableReplication = createTypicalTableReplication();
+    PartitionedTableReplication replication = new PartitionedTableReplication(tableReplication, partitionPredicate,
+        source, replica, copierFactoryManager, eventIdFactory, copierOptions, listener, dataManipulatorFactoryManager);
     try {
       replication.replicate();
       fail("Copy exception should be caught and rethrown");

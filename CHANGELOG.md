@@ -1,3 +1,9 @@
+## [16.3.0] - TBD
+### Added
+* Added method `newInstance(CopierContext)` to `com.hotels.bdp.circustrain.api.copier.CopierFactory`. This provides Copiers with more configuration information in a future proof manner. See [#195](https://github.com/HotelsDotCom/circus-train/issues/195).
+### Deprecated
+* Deprecated other `newInstance()` methods on `com.hotels.bdp.circustrain.api.copier.CopierFactory`.
+
 ## [16.2.0] - 2020-07-01
 ### Changed
 * Changed version of `hive.version` to `2.3.7` (was `2.3.2`). This allows Circus Train to be used on JDK>=9.
