@@ -1,4 +1,4 @@
-## [16.3.0] - TBD
+## [16.3.0] - 2020-09-01
 ### Added
 * Added method `newInstance(CopierContext)` to `com.hotels.bdp.circustrain.api.copier.CopierFactory`. This provides Copiers with more configuration information in a future proof manner. See [#195](https://github.com/HotelsDotCom/circus-train/issues/195).
 ### Deprecated
@@ -9,7 +9,7 @@
 * Changed version of `hive.version` to `2.3.7` (was `2.3.2`). This allows Circus Train to be used on JDK>=9.
 
 ### Added
-* Replication mode `FULL_OVERWRITE` to overwrite a previously replicated table and delete its data. Useful for incompatible schema changes. 
+* Replication mode `FULL_OVERWRITE` to overwrite a previously replicated table and delete its data. Useful for incompatible schema changes.
 
 ## [16.1.0] - 2020-03-18
 ### Changed
@@ -28,11 +28,11 @@
 
 ## [15.1.1] - 2020-02-06
 ### Fixed
-* When replicating tables with large numbers of partitions, `Replica.updateMetadata` now calls add/alter partition in batches of 1000. See [#166](https://github.com/HotelsDotCom/circus-train/issues/166). 
+* When replicating tables with large numbers of partitions, `Replica.updateMetadata` now calls add/alter partition in batches of 1000. See [#166](https://github.com/HotelsDotCom/circus-train/issues/166).
 
 ## [15.1.0] - 2020-01-28
 ### Changed
-* AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162). 
+* AVRO Schema Copier now re-uses the normal 'data' copier instead of its own. See [#162](https://github.com/HotelsDotCom/circus-train/issues/162).
 * Changed the order of the generated partition filter used by "HiveDiff"  - it is now reverse natural order (which means new partitions first when partitions are date/time strings). When in doubt use the circus-train-tool `check-filters.sh` to see what would be generated.
 
 ### Fixed
@@ -65,7 +65,7 @@ Fixed issue where partition-limit is not correctly applied when generating a par
 ### Changed
 * Updated `jackson` version to 2.9.10 (was 2.9.8).
 * Updated `beeju` version to 2.0.0 (was 1.2.1).
-* Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2. 
+* Updated `circus-train-minimal.yml.template` to include the required `housekeeping` configuration for using the default schema with H2.
 
 ## [14.0.1] - 2019-04-09
 ### Changed
@@ -113,7 +113,7 @@ Fixed issue where partition-limit is not correctly applied when generating a par
 
 ## [13.0.0] - 2018-10-15
 ### Changed
-* Narrowed component scanning to be internal base packages instead of `com.hotels.bdp.circustrain`. See [#95](https://github.com/HotelsDotCom/circus-train/issues/95). Note this change is _not_ backwards compatible for any Circus Train extensions that are in the `com.hotels.bdp.circustrain` package - these were in effect being 
+* Narrowed component scanning to be internal base packages instead of `com.hotels.bdp.circustrain`. See [#95](https://github.com/HotelsDotCom/circus-train/issues/95). Note this change is _not_ backwards compatible for any Circus Train extensions that are in the `com.hotels.bdp.circustrain` package - these were in effect being
 implicitly scanned and loaded but won't be now. Instead these extensions will now need to be added using Circus Train's [standard extension loading mechanism](https://github.com/HotelsDotCom/circus-train#loading-extensions).
 * Upgraded `jackson.version` to 2.9.7 (was 2.6.6), `aws-jdk.version` to 1.11.431 (was 1.11.126) and `httpcomponents.httpclient.version` to 4.5.5 (was 4.5.2). See [#91](https://github.com/HotelsDotCom/circus-train/issues/91).
 * Refactored general metastore tunnelling code to leverage hcommon-hive-metastore libraries. See [#85](https://github.com/HotelsDotCom/circus-train/issues/85).
@@ -200,7 +200,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 ### Changed
 * Upgraded Hive version from 1.2.1 to 2.3.2 (changes are backwards compatible).
 * Upgraded Spring Platform version from 2.0.3.RELEASE to 2.0.8.RELEASE.
-* Replaced `TunnellingMetaStoreClient` "concrete" implementation with a Java reflection `TunnellingMetaStoreClientInvocationHandler`. 
+* Replaced `TunnellingMetaStoreClient` "concrete" implementation with a Java reflection `TunnellingMetaStoreClientInvocationHandler`.
 * Replicating a partitioned table containing no partitions will now succeed instead of silently not replicating the table metadata.
 * Most functionality from Housekeeping module moved to https://github.com/HotelsDotCom/housekeeping.
 
@@ -226,7 +226,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 
 
 ## [9.1.0] - 2017-10-03
-### Added 
+### Added
 * _circus-train-housekeeping_ support for storing housekeeping data in JDBC compliant SQL databases.
 
 ### Changed
@@ -240,7 +240,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 * Removed _circus-train-aws_ dependency on internal patched _hadoop-aws_.
 
 ## [9.0.1] - 2017-09-14
-### Fixed 
+### Fixed
 * Fixed error when replicating partitioned tables with empty partitions.
 
 ## [9.0.0] - 2017-09-05
@@ -282,7 +282,7 @@ implicitly scanned and loaded but won't be now. Instead these extensions will no
 
 # 5.2.0
 * Added S3 to S3 replication.
-* Should have been major release. The public `com.hotels.bdp.circustrain.api.copier.CopierFactory.supportsSchemes` method has changed signature. Please adjust your code if you rely on this for Circus Train extensions. 
+* Should have been major release. The public `com.hotels.bdp.circustrain.api.copier.CopierFactory.supportsSchemes` method has changed signature. Please adjust your code if you rely on this for Circus Train extensions.
 
 # 5.1.1
 * Clean up of AWS Credential Provider classes.
