@@ -53,7 +53,6 @@ public class CompositeCopierFactory implements CopierFactory {
       }
       return metrics;
     }
-
   }
 
   private final List<CopierFactory> delegates;
@@ -94,7 +93,8 @@ public class CompositeCopierFactory implements CopierFactory {
       Path newReplicaLocation = pathGenerator.generateReplicaLocation(copierPathGeneratorParams);
 
       CopierContext delegateContext = new CopierContext(copierContext.getEventId(), newSourceBaseLocation,
-          copierContext.getSourceSubLocations(), newReplicaLocation, copierContext.getCopierOptions());
+          copierContext.getSourceSubLocations(), newReplicaLocation, copierContext.getCopierOptions(),
+          copierContext.getSourceTable(), copierContext.getSourcePartitions());
       Copier copier = delegate.newInstance(delegateContext);
       copiers.add(copier);
     }
@@ -122,5 +122,4 @@ public class CompositeCopierFactory implements CopierFactory {
         copierOptions);
     return newInstance(copierContext);
   }
-
 }
