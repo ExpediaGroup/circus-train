@@ -92,9 +92,9 @@ public class CompositeCopierFactory implements CopierFactory {
       Path newSourceBaseLocation = pathGenerator.generateSourceBaseLocation(copierPathGeneratorParams);
       Path newReplicaLocation = pathGenerator.generateReplicaLocation(copierPathGeneratorParams);
 
-      CopierContext delegateContext = new CopierContext(copierContext.getEventId(), newSourceBaseLocation,
-          copierContext.getSourceSubLocations(), newReplicaLocation, copierContext.getCopierOptions(),
-          copierContext.getSourceTable(), copierContext.getSourcePartitions());
+      CopierContext delegateContext = new CopierContext(copierContext.getTableReplication(), copierContext.getEventId(),
+          newSourceBaseLocation, copierContext.getSourceSubLocations(), newReplicaLocation,
+          copierContext.getCopierOptions(), copierContext.getSourceTable(), copierContext.getSourcePartitions());
       Copier copier = delegate.newInstance(delegateContext);
       copiers.add(copier);
     }

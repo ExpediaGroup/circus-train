@@ -63,28 +63,6 @@ public final class CopierContext {
   public CopierContext(
       TableReplication tableReplication,
       String eventId,
-      Path sourceLocation,
-      Path replicaLocation,
-      Map<String, Object> copierOptions,
-      Table sourceTable) {
-    this(tableReplication, eventId, sourceLocation, null, replicaLocation, copierOptions, sourceTable, null);
-  }
-
-  public CopierContext(
-      String eventId,
-      Path sourceBaseLocation,
-      List<Path> sourceSubLocations,
-      Path replicaLocation,
-      Map<String, Object> copierOptions,
-      Table sourceTable,
-      List<Partition> sourcePartitions) {
-    this(null, eventId, sourceBaseLocation, sourceSubLocations, replicaLocation, copierOptions, sourceTable,
-        sourcePartitions);
-  }
-
-  public CopierContext(
-      TableReplication tableReplication,
-      String eventId,
       Path sourceBaseLocation,
       List<Path> sourceSubLocations,
       Path replicaLocation,

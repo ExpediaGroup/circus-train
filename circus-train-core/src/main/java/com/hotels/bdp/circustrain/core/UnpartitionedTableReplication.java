@@ -91,13 +91,15 @@ class UnpartitionedTableReplication implements Replication {
       Path sourceLocation = sourceLocationManager.getTableLocation();
 
       ReplicaLocationManager replicaLocationManager = replica
-          .getLocationManager(TableType.UNPARTITIONED, tableReplication.getReplicaTable().getTableLocation(), eventId, sourceLocationManager);
+          .getLocationManager(TableType.UNPARTITIONED, tableReplication.getReplicaTable().getTableLocation(), eventId,
+              sourceLocationManager);
       Path replicaLocation = replicaLocationManager.getTableLocation();
 
       CopierFactory copierFactory = copierFactoryManager
           .getCopierFactory(sourceLocation, replicaLocation, copierOptions);
-      
-      CopierContext copierContext = new CopierContext(tableReplication, eventId, sourceLocation, replicaLocation, copierOptions, sourceTable);
+
+      CopierContext copierContext = new CopierContext(tableReplication, eventId, sourceLocation, null, replicaLocation,
+          copierOptions, sourceTable, null);
       Copier copier = copierFactory.newInstance(copierContext);
       copierListener.copierStart(copier.getClass().getName());
       try {
@@ -131,5 +133,4 @@ class UnpartitionedTableReplication implements Replication {
   public String getEventId() {
     return eventId;
   }
-
 }
