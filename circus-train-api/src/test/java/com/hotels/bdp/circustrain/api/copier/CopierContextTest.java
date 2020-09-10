@@ -19,6 +19,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,6 @@ import com.hotels.bdp.circustrain.api.conf.TableReplication;
 public class CopierContextTest {
 
   private @Mock TableReplication tableReplication;
-  private @Mock Map<String, Object> copierOptions;
   private @Mock Table sourceTable;
   private @Mock List<Partition> sourcePartitions;
 
@@ -45,6 +45,7 @@ public class CopierContextTest {
   private final Path sourceLocation = new Path("source");
   private final List<Path> sourceSubLocations = new ArrayList<>();
   private final Path replicaLocation = new Path("replica");
+  private final Map<String, Object> copierOptions = new HashMap<>();
 
   private CopierContext copierContext;
 
@@ -56,10 +57,10 @@ public class CopierContextTest {
 
   @Test
   public void getters() {
-    assertThat(copierContext.getEventId(), is("1"));
-    assertThat(copierContext.getSourceBaseLocation(), is(new Path("source")));
-    assertThat(copierContext.getSourceSubLocations().size(), is(0));
-    assertThat(copierContext.getReplicaLocation(), is(new Path("replica")));
+    assertThat(copierContext.getEventId(), is(eventId));
+    assertThat(copierContext.getSourceBaseLocation(), is(sourceLocation));
+    assertThat(copierContext.getSourceSubLocations().size(), is(sourceSubLocations));
+    assertThat(copierContext.getReplicaLocation(), is(replicaLocation));
 
     assertThat(copierContext.getTableReplication(), is(tableReplication));
     assertThat(copierContext.getCopierOptions(), is(copierOptions));
