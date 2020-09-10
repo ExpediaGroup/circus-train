@@ -1,3 +1,7 @@
+## [16.3.1] - TBD
+### Changed
+* Added fields `sourceTable` and `sourcePartitions` to the `CopierContext` class. 
+
 ## [16.3.0] - 2020-09-01
 ### Added
 * Added method `newInstance(CopierContext)` to `com.hotels.bdp.circustrain.api.copier.CopierFactory`. This provides Copiers with more configuration information in a future proof manner. See [#195](https://github.com/HotelsDotCom/circus-train/issues/195).
