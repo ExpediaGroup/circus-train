@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.api.Partition;
+import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,6 +36,8 @@ public final class CopierContext {
   private Path replicaLocation;
   private Map<String, Object> copierOptions;
   private TableReplication tableReplication;
+  private Table sourceTable;
+  private List<Partition> sourcePartitions;
 
   public CopierContext(
       TableReplication tableReplication,
@@ -41,7 +45,9 @@ public final class CopierContext {
       Path sourceBaseLocation,
       List<Path> sourceSubLocations,
       Path replicaLocation,
-      Map<String, Object> copierOptions) {
+      Map<String, Object> copierOptions,
+      Table sourceTable,
+      List<Partition> sourcePartitions) {
     this.tableReplication = tableReplication;
     this.eventId = eventId;
     this.sourceBaseLocation = sourceBaseLocation;
@@ -50,6 +56,18 @@ public final class CopierContext {
     }
     this.replicaLocation = replicaLocation;
     this.copierOptions = ImmutableMap.copyOf(copierOptions);
+    this.sourceTable = sourceTable;
+    this.sourcePartitions = sourcePartitions;
+  }
+
+  public CopierContext(
+      TableReplication tableReplication,
+      String eventId,
+      Path sourceBaseLocation,
+      List<Path> sourceSubLocations,
+      Path replicaLocation,
+      Map<String, Object> copierOptions) {
+    this(tableReplication, eventId, sourceBaseLocation, sourceSubLocations, replicaLocation, copierOptions, null, null);
   }
 
   public CopierContext(
@@ -102,4 +120,11 @@ public final class CopierContext {
     return tableReplication;
   }
 
+  public Table getSourceTable() {
+    return sourceTable;
+  }
+
+  public List<Partition> getSourcePartitions() {
+    return sourcePartitions;
+  }
 }
