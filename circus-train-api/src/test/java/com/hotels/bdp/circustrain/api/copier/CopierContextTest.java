@@ -59,7 +59,7 @@ public class CopierContextTest {
   public void getters() {
     assertThat(copierContext.getEventId(), is(eventId));
     assertThat(copierContext.getSourceBaseLocation(), is(sourceLocation));
-    assertThat(copierContext.getSourceSubLocations().size(), is(sourceSubLocations));
+    assertThat(copierContext.getSourceSubLocations(), is(sourceSubLocations));
     assertThat(copierContext.getReplicaLocation(), is(replicaLocation));
 
     assertThat(copierContext.getTableReplication(), is(tableReplication));
