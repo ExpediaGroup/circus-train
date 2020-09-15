@@ -1,4 +1,4 @@
-## [16.3.1] - TBD
+## [16.3.1] - 2020-09-15
 ### Changed
 * Added fields `sourceTable` and `sourcePartitions` to the `CopierContext` class. 
 
