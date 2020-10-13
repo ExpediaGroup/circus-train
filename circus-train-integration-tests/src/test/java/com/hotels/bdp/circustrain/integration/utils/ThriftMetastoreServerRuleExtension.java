@@ -27,27 +27,19 @@ public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnit
     this.hiveConf = hiveConf;
   }
 
+  @Override
   public void before() throws Throwable {
+    // Override with values given in the hiveConf.
+    core.conf().setVar(ConfVars.METASTORECONNECTURLKEY, hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
+    core.conf().setVar(ConfVars.METASTORE_CONNECTION_DRIVER, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
+    core.conf().setVar(ConfVars.METASTORE_CONNECTION_USER_NAME, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
+    core.conf().setVar(ConfVars.METASTOREPWD, hiveConf.getVar(ConfVars.METASTOREPWD));
     super.before();
   }
 
+  @Override
   public void after() {
     super.after();
-  }
-
-  @Override
-  public void beforeTest() throws Throwable {
-    // Override with values given in the hiveConf.
-    core.setHiveVar(ConfVars.METASTORECONNECTURLKEY, hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
-    core.setHiveVar(ConfVars.METASTORE_CONNECTION_DRIVER, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
-    core.setHiveVar(ConfVars.METASTORE_CONNECTION_USER_NAME, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
-    core.setHiveVar(ConfVars.METASTOREPWD, hiveConf.getVar(ConfVars.METASTOREPWD));
-    super.beforeTest();
-  }
-
-  @Override
-  protected void afterTest() {
-    super.afterTest();
   }
 
 }
