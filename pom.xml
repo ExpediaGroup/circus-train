@@ -57,7 +57,7 @@
     <hadoop.version>2.7.1</hadoop.version>
     <hive.version>2.3.7</hive.version>
     <mockito.version>1.10.19</mockito.version>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <powermock.version>1.6.4</powermock.version>
     <derby.version>10.10.2.0</derby.version>
     <beeju.version>2.0.0</beeju.version>
