@@ -75,7 +75,7 @@ public class SchemaCopier {
 
     Path destinationSchemaFile = new Path(destination, sourceLocation.getName());
     try {
-      FileSystem targetFileSystem = FileSystem.get(replicaHiveConf);
+      FileSystem targetFileSystem = destinationSchemaFile.getFileSystem(replicaHiveConf);
       if (targetFileSystem.exists(destinationSchemaFile)) {
         LOG
             .info("Avro schema has already been copied from '{}' to '{}', skipping schema copy step.", sourceLocation,
