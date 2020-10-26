@@ -1,6 +1,6 @@
 ## [16.3.2] - 2020-10-27
 ### Fixed
-issue where external AVRO schemas generated lots of copy jobs. See [#203](https://github.com/HotelsDotCom/circus-train/issues/203).
+Issue where external AVRO schemas generated lots of copy jobs. See [#203](https://github.com/HotelsDotCom/circus-train/issues/203).
 
 ## [16.3.1] - 2020-09-15
 ### Changed
