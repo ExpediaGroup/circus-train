@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -35,6 +36,8 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.google.common.io.Files;
 
 import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.copier.CopierContext;
@@ -60,7 +63,7 @@ public class SchemaCopierTest {
 
   @Before
   public void setUp() {
-    schemaCopier = new SchemaCopier(new HiveConf(), copierFactoryManager, copierOptions);
+    schemaCopier = new SchemaCopier(new HiveConf(), new HiveConf(), copierFactoryManager, copierOptions);
   }
 
   @Test
@@ -77,6 +80,20 @@ public class SchemaCopierTest {
     when(metrics.getBytesReplicated()).thenReturn(123L);
     Path result = schemaCopier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
     assertThat(result, is(targetFile));
+  }
+
+  @Test
+  public void skipCopyIfDestinationExists() throws IOException {
+    Path source = new Path(temporaryFolder.newFile("test.txt").toURI());
+    File destination = temporaryFolder.newFolder();
+    Path targetFile = new Path(destination.toString(), "test.txt");
+    Files.touch(new File(targetFile.toUri().toString()));
+    Map<String, Object> copierOptionsMap = new HashMap<>();
+    copierOptionsMap.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+
+    Path result = schemaCopier.copy(source.toString(), destination.toString(), eventTableReplication, eventId);
+    assertThat(result, is(targetFile));
+    verifyZeroInteractions(copierFactoryManager, copierFactory, copier, metrics);
   }
 
   @Test(expected = NullPointerException.class)
