@@ -17,10 +17,12 @@ package com.hotels.bdp.circustrain.avro.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.Modules;
 import com.hotels.bdp.circustrain.api.conf.TableReplication;
 import com.hotels.bdp.circustrain.api.copier.Copier;
@@ -45,15 +48,18 @@ public class SchemaCopier {
   private static final Logger LOG = LoggerFactory.getLogger(SchemaCopier.class);
 
   private final Configuration sourceHiveConf;
+  private final Configuration replicaHiveConf;
   private final CopierFactoryManager copierFactoryManager;
   private final CopierOptions globalCopierOptions;
 
   @Autowired
   public SchemaCopier(
       Configuration sourceHiveConf,
+      Configuration replicaHiveConf,
       CopierFactoryManager copierFactoryManager,
       CopierOptions globalCopierOptions) {
     this.sourceHiveConf = sourceHiveConf;
+    this.replicaHiveConf = replicaHiveConf;
     this.copierFactoryManager = copierFactoryManager;
     this.globalCopierOptions = globalCopierOptions;
   }
@@ -68,20 +74,32 @@ public class SchemaCopier {
     sourceLocation = sourceFileSystemPathResolver.resolveNameServices(sourceLocation);
 
     Path destinationSchemaFile = new Path(destination, sourceLocation.getName());
+    try {
+      FileSystem targetFileSystem = FileSystem.get(replicaHiveConf);
+      if (targetFileSystem.exists(destinationSchemaFile)) {
+        LOG
+            .info("Avro schema has already been copied from '{}' to '{}', skipping schema copy step.", sourceLocation,
+                destinationSchemaFile);
+      } else {
+        Map<String, Object> mergedCopierOptions = new HashMap<>(TableReplication
+            .getMergedCopierOptions(globalCopierOptions.getCopierOptions(), eventTableReplication.getCopierOptions()));
 
-    Map<String, Object> mergedCopierOptions = new HashMap<>(TableReplication
-        .getMergedCopierOptions(globalCopierOptions.getCopierOptions(), eventTableReplication.getCopierOptions()));
-    mergedCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
-    CopierFactory copierFactory = copierFactoryManager
-        .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
-    LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
-    CopierContext copierContext = new CopierContext(eventId, sourceLocation, destinationSchemaFile, mergedCopierOptions);
-    Copier copier = copierFactory.newInstance(copierContext);
-    Metrics metrics = copier.copy();
+        mergedCopierOptions.put(CopierOptions.COPY_DESTINATION_IS_FILE, "true");
+        CopierFactory copierFactory = copierFactoryManager
+            .getCopierFactory(sourceLocation, destinationSchemaFile, mergedCopierOptions);
+        LOG.info("Replicating Avro schema from '{}' to '{}'", sourceLocation, destinationSchemaFile);
+        CopierContext copierContext = new CopierContext(eventId, sourceLocation, destinationSchemaFile,
+            mergedCopierOptions);
+        Copier copier = copierFactory.newInstance(copierContext);
+        Metrics metrics = copier.copy();
 
-    LOG
-        .info("Avro schema '{} bytes' has been copied from '{}' to '{}'", metrics.getBytesReplicated(), sourceLocation,
-            destinationSchemaFile);
+        LOG
+            .info("Avro schema '{} bytes' has been copied from '{}' to '{}'", metrics.getBytesReplicated(),
+                sourceLocation, destinationSchemaFile);
+      }
+    } catch (IOException e) {
+      throw new CircusTrainException("Could not check target FileSystem:", e);
+    }
     return destinationSchemaFile;
   }
 }
