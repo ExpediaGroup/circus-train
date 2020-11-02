@@ -15,25 +15,33 @@
  */
 package com.hotels.bdp.circustrain.integration.utils;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 
 public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnitRule {
-  private final HiveConf hiveConf;
+  
+  private static Map<String, String> createConfigOverride(HiveConf hiveConf) {
+    Map<String, String> overrideConfig = new HashMap<String, String>();
+    // Override with values given in the hiveConf.
+    overrideConfig.put(ConfVars.METASTORECONNECTURLKEY.toString(), hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
+    overrideConfig.put(ConfVars.METASTORE_CONNECTION_DRIVER.toString(), hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
+    overrideConfig.put(ConfVars.METASTORE_CONNECTION_USER_NAME.toString(), hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
+    overrideConfig.put(ConfVars.METASTOREPWD.toString(), hiveConf.getVar(ConfVars.METASTOREPWD));
+    return overrideConfig;
+  }
 
   public ThriftMetastoreServerRuleExtension(HiveConf hiveConf) {
-    this.hiveConf = hiveConf;
+    super("test_database", Collections.emptyMap(), createConfigOverride(hiveConf));
   }
 
   @Override
   public void before() throws Throwable {
-    // Override with values given in the hiveConf.
-    core.conf().setVar(ConfVars.METASTORECONNECTURLKEY, hiveConf.getVar(ConfVars.METASTORECONNECTURLKEY));
-    core.conf().setVar(ConfVars.METASTORE_CONNECTION_DRIVER, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_DRIVER));
-    core.conf().setVar(ConfVars.METASTORE_CONNECTION_USER_NAME, hiveConf.getVar(ConfVars.METASTORE_CONNECTION_USER_NAME));
-    core.conf().setVar(ConfVars.METASTOREPWD, hiveConf.getVar(ConfVars.METASTOREPWD));
     super.before();
   }
 
