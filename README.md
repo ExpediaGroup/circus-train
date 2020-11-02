@@ -6,7 +6,7 @@ You can obtain Circus Train from Maven Central:
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) [![Build Status](https://travis-ci.org/HotelsDotCom/circus-train.svg?branch=master)](https://travis-ci.org/HotelsDotCom/circus-train) ![build](https://github.com/HotelsDotCom/circus-train/workflows/build/badge.svg?event=push) [![Coverage Status](https://coveralls.io/repos/github/HotelsDotCom/circus-train/badge.svg?branch=master)](https://coveralls.io/github/HotelsDotCom/circus-train?branch=master) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/circus-train.svg)
 
 ## Overview
-Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2). 
+Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2).
 
 Other features include:
 * Replication of any of the following:
@@ -62,11 +62,11 @@ Below is a high level summary of the steps that Circus Train performs during the
 Although it's not necessary, we recommend exporting the environment variable `CIRCUS_TRAIN_HOME` by setting its value to wherever you extracted it to:
 
     export CIRCUS_TRAIN_HOME=/<foo>/<bar>/circus-train-<version>
-    
+
 Refer to the [configuration](#configuration-reference) section below on what is needed to customise the configuration files before continuing.
 
 ## Usage
-To run Circus Train you just need to execute the `bin/circus-train.sh` script in the installation directory and pass the configuration file which includes the replication configurations: 
+To run Circus Train you just need to execute the `bin/circus-train.sh` script in the installation directory and pass the configuration file which includes the replication configurations:
 
         $CIRCUS_TRAIN_HOME/bin/circus-train.sh --config=/path/to/config/file.yml
 
@@ -118,11 +118,11 @@ The preferred way to execute the housekeeping process is by using the `housekeep
 If you want to schedule housekeeping as a separate process then you should use the following script:
 
         $CIRCUS_TRAIN_HOME/bin/housekeeping.sh --config=/path/to/config/file.yml
-        
-### Orphaned data strategy
-To switch off housekeeping completely, and not put any paths to dereferenced data in the housekeeping database, `orphaned-data-strategy` can be set to `NONE`. This property is set to `HOUSEKEEPING` by default. 
 
-Naturally, to substitute housekeeping, Circus Train supports the addition of properties to newly created tables so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore's events is the addition of Beekeeper-specific properties to your configuration (see [Metadata transformations](#metadata-transformations)), and Beekeeper will handle the rest. 
+### Orphaned data strategy
+To switch off housekeeping completely, and not put any paths to dereferenced data in the housekeeping database, `orphaned-data-strategy` can be set to `NONE`. This property is set to `HOUSEKEEPING` by default.
+
+Naturally, to substitute housekeeping, Circus Train supports the addition of properties to newly created tables so that you can hook into Hive events to monitor and delete dereferenced data as appropriate. One such tool, [Beekeeper](https://github.com/ExpediaGroup/beekeeper), does exactly this. All that is required if Beekeeper is monitoring your Hive Metastore's events is the addition of Beekeeper-specific properties to your configuration (see [Metadata transformations](#metadata-transformations)), and Beekeeper will handle the rest.
 
 If your table already exists, you will need to add these properties to your replica table manually, as well as your Circus Train configuration.
 
@@ -155,7 +155,7 @@ The YAML fragment below shows some common options for setting up the base source
 The YAML fragment below shows some common options for setting up the replication of an unpartitioned table where the *entire* table will be replicated on each run.
 
         table-replications:
-          - source-table: 
+          - source-table:
               database-name: test_database
               table-name: test_unpartitioned_table
             replica-table:
@@ -183,7 +183,7 @@ The YAML fragment below shows some common options for setting up the replication
           - replication-mode: METADATA_MIRROR
             table-mappings:
               test_database.test_unpartitioned_table: replica_db.replica_test_unpartitioned_table
-            source-table: 
+            source-table:
               database-name: test_database
               table-name: test_view
             replica-table:
@@ -243,7 +243,7 @@ Partition filters can be specified using the syntax described in [HIVE-1609](htt
 
 > The filter supports "=", "!=", ">", "<", ">=", "<=" and "LIKE" operations on partition keys of type string. "AND" and "OR" logical operations are supported in the filter. So for example, for a table having partition keys country and state, the filter can be 'country = "USA" AND (state = "CA" OR state = "AZ")'
 
-In particular notice that it is possible to nest sub-expressions within parentheses. Wildcards are allowed in the form of `.*`, for example: `year like '201.*'`. Full regular expressions don't seem to be supported by Hive. 
+In particular notice that it is possible to nest sub-expressions within parentheses. Wildcards are allowed in the form of `.*`, for example: `year like '201.*'`. Full regular expressions don't seem to be supported by Hive.
 
 Encoding a constant literal expression into a replication configuration is not especially useful unless you always want to copy the same partitions each time. Therefore it is possible to introduce dynamically evaluated elements using Spring SpELs. We refer you to the [SpEL documentation](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#expressions) for the specific syntax and rules, however they quite simply allow you to embed Java language fragments into the filter which are dynamically evaluated to a string value. As most partition filters are date based, Circus Train includes the [Joda Time API](http://www.joda.org/joda-time/) on its classpath and we've also statically imported some convenience methods into the SpEL root context:
 
@@ -300,13 +300,13 @@ It has the following options:
 * You cannot `METADATA_MIRROR` a previously fully replicated table (use `METADATA_UPDATE` if you want to do that). Similarly you cannot go from `METADATA_MIRROR` to `FULL`/`METADATA_UPDATE` as you then might end up with a table that points both to original and replicated data. Replicate to new a table if `METADATA_UPDATE` doesn't suffice for your use case. Circus Train will fail with an exception if any of these restrictions are not met.
 
 #### Replication Strategy
-Circus Train provides configurable replication strategies which can be used to control whether "destructive actions" like dropping tables or partitions should be propagated to the replica table. 
+Circus Train provides configurable replication strategies which can be used to control whether "destructive actions" like dropping tables or partitions should be propagated to the replica table.
 
 It has the following options:
 
 * `UPSERT`: Default behaviour, data is only added to the replica. If the source tables or partitions are deleted these changes are *not* propagated to the replica.
 * `PROPAGATE_DELETES`: Like UPSERT but Circus Train will also propagate deletes from the source to the replica. If a source table is deleted then the replica table will also be deleted. Similarly if there are any partitions in the source table that have been deleted they will also be deleted from the replica table. The deletes apply to both metadata and the underlying data (which is scheduled for deletion using Circus Train's Housekeeping mechanism).
- 
+
 #### Copier options
 Circus Train uses highly configurable means to copy the actual data between clusters. Control over this is provided by "copier options" which allow fine grained configuration of the copier processes. The default values should suffice for most use cases but the below sections describe the various options available as they might be useful in certain situations.
 
@@ -327,7 +327,7 @@ If data is being replicated to HDFS then Circus Train will use DistCp to copy th
             max-maps: 50
             skip-crc: false
             ssl-configuration-file: /foo/bar/ssl-config
-            copier-factory-class: com.hotels.bdp.circustrain.distcpcopier.DistCpCopier
+            copier-factory-class: com.hotels.bdp.circustrain.distcpcopier.DistCpCopierFactory
             data-manipulator-factory-class: com.hotels.bdp.circustrain.distcpcopier.HdfsDataManipulatorFactory
 
 |Property|Required|Description|
@@ -363,7 +363,7 @@ If data is being replicated from HDFS to S3 then Circus Train will use a customi
             copy-strategy: uniformsize
             ignore-failures: false
             log-path:
-            copier-factory-class: com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpCopier
+            copier-factory-class: com.hotels.bdp.circustrain.s3mapreducecpcopier.S3MapReduceCpCopierFactory
             data-manipulator-factory-class: com.hotels.bdp.circustrain.s3mapreducecp.aws.AwsMapreduceDataManipulatorFactory
 
 | Property|Required|Description|
@@ -540,7 +540,7 @@ Housekeeping is the process that removes expired and orphaned data on the replic
           expired-path-duration: P3D
           db-init-script: classpath:/schema.sql
           data-source:
-            driver-class-name: org.h2.Driver 
+            driver-class-name: org.h2.Driver
             url: jdbc:h2:${housekeeping.h2.database};AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
             username: user
             password: secret
@@ -581,7 +581,7 @@ Note that `database` and `table` are only present for table level metrics and ar
 |`[database].[table].bytes_replicated`|Number of bytes transmitted to the replica table location.|
 |`[database].[table].[hadoop_counters]`|All other metrics (typically Hadoop Counters from DistCp and S3MepReduceCp jobs).|
 
-The configuration options for Graphite are: 
+The configuration options for Graphite are:
 
         graphite:
           config: hdfs:///path/to/your/conf/cluster.properties
@@ -633,7 +633,7 @@ In this case, the first table replication will add just one property, `my-custom
           table-properties:
             '[my.custom.property]': my-custom-value
             '[my.custom.property2]': my-custom-value2
-            
+
 This feature is a part of Circus Train and no further configuration is required. In addition to this, Circus Train supports custom metadata transformations which are built separately and placed on the Classpath when Circus Train is run. These are documented [below](#custom-metadata-transformations).
 
 ## Important Notes
@@ -656,7 +656,7 @@ The Hadoop S3 `FileSystem` landscape is chaotic and confusing. What truths apply
 
 We have spent time investigating the S3 `FileSystem` implementations provided by both the Apache Hadoop project and the Amazon EMR project. Additionally we've analysed the operation of multiple versions of both `DistCp` and `S3MapReduceCp`. With this in mind we believe that the best way to move data using Circus Train from an on-premises cluster to S3 for consumption by an EMR cluster is using `S3MapReduceCp`.
 
-We have verified its operation end-to-end, from a file based in HortonWorks HDFS to a query executing in EMR Hive. As a user all you need do is specify your S3 paths using **only** the `s3://` protocol, Circus Train will handle the details. 
+We have verified its operation end-to-end, from a file based in HortonWorks HDFS to a query executing in EMR Hive. As a user all you need do is specify your S3 paths using **only** the `s3://` protocol, Circus Train will handle the details.
 
 ## Project layout
 Below is a high level summary of the various modules that comprise Circus Train as they are laid out in version control.
@@ -737,7 +737,7 @@ A high level summary that assumes some knowledge of the Spring Framework and Spr
 * Create a JavaBean that represents your listener's configuration, mark it with `@Configuration`. Optionally assign it a prefix with `@ConfigurationProperties`.
 * Create your listener, implementing the  `com.hotels.bdp.circustrain.api.event.*Listener` interfaces as needed, mark it as a `@Component` and `@Autowire` its dependencies.
 * Try to prevent blocking callers to your listener by invoking other systems asynchronously.
-* In a script that invokes Circus Train, append an entries to the `CIRCUS_TRAIN_CLASSPATH` environment variable to add your listener jar file and its dependencies to the Circus Train classpath. 
+* In a script that invokes Circus Train, append an entries to the `CIRCUS_TRAIN_CLASSPATH` environment variable to add your listener jar file and its dependencies to the Circus Train classpath.
 * Add the package where your `Listener` is located to the `extension-packages` section of your replication YAML.
 
 ### Providing a custom `MetaStoreClientFactory`
@@ -747,7 +747,7 @@ containing these classes to the `extension-packages` section of your YAML config
 
 The `accept` method must analyse the given metastore URL to determine whether the class can create a client for the metastore protocol. Circus Train will choose the first implementation in the classpath that accepts the metastore URL - the order in which these classes are loaded and interrogated is not controlled by Circus Train, i.e. the interrogation order in unpredictable and depends on the class loader.
 
-Circus Train provides a `MetaStoreClientFactory` implementation out of the box that creates clients for the `thrift` protocol. 
+Circus Train provides a `MetaStoreClientFactory` implementation out of the box that creates clients for the `thrift` protocol.
 
 ### Implementing your own data copiers
 New `CopierFactories` can be added just by extending the `CopierFactory` interface. Circus Train relies on Spring to detect a `CopierFactory` so each instance of such interface can either be instantiated in a Spring `@Configuration` class or the class itself can be annotated with `@Component` and `@Order`. The `@Order` annotation is used to establish precedence with respect to other `CopierFactories` that support the same schema.
@@ -864,7 +864,7 @@ Note that usually the EMR user who runs Circus Train is the default EMR user _ha
 
 ### Circus Train running on EMR cluster A synchronizing tables from on-premises cluster B to EMR cluster A
 This configuration below shows how you could run Circus Train to replicate data between EMR and an on-premises cluster - for example you may want to replicate data between the `AWS` cluster (referred to as "cluster A") and the on-premises `DEV` cluster (referred to as "cluster B"). Circus Train runs on `AWS` and it will pull data from `DEV`.
-    
+
     source-catalog:
       name: dev
       hive-metastore-uris: thrift://hiveDEV.onpremises.domain:9083
@@ -931,10 +931,10 @@ Note that the Circus Train configuration only supports one set of AWS credential
 # Contact
 
 ## Mailing List
-If you would like to ask any questions about or discuss Circus Train please join our mailing list at 
+If you would like to ask any questions about or discuss Circus Train please join our mailing list at
 
   [https://groups.google.com/forum/#!forum/circus-train-user](https://groups.google.com/forum/#!forum/circus-train-user)
-  
+
 # Credits
 Created by [Elliot West](https://github.com/teabot), [Daniel del Castillo](https://github.com/ddcprg), [Patrick Duin](https://github.com/patduin), [Dave Maughan](https://github.com/nahguam) & [Courtney Edwards](https://github.com/courtsvii) with thanks to: [Adrian Woodhead](https://github.com/massdosage), [Dave Bauman](https://github.com/baumandm), Jose Nuñez Izu and Oscar Mateos Ventura.
 
