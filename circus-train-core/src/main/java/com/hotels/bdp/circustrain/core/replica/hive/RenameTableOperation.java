@@ -26,7 +26,7 @@ public class RenameTableOperation {
   private static final Logger LOG = LoggerFactory.getLogger(RenameTableOperation.class);
   private static final String DELETE_ME = "_delete_me";
 
-  private DropTableService dropTableService;
+  private final DropTableService dropTableService;
 
   public RenameTableOperation(DropTableService dropTableService) {
     this.dropTableService = dropTableService;
@@ -40,20 +40,27 @@ public class RenameTableOperation {
    * renamed.
    */
   public void execute(CloseableMetaStoreClient client, Table from, Table to) throws Exception {
-    LOG
-        .info("Renaming table {}.{} to {}.{}", from.getDbName(), from.getTableName(), to.getDbName(),
-            to.getTableName());
+    LOG.info("Renaming table {}.{} to {}.{}", from.getDbName(), from.getTableName(), to.getDbName(), to.getTableName());
     Table fromTable = client.getTable(from.getDbName(), from.getTableName());
     Table toTable = client.getTable(to.getDbName(), to.getTableName());
+    String fromDatabaseName = fromTable.getDbName();
     String fromTableName = fromTable.getTableName();
     String toTableName = toTable.getTableName();
     String toDelete = toTableName + DELETE_ME;
     try {
+      fromTable.setDbName(toTable.getDbName());
       fromTable.setTableName(toTableName);
       toTable.setTableName(toDelete);
+      LOG
+          .info("Alter table {}.{} to {}.{}", toTable.getDbName(), toTableName, toTable.getDbName(),
+              toTable.getTableName());
       client.alter_table(toTable.getDbName(), toTableName, toTable);
-      client.alter_table(fromTable.getDbName(), fromTableName, fromTable);
+      LOG
+          .info("Alter table {}.{} to {}.{}", fromDatabaseName, fromTableName, fromTable.getDbName(),
+              fromTable.getTableName());
+      client.alter_table(fromDatabaseName, fromTableName, fromTable);
     } finally {
+      LOG.info("Drop table {}.{}", toTable.getDbName(), toDelete);
       dropTableService.dropTable(client, toTable.getDbName(), toDelete);
     }
   }
