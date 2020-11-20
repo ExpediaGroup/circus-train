@@ -45,22 +45,26 @@ public class RenameTableOperation {
     Table toTable = client.getTable(to.getDbName(), to.getTableName());
     String fromDatabaseName = fromTable.getDbName();
     String fromTableName = fromTable.getTableName();
+    String toDatabaseName = toTable.getDbName();
     String toTableName = toTable.getTableName();
     String toDelete = toTableName + DELETE_ME;
     try {
-      fromTable.setDbName(toTable.getDbName());
-      fromTable.setTableName(toTableName);
+      // rename current table to a new intermediate table
       toTable.setTableName(toDelete);
       LOG
-          .info("Alter table {}.{} to {}.{}", toTable.getDbName(), toTableName, toTable.getDbName(),
+          .info("Altering table {}.{} to {}.{}", toDatabaseName, toTableName, toTable.getDbName(),
               toTable.getTableName());
-      client.alter_table(toTable.getDbName(), toTableName, toTable);
+      client.alter_table(toDatabaseName, toTableName, toTable);
+
+      // rename new table to current table
+      fromTable.setDbName(toTable.getDbName());
+      fromTable.setTableName(toTableName);
       LOG
-          .info("Alter table {}.{} to {}.{}", fromDatabaseName, fromTableName, fromTable.getDbName(),
+          .info("Altering table {}.{} to {}.{}", fromDatabaseName, fromTableName, fromTable.getDbName(),
               fromTable.getTableName());
       client.alter_table(fromDatabaseName, fromTableName, fromTable);
     } finally {
-      LOG.info("Drop table {}.{}", toTable.getDbName(), toDelete);
+      LOG.info("Dropping table {}.{}", toTable.getDbName(), toDelete);
       dropTableService.dropTable(client, toTable.getDbName(), toDelete);
     }
   }
