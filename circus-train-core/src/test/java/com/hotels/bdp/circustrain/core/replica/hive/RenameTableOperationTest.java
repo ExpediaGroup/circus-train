@@ -44,8 +44,8 @@ public class RenameTableOperationTest {
 
   private @Mock CloseableMetaStoreClient client;
   private @Mock DropTableService dropTableService;
-  private Table fromTable = new Table();
-  private Table toTable = new Table();
+  private final Table fromTable = new Table();
+  private final Table toTable = new Table();
   private RenameTableOperation operation;
 
   @Before
@@ -55,8 +55,8 @@ public class RenameTableOperationTest {
     toTable.setTableName(TO_TABLE_NAME);
     fromTable.setDbName(FROM_DB_NAME);
     toTable.setDbName(TO_DB_NAME);
-    when(client.getTable(FROM_DB_NAME, FROM_TABLE_NAME)).thenReturn(fromTable);
-    when(client.getTable(TO_DB_NAME, TO_TABLE_NAME)).thenReturn(toTable);
+    when(client.getTable(FROM_DB_NAME, FROM_TABLE_NAME)).thenReturn(new Table(fromTable));
+    when(client.getTable(TO_DB_NAME, TO_TABLE_NAME)).thenReturn(new Table(toTable));
   }
 
   @Test
@@ -66,6 +66,7 @@ public class RenameTableOperationTest {
 
     operation.execute(client, fromTable, toTable);
 
+    fromTable.setDbName(TO_DB_NAME);
     fromTable.setTableName(TO_TABLE_NAME);
     verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
     verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
@@ -97,8 +98,11 @@ public class RenameTableOperationTest {
   public void renameFromTableException() throws Exception {
     Table toTableTemp = new Table(toTable);
     toTableTemp.setTableName(TO_TABLE_NAME_TEMP);
+    Table expectedFromTable = new Table(fromTable);
+    expectedFromTable.setDbName(TO_DB_NAME);
+    expectedFromTable.setTableName(TO_TABLE_NAME);
     TException toBeThrown = new TException();
-    doThrow(toBeThrown).when(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
+    doThrow(toBeThrown).when(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, expectedFromTable);
 
     try {
       operation.execute(client, fromTable, toTable);
@@ -108,7 +112,7 @@ public class RenameTableOperationTest {
       verify(client).getTable(TO_DB_NAME, TO_TABLE_NAME);
       fromTable.setTableName(TO_TABLE_NAME);
       verify(client).alter_table(TO_DB_NAME, TO_TABLE_NAME, toTableTemp);
-      verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, fromTable);
+      verify(client).alter_table(FROM_DB_NAME, FROM_TABLE_NAME, expectedFromTable);
       verify(dropTableService).dropTable(client, TO_DB_NAME, TO_TABLE_NAME_TEMP);
       verifyNoMoreInteractions(client);
       assertThat(e, is(toBeThrown));

@@ -1,3 +1,7 @@
+## [TBD] - TBD
+### Fixed
+* Issue where rename table operation would be incorrect if tables are in different databases.
+
 ## [16.3.2] - 2020-10-27
 ### Fixed
 * Issue where external AVRO schemas generated lots of copy jobs. See [#203](https://github.com/HotelsDotCom/circus-train/issues/203).
