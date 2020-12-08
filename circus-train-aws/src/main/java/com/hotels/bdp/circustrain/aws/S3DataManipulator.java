@@ -54,6 +54,11 @@ public class S3DataManipulator implements DataManipulator {
     List<KeyVersion> keysToDelete = getKeysToDelete(bucket, uri.getKey());
     log.debug("Deleting keys: {}", keysToDelete.stream().map(k -> k.getKey()).collect(Collectors.toList()));
 
+    if (keysToDelete.isEmpty()) {
+      log.info("Nothing to delete at location: {}", path);
+      return false;
+    }
+
     DeleteObjectsResult result = s3Client.deleteObjects(new DeleteObjectsRequest(bucket).withKeys(keysToDelete));
     return successfulDeletion(result, keysToDelete.size());
   }
