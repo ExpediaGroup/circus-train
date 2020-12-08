@@ -1,6 +1,7 @@
-## [TBD] - TBD
+## [16.3.3] - TBD
 ### Fixed
 * Issue where rename table operation would be incorrect if tables are in different databases.
+* Added check in `delete` operation so that it doesn't try to delete empty lists of keys.
 
 ## [16.3.2] - 2020-10-27
 ### Fixed
