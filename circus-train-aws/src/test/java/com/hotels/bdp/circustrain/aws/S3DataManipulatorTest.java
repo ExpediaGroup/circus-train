@@ -43,7 +43,6 @@ public class S3DataManipulatorTest {
   private static final String BUCKET = "bucket";
   private static final String BUCKET_PATH = "s3://" + BUCKET;
   private static final String FOLDER = "folder";
-  private static final String EMPTY_FOLDER = "empty-folder";
   private static final String EMPTY_BUCKET = "empty-bucket";
 
   public @Rule TemporaryFolder temp = new TemporaryFolder();
@@ -76,15 +75,6 @@ public class S3DataManipulatorTest {
     s3Client.putObject(BUCKET, FOLDER, inputData);
     boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + FOLDER);
     assertThat(result, is(true));
-  }
-
-  @Test
-  public void deleteEmptyFolderFails() throws IOException {
-    s3Client.createBucket(BUCKET);
-    File inputData = temp.newFile("empty");
-    s3Client.putObject(BUCKET, EMPTY_FOLDER + "/", inputData);
-    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + EMPTY_FOLDER);
-    assertThat(result, is(false));
   }
 
   @Test
