@@ -71,7 +71,7 @@ public class S3DataManipulatorTest {
   }
 
   @Test
-  public void deleteSucceeds() throws IOException {
+  public void deleteFolderSucceeds() throws IOException {
     File inputData = temp.newFile("data");
     s3Client.putObject(BUCKET, FOLDER, inputData);
     boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + FOLDER);
@@ -87,8 +87,14 @@ public class S3DataManipulatorTest {
   }
 
   @Test
-  public void deleteInexistentPathFails() {
-    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/inexistent-path");
+  public void deleteInexistentFolderFails() {
+    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/inexistent-folder");
+    assertThat(result, is(false));
+  }
+
+  @Test
+  public void deleteBucketSucceeds() {
+    boolean result = s3DataManipulator.delete(BUCKET_PATH);
     assertThat(result, is(false));
   }
 
