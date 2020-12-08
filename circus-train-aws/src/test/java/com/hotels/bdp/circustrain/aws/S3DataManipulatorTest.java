@@ -41,9 +41,10 @@ public class S3DataManipulatorTest {
   private static final String AWS_ACCESS_KEY = "access";
   private static final String AWS_SECRET_KEY = "secret";
   private static final String BUCKET = "bucket";
+  private static final String BUCKET_PATH = "s3://" + BUCKET;
+  private static final String FOLDER = "folder";
+  private static final String EMPTY_FOLDER = "empty-folder";
   private static final String EMPTY_BUCKET = "empty-bucket";
-  private static final String PATH ="s3://" + BUCKET;
-  private static final String EMPTY_PATH ="s3://" + EMPTY_BUCKET;
 
   public @Rule TemporaryFolder temp = new TemporaryFolder();
   public @Rule S3ProxyRule s3Proxy = S3ProxyRule.builder().withCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY).build();
@@ -55,6 +56,7 @@ public class S3DataManipulatorTest {
   public void setUp() {
     s3Client = newClient();
     s3DataManipulator = new S3DataManipulator(s3Client);
+    s3Client.createBucket(BUCKET);
   }
 
   private AmazonS3 newClient() {
@@ -69,20 +71,31 @@ public class S3DataManipulatorTest {
   }
 
   @Test
-  public void deleteFails() {
-    s3Client.createBucket(EMPTY_BUCKET);
-    boolean result = s3DataManipulator.delete(EMPTY_PATH);
+  public void deleteSucceeds() throws IOException {
+    File inputData = temp.newFile("data");
+    s3Client.putObject(BUCKET, FOLDER, inputData);
+    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + FOLDER);
+    assertThat(result, is(true));
+  }
+
+  @Test
+  public void deleteEmptyFolderFails() throws IOException {
+    File inputData = temp.newFile("empty");
+    s3Client.putObject(BUCKET, EMPTY_FOLDER + "/", inputData);
+    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + EMPTY_FOLDER);
     assertThat(result, is(false));
   }
 
   @Test
-  public void deleteSucceeds() throws IOException {
-    s3Client.createBucket(BUCKET);
-    File inputData = temp.newFile("data");
-
-    s3Client.putObject(BUCKET, "key1/key2", inputData);
-    boolean result = s3DataManipulator.delete(PATH);
-    assertThat(result, is(true));
+  public void deleteInexistentPathFails() {
+    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/inexistent-path");
+    assertThat(result, is(false));
   }
 
+  @Test
+  public void deleteEmptyBucketFails() {
+    s3Client.createBucket(EMPTY_BUCKET);
+    boolean result = s3DataManipulator.delete("s3://" + EMPTY_BUCKET);
+    assertThat(result, is(false));
+  }
 }
