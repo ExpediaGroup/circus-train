@@ -78,14 +78,14 @@ public class S3DataManipulatorTest {
   }
 
   @Test
-  public void deleteInexistentFolderFails() {
+  public void deleteNonexistentFolderFails() {
     s3Client.createBucket(BUCKET);
-    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/inexistent-folder");
+    boolean result = s3DataManipulator.delete(BUCKET_PATH + "/nonexistent-folder");
     assertThat(result, is(false));
   }
 
   @Test
-  public void deleteBucketSucceeds() {
+  public void deleteBucketFails() {
     s3Client.createBucket(BUCKET);
     boolean result = s3DataManipulator.delete(BUCKET_PATH);
     assertThat(result, is(false));
