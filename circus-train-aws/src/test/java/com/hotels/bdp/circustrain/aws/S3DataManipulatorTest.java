@@ -16,7 +16,7 @@
 package com.hotels.bdp.circustrain.aws;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,6 +99,6 @@ public class S3DataManipulatorTest {
 
   @Test(expected = AmazonS3Exception.class)
   public void deleteNonExistentBucketThrowsException() {
-    s3DataManipulator.delete("s3://" + "nonexistent-bucket");
+    s3DataManipulator.delete("s3://nonexistent-bucket");
   }
 }
