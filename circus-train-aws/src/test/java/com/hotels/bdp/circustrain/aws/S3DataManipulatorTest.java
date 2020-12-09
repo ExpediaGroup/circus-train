@@ -99,7 +99,6 @@ public class S3DataManipulatorTest {
 
   @Test(expected = AmazonS3Exception.class)
   public void deleteNonExistentBucketThrowsException() {
-    boolean result = s3DataManipulator.delete("s3://" + "nonexistent-bucket");
-    assertThat(result, is(false));
+    s3DataManipulator.delete("s3://" + "nonexistent-bucket");
   }
 }
