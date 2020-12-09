@@ -52,9 +52,12 @@ public class S3DataManipulatorTest {
   private AmazonS3 s3Client;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     s3Client = newClient();
     s3DataManipulator = new S3DataManipulator(s3Client);
+    s3Client.createBucket(BUCKET);
+    File inputData = temp.newFile("data");
+    s3Client.putObject(BUCKET, FOLDER, inputData);
   }
 
   private AmazonS3 newClient() {
@@ -69,26 +72,21 @@ public class S3DataManipulatorTest {
   }
 
   @Test
-  public void deleteFolderSucceeds() throws IOException {
-    s3Client.createBucket(BUCKET);
-    File inputData = temp.newFile("data");
-    s3Client.putObject(BUCKET, FOLDER, inputData);
+  public void deleteFolderSucceeds() {
     boolean result = s3DataManipulator.delete(BUCKET_PATH + "/" + FOLDER);
     assertThat(result, is(true));
   }
 
   @Test
   public void deleteNonexistentFolderFails() {
-    s3Client.createBucket(BUCKET);
     boolean result = s3DataManipulator.delete(BUCKET_PATH + "/nonexistent-folder");
     assertThat(result, is(false));
   }
 
   @Test
-  public void deleteBucketFails() {
-    s3Client.createBucket(BUCKET);
+  public void deleteBucketSucceeds() {
     boolean result = s3DataManipulator.delete(BUCKET_PATH);
-    assertThat(result, is(false));
+    assertThat(result, is(true));
   }
 
   @Test
