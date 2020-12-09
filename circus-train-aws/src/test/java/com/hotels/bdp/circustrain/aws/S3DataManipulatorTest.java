@@ -34,6 +34,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 
 @RunWith(MockitoJUnitRunner.class)
 public class S3DataManipulatorTest {
@@ -93,6 +94,12 @@ public class S3DataManipulatorTest {
   public void deleteEmptyBucketFails() {
     s3Client.createBucket(EMPTY_BUCKET);
     boolean result = s3DataManipulator.delete("s3://" + EMPTY_BUCKET);
+    assertThat(result, is(false));
+  }
+
+  @Test(expected = AmazonS3Exception.class)
+  public void deleteNonExistentBucketThrowsException() {
+    boolean result = s3DataManipulator.delete("s3://" + "nonexistent-bucket");
     assertThat(result, is(false));
   }
 }
