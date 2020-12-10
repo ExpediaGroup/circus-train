@@ -1,4 +1,4 @@
-## [16.3.3] - TBD
+## [16.3.3] - 2020-12-10
 ### Fixed
 * Issue where rename table operation would be incorrect if tables are in different databases.
 * Added check in `delete` operation so that it doesn't try to delete empty lists of keys.
