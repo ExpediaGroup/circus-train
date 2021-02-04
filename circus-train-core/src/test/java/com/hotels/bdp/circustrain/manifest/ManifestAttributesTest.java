@@ -39,7 +39,7 @@ import com.google.common.base.Preconditions;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ManifestAttributes.class })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "javax.xml.*", "org.xml.sax.*", "org.w3c.dom.*"})
 public class ManifestAttributesTest {
 
   private @Rule final ClassDataFolder dataFolder = new ClassDataFolder();

@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -8,7 +10,8 @@
   </parent>
 
   <properties>
-    <!-- Needs to be different from the normal circus train shaded prefix otherwise we'll have conflicts with that jar -->
+    <!-- Needs to be different from the normal circus train shaded prefix 
+      otherwise we'll have conflicts with that jar -->
     <shade.prefix>${project.groupId}.snsshaded</shade.prefix>
   </properties>
 
@@ -25,6 +28,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.3.2</version>
     </dependency>
 
     <!-- Spring -->
@@ -96,8 +105,8 @@
               <shadedClassifierName>all</shadedClassifierName>
               <artifactSet>
                 <includes>
-                  <!-- our own jars need to be shaded + aws jars (+ deps) as they can conflict with provided jar when running
-                    on AWS -->
+                  <!-- our own jars need to be shaded + aws jars (+ deps) 
+                    as they can conflict with provided jar when running on AWS -->
                   <include>com.hotels:circus-train-aws-sns</include>
                   <include>com.amazonaws:*</include>
                   <include>org.apache.httpcomponents:*</include>
@@ -109,8 +118,9 @@
                   <pattern>com.amazonaws</pattern>
                   <shadedPattern>${shade.prefix}.com.amazonaws</shadedPattern>
                 </relocation>
-                <relocation><!-- Note org.apache.httpcomponents groupId but org.apache.http package, this is relocated due
-                    to newer version used by com.amazonaws, older version is provided by /usr/lib/hive/ -->
+                <relocation><!-- Note org.apache.httpcomponents groupId but 
+                    org.apache.http package, this is relocated due to newer version used by com.amazonaws, 
+                    older version is provided by /usr/lib/hive/ -->
                   <pattern>org.apache.http</pattern>
                   <shadedPattern>${shade.prefix}.org.apache.http</shadedPattern>
                 </relocation>
