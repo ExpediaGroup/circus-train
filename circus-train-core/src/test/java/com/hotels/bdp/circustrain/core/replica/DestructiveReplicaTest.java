@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,6 @@ public class DestructiveReplicaTest {
 
   @Test
   public void dropDeletedPartitionsNothingToDrop() throws Exception {
-    when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
     Partition replicaPartition = new Partition();
     replicaPartition.setValues(Lists.newArrayList("value1"));
 
@@ -192,7 +191,6 @@ public class DestructiveReplicaTest {
   @Test
   public void dropDeletedPartitionsUnpartitionedTable() throws Exception {
     table.setPartitionKeys(null);
-    when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 
     List<String> sourcePartitionNames = Lists.newArrayList();
     replica.dropDeletedPartitions(sourcePartitionNames);

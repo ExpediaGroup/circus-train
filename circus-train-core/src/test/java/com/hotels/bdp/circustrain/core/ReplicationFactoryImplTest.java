@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -94,17 +93,12 @@ public class ReplicationFactoryImplTest {
 
     when(sourceTable.getDatabaseName()).thenReturn(DATABASE);
     when(sourceTable.getTableName()).thenReturn(TABLE);
-    when(sourceTable.getTableLocation()).thenReturn(SOURCE_TABLE_LOCATION_BASE);
-    when(sourceTable.getPartitionLimit()).thenReturn((short) -1);
 
     when(replicaTable.getTableLocation()).thenReturn(TARGET_TABLE_LOCATION_BASE);
     when(replicaTable.getDatabaseName()).thenReturn(DATABASE);
     when(replicaTable.getTableName()).thenReturn(TABLE);
 
-    when(copierFactoryManager.getCopierFactory(any(Path.class), any(Path.class), anyMap())).thenReturn(copierFactory);
     when(partitionPredicateFactory.newInstance(tableReplication)).thenReturn(partitionPredicate);
-    when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
-    when(sourceTable.getPartitionLimit()).thenReturn((short) MAX_PARTITIONS);
     when(replicaFactory.newInstance(tableReplication)).thenReturn(replica);
 
     factory = new ReplicationFactoryImpl(sourceFactory, replicaFactory, copierFactoryManager, copierListener,
@@ -183,10 +177,9 @@ public class ReplicationFactoryImplTest {
   @Test
   public void partitionedTableReplicationLazyLoadPartitionPredicate() throws Exception {
     when(table.getPartitionKeys()).thenReturn(Arrays.asList(new FieldSchema()));
-    when(partitionPredicate.getPartitionPredicate()).thenThrow(new RuntimeException("Error!"));
-    // Should not fail in creating a new instance.
     Replication replication = factory.newInstance(tableReplication);
     assertThat(replication, is(instanceOf(PartitionedTableReplication.class)));
+    verify(partitionPredicate, never()).getPartitionPredicate();
   }
 
   @Test(expected = CircusTrainException.class)
@@ -216,7 +209,6 @@ public class ReplicationFactoryImplTest {
   @Test
   public void viewReplicationModeIsMetadataMirror() {
     tableReplication.setReplicationMode(ReplicationMode.METADATA_MIRROR);
-    when(table.getTableType()).thenReturn(TableType.VIRTUAL_VIEW.name());
     Replication replication = factory.newInstance(tableReplication);
     assertThat(replication, is(instanceOf(UnpartitionedTableMetadataMirrorReplication.class)));
   }

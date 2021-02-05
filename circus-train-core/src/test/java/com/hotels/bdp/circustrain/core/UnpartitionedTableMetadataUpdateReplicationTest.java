@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,6 @@ public class UnpartitionedTableMetadataUpdateReplicationTest {
   public void injectMocks() throws Exception {
     when(eventIdFactory.newEventId(anyString())).thenReturn(EVENT_ID);
     when(source.getTableAndStatistics(DATABASE, TABLE)).thenReturn(sourceTableAndStatistics);
-    when(sourceTableAndStatistics.getTable()).thenReturn(sourceTable);
     when(replica.getMetaStoreClientSupplier()).thenReturn(supplier);
     when(supplier.get()).thenReturn(client);
   }

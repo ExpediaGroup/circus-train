@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package com.hotels.bdp.circustrain.core.source;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -63,20 +65,20 @@ public class SourceFactoryTest {
   @Test
   public void newInstanceMetadataMirrorReplicationModeOverridesDisabledSnapshots() throws Exception {
     when(tableReplication.getReplicationMode()).thenReturn(ReplicationMode.METADATA_MIRROR);
-    when(sourceCatalog.isDisableSnapshots()).thenReturn(false);
     SourceFactory sourceFactory = new SourceFactory(sourceCatalog, sourceHiveConf, sourceMetaStoreClientSupplier,
         sourceCatalogListener);
     Source source = sourceFactory.newInstance(tableReplication);
     assertTrue(source.isSnapshotsDisabled());
+    verify(sourceCatalog, never()).isDisableSnapshots();
   }
 
   @Test
   public void newInstanceMetadataUpdateReplicationModeOverridesDisabledSnapshots() throws Exception {
     when(tableReplication.getReplicationMode()).thenReturn(ReplicationMode.METADATA_UPDATE);
-    when(sourceCatalog.isDisableSnapshots()).thenReturn(false);
     SourceFactory sourceFactory = new SourceFactory(sourceCatalog, sourceHiveConf, sourceMetaStoreClientSupplier,
         sourceCatalogListener);
     Source source = sourceFactory.newInstance(tableReplication);
     assertTrue(source.isSnapshotsDisabled());
+    verify(sourceCatalog, never()).isDisableSnapshots();
   }
 }
