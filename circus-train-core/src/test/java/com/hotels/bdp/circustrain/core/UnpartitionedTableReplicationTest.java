@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,8 @@ public class UnpartitionedTableReplicationTest {
   private DataManipulatorFactory dataManipulatorFactory;
   @Mock
   private DataManipulator dataManipulator;
+  @Mock
+  private  Metrics metrics;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
@@ -108,6 +110,7 @@ public class UnpartitionedTableReplicationTest {
     when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(dataManipulatorFactory);
     when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
+    when(copier.copy()).thenReturn(metrics);
   }
 
   private TableReplication createTypicalTableReplication() {
@@ -133,7 +136,7 @@ public class UnpartitionedTableReplicationTest {
     replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(listener).copierStart(anyString());
     replicationOrder.verify(copier).copy();
-    replicationOrder.verify(listener).copierEnd(any(Metrics.class));
+    replicationOrder.verify(listener).copierEnd(metrics);
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
         .verify(replica)
