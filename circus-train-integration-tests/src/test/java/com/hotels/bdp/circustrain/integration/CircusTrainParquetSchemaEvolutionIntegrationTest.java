@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ import com.klarna.hiverunner.annotations.HiveSQL;
 
 import com.hotels.bdp.circustrain.common.test.base.CircusTrainRunner;
 import com.hotels.bdp.circustrain.common.test.junit.rules.ServerSocketRule;
+import com.hotels.bdp.circustrain.integration.utils.CircusTrainThriftMetastoreServerRule;
 import com.hotels.bdp.circustrain.integration.utils.SchemaEvolution;
-import com.hotels.bdp.circustrain.integration.utils.ThriftMetastoreServerRuleExtension;
 import com.hotels.hcommon.hive.metastore.iterator.PartitionIterator;
 
 @Category(SchemaEvolution.class)
@@ -89,7 +89,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
   private IntegrationTestHelper helper;
 
-  private ThriftMetastoreServerRuleExtension thriftMetaStoreRule;
+  private CircusTrainThriftMetastoreServerRule thriftMetaStoreRule;
   private HiveMetaStoreClient metaStoreClient;
 
   @Before
@@ -98,8 +98,8 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
     shell.execute("CREATE DATABASE " + SOURCE_DB);
     shell.execute("CREATE DATABASE " + REPLICA_DB);
     HiveConf hiveConf = shell.getHiveConf();
-    thriftMetaStoreRule = new ThriftMetastoreServerRuleExtension(hiveConf);
-    thriftMetaStoreRule.before();
+    thriftMetaStoreRule = new CircusTrainThriftMetastoreServerRule(hiveConf);
+    thriftMetaStoreRule.starting(null);
     metaStoreClient = thriftMetaStoreRule.client();
 
     sourceWarehouseUri = temporaryFolder.newFolder("source-warehouse");
@@ -111,7 +111,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
 
   @After
   public void teardown() {
-    thriftMetaStoreRule.after();
+    thriftMetaStoreRule.finished(null);
   }
 
   @Test
