@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,10 +101,8 @@ public class SnsListenerTest {
     when(config.getStartTopic()).thenReturn("startArn");
     when(config.getSuccessTopic()).thenReturn("successArn");
     when(config.getFailTopic()).thenReturn("failArn");
-    when(config.getTopic()).thenReturn("topicArn");
     when(config.getSubject()).thenReturn(SUBJECT);
     when(config.getHeaders()).thenReturn(headers);
-    when(config.getQueueSize()).thenReturn(10);
 
     when(replicaTable.getTableLocation()).thenReturn(REPLICA_TABLE_LOCATION);
     when(tableReplication.getSourceTable()).thenReturn(sourceTable);

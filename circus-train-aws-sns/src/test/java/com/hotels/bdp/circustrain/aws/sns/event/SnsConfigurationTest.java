@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +54,6 @@ public class SnsConfigurationTest {
   @Test
   public void snsClient() {
     AWSCredentialsProvider credentialsProvider = mock(AWSCredentialsProvider.class);
-    when(credentialsProvider.getCredentials()).thenReturn(new BasicAWSCredentials("accessKey", "secretKey"));
     ListenerConfig config = new ListenerConfig();
     config.setRegion("eu-west-1");
     AmazonSNS sns = configuration.amazonSNS(config, credentialsProvider);

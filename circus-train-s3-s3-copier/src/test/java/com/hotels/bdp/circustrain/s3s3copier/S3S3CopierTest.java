@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,7 +315,6 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(copy.getProgress()).thenReturn(new TransferProgress());
     when(mockedTransferManager
         .copy(any(CopyObjectRequest.class), any(AmazonS3.class), any(TransferStateChangeListener.class)))
             .thenReturn(copy);
@@ -438,7 +437,6 @@ public class S3S3CopierTest {
         .copy(any(CopyObjectRequest.class), any(AmazonS3.class), any(TransferStateChangeListener.class)))
             .thenThrow(new AmazonClientException("S3 error"));
     TransferProgress transferProgress = new TransferProgress();
-    when(copy.getProgress()).thenReturn(transferProgress);
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
     try {

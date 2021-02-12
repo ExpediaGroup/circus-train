@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.hotels.bdp.circustrain.distcpcopier;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Iterables;
 
@@ -45,22 +45,22 @@ public class FileStatusTreeTraverserTest {
   @Mock
   private FileSystem fileSystem;
   @Mock
-  private FileStatus status;
+  private FileStatus fileStatus;
 
   private FileStatusTreeTraverser traverser;
 
   @Before
   public void before() {
     traverser = new FileStatusTreeTraverser(fileSystem);
+    when(fileStatus.isFile()).thenReturn(false);
+    when(fileStatus.getPath()).thenReturn(new Path("/tmp"));
   }
 
   @Test
   public void typical() throws IOException {
-    when(status.isFile()).thenReturn(false);
-    FileStatus fileStatus = new FileStatus();
     when(fileSystem.listStatus(any(Path.class))).thenReturn(new FileStatus[] { fileStatus });
 
-    Iterable<FileStatus> children = traverser.children(status);
+    Iterable<FileStatus> children = traverser.children(fileStatus);
 
     verify(fileSystem).listStatus(any(Path.class));
 
@@ -70,10 +70,9 @@ public class FileStatusTreeTraverserTest {
 
   @Test
   public void noChildren() throws IOException {
-    when(status.isFile()).thenReturn(false);
     when(fileSystem.listStatus(any(Path.class))).thenReturn(new FileStatus[] {});
 
-    Iterable<FileStatus> children = traverser.children(status);
+    Iterable<FileStatus> children = traverser.children(fileStatus);
 
     verify(fileSystem).listStatus(any(Path.class));
 
@@ -82,10 +81,9 @@ public class FileStatusTreeTraverserTest {
 
   @Test
   public void nullListStatus() throws IOException {
-    when(status.isFile()).thenReturn(false);
     when(fileSystem.listStatus(any(Path.class))).thenReturn(null);
 
-    Iterable<FileStatus> children = traverser.children(status);
+    Iterable<FileStatus> children = traverser.children(fileStatus);
 
     verify(fileSystem).listStatus(any(Path.class));
 
@@ -94,9 +92,9 @@ public class FileStatusTreeTraverserTest {
 
   @Test
   public void rootIsFile() throws IOException {
-    when(status.isFile()).thenReturn(true);
+    when(fileStatus.isFile()).thenReturn(true);
 
-    Iterable<FileStatus> children = traverser.children(status);
+    Iterable<FileStatus> children = traverser.children(fileStatus);
 
     verify(fileSystem, never()).listStatus(any(Path.class));
 
@@ -105,10 +103,9 @@ public class FileStatusTreeTraverserTest {
 
   @Test(expected = CircusTrainException.class)
   public void fileSystemException() throws IOException {
-    when(status.isFile()).thenReturn(false);
     doThrow(IOException.class).when(fileSystem).listStatus(any(Path.class));
 
-    traverser.children(status);
+    traverser.children(fileStatus);
   }
 
 }
