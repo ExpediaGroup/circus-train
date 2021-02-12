@@ -125,8 +125,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "2\tafter\t2"
     );
     runTest(schema, evolvedSchema, new FieldDataWrapper(), afterEvolution);
-    //TODO: should we call runDataChecks here?
-    //runDataChecks(evolvedSchema, expectedData);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   @Test
@@ -140,8 +139,7 @@ public class CircusTrainParquetSchemaEvolutionIntegrationTest {
         "2\t2"
     );
     runTest(schema, evolvedSchema, beforeEvolution, new FieldDataWrapper());
-  //TODO: should we call runDataChecks here?
-    //runDataChecks(evolvedSchema, expectedData);
+    runDataChecks(evolvedSchema, expectedData);
   }
 
   // Replication success - old expectedData not "renamed" too
