@@ -23,7 +23,7 @@ import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.METASTORE_CONNECTION
 import static org.apache.hadoop.mapreduce.MRConfig.FRAMEWORK_NAME;
 import static org.apache.hadoop.mapreduce.MRConfig.LOCAL_FRAMEWORK_NAME;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
