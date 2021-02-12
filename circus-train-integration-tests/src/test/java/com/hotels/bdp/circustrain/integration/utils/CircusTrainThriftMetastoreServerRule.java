@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 
 import com.hotels.beeju.ThriftHiveMetaStoreJUnitRule;
 
-public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnitRule {
+public class CircusTrainThriftMetastoreServerRule extends ThriftHiveMetaStoreJUnitRule {
   
   private static Map<String, String> createConfigOverride(HiveConf hiveConf) {
     Map<String, String> overrideConfig = new HashMap<String, String>();
@@ -36,18 +36,8 @@ public class ThriftMetastoreServerRuleExtension extends ThriftHiveMetaStoreJUnit
     return overrideConfig;
   }
 
-  public ThriftMetastoreServerRuleExtension(HiveConf hiveConf) {
+  public CircusTrainThriftMetastoreServerRule(HiveConf hiveConf) {
     super("test_database", Collections.emptyMap(), createConfigOverride(hiveConf));
-  }
-
-  @Override
-  public void before() throws Throwable {
-    super.before();
-  }
-
-  @Override
-  public void after() {
-    super.after();
   }
 
 }

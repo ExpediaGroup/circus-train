@@ -62,7 +62,7 @@
     <junit.version>4.13.1</junit.version>
     <powermock.version>2.0.2</powermock.version>
     <derby.version>10.10.2.0</derby.version>
-    <beeju.version>3.3.0</beeju.version>
+    <beeju.version>4.0.0</beeju.version>
     <hamcrest-library.version>1.3</hamcrest-library.version>
     <housekeeping.version>3.1.0</housekeeping.version>
     <guava.version>20.0</guava.version>
