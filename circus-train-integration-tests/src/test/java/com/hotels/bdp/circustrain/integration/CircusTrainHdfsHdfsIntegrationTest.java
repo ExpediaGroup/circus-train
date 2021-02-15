@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import static com.hotels.bdp.circustrain.api.CircusTrainTableParameter.REPLICATI
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.DATABASE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.EVOLUTION_COLUMN;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PARTITIONED_TABLE;
+import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.PART_00000;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_ENCODED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_PARTITIONED_TABLE;
 import static com.hotels.bdp.circustrain.integration.IntegrationTestHelper.SOURCE_MANAGED_UNPARTITIONED_TABLE;
@@ -254,6 +255,68 @@ public class CircusTrainHdfsHdfsIntegrationTest {
             assertThat(e.getMessage().startsWith("Table \"LEGACY_REPLICA_PATH_AUD\" not found;"), is(true));
           }
         }
+      }
+    });
+    runner.run(config.getAbsolutePath());
+  }
+
+  @Test
+  public void partitionedTableDifferentBasePaths() throws Exception {
+    // base path .../base1/
+    Table hiveTable = TestUtils
+        .createPartitionedTable(sourceCatalog.client(), DATABASE, PARTITIONED_TABLE,
+            new URI(sourceWarehouseUri + "/base1/"));
+
+    // base path .../base1/
+    URI partitionEurope = URI.create(sourceWarehouseUri + "/base1/continent=Europe");
+    URI partitionUk = URI.create(partitionEurope + "/country=UK");
+    File dataFileUk = new File(partitionUk.getPath(), PART_00000);
+    FileUtils.writeStringToFile(dataFileUk, "1\tadam\tlondon\n2\tsusan\tglasgow\n");
+
+    // base path .../base2/
+    URI partitionAsia = URI.create(sourceWarehouseUri + "/base2/continent=Asia");
+    URI partitionChina = URI.create(partitionAsia + "/country=China");
+    File dataFileChina = new File(partitionChina.getPath(), PART_00000);
+    FileUtils.writeStringToFile(dataFileChina, "1\tchun\tbeijing\n2\tlee\tshanghai\n");
+    LOG
+        .info(">>>> Partitions added: {}",
+            sourceCatalog
+                .client()
+                .add_partitions(Arrays
+                    .asList(newTablePartition(hiveTable, Arrays.asList("Europe", "UK"), partitionUk),
+                        newTablePartition(hiveTable, Arrays.asList("Asia", "China"), partitionChina))));
+    LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
+
+    exit.expectSystemExitWithStatus(0);
+    File config = dataFolder.getFile("partitioned-single-table-no-housekeeping.yml");
+    CircusTrainRunner runner = CircusTrainRunner
+        .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
+        .sourceMetaStore(sourceCatalog.getThriftConnectionUri(), sourceCatalog.connectionURL(),
+            sourceCatalog.driverClassName())
+        .replicaMetaStore(replicaCatalog.getThriftConnectionUri())
+        .build();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        Table table = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
+        String warehouseBase = replicaWarehouseUri.toURI().toString();
+        System.out.println(table.getSd().getLocation());
+        System.out.println(warehouseBase + "ct_database/ct_table_p");
+        assertTrue(table.getSd().getLocation().matches(warehouseBase + "/ct_database/ct_table_p"));
+        List<Partition> listPartitions = replicaCatalog
+            .client()
+            .listPartitions(DATABASE, PARTITIONED_TABLE, (short) -1);
+        assertThat(listPartitions.size(), is(2));
+        assertTrue(listPartitions
+            .get(0)
+            .getSd()
+            .getLocation()
+            .matches(warehouseBase + "ct_database/ct_table_p/ctp.*?/continent=Asia/country=China"));
+        assertTrue(listPartitions
+            .get(1)
+            .getSd()
+            .getLocation()
+            .matches(warehouseBase + "ct_database/ct_table_p/ctp.*?/continent=Europe/country=UK"));
       }
     });
     runner.run(config.getAbsolutePath());
@@ -1427,21 +1490,18 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("name", "adam");
     structData.put("city", "blackpool");
 
-    Table replicaTable = replicaHelper.createParquetPartitionedTable(
-        toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE),
-        DATABASE,
-        PARTITIONED_TABLE,
-        schema,
-        EVOLUTION_COLUMN,
-        structData,
-        1);
+    Table replicaTable = replicaHelper
+        .createParquetPartitionedTable(toUri(replicaWarehouseUri, DATABASE, PARTITIONED_TABLE), DATABASE,
+            PARTITIONED_TABLE, schema, EVOLUTION_COLUMN, structData, 1);
     LOG.info(">>>> Table {} ", replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     replicaTable.getParameters().put("com.hotels.bdp.circustrain.replication.event", "event_id");
     replicaCatalog.client().alter_table(DATABASE, PARTITIONED_TABLE, replicaTable);
 
     // Create the source table with an additional column in the struct.
-    helper.createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, EVOLUTION_COLUMN, structData);
+    helper
+        .createData(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), schema, "1", 1, EVOLUTION_COLUMN,
+            structData);
 
     Schema schemaV2 = SchemaBuilder
         .builder("name.space")
@@ -1450,7 +1510,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         .requiredInt("id")
         .name(EVOLUTION_COLUMN)
         .type()
-        .record( EVOLUTION_COLUMN + "_struct")
+        .record(EVOLUTION_COLUMN + "_struct")
         .fields()
         .requiredString("name")
         .requiredString("city")
@@ -1464,21 +1524,14 @@ public class CircusTrainHdfsHdfsIntegrationTest {
     structData.put("city", "blackpool");
     structData.put("dob", "22/09/1992");
 
-    Table table = helper.createParquetPartitionedTable(
-        toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE),
-        DATABASE,
-        PARTITIONED_TABLE,
-        schemaV2,
-        EVOLUTION_COLUMN,
-        structData,
-        2);
+    Table table = helper
+        .createParquetPartitionedTable(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE), DATABASE,
+            PARTITIONED_TABLE, schemaV2, EVOLUTION_COLUMN, structData, 2);
     LOG.info(">>>> Table {} ", sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE));
 
     // Create the source partition with the original struct.
     URI partition = URI.create(toUri(sourceWarehouseUri, DATABASE, PARTITIONED_TABLE) + "/hour=" + 1);
-    sourceCatalog.client().add_partitions(Arrays.asList(
-        newTablePartition(table, Arrays.asList("1"), partition)
-    ));
+    sourceCatalog.client().add_partitions(Arrays.asList(newTablePartition(table, Arrays.asList("1"), partition)));
 
     CircusTrainRunner runner = CircusTrainRunner
         .builder(DATABASE, sourceWarehouseUri, replicaWarehouseUri, housekeepingDbLocation)
@@ -1496,7 +1549,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         Table sourceTable = sourceCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         List<FieldSchema> cols = sourceTable.getSd().getCols();
         assertThat(cols.get(0), is(new FieldSchema("id", "int", "")));
-        assertThat(cols.get(1), is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
+        assertThat(cols.get(1),
+            is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
         PartitionIterator partitionIterator = new PartitionIterator(sourceCatalog.client(), sourceTable, (short) 1000);
         List<Partition> partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {
@@ -1510,7 +1564,8 @@ public class CircusTrainHdfsHdfsIntegrationTest {
         Table replicaTable = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         cols = replicaTable.getSd().getCols();
         assertThat(cols.get(0), is(new FieldSchema("id", "int", "")));
-        assertThat(cols.get(1), is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
+        assertThat(cols.get(1),
+            is(new FieldSchema(EVOLUTION_COLUMN, "struct<name:string,city:string,dob:string>", "")));
         partitionIterator = new PartitionIterator(replicaCatalog.client(), replicaTable, (short) 1000);
         partitions = new ArrayList<>();
         while (partitionIterator.hasNext()) {

@@ -35,7 +35,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
+import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.ColumnStatistics;
+import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.SetPartitionsStatsRequest;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -175,7 +177,8 @@ public class Replica extends HiveEndpoint {
       List<Partition> partitionsToAlter = new ArrayList<>(sourcePartitions.size());
       List<ColumnStatistics> statisticsToSet = new ArrayList<>(sourcePartitions.size());
       for (Partition sourcePartition : sourcePartitions) {
-        Path replicaPartitionLocation = locationManager.getPartitionLocation(sourcePartition);
+        Path replicaPartitionLocation = createReplicaPartitionLocation(sourceTableAndStatistics, sourcePartition,
+            locationManager);
         LOG.debug("Generated replica partition path: {}", replicaPartitionLocation);
 
         Partition replicaPartition = tableFactory
@@ -265,6 +268,29 @@ public class Replica extends HiveEndpoint {
       } else {
         LOG.debug("No partition column stats to set.");
       }
+    }
+  }
+
+  private Path createReplicaPartitionLocation(
+      TableAndStatistics sourceTableAndStatistics,
+      Partition sourcePartition,
+      ReplicaLocationManager locationManager) {
+    try {
+      return locationManager.getPartitionLocation(sourcePartition);
+    } catch (CircusTrainException e) {
+      String subPath;
+      try {
+        subPath = Warehouse
+            .makePartName(sourceTableAndStatistics.getTable().getPartitionKeys(), sourcePartition.getValues());
+      } catch (MetaException e1) {
+        throw new CircusTrainException(e1);
+      }
+      Path replicationPath = new Path(locationManager.getPartitionBaseLocation(), subPath);
+      LOG
+          .warn(
+              "Couldn't get partition location from folder will generate one instead and use: '{}', original error: {}",
+              replicationPath, e.getMessage());
+      return replicationPath;
     }
   }
 

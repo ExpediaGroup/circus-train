@@ -70,8 +70,7 @@ public class IntegrationTestHelper {
   }
 
   void createPartitionedTable(URI sourceTableUri) throws Exception {
-    Table hiveTable = TestUtils
-        .createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri);
+    Table hiveTable = TestUtils.createPartitionedTable(metaStoreClient, DATABASE, PARTITIONED_TABLE, sourceTableUri);
 
     URI partitionEurope = URI.create(sourceTableUri + "/continent=Europe");
     URI partitionUk = URI.create(partitionEurope + "/country=UK");
@@ -91,38 +90,34 @@ public class IntegrationTestHelper {
   }
 
   Table createParquetPartitionedTable(
-          URI tableUri,
-          String database,
-          String table,
-          Schema schema,
-          String fieldName,
-          Object fieldData,
-          int version) throws Exception {
+      URI tableUri,
+      String database,
+      String table,
+      Schema schema,
+      String fieldName,
+      Object fieldData,
+      int version)
+    throws Exception {
     List<FieldSchema> columns = new ArrayList<>();
     AvroObjectInspectorGenerator schemaInspector = new AvroObjectInspectorGenerator(schema);
     for (int i = 0; i < schemaInspector.getColumnNames().size(); i++) {
-      columns.add(new FieldSchema(
-              schemaInspector.getColumnNames().get(i), schemaInspector.getColumnTypes().get(i).toString(), ""
-      ));
+      columns
+          .add(new FieldSchema(schemaInspector.getColumnNames().get(i),
+              schemaInspector.getColumnTypes().get(i).toString(), ""));
     }
     List<FieldSchema> partitionKeys = Arrays.asList(new FieldSchema("hour", "string", ""));
     Table parquetTable = TestUtils
-            .createPartitionedTable(metaStoreClient, database, table, tableUri, columns, partitionKeys,
-                    "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", MapredParquetInputFormat.class.getName(),
-                    MapredParquetOutputFormat.class.getName());
+        .createPartitionedTable(metaStoreClient, database, table, tableUri, columns, partitionKeys,
+            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe", MapredParquetInputFormat.class.getName(),
+            MapredParquetOutputFormat.class.getName());
     URI partition = createData(tableUri, schema, Integer.toString(version), version, fieldName, fieldData);
-    metaStoreClient.add_partitions(Arrays.asList(newTablePartition(parquetTable,
-            Arrays.asList(Integer.toString(version)), partition)));
+    metaStoreClient
+        .add_partitions(
+            Arrays.asList(newTablePartition(parquetTable, Arrays.asList(Integer.toString(version)), partition)));
     return metaStoreClient.getTable(database, table);
   }
 
-  URI createData(
-      URI tableUri,
-      Schema schema,
-      String hour,
-      int id,
-      String fieldName,
-      Object data) throws IOException {
+  URI createData(URI tableUri, Schema schema, String hour, int id, String fieldName, Object data) throws IOException {
     GenericData.Record record = new GenericData.Record(schema);
     record.put("id", id);
 
@@ -144,10 +139,8 @@ public class IntegrationTestHelper {
     parentFolder.mkdirs();
     File partitionFile = new File(parentFolder, "parquet0000");
     Path filePath = new Path(partitionFile.toURI());
-    ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(filePath)
-        .withSchema(schema)
-        .withConf(new Configuration())
-        .build();
+    ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData
+        .Record>builder(filePath).withSchema(schema).withConf(new Configuration()).build();
 
     try {
       writer.write(record);
@@ -201,8 +194,7 @@ public class IntegrationTestHelper {
   }
 
   void createPartitionedView() throws Exception {
-    Table view = TestUtils
-        .createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW, PARTITIONED_TABLE);
+    Table view = TestUtils.createPartitionedView(metaStoreClient, DATABASE, SOURCE_PARTITIONED_VIEW, PARTITIONED_TABLE);
     metaStoreClient
         .add_partitions(Arrays
             .asList(newViewPartition(view, Arrays.asList("Europe", "UK")),

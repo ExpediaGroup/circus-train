@@ -1,3 +1,7 @@
+## [16.3.3] - 2021-02-16
+### Fixed
+* Issue where replication location could not be generated. See [#212](https://github.com/HotelsDotCom/circus-train/issues/212).
+
 ## [16.3.2] - 2020-10-27
 ### Fixed
 * Issue where external AVRO schemas generated lots of copy jobs. See [#203](https://github.com/HotelsDotCom/circus-train/issues/203).
