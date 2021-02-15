@@ -300,9 +300,7 @@ public class CircusTrainHdfsHdfsIntegrationTest {
       public void checkAssertion() throws Exception {
         Table table = replicaCatalog.client().getTable(DATABASE, PARTITIONED_TABLE);
         String warehouseBase = replicaWarehouseUri.toURI().toString();
-        System.out.println(table.getSd().getLocation());
-        System.out.println(warehouseBase + "ct_database/ct_table_p");
-        assertTrue(table.getSd().getLocation().matches(warehouseBase + "/ct_database/ct_table_p"));
+        assertTrue(table.getSd().getLocation().matches(warehouseBase + "ct_database/ct_table_p"));
         List<Partition> listPartitions = replicaCatalog
             .client()
             .listPartitions(DATABASE, PARTITIONED_TABLE, (short) -1);

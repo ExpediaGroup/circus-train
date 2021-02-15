@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,19 +278,18 @@ public class Replica extends HiveEndpoint {
     try {
       return locationManager.getPartitionLocation(sourcePartition);
     } catch (CircusTrainException e) {
-      String subPath;
       try {
-        subPath = Warehouse
+        String partitionName = Warehouse
             .makePartName(sourceTableAndStatistics.getTable().getPartitionKeys(), sourcePartition.getValues());
+        Path replicationPath = new Path(locationManager.getPartitionBaseLocation(), partitionName);
+        LOG
+            .warn(
+                "Couldn't get partition location from folder will generate one instead and use: '{}', original error: {}",
+                replicationPath, e.getMessage());
+        return replicationPath;
       } catch (MetaException e1) {
         throw new CircusTrainException(e1);
       }
-      Path replicationPath = new Path(locationManager.getPartitionBaseLocation(), subPath);
-      LOG
-          .warn(
-              "Couldn't get partition location from folder will generate one instead and use: '{}', original error: {}",
-              replicationPath, e.getMessage());
-      return replicationPath;
     }
   }
 
