@@ -1,6 +1,13 @@
-## [16.3.3] - 2021-02-16
+
+
+## [16.3.4] - 2021-02-16
 ### Fixed
 * Issue where replication location could not be generated. See [#212](https://github.com/HotelsDotCom/circus-train/issues/212).
+
+## [16.3.3] - 2020-12-10
+### Fixed
+* Issue where rename table operation would be incorrect if tables are in different databases.
+* Added check in `delete` operation so that it doesn't try to delete empty lists of keys.
 
 ## [16.3.2] - 2020-10-27
 ### Fixed

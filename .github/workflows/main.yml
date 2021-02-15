@@ -22,7 +22,7 @@ jobs:
              echo "Coveralls token available"
              COVERALLS_SKIP=false
           fi
-          echo ::set-env name=COVERALLS_SKIP::${COVERALLS_SKIP}
+          echo "COVERALLS_SKIP=${COVERALLS_SKIP}" >> $GITHUB_ENV
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
