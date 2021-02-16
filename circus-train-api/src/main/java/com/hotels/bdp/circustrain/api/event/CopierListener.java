@@ -15,20 +15,19 @@
  */
 package com.hotels.bdp.circustrain.api.event;
 
-import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 public interface CopierListener {
 
   /**
-   * Is guaranteed to be called before a {@link Copier#copy()} is called.
+   * Is guaranteed to be called before a {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} is called.
    *
    * @param copierImplementation
    */
   void copierStart(String copierImplementation);
 
   /**
-   * Is guaranteed to be called when {@link Copier#copy()} is finished (even when {@link Copier#copy()} throws
+   * Is guaranteed to be called when {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} is finished (even when {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} throws
    * exceptions).
    *
    * @param metrics
