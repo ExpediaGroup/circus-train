@@ -101,7 +101,6 @@ public class SourceTest {
   @Before
   public void setupTable() {
     when(sourceCatalog.getName()).thenReturn(NAME);
-    //when(sourceCatalog.isDisableSnapshots()).thenReturn(true);
 
     table.setDbName(DATABASE);
     table.setTableName(TABLE);
