@@ -15,6 +15,7 @@
  */
 package com.hotels.bdp.circustrain.api.event;
 
+import com.hotels.bdp.circustrain.api.copier.Copier;
 import com.hotels.bdp.circustrain.api.metrics.Metrics;
 
 public interface CopierListener {
