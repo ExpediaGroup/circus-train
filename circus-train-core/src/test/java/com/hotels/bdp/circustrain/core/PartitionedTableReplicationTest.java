@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.api.CircusTrainException;
 import com.hotels.bdp.circustrain.api.ReplicaLocationManager;
@@ -84,6 +84,7 @@ public class PartitionedTableReplicationTest {
   private @Mock DataManipulatorFactoryManager dataManipulatorFactoryManager;
   private @Mock DataManipulatorFactory dataManipulatorFactory;
   private @Mock DataManipulator dataManipulator;
+  private @Mock Metrics metrics;
 
   private final Path sourceTableLocation = new Path("sourceTableLocation");
   private final Path replicaTableLocation = new Path("replicaTableLocation");
@@ -107,12 +108,12 @@ public class PartitionedTableReplicationTest {
         .thenReturn(copierFactory);
     when(copierFactory.newInstance(any(CopierContext.class))).thenReturn(copier);
     when(partitionsAndStatistics.getPartitions()).thenReturn(sourcePartitions);
-    when(copierOptions.get("task-count")).thenReturn(Integer.valueOf(2));
     when(partitionPredicate.getPartitionPredicate()).thenReturn(PARTITION_PREDICATE);
     when(partitionPredicate.getPartitionPredicateLimit()).thenReturn(MAX_PARTITIONS);
     when(dataManipulatorFactoryManager.getFactory(sourceTableLocation, replicaTableLocation, copierOptions))
         .thenReturn(dataManipulatorFactory);
     when(dataManipulatorFactory.newInstance(replicaTableLocation, copierOptions)).thenReturn(dataManipulator);
+    when(copier.copy()).thenReturn(metrics);
   }
 
   @Test
@@ -158,7 +159,7 @@ public class PartitionedTableReplicationTest {
     replicationOrder.verify(copierFactory).newInstance(any(CopierContext.class));
     replicationOrder.verify(listener).copierStart(anyString());
     replicationOrder.verify(copier).copy();
-    replicationOrder.verify(listener).copierEnd(any(Metrics.class));
+    replicationOrder.verify(listener).copierEnd(metrics);
     replicationOrder.verify(sourceLocationManager).cleanUpLocations();
     replicationOrder
         .verify(replica)
@@ -239,7 +240,7 @@ public class PartitionedTableReplicationTest {
       replicationOrder.verify(listener).copierStart(anyString());
       replicationOrder.verify(copier).copy();
       // Still called
-      replicationOrder.verify(listener).copierEnd(any(Metrics.class));
+      replicationOrder.verify(listener).copierEnd(metrics);
     }
   }
 }

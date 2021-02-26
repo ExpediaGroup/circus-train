@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package com.hotels.bdp.circustrain.core.replica;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyShort;
@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
@@ -172,7 +172,6 @@ public class DestructiveReplicaTest {
 
   @Test
   public void dropDeletedPartitionsNothingToDrop() throws Exception {
-    when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
     Partition replicaPartition = new Partition();
     replicaPartition.setValues(Lists.newArrayList("value1"));
 
@@ -192,7 +191,6 @@ public class DestructiveReplicaTest {
   @Test
   public void dropDeletedPartitionsUnpartitionedTable() throws Exception {
     table.setPartitionKeys(null);
-    when(client.getTable(DATABASE, REPLICA_TABLE)).thenReturn(table);
 
     List<String> sourcePartitionNames = Lists.newArrayList();
     replica.dropDeletedPartitions(sourcePartitionNames);

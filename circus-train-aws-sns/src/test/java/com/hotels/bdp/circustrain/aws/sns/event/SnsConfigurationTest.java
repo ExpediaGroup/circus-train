@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.hotels.bdp.circustrain.aws.sns.event;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,11 +28,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +54,6 @@ public class SnsConfigurationTest {
   @Test
   public void snsClient() {
     AWSCredentialsProvider credentialsProvider = mock(AWSCredentialsProvider.class);
-    when(credentialsProvider.getCredentials()).thenReturn(new BasicAWSCredentials("accessKey", "secretKey"));
     ListenerConfig config = new ListenerConfig();
     config.setRegion("eu-west-1");
     AmazonSNS sns = configuration.amazonSNS(config, credentialsProvider);

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.METASTORE_CONNECTION
 import static org.apache.hadoop.mapreduce.MRConfig.FRAMEWORK_NAME;
 import static org.apache.hadoop.mapreduce.MRConfig.LOCAL_FRAMEWORK_NAME;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public interface CopierFactory {
    * Creates a new Copier.
    * 
    * @param copierContext Context object containing configuration values for the Copier.
-   * @return
+   * @return A new Copier.
    */
   default Copier newInstance(CopierContext copierContext) {
     //TODO: this is only here for backwards compatibility with CopierFactorys using older versions of Circus Train, when the below
@@ -43,8 +43,7 @@ public interface CopierFactory {
    * @param sourceBaseLocation
    * @param sourceSubLocations
    * @param replicaLocation
-   * @param copierOptions, contains both global and per table override configured options
-   * @return
+   * @return A new Copier.
    */
   @Deprecated
   Copier newInstance(
@@ -60,8 +59,8 @@ public interface CopierFactory {
    * @param eventId
    * @param sourceBaseLocation
    * @param replicaLocation
-   * @param copierOptions, contains both global and per table override configured options
-   * @return
+   * @param copierOptions Contains both global and per table override configured options
+   * @return A new Copier.
    */
   @Deprecated
   Copier newInstance(String eventId, Path sourceBaseLocation, Path replicaLocation, Map<String, Object> copierOptions);

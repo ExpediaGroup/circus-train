@@ -1,3 +1,8 @@
+## [16.4.0] - TBD
+### Changed
+* Various code changes to allow compilation and build on Java 11.
+* `hotels-oss-parent` version to 6.2.1 (was 5.0.0).
+
 ## [16.3.3] - 2020-12-10
 ### Fixed
 * Issue where rename table operation would be incorrect if tables are in different databases.

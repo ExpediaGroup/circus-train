@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.hotels.bdp.circustrain.core.source;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -45,7 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 
@@ -100,9 +100,7 @@ public class SourceTest {
 
   @Before
   public void setupTable() {
-    when(metaStoreClientSupplier.get()).thenReturn(metaStoreClient);
     when(sourceCatalog.getName()).thenReturn(NAME);
-    when(sourceCatalog.isDisableSnapshots()).thenReturn(true);
 
     table.setDbName(DATABASE);
     table.setTableName(TABLE);
@@ -146,6 +144,7 @@ public class SourceTest {
 
   @Test
   public void getTable() throws Exception {
+    when(metaStoreClientSupplier.get()).thenReturn(metaStoreClient);
     when(metaStoreClient.getTable(DATABASE, TABLE)).thenReturn(table);
     when(metaStoreClient.getTableColumnStatistics(DATABASE, TABLE, COLUMN_NAMES)).thenReturn(columnStatisticsObjs);
 
@@ -156,6 +155,7 @@ public class SourceTest {
 
   @Test
   public void getTableNoStats() throws Exception {
+    when(metaStoreClientSupplier.get()).thenReturn(metaStoreClient);
     when(metaStoreClient.getTable(DATABASE, TABLE)).thenReturn(table);
     when(metaStoreClient.getTableColumnStatistics(DATABASE, TABLE, COLUMN_NAMES))
         .thenReturn(Collections.<ColumnStatisticsObj> emptyList());
@@ -167,6 +167,7 @@ public class SourceTest {
 
   @Test
   public void getPartitions() throws Exception {
+    when(metaStoreClientSupplier.get()).thenReturn(metaStoreClient);
     when(metaStoreClient.listPartitionsByFilter(DATABASE, TABLE, PARTITION_PREDICATE, (short) MAX_PARTITIONS))
         .thenReturn(partitions);
     when(metaStoreClient.getPartitionColumnStatistics(DATABASE, TABLE, PARTITION_NAMES, COLUMN_NAMES))
@@ -179,6 +180,7 @@ public class SourceTest {
 
   @Test
   public void getPartitionsNoStats() throws Exception {
+    when(metaStoreClientSupplier.get()).thenReturn(metaStoreClient);
     when(metaStoreClient.listPartitionsByFilter(DATABASE, TABLE, PARTITION_PREDICATE, (short) MAX_PARTITIONS))
         .thenReturn(partitions);
     when(metaStoreClient.getPartitionColumnStatistics(DATABASE, TABLE, PARTITION_NAMES, COLUMN_NAMES))

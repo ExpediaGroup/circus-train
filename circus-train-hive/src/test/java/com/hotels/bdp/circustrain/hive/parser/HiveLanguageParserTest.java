@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.hotels.bdp.circustrain.hive.parser;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -25,11 +24,10 @@ import java.util.Stack;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.lib.Node;
 import org.apache.hadoop.hive.ql.lib.NodeProcessor;
-import org.apache.hadoop.hive.ql.lib.NodeProcessorCtx;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HiveLanguageParserTest {
@@ -66,8 +64,7 @@ public class HiveLanguageParserTest {
   @Test
   public void typical() throws Exception {
     parser.parse(CREATE_TABLE_STATEMENT, nodeProcessor);
-    verify(nodeProcessor, times(49)).process(any(Node.class), any(Stack.class), any(NodeProcessorCtx.class),
-        anyVararg());
+    verify(nodeProcessor, times(49)).process(any(Node.class), any(Stack.class), any(), any());
   }
 
   @Test(expected = HiveParseException.class)

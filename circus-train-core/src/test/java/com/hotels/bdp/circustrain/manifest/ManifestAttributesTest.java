@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.hotels.bdp.circustrain.manifest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.net.URL;
 import java.security.CodeSource;
@@ -29,20 +29,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import fm.last.commons.test.file.ClassDataFolder;
 
 import com.google.common.base.Preconditions;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ManifestAttributes.class })
-@PowerMockIgnore("javax.management.*")
+@RunWith(MockitoJUnitRunner.class)
 public class ManifestAttributesTest {
 
-  private @Rule final ClassDataFolder dataFolder = new ClassDataFolder();
+  public @Rule final ClassDataFolder dataFolder = new ClassDataFolder();
 
   public @Mock ClassLoader clazzLoader;
   public @Mock CodeSource clazzCodeSource;

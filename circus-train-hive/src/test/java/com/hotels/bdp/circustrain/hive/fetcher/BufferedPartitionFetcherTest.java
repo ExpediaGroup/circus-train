@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package com.hotels.bdp.circustrain.hive.fetcher;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,11 +28,10 @@ import org.apache.hadoop.hive.metastore.IMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BufferedPartitionFetcherTest {
@@ -47,8 +46,7 @@ public class BufferedPartitionFetcherTest {
   private @Mock Partition p02;
   private @Mock Partition p03;
 
-  @Before
-  public void init() throws Exception {
+  private void init() throws Exception {
     when(p01.getValues()).thenReturn(Arrays.asList("01"));
     when(p02.getValues()).thenReturn(Arrays.asList("02"));
     when(p03.getValues()).thenReturn(Arrays.asList("03"));
@@ -63,9 +61,6 @@ public class BufferedPartitionFetcherTest {
 
   @Test(expected = PartitionNotFoundException.class)
   public void unknowPartition() throws Exception {
-    when(metastore.getPartitionsByNames(DATABASE_NAME, TABLE_NAME, Arrays.asList("a=01", "a=02", "a=03")))
-        .thenReturn(Arrays.asList(p01, p02, p03));
-
     BufferedPartitionFetcher fetcher = spy(new BufferedPartitionFetcher(metastore, table, (short) 10));
 
     fetcher.fetch("a=10");
@@ -73,6 +68,7 @@ public class BufferedPartitionFetcherTest {
 
   @Test
   public void all() throws Exception {
+    init();
     when(metastore.getPartitionsByNames(DATABASE_NAME, TABLE_NAME, Arrays.asList("a=01", "a=02", "a=03")))
         .thenReturn(Arrays.asList(p01, p02, p03));
 
@@ -85,6 +81,7 @@ public class BufferedPartitionFetcherTest {
 
   @Test
   public void longBuffer() throws Exception {
+    init();
     when(metastore.getPartitionsByNames(DATABASE_NAME, TABLE_NAME, Arrays.asList("a=01", "a=02", "a=03")))
         .thenReturn(Arrays.asList(p01, p02, p03));
 
@@ -97,6 +94,7 @@ public class BufferedPartitionFetcherTest {
 
   @Test
   public void shortBuffer() throws Exception {
+    init();
     when(metastore.getPartitionsByNames(DATABASE_NAME, TABLE_NAME, Arrays.asList("a=01", "a=02")))
         .thenReturn(Arrays.asList(p01, p02));
     when(metastore.getPartitionsByNames(DATABASE_NAME, TABLE_NAME, Arrays.asList("a=03")))

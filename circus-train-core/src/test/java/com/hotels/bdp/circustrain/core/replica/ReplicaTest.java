@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 package com.hotels.bdp.circustrain.core.replica;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -71,7 +72,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
@@ -168,7 +169,6 @@ public class ReplicaTest {
     existingReplicaTable = new Table(sourceTable);
 
     when(mockReplicaLocationManager.getTableLocation()).thenReturn(new Path(tableLocation));
-    when(mockReplicaLocationManager.getPartitionBaseLocation()).thenReturn(new Path(tableLocation));
 
     when(mockMetaStoreClient.getTable(DB_NAME, TABLE_NAME)).thenReturn(existingReplicaTable);
   }
@@ -180,7 +180,6 @@ public class ReplicaTest {
 
   private void convertExistingReplicaTableToView() {
     when(mockReplicaLocationManager.getTableLocation()).thenReturn(null);
-    when(mockReplicaLocationManager.getPartitionBaseLocation()).thenReturn(null);
     existingReplicaTable.setTableType(TableType.VIRTUAL_VIEW.name());
     existingReplicaTable.getSd().setLocation(null);
     existingPartition.getSd().setLocation(null);
@@ -405,9 +404,6 @@ public class ReplicaTest {
 
   @Test
   public void alteringExistingPartitionedReplicaTableSucceeds() throws Exception, IOException {
-    when(mockMetaStoreClient
-        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
-            .thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica
         .updateMetadata(EVENT_ID, tableAndStatistics,
@@ -423,9 +419,6 @@ public class ReplicaTest {
   public void alteringExistingPartitionedReplicaViewSucceeds() throws Exception, IOException {
     convertSourceTableToView();
     convertExistingReplicaTableToView();
-    when(mockMetaStoreClient
-        .getPartitionsByNames(DB_NAME, TABLE_NAME, Lists.newArrayList("c=one/d=two", "c=three/d=four")))
-            .thenReturn(Arrays.asList(existingPartition));
     existingReplicaTable.getParameters().put(REPLICATION_EVENT.parameterName(), "previousEventId");
     replica
         .updateMetadata(EVENT_ID, tableAndStatistics,
@@ -512,8 +505,8 @@ public class ReplicaTest {
 
 
     List<String> testPartitionNames = new ArrayList<>();
-    for (Partition p : (List<Partition>) ListUtils.union(existingPartitions, newPartitions)) {
-      testPartitionNames.add(partitionName((String[]) p.getValues().toArray()));
+   for (Partition p : (List<Partition>) ListUtils.union(existingPartitions, newPartitions)) {
+      testPartitionNames.add(partitionName((String[]) p.getValues().toArray(new String[]{})));
     }
 
     when(mockMetaStoreClient.getPartitionsByNames(DB_NAME, TABLE_NAME, testPartitionNames))
@@ -550,7 +543,9 @@ public class ReplicaTest {
 
     verify(alterTableService).alterTable(eq(mockMetaStoreClient), eq(existingReplicaTable), any(Table.class));
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
-    verify(mockReplicaLocationManager, times(numTestAlterPartitions)).addCleanUpLocation(anyString(), any(Path.class));
+    
+    verify(mockReplicaLocationManager, times(numTestAlterPartitions)).addCleanUpLocation(isNull(), any(Path.class));
+    
     verify(mockMetaStoreClient, times(numAlterBatches)).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient, times(numAddBatches)).add_partitions(addPartitionCaptor.capture());
 
@@ -692,7 +687,7 @@ public class ReplicaTest {
     verify(mockMetaStoreClient).updateTableColumnStatistics(columnStatistics);
     verify(mockMetaStoreClient).alter_partitions(eq(DB_NAME), eq(TABLE_NAME), alterPartitionCaptor.capture());
     verify(mockMetaStoreClient).add_partitions(addPartitionCaptor.capture());
-    verify(mockReplicaLocationManager, never()).addCleanUpLocation(anyString(), any(Path.class));
+    verify(mockReplicaLocationManager, never()).addCleanUpLocation(isNull(), any(Path.class));
 
     assertThat(alterPartitionCaptor.getValue().size(), is(1));
     assertThat(addPartitionCaptor.getValue().size(), is(1));

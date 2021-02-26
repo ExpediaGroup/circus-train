@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2020 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.hotels.bdp.circustrain.s3s3copier;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -44,7 +44,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -315,7 +315,6 @@ public class S3S3CopierTest {
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
     Copy copy = Mockito.mock(Copy.class);
-    when(copy.getProgress()).thenReturn(new TransferProgress());
     when(mockedTransferManager
         .copy(any(CopyObjectRequest.class), any(AmazonS3.class), any(TransferStateChangeListener.class)))
             .thenReturn(copy);
@@ -433,12 +432,9 @@ public class S3S3CopierTest {
     TransferManager mockedTransferManager = Mockito.mock(TransferManager.class);
     when(mockedTransferManagerFactory.newInstance(any(AmazonS3.class), eq(s3S3CopierOptions)))
         .thenReturn(mockedTransferManager);
-    Copy copy = Mockito.mock(Copy.class);
     when(mockedTransferManager
         .copy(any(CopyObjectRequest.class), any(AmazonS3.class), any(TransferStateChangeListener.class)))
             .thenThrow(new AmazonClientException("S3 error"));
-    TransferProgress transferProgress = new TransferProgress();
-    when(copy.getProgress()).thenReturn(transferProgress);
     S3S3Copier s3s3Copier = new S3S3Copier(sourceBaseLocation, sourceSubLocations, replicaLocation, s3ClientFactory,
         mockedTransferManagerFactory, listObjectsRequestFactory, registry, s3S3CopierOptions);
     try {

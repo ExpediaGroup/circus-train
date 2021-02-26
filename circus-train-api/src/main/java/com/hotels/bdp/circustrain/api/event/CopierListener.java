@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import com.hotels.bdp.circustrain.api.metrics.Metrics;
 public interface CopierListener {
 
   /**
-   * Is guaranteed to be called before a {@link Copier#copy()} is called.
+   * Is guaranteed to be called before a {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} is called.
    *
    * @param copierImplementation
    */
   void copierStart(String copierImplementation);
 
   /**
-   * Is guaranteed to be called when {@link Copier#copy()} is finished (even when {@link Copier#copy()} throws
+   * Is guaranteed to be called when {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} is finished (even when {@link com.hotels.bdp.circustrain.api.copier.Copier#copy()} throws
    * exceptions).
    *
    * @param metrics

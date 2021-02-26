@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016-2019 Expedia, Inc.
+ * Copyright (C) 2016-2021 Expedia, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 package com.hotels.bdp.circustrain.comparator.hive.functions;
 
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.hotels.bdp.circustrain.comparator.hive.wrappers.PathMetadata;
 
@@ -63,7 +63,6 @@ public class PathToPathMetadataTest {
     when(path.toUri()).thenReturn(new URI(DIR_PATH));
     when(path.getFileSystem(any(Configuration.class))).thenReturn(fs);
 
-    when(fileStatus.getPath()).thenReturn(path);
     when(fileStatus.getModificationTime()).thenReturn(LAST_MODIFIED);
     when(fs.getFileStatus(path)).thenReturn(fileStatus);
 
