@@ -9,7 +9,7 @@ These notes are meant as a helpful developer's guide into Circus Train's code an
 
 ## README.md
 
-First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train/blob/master/README.md) file. It is a pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
+First and foremost, its worth having a read through the [README.md](https://github.com/HotelsDotCom/circus-train/blob/main/README.md) file. It is a pretty extensive guide containing a lot of info on the project, including how to run it and all the different configurations which can be used. 
 
 ## Classes
 **Locomotive**
