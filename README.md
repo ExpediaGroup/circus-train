@@ -35,7 +35,7 @@ Other features include:
 
 Circus Train has been architected in a modular fashion to allow it to be more easily integrated with existing systems and to have additional functionality added to it. Here are some projects which are outside of the core Circus Train but provide useful additional features:
 * [Circus Train Big Query](https://github.com/HotelsDotCom/circus-train-bigquery) - replicates tables from Google's [BigQuery](https://cloud.google.com/bigquery/) to Hive.
-* [Circus Train DataSqueeze Copier](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) - a Circus Train copier implementation which also compacts small files into larger ones using [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze).
+* [Circus Train DataSqueeze Copier](https://github.com/ExpediaGroup/circus-train-datasqueeze) - a Circus Train copier implementation which also compacts small files into larger ones using [DataSqueeze](https://github.com/ExpediaGroup/datasqueeze).
 * [Shunting Yard](https://github.com/HotelsDotCom/shunting-yard) - uses Circus Train to perform event-based (i.e. as opposed to scheduled) replication.
 
 ## General operation
