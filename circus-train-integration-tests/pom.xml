@@ -225,19 +225,23 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.klarna</groupId>
+      <groupId>io.github.hiverunner</groupId>
       <artifactId>hiverunner</artifactId>
-      <version>5.2.1</version>
+      <version>5.4.0</version>
       <scope>test</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.apache.hbase</groupId>
+          <artifactId>hbase-server</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.eclipse.jetty.aggregate</groupId>
           <artifactId>jetty-all</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.hbase</groupId>
-          <artifactId>hbase-server</artifactId>
-        </exclusion>
+          <groupId>org.pentaho</groupId>
+          <artifactId>pentaho-aggdesigner-algorithm</artifactId>
+        </exclusion>        
       </exclusions>
     </dependency>
   </dependencies>
