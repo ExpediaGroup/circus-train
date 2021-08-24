@@ -3,7 +3,7 @@
 # Start using
 You can obtain Circus Train from Maven Central:
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) ![build](https://github.com/HotelsDotCom/circus-train/workflows/build/badge.svg?event=push) [![Coverage Status](https://coveralls.io/repos/github/HotelsDotCom/circus-train/badge.svg?branch=main)](https://coveralls.io/github/HotelsDotCom/circus-train?branch=main) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/circus-train.svg)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train/badge.svg?subject=com.hotels:circus-train)](https://maven-badges.herokuapp.com/maven-central/com.hotels/circus-train) ![build](https://github.com/ExpediaGroup/circus-train/workflows/build/badge.svg?event=push) [![Coverage Status](https://coveralls.io/repos/github/ExpediaGroup/circus-train/badge.svg?branch=main)](https://coveralls.io/github/ExpediaGroup/circus-train?branch=main) ![GitHub license](https://img.shields.io/github/license/ExpediaGroup/circus-train.svg)
 
 ## Overview
 Circus Train replicates Hive tables between clusters on request. It replicates both the table's data and metadata. Unlike many other solutions it has a light touch, requiring no direct integration with Hive's core services. It can copy either entire unpartitioned tables or user defined sets of partitions on partitioned tables. A more detailed overview and the background of this project can be found in this blog post: [Replicating big datasets in the cloud](https://medium.com/hotels-com-technology/replicating-big-datasets-in-the-cloud-c0db388f6ba2).
@@ -27,16 +27,16 @@ Other features include:
 * Connectivity with private networks through a [bastion host](#configuring-a-ssh-tunnel) and direct connections.
 * Table, partition, and column statistics are also copied to preserve performance at the replica.
 * [Metrics](#metric-reporting) about replication (success/failure, bandwidth, bytes copied etc.) can be sent to Graphite for building dashboards, alerting etc.
-* Pluggable [replication event listeners](#developing-a-replicationeventlistener) so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A [sample listener](https://github.com/HotelsDotCom/circus-train/tree/main/circus-train-aws-sns) that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
+* Pluggable [replication event listeners](#developing-a-replicationeventlistener) so users can implement their own functionality based on events occurring during a replication (e.g. triggering a downstream job when a replication completes). A [sample listener](https://github.com/ExpediaGroup/circus-train/tree/main/circus-train-aws-sns) that uses Amazon's Simple Notification Service (SNS) is provided as a usable reference implementation of this.
 * Pluggable [transformations](#metadata-transformations) so users can implement their own functionality to transform table, partition and column statistics metadata during a replication.
 * Configuration can be provided using YAML, property files, environment variables and command line arguments.
 
 ## Related projects
 
 Circus Train has been architected in a modular fashion to allow it to be more easily integrated with existing systems and to have additional functionality added to it. Here are some projects which are outside of the core Circus Train but provide useful additional features:
-* [Circus Train Big Query](https://github.com/HotelsDotCom/circus-train-bigquery) - replicates tables from Google's [BigQuery](https://cloud.google.com/bigquery/) to Hive.
+* [Circus Train Big Query](https://github.com/ExpediaGroup/circus-train-bigquery) - replicates tables from Google's [BigQuery](https://cloud.google.com/bigquery/) to Hive.
 * [Circus Train DataSqueeze Copier](https://github.com/ExpediaGroup/circus-train-datasqueeze) - a Circus Train copier implementation which also compacts small files into larger ones using [DataSqueeze](https://github.com/ExpediaGroup/datasqueeze).
-* [Shunting Yard](https://github.com/HotelsDotCom/shunting-yard) - uses Circus Train to perform event-based (i.e. as opposed to scheduled) replication.
+* [Shunting Yard](https://github.com/ExpediaGroup/shunting-yard) - uses Circus Train to perform event-based (i.e. as opposed to scheduled) replication.
 
 ## General operation
 Below is a high level summary of the steps that Circus Train performs during the course of a typical run (different configuration might change this).
@@ -534,7 +534,7 @@ A YAML file is made up of multiple *documents*, separated by three hyphens (`---
           hive-metastore-uris: thrift://<prod-host>.com:9083
 
 ### Configuring housekeeping
-Housekeeping is the process that removes expired and orphaned data on the replica. Below is a YAML configuration fragment and description of the available configuration properties. Implementation of Housekeeping can be found [here](https://github.com/HotelsDotCom/housekeeping)
+Housekeeping is the process that removes expired and orphaned data on the replica. Below is a YAML configuration fragment and description of the available configuration properties. Implementation of Housekeeping can be found [here](https://github.com/ExpediaGroup/housekeeping)
 
         housekeeping:
           expired-path-duration: P3D
@@ -551,7 +551,7 @@ Housekeeping is the process that removes expired and orphaned data on the replic
 |`housekeeping.schema-name`|No|Database schema name to use. Circus Train default: 'circus_train'|
 |`housekeeping.db-init-script`|No|Database init script to use. Circus Train comes with `schema.sql` on the classpath by default to create a `circus_train` schema, but to use it, it needs to be specified for this parameter.|
 
-For more details on Housekeeping configuration, including examples on how to override the H2 default database with something a bit more robust, please consult the [Housekeeping documentation](https://github.com/HotelsDotCom/housekeeping).
+For more details on Housekeeping configuration, including examples on how to override the H2 default database with something a bit more robust, please consult the [Housekeeping documentation](https://github.com/ExpediaGroup/housekeeping).
 
 
 ## Metric Reporting
@@ -699,10 +699,10 @@ Circus Train can be extended in various ways. This is an advanced feature that t
 ### External Extensions
 
 #### Circus Train DataSqueeze Copier
-The [DataSqueeze](https://github.com/ExpediaInceCommercePlatform/circus-train-datasqueeze) extension provides new Copiers for Circus Train which compact the data being replicated in various ways.
+The [DataSqueeze](https://github.com/ExpediaGroup/circus-train-datasqueeze) extension provides new Copiers for Circus Train which compact the data being replicated in various ways.
 
 #### Circus Train BigQuery To Hive Replication
-The [Circus Train BigQuery](https://github.com/HotelsDotCom/circus-train-bigquery) extension enables the conversion of Google BigQuery tables to Hive.
+The [Circus Train BigQuery](https://github.com/ExpediaGroup/circus-train-bigquery) extension enables the conversion of Google BigQuery tables to Hive.
 
 ### Loading Extensions
 Circus Train loads extensions using Spring's standard [ComponentScan](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/ComponentScan.html) mechanism. Users can add their own packages to be scanned by declaring `extension-packages` as a comma separated list of package names to their YAML.
