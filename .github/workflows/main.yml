@@ -1,20 +1,20 @@
 name: build
 
-on: 
+on:
   pull_request:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
   test:
     name: Package and run all tests
     runs-on: ubuntu-18.04
-    
+
     strategy:
       matrix:
         java-version: [ 8, 11 ]
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -33,8 +33,22 @@ jobs:
           fi
           echo "COVERALLS_SKIP=${COVERALLS_SKIP}" >> $GITHUB_ENV
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
         java-version: ${{ matrix.java-version }}
+        distribution: 'adopt'
+        java-package: jdk
+        server-id: sonatype-nexus-snapshots # Value of the distributionManagement/repository/id field of the pom.xml
+        server-username: SONATYPE_USERNAME # env variable for username in deploy
+        server-password: SONATYPE_PASSWORD # env variable for token in deploy
+        # only signed artifacts will be released to maven central. this sets up things for the maven-gpg-plugin
+        gpg-private-key: ${{ secrets.HCOM_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
+        gpg-passphrase: GPG_PASSPHRASE # env variable for GPG private key passphrase
+        # this creates a settings.xml on build server
+        settings-path: ${{ github.workspace }}
     - name: Run Maven Targets
-      run: mvn package jacoco:report coveralls:report --batch-mode --show-version --no-transfer-progress --activate-profiles coveralls -Dcoveralls.skip=$COVERALLS_SKIP -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
+      run: mvn deploy jacoco:report coveralls:report --settings $GITHUB_WORKSPACE/settings.xml --batch-mode --show-version --activate-profiles coveralls,sonatype-oss-release-github-actions -Dcoveralls.skip=$COVERALLS_SKIP -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
+      env:
+        SONATYPE_PASSWORD: ${{ secrets.HCOM_SONATYPE_PASSWORD }}
+        SONATYPE_USERNAME: ${{ secrets.HCOM_SONATYPE_USERNAME }}
+        GPG_PASSPHRASE: ${{secrets.HCOM_GPG_PRIVATE_KEY_PASSPHRASE}}
