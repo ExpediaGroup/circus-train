@@ -1,4 +1,4 @@
-## [16.4.0] - TBD
+## [16.4.0] - 2021-08-24
 ### Changed
 * Various code changes to allow compilation and build on Java 11.
 * `hotels-oss-parent` version to 6.2.1 (was 5.0.0).
