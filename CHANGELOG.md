@@ -1,3 +1,7 @@
+## [16.4.1] - Unreleased
+### Changed
+* `log4j2` updated to `2.16.0` (was `2.4.1`) these are provided dependencies.
+
 ## [16.4.0] - 2021-08-24
 ### Changed
 * Various code changes to allow compilation and build on Java 11.
