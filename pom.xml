@@ -55,7 +55,7 @@
     <httpcomponents.httpclient.version>4.5.13</httpcomponents.httpclient.version>
     <jackson.version>2.10.0</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
-    <hadoop.version>2.7.1</hadoop.version>
+    <hadoop.version>2.10.1</hadoop.version>
     <hive.version>2.3.7</hive.version>
     <mockito.version>2.28.2</mockito.version>
     <junit.version>4.13.1</junit.version>
