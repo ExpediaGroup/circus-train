@@ -45,7 +45,7 @@
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j</artifactId>
+      <artifactId>spring-boot-starter-logging</artifactId>
     </dependency>
 
     <!-- Hive -->

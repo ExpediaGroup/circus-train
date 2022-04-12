@@ -1,6 +1,7 @@
 ## [16.4.1] - Unreleased
 ### Changed
-* `log4j2` updated to `2.16.0` (was `2.4.1`) these are provided dependencies.
+* `log4j2` updated to `2.17.1` (was `2.4.1`) these are provided dependencies.
+* Excluding `log4j` v1 dependencies as part of [CVE-2021-45105](https://logging.apache.org/log4j/2.x/security.html#:~:text=2.3.1%20(Java%206)-,CVE%2D2021%2D45105,-%3A%20Apache%20Log4j2%20does).
 
 ## [16.4.0] - 2021-08-24
 ### Changed

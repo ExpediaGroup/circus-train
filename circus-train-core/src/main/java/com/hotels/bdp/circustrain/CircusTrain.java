@@ -80,7 +80,6 @@ import com.hotels.hcommon.hive.metastore.client.api.CloseableMetaStoreClient;
 
 @SpringBootApplication
 @EnableRetry
-@EnableConfigurationProperties
 @ComponentScan(basePackages = {
     "com.hotels.bdp.circustrain.avro",
     "com.hotels.bdp.circustrain.aws",
@@ -106,6 +105,9 @@ public class CircusTrain {
       exitCode = SpringApplication
           .exit(new SpringApplicationBuilder(CircusTrain.class)
               .properties("spring.config.location:${config:null}")
+              // Bean overriding has to be enabled since Spring Boot 2.1
+              // https://stackoverflow.com/questions/53723303/springboot-beandefinitionoverrideexception-invalid-bean-definition
+              .properties("spring.main.allow-bean-definition-overriding:true")
               .properties("spring.profiles.active:${modules:" + defaultModules + "}")
               .properties("instance.home:${user.home}")
               .properties("instance.name:${source-catalog.name}_${replica-catalog.name}")
