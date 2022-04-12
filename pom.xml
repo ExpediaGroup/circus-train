@@ -50,7 +50,7 @@
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
     <spring-platform.version>2.0.8.RELEASE</spring-platform.version>
-    <spring-boot.version>2.6.6</spring-boot.version>
+    <spring-boot.version>2.6.3</spring-boot.version>
     <hibernate.version>8.0.0.Alpha3</hibernate.version>
     <javax.el.version>3.0.0</javax.el.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
@@ -118,6 +118,11 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-jpa</artifactId>
+        <version>${spring-boot.version}</version>
       </dependency>
       <!-- Java EL: needed for compatibility with new Spring and hibernate-validator -->
       <dependency>
