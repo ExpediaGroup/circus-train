@@ -2,6 +2,8 @@
 ### Changed
 * `log4j2` updated to `2.17.1` (was `2.4.1`) these are provided dependencies.
 * `spring-boot` updated to `1.5.22.RELEASE` (was `1.3.8.RELEASE`).
+* `spring-core` updated to `4.3.9.RELEASE` (was `4.2.8.RELEASE`).
+* Fix google library conflicts with `guava` and `gson`.
 
 ## [16.4.0] - 2021-08-24
 ### Changed
