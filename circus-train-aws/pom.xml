@@ -10,6 +10,10 @@
   <artifactId>circus-train-aws</artifactId>
   <name>AWS utils</name>
 
+  <properties>
+    <gson.version>2.5</gson.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.hotels</groupId>
@@ -33,6 +37,11 @@
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-sts</artifactId>
       <version>${aws-jdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
     </dependency>
 
     <!-- Test -->
