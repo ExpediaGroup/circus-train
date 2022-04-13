@@ -12,6 +12,16 @@
   <description>Design contracts.</description>
 
   <dependencies>
+    <!-- Java EL: needed for compatibility with new Spring and hibernate-validator -->
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>javax.el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
