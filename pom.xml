@@ -50,6 +50,8 @@
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <shade.prefix>${project.groupId}.shaded</shade.prefix>
     <spring-platform.version>2.0.8.RELEASE</spring-platform.version>
+    <spring-boot.version>1.5.22.RELEASE</spring-boot.version>
+    <spring-core.version>4.3.9.RELEASE</spring-core.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
     <aws-jdk.version>1.11.728</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.13</httpcomponents.httpclient.version>
@@ -71,6 +73,19 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>${spring-core.version}</version>
+      </dependency>
+
       <!-- Log4j v2 -->
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
