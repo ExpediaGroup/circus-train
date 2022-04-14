@@ -1,4 +1,4 @@
-## [16.4.1] - Unreleased
+## [16.4.1] - 2022-04-14
 ### Changed
 * `log4j2` updated to `2.17.1` (was `2.4.1`) these are provided dependencies.
 * `spring-boot` updated to `1.5.22.RELEASE` (was `1.3.8.RELEASE`).
