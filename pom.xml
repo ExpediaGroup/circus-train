@@ -53,7 +53,7 @@
     <spring-boot.version>1.5.22.RELEASE</spring-boot.version>
     <spring-core.version>4.3.9.RELEASE</spring-core.version>
     <!-- BEGIN: AWS jdk version + dependencies -->
-    <aws-jdk.version>1.11.728</aws-jdk.version>
+    <aws-jdk.version>1.12.261</aws-jdk.version>
     <httpcomponents.httpclient.version>4.5.13</httpcomponents.httpclient.version>
     <jackson.version>2.10.0</jackson.version>
     <!-- END: AWS jdk version + dependencies -->
